@@ -3,6 +3,7 @@ package requestHandling;
 import com.google.gson.Gson;
 import constants.Params;
 import contracts.LinkContract;
+import contracts.RectContract;
 import data.MatsimDataProvider;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,7 +25,7 @@ public class NetworkRequestHandlerTest {
     }
 
     @Test
-    public void processImplTest() {
+    public void processTest() {
 
         //arrange
         Map<String, String[]> parameters = new HashMap<>();
@@ -32,11 +33,12 @@ public class NetworkRequestHandlerTest {
         parameters.put(Params.BOUNDINGBOX_TOP, new String[]{"-1000"});
         parameters.put(Params.BOUNDINGBOX_LEFT, new String[]{"-1000"});
         parameters.put(Params.BOUNDINGBOX_RIGHT, new String[]{"0"});
+        RectContract bounds = new RectContract(-1000, 0, -1000, 0);
         final int expectedStatus = Params.STATUS_OK;
         final int expectedNumberOfLinks = 4;
 
         //act
-        Answer answer = testObject.process(parameters);
+        Answer answer = testObject.process(bounds);
 
         //assert
         assertEquals(expectedStatus, answer.getCode());

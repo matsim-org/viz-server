@@ -2,7 +2,8 @@ import constants.Path;
 import data.MatsimDataProvider;
 import requestHandling.NetworkRequestHandler;
 
-import static spark.Spark.get;
+import static spark.Spark.port;
+import static spark.Spark.post;
 
 public class Server {
 
@@ -22,7 +23,11 @@ public class Server {
 
     private static void initializeRoutes() {
 
-        get(Path.NETWORK, new NetworkRequestHandler(data));
+        //this is for development purposes the webpack-dev-server will proxy all calls
+        //to localhost:3000/data/* to localhost:3001/data/* which is this server
+        port(3001);
+
+        post(Path.NETWORK, new NetworkRequestHandler(data));
 
     }
 }
