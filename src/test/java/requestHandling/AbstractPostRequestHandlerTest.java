@@ -35,6 +35,33 @@ public class AbstractPostRequestHandlerTest {
         assertEquals(4, contracts.length);
     }
 
+    @Test
+    public void processBodyTest_wrongJSONObject_zeroLinks() {
+        //arrange
+        String bodyText = "{\"wrong\":-1000,\"json\":0,\"object\":-1000, \"body\": 0}";
+
+        //act
+        Answer answer = testObject.processBodyImpl(bodyText);
+
+        //assert
+        assertEquals(Params.STATUS_OK, answer.getCode());
+        LinkContract[] contracts = new Gson().fromJson(answer.getBody(), LinkContract[].class);
+        assertEquals(0, contracts.length);
+    }
+
+    @Test
+    public void processBodyTest_Status400() {
+
+        //arrange
+        String bodyText = "poorly formatted request body";
+
+        //act
+        Answer answer = testObject.processBodyImpl(bodyText);
+
+        //assert
+        assertEquals(Params.STATUS_BADREQUEST, answer.getCode());
+    }
+
     private class AbstractPostRequestHandlerTestable extends NetworkRequestHandler {
 
         public AbstractPostRequestHandlerTestable() {

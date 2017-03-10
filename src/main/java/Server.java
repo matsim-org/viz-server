@@ -11,14 +11,19 @@ public class Server {
 
     public static void main(String[] args) {
 
-        initializeData();
+        if (args == null || args.length == 0) {
+            System.out.println("Please provide a path to some network file!!!");
+        }
+
+        String networkPath = args[0];
+        initializeData(networkPath);
         initializeRoutes();
     }
 
-    private static void initializeData() {
+    private static void initializeData(String networkFilePath) {
 
         //this should be configurable through command line args or a config file
-        data = new MatsimDataProvider("src/test/data/two-routes-test-network.xml", "");
+        data = new MatsimDataProvider(networkFilePath, "");
     }
 
     private static void initializeRoutes() {
