@@ -6,12 +6,12 @@ import org.matsim.core.utils.collections.QuadTree;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.HashMap;
 
 public class MatsimDataProvider {
 
     private QuadTree<Link> networkData;
-    private List<SnapshotContract> snapshots;
+    private HashMap<Double, SnapshotContract> snapshots;
 
     public MatsimDataProvider(String networkFilePath, String eventsFilePath) {
 
@@ -34,7 +34,12 @@ public class MatsimDataProvider {
     }
 
     public SnapshotContract getSnapshot(QuadTree.Rect bounds, double time) {
-        SnapshotContract snapshot = snapshots.stream().filter(e -> e.getTime() == time).findFirst().get();
+        //This will be more sophisticated later
+        SnapshotContract snapshot = snapshots.get(time);
+        if (snapshot == null) {
+            double smallestTimestep = snapshots.keySet().stream().mapToDouble(d -> d).min().getAsDouble();
+            snapshot = snapshots.get(smallestTimestep);
+        }
         return snapshot;
     }
 }

@@ -9,7 +9,7 @@ import org.matsim.vis.snapshotwriters.AgentSnapshotInfo;
 import org.matsim.vis.snapshotwriters.AgentSnapshotInfoFactory;
 import org.matsim.vis.snapshotwriters.SnapshotLinkWidthCalculator;
 
-import java.util.List;
+import java.util.HashMap;
 
 import static org.junit.Assert.assertEquals;
 
@@ -29,7 +29,7 @@ public class SnapshotWriterImplTest {
         testObject.beginSnapshot(0);
 
         //assert
-        List<SnapshotContract> result = testObject.getSnapshots();
+        HashMap<Double, SnapshotContract> result = testObject.getSnapshots();
         assertEquals(0, result.size());
     }
 
@@ -37,15 +37,16 @@ public class SnapshotWriterImplTest {
     public void endSnaphotTest() {
 
         //arrange
-        testObject.beginSnapshot(1);
+        final double timestep = 1;
+        testObject.beginSnapshot(timestep);
 
         //act
         testObject.endSnapshot();
 
         //assert
-        List<SnapshotContract> result = testObject.getSnapshots();
+        HashMap<Double, SnapshotContract> result = testObject.getSnapshots();
         assertEquals(1, result.size());
-        assertEquals(1, result.get(0).getTime(), 0.1);
+        assertEquals(1, result.get(timestep).getTime(), 0.1);
     }
 
     @Test
@@ -55,7 +56,8 @@ public class SnapshotWriterImplTest {
         final String id = "id";
         final double northing = 12;
         final double easting = 13;
-        testObject.beginSnapshot(2);
+        final double timestep = 2;
+        testObject.beginSnapshot(timestep);
         AgentSnapshotInfoFactory factory = new AgentSnapshotInfoFactory(new SnapshotLinkWidthCalculator());
         AgentSnapshotInfo info = factory.createAgentSnapshotInfo(Id.createPersonId(id), easting, northing, 1, 1);
 
@@ -64,9 +66,9 @@ public class SnapshotWriterImplTest {
 
         //assert
         testObject.endSnapshot();
-        List<SnapshotContract> result = testObject.getSnapshots();
+        HashMap<Double, SnapshotContract> result = testObject.getSnapshots();
         assertEquals(1, result.size());
-        SnapshotContract contract = result.get(0);
+        SnapshotContract contract = result.get(timestep);
         assertEquals(2, contract.getTime(), 0.1);
         assertEquals(1, contract.getAgentInformations().size());
         AgentSnapshotContract agent = contract.getAgentInformations().get(0);

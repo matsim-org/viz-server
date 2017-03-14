@@ -10,8 +10,8 @@ public class AgentSnapshotContract {
 
     public AgentSnapshotContract(AgentSnapshotInfo info) {
         this.id = info.getId().toString();
-        this.x = info.getNorthing();
-        this.y = info.getEasting();
+        this.x = info.getEasting();
+        this.y = info.getNorthing();
     }
 
     public String getId() {

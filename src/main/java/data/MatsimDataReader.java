@@ -15,7 +15,7 @@ import org.matsim.core.network.MatsimNetworkReader;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.utils.collections.QuadTree;
 
-import java.util.List;
+import java.util.HashMap;
 
 public final class MatsimDataReader {
 
@@ -66,7 +66,7 @@ public final class MatsimDataReader {
         return new QuadTree.Rect(minEasting, minNorthing, maxEasting, maxNorthing);
     }
 
-    public static List<SnapshotContract> readEventsFile(String eventsFilePath, String networkFilePath) {
+    public static HashMap<Double, SnapshotContract> readEventsFile(String eventsFilePath, String networkFilePath) {
         Network network = loadNetworkFile(networkFilePath);
         Config config = ConfigUtils.createConfig();
         SnapshotGenerator generator = new SnapshotGenerator(network, 1, config.qsim());

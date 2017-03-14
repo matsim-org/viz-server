@@ -8,14 +8,14 @@ import java.util.List;
 public class SnapshotContract {
 
     private double time;
-    private List<AgentSnapshotContract> infos = new ArrayList<>();
+    private List<AgentSnapshotContract> positions = new ArrayList<>();
 
     public SnapshotContract(double time) {
         this.time = time;
     }
 
     public List<AgentSnapshotContract> getAgentInformations() {
-        return infos;
+        return positions;
     }
 
     public double getTime() {
@@ -23,6 +23,6 @@ public class SnapshotContract {
     }
 
     public void add(AgentSnapshotInfo info) {
-        infos.add(new AgentSnapshotContract(info));
+        positions.add(new AgentSnapshotContract(info));
     }
 }

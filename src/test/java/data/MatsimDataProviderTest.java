@@ -12,10 +12,10 @@ import static org.junit.Assert.assertEquals;
 
 public class MatsimDataProviderTest {
 
-    private MatsimDataProvider testObject;
+    private static MatsimDataProvider testObject;
 
     @BeforeClass
-    public void setUp() {
+    public static void setUp() {
         testObject = new MatsimDataProvider(TestUtils.NETWORK_FILE, TestUtils.EVENTS_FILE);
     }
 

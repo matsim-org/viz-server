@@ -12,19 +12,20 @@ public class Server {
 
     public static void main(String[] args) {
 
-        if (args == null || args.length == 0) {
-            System.out.println("Please provide a path to some network file!!!");
+        if (args == null || args.length != 2) {
+            System.out.println("Please provide a path to some network and events file!!!");
         }
 
+        //This is for debugging purposes and should be nicer
         String networkPath = args[0];
-        initializeData(networkPath);
+        String eventsPath = args[1];
+        initializeData(networkPath, eventsPath);
         initializeRoutes();
     }
 
-    private static void initializeData(String networkFilePath) {
+    private static void initializeData(String networkFilePath, String eventsFilePath) {
 
-        //this should be configurable through command line args or a config file
-        data = new MatsimDataProvider(networkFilePath, "");
+        data = new MatsimDataProvider(networkFilePath, eventsFilePath);
     }
 
     private static void initializeRoutes() {
