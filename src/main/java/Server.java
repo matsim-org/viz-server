@@ -1,5 +1,6 @@
 import constants.Path;
 import data.MatsimDataProvider;
+import requestHandling.AgentRequestHandler;
 import requestHandling.NetworkRequestHandler;
 
 import static spark.Spark.port;
@@ -33,6 +34,6 @@ public class Server {
         port(3001);
 
         post(Path.NETWORK, new NetworkRequestHandler(data));
-
+        post(Path.AGENTS, new AgentRequestHandler(data));
     }
 }

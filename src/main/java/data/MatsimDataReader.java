@@ -1,12 +1,21 @@
 package data;
 
+import contracts.SnapshotContract;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
+import org.matsim.core.api.experimental.events.EventsManager;
+import org.matsim.core.config.Config;
+import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.events.EventsUtils;
+import org.matsim.core.events.MatsimEventsReader;
+import org.matsim.core.events.algorithms.SnapshotGenerator;
 import org.matsim.core.network.MatsimNetworkReader;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.utils.collections.QuadTree;
+
+import java.util.List;
 
 public final class MatsimDataReader {
 
@@ -15,10 +24,15 @@ public final class MatsimDataReader {
 
     static QuadTree<Link> readNetworkFile(String path) {
 
+        Network network = loadNetworkFile(path);
+        return initNetworkData(network);
+    }
+
+    private static Network loadNetworkFile(String path) {
         Network network = NetworkUtils.createNetwork();
         MatsimNetworkReader reader = new MatsimNetworkReader(network);
         reader.readFile(path);
-        return initNetworkData(network);
+        return network;
     }
 
     private static QuadTree<Link> initNetworkData(Network network) {
@@ -52,7 +66,18 @@ public final class MatsimDataReader {
         return new QuadTree.Rect(minEasting, minNorthing, maxEasting, maxNorthing);
     }
 
-    public void readEventsFile(String path) {
-
+    public static List<SnapshotContract> readEventsFile(String eventsFilePath, String networkFilePath) {
+        Network network = loadNetworkFile(networkFilePath);
+        Config config = ConfigUtils.createConfig();
+        SnapshotGenerator generator = new SnapshotGenerator(network, 1, config.qsim());
+        SnapshotWriterImpl writer = new SnapshotWriterImpl();
+        generator.addSnapshotWriter(writer);
+        EventsManager eventsManager = EventsUtils.createEventsManager();
+        eventsManager.addHandler(generator);
+        MatsimEventsReader reader = new MatsimEventsReader(eventsManager);
+        reader.readFile(eventsFilePath);
+        generator.finish();
+        writer.finish();
+        return writer.getSnapshots();
     }
 }

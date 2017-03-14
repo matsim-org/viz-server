@@ -3,16 +3,20 @@ package requestHandling;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import constants.Params;
+import data.MatsimDataProvider;
 import spark.Request;
 import spark.Response;
 import spark.Route;
 
 public abstract class AbstractPostRequestHandler<T> implements Route {
 
+    protected MatsimDataProvider dataProvider;
     private Class<T> classInfo;
 
-    protected AbstractPostRequestHandler(Class<T> classInfo) {
+    protected AbstractPostRequestHandler(Class<T> classInfo, MatsimDataProvider dataProvider) {
+
         this.classInfo = classInfo;
+        this.dataProvider = dataProvider;
     }
 
     public abstract Answer process(T body);

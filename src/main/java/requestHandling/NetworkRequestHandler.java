@@ -12,12 +12,9 @@ import java.util.Collection;
 
 public class NetworkRequestHandler extends AbstractPostRequestHandler<RectContract> {
 
-    private MatsimDataProvider dataProvider;
-
     public NetworkRequestHandler(MatsimDataProvider dataProvider) {
 
-        super(RectContract.class);
-        this.dataProvider = dataProvider;
+        super(RectContract.class, dataProvider);
     }
 
     @Override
