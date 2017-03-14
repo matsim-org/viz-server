@@ -1,6 +1,6 @@
 package data;
 
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.core.utils.collections.QuadTree;
@@ -14,7 +14,7 @@ public class MatsimDataProviderTest {
 
     private MatsimDataProvider testObject;
 
-    @Before
+    @BeforeClass
     public void setUp() {
         testObject = new MatsimDataProvider(TestUtils.NETWORK_FILE, TestUtils.EVENTS_FILE);
     }

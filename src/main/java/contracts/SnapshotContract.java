@@ -7,11 +7,15 @@ import java.util.List;
 
 public class SnapshotContract {
 
-    double time;
+    private double time;
     private List<AgentSnapshotContract> infos = new ArrayList<>();
 
     public SnapshotContract(double time) {
         this.time = time;
+    }
+
+    public List<AgentSnapshotContract> getAgentInformations() {
+        return infos;
     }
 
     public double getTime() {
