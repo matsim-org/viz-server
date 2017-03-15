@@ -48,7 +48,7 @@ public class MatsimDataProvider {
         return new RectContract(
                 networkData.getMinEasting(),
                 networkData.getMaxEasting(),
-                networkData.getMinNorthing(),
-                networkData.getMaxNorthing());
+                networkData.getMaxNorthing(),
+                networkData.getMinNorthing());
     }
 }
