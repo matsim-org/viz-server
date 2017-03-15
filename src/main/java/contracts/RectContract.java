@@ -15,6 +15,22 @@ public class RectContract {
         this.bottom = bottom;
     }
 
+    public double getLeft() {
+        return left;
+    }
+
+    public double getRight() {
+        return right;
+    }
+
+    public double getTop() {
+        return top;
+    }
+
+    public double getBottom() {
+        return bottom;
+    }
+
     public QuadTree.Rect copyToMatsimRect() {
         return new QuadTree.Rect(left, top, right, bottom);
     }

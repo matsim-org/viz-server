@@ -1,5 +1,6 @@
 package data;
 
+import contracts.RectContract;
 import contracts.SnapshotContract;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.core.utils.collections.QuadTree;
@@ -41,5 +42,13 @@ public class MatsimDataProvider {
             snapshot = snapshots.get(smallestTimestep);
         }
         return snapshot;
+    }
+
+    public RectContract getBounds() {
+        return new RectContract(
+                networkData.getMinEasting(),
+                networkData.getMaxEasting(),
+                networkData.getMinNorthing(),
+                networkData.getMaxNorthing());
     }
 }

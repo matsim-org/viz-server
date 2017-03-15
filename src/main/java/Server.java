@@ -1,6 +1,7 @@
 import constants.Path;
 import data.MatsimDataProvider;
 import requestHandling.AgentRequestHandler;
+import requestHandling.ConfigurationRequestHandler;
 import requestHandling.NetworkRequestHandler;
 
 import static spark.Spark.port;
@@ -34,6 +35,7 @@ public class Server {
         //to localhost:3000/data/* to localhost:3001/data/* which is this server
         port(3001);
 
+        post(Path.CONFIGURATION, new ConfigurationRequestHandler(data));
         post(Path.NETWORK, new NetworkRequestHandler(data));
         post(Path.AGENTS, new AgentRequestHandler(data));
     }

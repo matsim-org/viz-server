@@ -1,5 +1,6 @@
 package data;
 
+import contracts.RectContract;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.matsim.api.core.v01.network.Link;
@@ -30,5 +31,24 @@ public class MatsimDataProviderTest {
 
         //assert
         assertEquals(5, result.size());
+    }
+
+    @Test
+    public void getBoundsTest() {
+
+        //arrange
+        final double left = -2500;
+        final double right = 1001;
+        final double top = -1000;
+        final double bottom = 401;
+
+        //act
+        RectContract bounds = testObject.getBounds();
+
+        //assert
+        assertEquals(left, bounds.getLeft(), 0.1);
+        assertEquals(right, bounds.getRight(), 0.1);
+        assertEquals(top, bounds.getTop(), 0.1);
+        assertEquals(bottom, bounds.getBottom(), 0.1);
     }
 }
