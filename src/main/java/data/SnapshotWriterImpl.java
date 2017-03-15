@@ -4,21 +4,20 @@ import contracts.SnapshotContract;
 import org.matsim.vis.snapshotwriters.AgentSnapshotInfo;
 import org.matsim.vis.snapshotwriters.SnapshotWriter;
 
-import java.util.HashMap;
-
 public class SnapshotWriterImpl implements SnapshotWriter {
 
-    private HashMap<Double, SnapshotContract> snapshots = new HashMap<>();
+    private SimulationData simulationData = new SimulationData();
     private SnapshotContract currentSnapshot;
 
     @Override
     public void beginSnapshot(double v) {
+
         currentSnapshot = new SnapshotContract(v);
     }
 
     @Override
     public void endSnapshot() {
-        snapshots.put(currentSnapshot.getTime(), currentSnapshot);
+        simulationData.addSnapshot(currentSnapshot);
     }
 
     @Override
@@ -31,7 +30,7 @@ public class SnapshotWriterImpl implements SnapshotWriter {
 
     }
 
-    public HashMap<Double, SnapshotContract> getSnapshots() {
-        return snapshots;
+    public SimulationData getSimulationData() {
+        return simulationData;
     }
 }

@@ -29,7 +29,7 @@ public class SnapshotWriterImplTest {
         testObject.beginSnapshot(0);
 
         //assert
-        HashMap<Double, SnapshotContract> result = testObject.getSnapshots();
+        HashMap<Double, SnapshotContract> result = testObject.getSimulationData();
         assertEquals(0, result.size());
     }
 
@@ -44,7 +44,7 @@ public class SnapshotWriterImplTest {
         testObject.endSnapshot();
 
         //assert
-        HashMap<Double, SnapshotContract> result = testObject.getSnapshots();
+        HashMap<Double, SnapshotContract> result = testObject.getSimulationData();
         assertEquals(1, result.size());
         assertEquals(1, result.get(timestep).getTime(), 0.1);
     }
@@ -66,7 +66,7 @@ public class SnapshotWriterImplTest {
 
         //assert
         testObject.endSnapshot();
-        HashMap<Double, SnapshotContract> result = testObject.getSnapshots();
+        HashMap<Double, SnapshotContract> result = testObject.getSimulationData();
         assertEquals(1, result.size());
         SnapshotContract contract = result.get(timestep);
         assertEquals(2, contract.getTime(), 0.1);

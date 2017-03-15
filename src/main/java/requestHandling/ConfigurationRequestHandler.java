@@ -15,7 +15,11 @@ public class ConfigurationRequestHandler extends AbstractPostRequestHandler<Conf
     @Override
     public Answer process(ConfigurationRequest body) {
         RectContract bounds = dataProvider.getBounds();
-        ConfigurationResponse response = new ConfigurationResponse(body.getId(), bounds);
+        double timestepSize = dataProvider.getTimestepSize();
+        double firstTimestep = dataProvider.getFirstTimestep();
+        double lastTimestep = dataProvider.getLastTimestep();
+        ConfigurationResponse response = new ConfigurationResponse(body.getId(), bounds, firstTimestep, lastTimestep,
+                timestepSize);
         String result = new Gson().toJson(response);
         return Answer.ok(result);
     }

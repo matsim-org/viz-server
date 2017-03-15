@@ -7,12 +7,12 @@ import org.matsim.core.utils.collections.QuadTree;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 
 public class MatsimDataProvider {
 
+    private final double snapshotPeriod = 1;
     private QuadTree<Link> networkData;
-    private HashMap<Double, SnapshotContract> snapshots;
+    private SimulationData simulationData;
 
     public MatsimDataProvider(String networkFilePath, String eventsFilePath) {
 
@@ -25,7 +25,7 @@ public class MatsimDataProvider {
     }
 
     private void initializeAgents(String eventsFilePath, String networkFilePath) {
-        snapshots = MatsimDataReader.readEventsFile(eventsFilePath, networkFilePath);
+        simulationData = MatsimDataReader.readEventsFile(eventsFilePath, networkFilePath, snapshotPeriod);
     }
 
     public Collection<Link> getLinks(QuadTree.Rect bounds) {
@@ -36,10 +36,9 @@ public class MatsimDataProvider {
 
     public SnapshotContract getSnapshot(QuadTree.Rect bounds, double time) {
         //This will be more sophisticated later
-        SnapshotContract snapshot = snapshots.get(time);
+        SnapshotContract snapshot = simulationData.getSnapshot(time);
         if (snapshot == null) {
-            double smallestTimestep = snapshots.keySet().stream().mapToDouble(d -> d).min().getAsDouble();
-            snapshot = snapshots.get(smallestTimestep);
+            snapshot = simulationData.getSnapshot(simulationData.getFirstTimestep());
         }
         return snapshot;
     }
@@ -50,5 +49,17 @@ public class MatsimDataProvider {
                 networkData.getMaxEasting(),
                 networkData.getMaxNorthing(),
                 networkData.getMinNorthing());
+    }
+
+    public double getTimestepSize() {
+        return snapshotPeriod;
+    }
+
+    public double getFirstTimestep() {
+        return simulationData.getFirstTimestep();
+    }
+
+    public double getLastTimestep() {
+        return simulationData.getLastTimestep();
     }
 }
