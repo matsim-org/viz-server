@@ -17,7 +17,11 @@ public class SnapshotWriterImpl implements SnapshotWriter {
 
     @Override
     public void endSnapshot() {
-        simulationData.addSnapshot(currentSnapshot);
+        try {
+            simulationData.addSnapshot(currentSnapshot);
+        } catch (Exception e) {
+            System.out.println("Exception in SnapshotWriterImpl:21! Message: " + e.getMessage());
+        }
     }
 
     @Override
