@@ -68,7 +68,7 @@ public final class MatsimDataReader {
         Network network = loadNetworkFile(networkFilePath);
         Config config = ConfigUtils.createConfig();
         SnapshotGenerator generator = new SnapshotGenerator(network, snapshotPeriod, config.qsim());
-        SnapshotWriterImpl writer = new SnapshotWriterImpl();
+        SnapshotWriterImpl writer = new SnapshotWriterImpl(snapshotPeriod);
         generator.addSnapshotWriter(writer);
         EventsManager eventsManager = EventsUtils.createEventsManager();
         eventsManager.addHandler(generator);

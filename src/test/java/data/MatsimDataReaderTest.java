@@ -25,19 +25,20 @@ public class MatsimDataReaderTest {
     @Test
     public void readEventsTest() {
         //act
-        final double firstTimestep = 25201;
-        final double lastTimestep = 25476;
-        SimulationData snapshots = MatsimDataReader.readEventsFile(TestUtils.EVENTS_FILE, TestUtils.NETWORK_FILE, 1);
+        final double firstTimestep = 25200.0161;
+        final double lastTimestep = 25475.98;
+        final double snapshotPeriod = 0.0167;
+        SimulationData snapshots = MatsimDataReader.readEventsFile(TestUtils.EVENTS_FILE, TestUtils.NETWORK_FILE, snapshotPeriod);
 
         //assert
         assertNotNull(snapshots);
         assertEquals(firstTimestep, snapshots.getFirstTimestep(), 0.1);
         assertEquals(lastTimestep, snapshots.getLastTimestep(), 0.1);
 
-        for (int i = (int) firstTimestep; i <= lastTimestep; i++) {
+        for (double i = firstTimestep; i <= lastTimestep; i += snapshotPeriod) {
             SnapshotContract snapshot = snapshots.getSnapshot(i);
             assertNotNull(snapshot);
-            assertEquals(i, (int) snapshot.getTime());
+            assertEquals(i, snapshot.getTime(), 0.1);
         }
     }
 }

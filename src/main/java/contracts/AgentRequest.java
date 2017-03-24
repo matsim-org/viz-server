@@ -2,11 +2,16 @@ package contracts;
 
 public class AgentRequest {
 
-    private double time;
+    private double fromTimestep;
+    private double toTimestep;
     private RectContract bounds;
 
-    public double getTime() {
-        return time;
+    public double getFromTimestep() {
+        return fromTimestep;
+    }
+
+    public double getToTimestep() {
+        return toTimestep;
     }
 
     public RectContract getBounds() {

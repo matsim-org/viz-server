@@ -1,5 +1,7 @@
 package data;
 
+import contracts.AgentSnapshotContract;
+import contracts.SnapshotContract;
 import org.junit.Before;
 import org.junit.Test;
 import org.matsim.api.core.v01.Id;
@@ -7,13 +9,15 @@ import org.matsim.vis.snapshotwriters.AgentSnapshotInfo;
 import org.matsim.vis.snapshotwriters.AgentSnapshotInfoFactory;
 import org.matsim.vis.snapshotwriters.SnapshotLinkWidthCalculator;
 
+import static org.junit.Assert.*;
+
 public class SnapshotWriterImplTest {
 
     private SnapshotWriterImpl testObject;
 
     @Before
     public void setUp() {
-        testObject = new SnapshotWriterImpl();
+        testObject = new SnapshotWriterImpl(1);
     }
 
     @Test
@@ -24,7 +28,7 @@ public class SnapshotWriterImplTest {
 
         //assert
         SimulationData result = testObject.getSimulationData();
-        // assertEquals(0, result.size());
+        assertNotNull(result);
     }
 
     @Test
@@ -39,8 +43,9 @@ public class SnapshotWriterImplTest {
 
         //assert
         SimulationData result = testObject.getSimulationData();
-        //  assertEquals(1, result.size());
-        //  assertEquals(1, result.get(timestep).getTime(), 0.1);
+        assertNotNull(result);
+        assertEquals(1, result.getSnapshots().size());
+        assertEquals(timestep, result.getSnapshot(timestep).getTime(), 0.1);
     }
 
     @Test
@@ -61,19 +66,21 @@ public class SnapshotWriterImplTest {
         //assert
         testObject.endSnapshot();
         SimulationData result = testObject.getSimulationData();
-        /*assertEquals(1, result.size());
-        SnapshotContract contract = result.get(timestep);
+        assertNotNull(result);
+
+        SnapshotContract contract = result.getSnapshot(timestep);
         assertEquals(2, contract.getTime(), 0.1);
         assertEquals(1, contract.getAgentInformations().size());
+
         AgentSnapshotContract agent = contract.getAgentInformations().get(0);
         assertEquals(id, agent.getId());
-        assertEquals(northing, agent.getX(), 0.1);
-        assertEquals(easting, agent.getY(), 0.1);
-        */
+        assertEquals(easting, agent.getX(), 0.1);
+        assertEquals(northing, agent.getY(), 0.1);
     }
 
     @Test
     public void finishTest() {
-
+        //nothing to test, since nothing is done
+        assertTrue(true);
     }
 }

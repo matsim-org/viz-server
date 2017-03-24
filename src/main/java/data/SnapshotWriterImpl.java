@@ -6,8 +6,12 @@ import org.matsim.vis.snapshotwriters.SnapshotWriter;
 
 public class SnapshotWriterImpl implements SnapshotWriter {
 
-    private SimulationData simulationData = new SimulationData();
+    private SimulationData simulationData;
     private SnapshotContract currentSnapshot;
+
+    public SnapshotWriterImpl(double timestepSize) {
+        this.simulationData = new SimulationData(timestepSize);
+    }
 
     @Override
     public void beginSnapshot(double v) {

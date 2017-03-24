@@ -4,6 +4,8 @@ import contracts.SnapshotContract;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.List;
+
 import static junit.framework.Assert.*;
 
 public class SimulationDataTest {
@@ -12,7 +14,7 @@ public class SimulationDataTest {
 
     @Before
     public void setUp() {
-        testObject = new SimulationData();
+        testObject = new SimulationData(1);
     }
 
     @Test
@@ -21,21 +23,15 @@ public class SimulationDataTest {
         //arrange
         final double time = 1;
         SnapshotContract snapshot = new SnapshotContract(time);
-
-        //act
-        try {
-            testObject.addSnapshot(snapshot);
-        } catch (Exception e) {
-            fail("Exception was thrown with message: " + e.getMessage());
-        }
+        testObject.addSnapshot(snapshot);
 
         //assert
         assertNotNull(testObject.getSnapshot(time));
         assertEquals(snapshot, testObject.getSnapshot(time));
     }
 
-    @Test(expected = Exception.class)
-    public void addSnapshot_snapShotAlreadyPresent() throws Exception {
+    @Test(expected = RuntimeException.class)
+    public void addSnapshot_snapShotAlreadyPresent() {
 
         //arrange
         final double time = 2;
@@ -51,7 +47,7 @@ public class SimulationDataTest {
     }
 
     @Test
-    public void addSnapshot_firstAndLastTimestepsAreSet() throws Exception {
+    public void addSnapshot_firstAndLastTimestepsAreSet() {
 
         //arrange
         final double firstTimestep = 1;
@@ -62,12 +58,99 @@ public class SimulationDataTest {
         SnapshotContract lastSnapshot = new SnapshotContract(lastTimestep);
 
         //act
-        testObject.addSnapshot(lastSnapshot);
-        testObject.addSnapshot(middleSnapshot);
         testObject.addSnapshot(firstSnapshot);
+        testObject.addSnapshot(middleSnapshot);
+        testObject.addSnapshot(lastSnapshot);
 
         //assert
         assertEquals(firstTimestep, testObject.getFirstTimestep());
         assertEquals(lastTimestep, testObject.getLastTimestep());
+    }
+
+    @Test
+    public void getSnapshot_correctSnapshotIsReturned() {
+
+        //arrange
+        final double firstTimestep = 1;
+        final double middleTimestep = 2;
+        final double lastTimestep = 3;
+        SnapshotContract firstSnapshot = new SnapshotContract(firstTimestep);
+        SnapshotContract middleSnapshot = new SnapshotContract(middleTimestep);
+        SnapshotContract lastSnapshot = new SnapshotContract(lastTimestep);
+        testObject.addSnapshot(firstSnapshot);
+        testObject.addSnapshot(middleSnapshot);
+        testObject.addSnapshot(lastSnapshot);
+
+        //act
+        SnapshotContract middleResult = testObject.getSnapshot(middleTimestep);
+        SnapshotContract firstResult = testObject.getSnapshot(firstTimestep);
+        SnapshotContract lastResult = testObject.getSnapshot(lastTimestep);
+
+        //assert
+        assertEquals(firstSnapshot, firstResult);
+        assertEquals(middleSnapshot, middleResult);
+        assertEquals(lastSnapshot, lastResult);
+    }
+
+    @Test
+    public void getSnapshot_timestepSizeOdd_correctSnapshotIsReturned() {
+
+        //arrange
+        testObject = new SimulationData(0.5);
+        final double firstTimestep = 1;
+        final double middleTimestep = 1.5;
+        final double lastTimestep = 2.0;
+        SnapshotContract firstSnapshot = new SnapshotContract(firstTimestep);
+        SnapshotContract middleSnapshot = new SnapshotContract(middleTimestep);
+        SnapshotContract lastSnapshot = new SnapshotContract(lastTimestep);
+        testObject.addSnapshot(firstSnapshot);
+        testObject.addSnapshot(middleSnapshot);
+        testObject.addSnapshot(lastSnapshot);
+
+        //act
+        SnapshotContract middleResult = testObject.getSnapshot(middleTimestep);
+        SnapshotContract firstResult = testObject.getSnapshot(firstTimestep);
+        SnapshotContract lastResult = testObject.getSnapshot(lastTimestep);
+
+        //assert
+        assertEquals(firstSnapshot, firstResult);
+        assertEquals(middleSnapshot, middleResult);
+        assertEquals(lastSnapshot, lastResult);
+    }
+
+    @Test
+    public void getSnapshots_correctSnapshotsReturned() {
+        //arrange
+        final double timestepSize = 0.5;
+        final double firstTimestep = 20;
+        final double lastTimestep = 50;
+        final double fromTimestep = 22.5;
+        final double toTimestep = 38.0;
+        testObject = new SimulationData(timestepSize);
+        for (double i = firstTimestep; i < lastTimestep; i += timestepSize) {
+            testObject.addSnapshot(new SnapshotContract(i));
+        }
+
+        //act
+        List<SnapshotContract> result = testObject.getSnapshots(fromTimestep, toTimestep);
+
+        //assert
+        int expectedSize = (int) ((toTimestep - fromTimestep) / timestepSize) + 1;
+        assertEquals(expectedSize, result.size());
+
+        SnapshotContract first = result.get(0);
+        SnapshotContract last = result.get(result.size() - 1);
+        assertEquals(fromTimestep, first.getTime(), 0.0001);
+        assertEquals(toTimestep, last.getTime(), 0.0001);
+    }
+
+    @Test
+    public void getSnapshots_timestepsWrong() {
+        assertFalse(true); //yet to be implemented
+    }
+
+    @Test
+    public void getSnapshots_timspanOutOfBounds() {
+        assertFalse(true); //yet to be implemented
     }
 }

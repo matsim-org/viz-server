@@ -7,10 +7,11 @@ import org.matsim.core.utils.collections.QuadTree;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 public class MatsimDataProvider {
 
-    private final double snapshotPeriod = 1;
+    private final double snapshotPeriod = 0.0167; //this equals 60fps
     private QuadTree<Link> networkData;
     private SimulationData simulationData;
 
@@ -34,13 +35,9 @@ public class MatsimDataProvider {
         return result;
     }
 
-    public SnapshotContract getSnapshot(QuadTree.Rect bounds, double time) {
+    public List<SnapshotContract> getSnapshot(QuadTree.Rect bounds, double startTime, double endTime) {
         //This will be more sophisticated later
-        SnapshotContract snapshot = simulationData.getSnapshot(time);
-        if (snapshot == null) {
-            snapshot = simulationData.getSnapshot(simulationData.getFirstTimestep());
-        }
-        return snapshot;
+        return simulationData.getSnapshots(startTime, endTime);
     }
 
     public RectContract getBounds() {

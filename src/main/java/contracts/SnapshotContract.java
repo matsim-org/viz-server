@@ -11,7 +11,8 @@ public class SnapshotContract {
     private List<AgentSnapshotContract> positions = new ArrayList<>();
 
     public SnapshotContract(double time) {
-        this.time = time;
+
+        this.time = roundFourDecimals(time);
     }
 
     public List<AgentSnapshotContract> getAgentInformations() {
@@ -24,5 +25,9 @@ public class SnapshotContract {
 
     public void add(AgentSnapshotInfo info) {
         positions.add(new AgentSnapshotContract(info));
+    }
+
+    private double roundFourDecimals(double value) {
+        return (double) Math.round(value * 10000) / 10000;
     }
 }
