@@ -125,32 +125,62 @@ public class SimulationDataTest {
         final double firstTimestep = 20;
         final double lastTimestep = 50;
         final double fromTimestep = 22.5;
-        final double toTimestep = 38.0;
+        final int size = 31;
         testObject = new SimulationData(timestepSize);
-        for (double i = firstTimestep; i < lastTimestep; i += timestepSize) {
+        for (double i = firstTimestep; i <= lastTimestep; i += timestepSize) {
             testObject.addSnapshot(new SnapshotContract(i));
         }
 
         //act
-        List<SnapshotContract> result = testObject.getSnapshots(fromTimestep, toTimestep);
+        List<SnapshotContract> result = testObject.getSnapshots(fromTimestep, size);
 
         //assert
-        int expectedSize = (int) ((toTimestep - fromTimestep) / timestepSize) + 1;
-        assertEquals(expectedSize, result.size());
+        assertEquals(size, result.size());
 
         SnapshotContract first = result.get(0);
         SnapshotContract last = result.get(result.size() - 1);
         assertEquals(fromTimestep, first.getTime(), 0.0001);
-        assertEquals(toTimestep, last.getTime(), 0.0001);
+        double expectedLastTime = fromTimestep + size * timestepSize - timestepSize;
+        assertEquals(expectedLastTime, last.getTime(), 0.0001);
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void getSnapshots_fromTimestepTooSmall() {
+
+        //arrange
+        final double timestepSize = 0.5;
+        final double firstTimestep = 20;
+        final double lastTimestep = 50;
+        final double fromTimestep = 22.5;
+        final int size = 31;
+        testObject = new SimulationData(timestepSize);
+        for (double i = firstTimestep; i <= lastTimestep; i += timestepSize) {
+            testObject.addSnapshot(new SnapshotContract(i));
+        }
+
+        //act
+        List<SnapshotContract> result = testObject.getSnapshots(firstTimestep - 1, 1);
     }
 
     @Test
-    public void getSnapshots_timestepsWrong() {
-        assertFalse(true); //yet to be implemented
-    }
+    public void getSnapshots_moreFramesThanAvailable() {
 
-    @Test
-    public void getSnapshots_timspanOutOfBounds() {
-        assertFalse(true); //yet to be implemented
+        //arrange
+        final double timestepSize = 0.5;
+        final double firstTimestep = 20;
+        final double lastTimestep = 50;
+        final double fromTimestep = 22.5;
+        final int size = 31;
+        testObject = new SimulationData(timestepSize);
+        for (double i = firstTimestep; i <= lastTimestep; i += timestepSize) {
+            testObject.addSnapshot(new SnapshotContract(i));
+        }
+
+        //act
+        List<SnapshotContract> result = testObject.getSnapshots(lastTimestep - 1, 10);
+
+        //assert
+        assertEquals(3, result.size());
+
     }
 }

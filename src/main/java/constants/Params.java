@@ -1,6 +1,12 @@
 package constants;
 
 public final class Params {
+
+    public static final String ARG_NETWORK = "network";
+    public static final String ARG_EVENTS = "events";
+    public static final String ARG_PERIOD = "snapshotPeriod";
+    public static final String ARG_PORT = "port";
+
     public static final String BOUNDINGBOX_LEFT = "l";
     public static final String BOUNDINGBOX_RIGHT = "r";
     public static final String BOUNDINGBOX_TOP = "t";

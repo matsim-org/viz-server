@@ -11,21 +11,22 @@ import java.util.List;
 
 public class MatsimDataProvider {
 
-    private final double snapshotPeriod = 0.0167; //this equals 60fps
+    private double snapshotPeriod;
     private QuadTree<Link> networkData;
     private SimulationData simulationData;
 
-    public MatsimDataProvider(String networkFilePath, String eventsFilePath) {
+    public MatsimDataProvider(String networkFilePath, String eventsFilePath, double snapshotPeriod) {
 
+        this.snapshotPeriod = snapshotPeriod;
         initializeNetwork(networkFilePath);
-        initializeAgents(eventsFilePath, networkFilePath);
+        initializeAgents(eventsFilePath, networkFilePath, snapshotPeriod);
     }
 
     private void initializeNetwork(String filePath) {
         networkData = MatsimDataReader.readNetworkFile(filePath);
     }
 
-    private void initializeAgents(String eventsFilePath, String networkFilePath) {
+    private void initializeAgents(String eventsFilePath, String networkFilePath, double snapshotPeriod) {
         simulationData = MatsimDataReader.readEventsFile(eventsFilePath, networkFilePath, snapshotPeriod);
     }
 
@@ -35,9 +36,9 @@ public class MatsimDataProvider {
         return result;
     }
 
-    public List<SnapshotContract> getSnapshot(QuadTree.Rect bounds, double startTime, double endTime) {
+    public List<SnapshotContract> getSnapshot(QuadTree.Rect bounds, double startTime, int size) {
         //This will be more sophisticated later
-        return simulationData.getSnapshots(startTime, endTime);
+        return simulationData.getSnapshots(startTime, size);
     }
 
     public RectContract getBounds() {

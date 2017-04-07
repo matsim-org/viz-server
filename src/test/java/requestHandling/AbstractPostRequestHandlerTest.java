@@ -65,7 +65,7 @@ public class AbstractPostRequestHandlerTest {
     private class AbstractPostRequestHandlerTestable extends NetworkRequestHandler {
 
         public AbstractPostRequestHandlerTestable() {
-            super(new MatsimDataProvider(TestUtils.NETWORK_FILE, TestUtils.EVENTS_FILE));
+            super(new MatsimDataProvider(TestUtils.NETWORK_FILE, TestUtils.EVENTS_FILE, 1));
         }
 
         public Answer processBodyImpl(String body) {

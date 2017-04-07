@@ -3,15 +3,15 @@ package contracts;
 public class AgentRequest {
 
     private double fromTimestep;
-    private double toTimestep;
+    private int size;
     private RectContract bounds;
 
     public double getFromTimestep() {
         return fromTimestep;
     }
 
-    public double getToTimestep() {
-        return toTimestep;
+    public int getSize() {
+        return size;
     }
 
     public RectContract getBounds() {

@@ -27,7 +27,7 @@ public class AgentRequestHandler extends AbstractPostRequestHandler<AgentRequest
             snapshots = dataProvider.getSnapshot(bounds, startTime, size);
         } catch (RuntimeException e) {
             System.out.println(e.getMessage());
-            System.out.println(e.getStackTrace());
+            e.printStackTrace();
             return new Answer(Params.STATUS_BADREQUEST, e.getMessage());
         }
         String result = new Gson().toJson(snapshots);

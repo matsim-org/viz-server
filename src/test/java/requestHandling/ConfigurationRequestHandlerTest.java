@@ -19,7 +19,7 @@ public class ConfigurationRequestHandlerTest {
 
     @BeforeClass
     public static void setUp() {
-        MatsimDataProvider data = new MatsimDataProvider(TestUtils.NETWORK_FILE, TestUtils.EVENTS_FILE);
+        MatsimDataProvider data = new MatsimDataProvider(TestUtils.NETWORK_FILE, TestUtils.EVENTS_FILE, 1);
         testObject = new ConfigurationRequestHandler(data);
     }
 
@@ -30,8 +30,8 @@ public class ConfigurationRequestHandlerTest {
         final String id = "id";
         final double left = -2500;
         final double right = 1001;
-        final double top = -1000;
-        final double bottom = 401;
+        final double top = 401;
+        final double bottom = -1000;
         ConfigurationRequest request = new ConfigurationRequest(id);
 
         //act

@@ -7,6 +7,7 @@ import org.matsim.api.core.v01.network.Node;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.events.algorithms.SnapshotGenerator;
@@ -67,6 +68,7 @@ public final class MatsimDataReader {
                                                 String networkFilePath, double snapshotPeriod) {
         Network network = loadNetworkFile(networkFilePath);
         Config config = ConfigUtils.createConfig();
+        config.qsim().setSnapshotStyle(QSimConfigGroup.SnapshotStyle.queue);
         SnapshotGenerator generator = new SnapshotGenerator(network, snapshotPeriod, config.qsim());
         SnapshotWriterImpl writer = new SnapshotWriterImpl(snapshotPeriod);
         generator.addSnapshotWriter(writer);

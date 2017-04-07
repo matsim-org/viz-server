@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SimulationData {
-    //private HashMap<Double, SnapshotContract> snapshots = new HashMap<>();
+
     private List<SnapshotContract> snapshots = new ArrayList<>();
     private double firstTimestep = Double.MAX_VALUE;
     private double lastTimestep = Double.MIN_VALUE;
@@ -63,28 +63,24 @@ public class SimulationData {
         return snapshots.get((int) index);
     }
 
-    public List<SnapshotContract> getSnapshots(double fromTimestep, double toTimestep) {
+    public List<SnapshotContract> getSnapshots(double fromTimestep, int size) {
 
-        //ensure timesteps are within bounds and in the right order
-        if (fromTimestep >= toTimestep) {
-            throw new RuntimeException("toTimestep must be greater than from Timestep");
+        if (firstTimestep - 0.0001 > fromTimestep) {
+            throw new RuntimeException("fromTimestep was not within recorded timespan");
         }
-        if (firstTimestep - 0.0001 > fromTimestep || lastTimestep + 0.0001 < toTimestep) {
-            throw new RuntimeException("timespan was not within recorded timespan");
-        }
-        //calculate starting index
-        double index = (fromTimestep - firstTimestep) / timestepSize;
-        //calculate how many frames to serve
-        double size = ((toTimestep - fromTimestep) / timestepSize) + 1; //+1 so toTimestep is included
-        List<SnapshotContract> result = new ArrayList<>((int) size + 1);
-        for (int i = (int) index; i < index + size && i < snapshots.size(); i++) {
+
+        double startingIndex = (fromTimestep - firstTimestep) / timestepSize;
+        List<SnapshotContract> result = new ArrayList<>(size);
+
+        for (int i = (int) startingIndex; i < startingIndex + size && i < snapshots.size(); i++) {
             result.add(snapshots.get(i));
         }
-        return result;
-    }
 
-    private double roundFourDecimals(double value) {
-        return (double) Math.round(value * 10000) / 10000;
+        System.out.println("getSnapshots fromTime: " + fromTimestep + " with size " + size + " results in " + result.size() + " snapshots");
+        if (result.size() > 0) {
+            System.out.println("firstSnapshot: " + result.get(0).getTime() + " lastSnapshot: " + result.get(result.size() - 1).getTime());
+        }
+        return result;
     }
 
     private void setFirstOrLastTimestep(double time) {
