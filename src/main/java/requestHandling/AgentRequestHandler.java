@@ -20,11 +20,11 @@ public class AgentRequestHandler extends AbstractPostRequestHandler<AgentRequest
 
         QuadTree.Rect bounds = body.getBounds().copyToMatsimRect();
         double startTime = body.getFromTimestep();
-        double endTime = body.getToTimestep();
+        int size = body.getSize();
         List<SnapshotContract> snapshots;
 
         try {
-            snapshots = dataProvider.getSnapshot(bounds, startTime, endTime);
+            snapshots = dataProvider.getSnapshot(bounds, startTime, size);
         } catch (RuntimeException e) {
             System.out.println(e.getMessage());
             System.out.println(e.getStackTrace());
