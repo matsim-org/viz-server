@@ -1,0 +1,47 @@
+package proto;
+syntax
+=
+"proto3"
+;
+
+option java_package = "org.matsim.webvis.contracts";
+option java_outer_classname = "Contracts";
+
+message Position {
+    required double x = 1;
+    required double y = 2;
+    required string agentId = 3;
+}
+
+message Link {
+    required Position from = 1;
+    required Position to = 2;
+}
+
+message Rect {
+    required double left = 1;
+    required double right = 2;
+    required double top = 3;
+    required double bottom = 4;
+}
+
+message Snapshot {
+    required double time = 1;
+    repeated Position positions = 2;
+}
+
+message SimulationData {
+    required double firstTimestep = 1;
+    required double lastTimestep = 2;
+    required double timestepSize = 3;
+    repeated Snapshot snapshots = 4;
+}
+
+message Configuration {
+    required string id = 1;
+    required Rect bounds = 2;
+    required double firstTimestep = 3;
+    required double lastTimestep = 4;
+    required double timestepSize = 5;
+}
+

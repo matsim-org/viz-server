@@ -13,6 +13,7 @@ public final class Params {
     public static final String BOUNDINGBOX_BOTTOM = "b";
 
     public static final String RESPONSETYPE_JSON = "application/json";
+    public static final String RESPONSETYPE_OCTET_STREAM = "application/octet-stream";
 
     public static final int STATUS_OK = 200;
     public static final int STATUS_BADREQUEST = 400;

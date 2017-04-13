@@ -27,10 +27,17 @@ public abstract class AbstractPostRequestHandler<T> implements Route {
         Answer answer = processBody(request.body());
 
         //prepare the response
-        response.status(answer.getCode());
+       /* response.status(answer.getCode());
         response.type(Params.RESPONSETYPE_JSON);
         response.body(answer.getBody());
-        return answer.getBody();
+        */
+
+        //prepare the response as bytes
+        response.type(Params.RESPONSETYPE_OCTET_STREAM);
+        response.raw().setContentType(Params.RESPONSETYPE_OCTET_STREAM);
+        response.raw().getOutputStream().write(answer.getContent());
+        response.raw().getOutputStream().close();
+        return answer.getCode();
     }
 
     protected Answer processBody(String body) {

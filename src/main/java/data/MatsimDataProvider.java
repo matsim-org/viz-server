@@ -1,19 +1,18 @@
 package data;
 
 import contracts.RectContract;
-import contracts.SnapshotContract;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.core.utils.collections.QuadTree;
+import org.matsim.webvis.contracts.Contracts;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 public class MatsimDataProvider {
 
     private double snapshotPeriod;
     private QuadTree<Link> networkData;
-    private SimulationData simulationData;
+    private Contracts.SimulationData simulationData;
 
     public MatsimDataProvider(String networkFilePath, String eventsFilePath, double snapshotPeriod) {
 
@@ -36,9 +35,13 @@ public class MatsimDataProvider {
         return result;
     }
 
-    public List<SnapshotContract> getSnapshot(QuadTree.Rect bounds, double startTime, int size) {
+   /* public List<SnapshotContract> getSnapshot(QuadTree.Rect bounds, double startTime, int size) {
         //This will be more sophisticated later
         return simulationData.getSnapshots(startTime, size);
+    }*/
+
+    public Contracts.SimulationData getSnapshots() {
+        return simulationData;
     }
 
     public RectContract getBounds() {

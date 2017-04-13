@@ -1,13 +1,12 @@
 package data;
 
-import contracts.AgentSnapshotContract;
-import contracts.SnapshotContract;
 import org.junit.Before;
 import org.junit.Test;
 import org.matsim.api.core.v01.Id;
 import org.matsim.vis.snapshotwriters.AgentSnapshotInfo;
 import org.matsim.vis.snapshotwriters.AgentSnapshotInfoFactory;
 import org.matsim.vis.snapshotwriters.SnapshotLinkWidthCalculator;
+import org.matsim.webvis.contracts.Contracts;
 
 import static org.junit.Assert.*;
 
@@ -23,12 +22,20 @@ public class SnapshotWriterImplTest {
     @Test
     public void beginSnapshotTest() {
 
+        //arrange
+        final double time = 0;
         //act
-        testObject.beginSnapshot(0);
+        testObject.beginSnapshot(time);
 
         //assert
-        SimulationData result = testObject.getSimulationData();
+        testObject.endSnapshot();
+        Contracts.SimulationData result = testObject.getSimulationData();
         assertNotNull(result);
+        assertEquals(1, result.getSnapshotsCount());
+        assertEquals(0, result.getFirstTimestep(), 0.1);
+        assertEquals(0, result.getLastTimestep(), 0.1);
+        Contracts.Snapshot snapshot = result.getSnapshots(0);
+        assertEquals(time, snapshot.getTime(), 0.1);
     }
 
     @Test
@@ -42,10 +49,11 @@ public class SnapshotWriterImplTest {
         testObject.endSnapshot();
 
         //assert
-        SimulationData result = testObject.getSimulationData();
+        Contracts.SimulationData result = testObject.getSimulationData();
         assertNotNull(result);
-        assertEquals(1, result.getSnapshots().size());
-        assertEquals(timestep, result.getSnapshot(timestep).getTime(), 0.1);
+        assertEquals(1, result.getSnapshotsCount());
+        Contracts.Snapshot snapshot = result.getSnapshots(0);
+        assertEquals(timestep, snapshot.getTime(), 0.1);
     }
 
     @Test
@@ -65,17 +73,17 @@ public class SnapshotWriterImplTest {
 
         //assert
         testObject.endSnapshot();
-        SimulationData result = testObject.getSimulationData();
+        Contracts.SimulationData result = testObject.getSimulationData();
         assertNotNull(result);
 
-        SnapshotContract contract = result.getSnapshot(timestep);
-        assertEquals(2, contract.getTime(), 0.1);
-        assertEquals(1, contract.getAgentInformations().size());
+        Contracts.Snapshot snapshot = result.getSnapshots(0);
+        assertEquals(timestep, snapshot.getTime(), 0.1);
+        assertEquals(1, snapshot.getPositionsCount());
 
-        AgentSnapshotContract agent = contract.getAgentInformations().get(0);
-        assertEquals(id, agent.getId());
-        assertEquals(easting, agent.getX(), 0.1);
-        assertEquals(northing, agent.getY(), 0.1);
+        Contracts.Position position = snapshot.getPositions(0);
+        assertEquals(id, position.getAgentId());
+        assertEquals(easting, position.getX(), 0.1);
+        assertEquals(northing, position.getY(), 0.1);
     }
 
     @Test

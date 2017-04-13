@@ -7,6 +7,7 @@ public class Answer {
 
     private int code;
     private String body;
+    private byte[] content;
 
     public Answer(int code) {
         this(code, "");
@@ -17,8 +18,17 @@ public class Answer {
         this.body = body;
     }
 
+    Answer(int code, byte[] content) {
+        this.code = code;
+        this.content = content;
+    }
+
     static Answer ok(String body) {
         return new Answer(Params.STATUS_OK, body);
+    }
+
+    static Answer ok(byte[] content) {
+        return new Answer(Params.STATUS_OK, content);
     }
 
     int getCode() {
@@ -35,5 +45,9 @@ public class Answer {
 
     public void setBody(String body) {
         this.body = body;
+    }
+
+    byte[] getContent() {
+        return content;
     }
 }

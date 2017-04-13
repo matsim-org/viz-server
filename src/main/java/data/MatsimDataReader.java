@@ -14,6 +14,7 @@ import org.matsim.core.events.algorithms.SnapshotGenerator;
 import org.matsim.core.network.MatsimNetworkReader;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.utils.collections.QuadTree;
+import org.matsim.webvis.contracts.Contracts;
 
 public final class MatsimDataReader {
 
@@ -64,8 +65,8 @@ public final class MatsimDataReader {
         return new QuadTree.Rect(minEasting, minNorthing, maxEasting, maxNorthing);
     }
 
-    public static SimulationData readEventsFile(String eventsFilePath,
-                                                String networkFilePath, double snapshotPeriod) {
+    public static Contracts.SimulationData readEventsFile(String eventsFilePath,
+                                                          String networkFilePath, double snapshotPeriod) {
         Network network = loadNetworkFile(networkFilePath);
         Config config = ConfigUtils.createConfig();
         config.qsim().setSnapshotStyle(QSimConfigGroup.SnapshotStyle.queue);
