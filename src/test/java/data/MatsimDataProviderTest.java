@@ -1,15 +1,12 @@
 package data;
 
-import contracts.RectContract;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.matsim.api.core.v01.network.Link;
 import org.matsim.core.utils.collections.QuadTree;
 import utils.TestUtils;
 
-import java.util.Collection;
-
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class MatsimDataProviderTest {
 
@@ -27,10 +24,11 @@ public class MatsimDataProviderTest {
         QuadTree.Rect bounds = new QuadTree.Rect(-500, -500, 500, 500);
 
         //act
-        Collection<Link> result = testObject.getLinks(bounds);
+        /*Collection<Link> result = testObject.getLinks(bounds);
 
         //assert
-        assertEquals(5, result.size());
+        assertEquals(5, result.size());*/
+        fail();
     }
 
     @Test
@@ -62,6 +60,7 @@ public class MatsimDataProviderTest {
         final double bottom = -1000;
 
         //act
+        /*
         RectContract bounds = testObject.getBounds();
 
         //assert
@@ -69,5 +68,7 @@ public class MatsimDataProviderTest {
         assertEquals(right, bounds.getRight(), 0.1);
         assertEquals(top, bounds.getTop(), 0.1);
         assertEquals(bottom, bounds.getBottom(), 0.1);
+        */
+        Assert.fail();
     }
 }

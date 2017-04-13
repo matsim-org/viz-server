@@ -1,7 +1,5 @@
 package data;
 
-import contracts.RectContract;
-import org.matsim.api.core.v01.network.Link;
 import org.matsim.core.utils.collections.QuadTree;
 import org.matsim.webvis.contracts.Contracts;
 
@@ -11,7 +9,7 @@ import java.util.Collection;
 public class MatsimDataProvider {
 
     private double snapshotPeriod;
-    private QuadTree<Link> networkData;
+    private QuadTree<Contracts.Link> networkData;
     private Contracts.SimulationData simulationData;
 
     public MatsimDataProvider(String networkFilePath, String eventsFilePath, double snapshotPeriod) {
@@ -29,8 +27,8 @@ public class MatsimDataProvider {
         simulationData = MatsimDataReader.readEventsFile(eventsFilePath, networkFilePath, snapshotPeriod);
     }
 
-    public Collection<Link> getLinks(QuadTree.Rect bounds) {
-        ArrayList<Link> result = new ArrayList<>();
+    public Collection<Contracts.Link> getLinks(QuadTree.Rect bounds) {
+        ArrayList<Contracts.Link> result = new ArrayList<>();
         networkData.getRectangle(bounds, result);
         return result;
     }
@@ -44,12 +42,15 @@ public class MatsimDataProvider {
         return simulationData;
     }
 
-    public RectContract getBounds() {
-        return new RectContract(
-                networkData.getMinEasting(),
-                networkData.getMaxEasting(),
-                networkData.getMaxNorthing(),
-                networkData.getMinNorthing());
+    public Contracts.Rect getBounds() {
+
+        Contracts.Rect bounds = Contracts.Rect.newBuilder()
+                .setLeft(networkData.getMinEasting())
+                .setRight(networkData.getMaxEasting())
+                .setTop(networkData.getMaxNorthing())
+                .setBottom(networkData.getMinNorthing())
+                .build();
+        return bounds;
     }
 
     public double getTimestepSize() {

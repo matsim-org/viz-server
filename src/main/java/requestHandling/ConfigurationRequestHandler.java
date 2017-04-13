@@ -4,7 +4,6 @@ import contracts.ConfigurationRequest;
 import data.MatsimDataProvider;
 
 import static org.matsim.webvis.contracts.Contracts.Configuration;
-import static org.matsim.webvis.contracts.Contracts.Rect;
 
 public class ConfigurationRequestHandler extends AbstractPostRequestHandler<ConfigurationRequest> {
 
@@ -24,13 +23,13 @@ public class ConfigurationRequestHandler extends AbstractPostRequestHandler<Conf
         */
 
         //create a test repsonse with protobuf
+
         Configuration.Builder config = Configuration.newBuilder();
-        Rect rect = Rect.newBuilder().setLeft(1).setRight(2).setTop(1).setBottom(2).build();
         config.setId("some id")
-                .setBounds(rect)
-                .setFirstTimestep(1)
-                .setLastTimestep(10)
-                .setTimestepSize(1);
+                .setBounds(dataProvider.getBounds())
+                .setFirstTimestep(dataProvider.getFirstTimestep())
+                .setLastTimestep(dataProvider.getLastTimestep())
+                .setTimestepSize(dataProvider.getTimestepSize());
 
         byte[] result = config.build().toByteArray();
         return Answer.ok(result);

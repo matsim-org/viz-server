@@ -1,8 +1,5 @@
 package proto;
-syntax
-=
-"proto3"
-;
+
 
 option java_package = "org.matsim.webvis.contracts";
 option java_outer_classname = "Contracts";
@@ -14,8 +11,14 @@ message Position {
 }
 
 message Link {
-    required Position from = 1;
-    required Position to = 2;
+    required double fromX = 1;
+    required double fromY = 2;
+    required double toX = 3;
+    required double toY = 4;
+}
+
+message Network {
+    repeated Link links = 1;
 }
 
 message Rect {

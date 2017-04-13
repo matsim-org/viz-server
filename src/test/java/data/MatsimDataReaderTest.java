@@ -1,11 +1,8 @@
 package data;
 
 import org.junit.Test;
-import org.matsim.api.core.v01.network.Link;
-import org.matsim.core.utils.collections.QuadTree;
-import utils.TestUtils;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.fail;
 
 public class MatsimDataReaderTest {
 
@@ -13,11 +10,12 @@ public class MatsimDataReaderTest {
     public void readNetworkTest() {
 
         //act
-        QuadTree<Link> links = MatsimDataReader.readNetworkFile(TestUtils.NETWORK_FILE);
+        /*QuadTree<Link> links = MatsimDataReader.readNetworkFile(TestUtils.NETWORK_FILE);
 
         //assert
         assertNotNull(links);
-        assertEquals(12, links.values().size());
+        assertEquals(12, links.values().size());*/
+        fail();
     }
 
     @Test

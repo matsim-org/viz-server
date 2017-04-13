@@ -21,7 +21,7 @@ public final class MatsimDataReader {
     private MatsimDataReader() {
     }
 
-    static QuadTree<Link> readNetworkFile(String path) {
+    static QuadTree<Contracts.Link> readNetworkFile(String path) {
 
         Network network = loadNetworkFile(path);
         return initNetworkData(network);
@@ -34,14 +34,21 @@ public final class MatsimDataReader {
         return network;
     }
 
-    private static QuadTree<Link> initNetworkData(Network network) {
+    private static QuadTree<Contracts.Link> initNetworkData(Network network) {
 
         QuadTree.Rect bounds = calculateBoundingRectangle(network);
-        QuadTree<Link> links = new QuadTree<>(bounds.minX, bounds.minY, bounds.maxX, bounds.maxY);
+        QuadTree<Contracts.Link> links = new QuadTree<>(bounds.minX, bounds.minY, bounds.maxX, bounds.maxY);
 
         for (final Link link : network.getLinks().values()) {
             Coord center = link.getCoord();
-            links.put(center.getX(), center.getY(), link);
+
+            //put the links as protobuf inside the tree
+            Contracts.Link.Builder linkBuilder = Contracts.Link.newBuilder()
+                    .setFromX(link.getFromNode().getCoord().getX())
+                    .setFromY(link.getFromNode().getCoord().getY())
+                    .setToX(link.getToNode().getCoord().getX())
+                    .setToY(link.getToNode().getCoord().getY());
+            links.put(center.getX(), center.getY(), linkBuilder.build());
         }
         return links;
     }
