@@ -1,11 +1,10 @@
 package requestHandling;
 
 
-import com.google.gson.Gson;
 import constants.Params;
-import contracts.LinkContract;
 import contracts.RectContract;
 import data.MatsimDataProvider;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import utils.TestUtils;
@@ -30,9 +29,10 @@ public class AbstractPostRequestHandlerTest {
         Answer answer = testObject.processBodyImpl(bodyText);
 
         //assert
-        assertEquals(Params.STATUS_OK, answer.getCode());
+        /*assertEquals(Params.STATUS_OK, answer.getCode());
         LinkContract[] contracts = new Gson().fromJson(answer.getBody(), LinkContract[].class);
-        assertEquals(4, contracts.length);
+        assertEquals(4, contracts.length);*/
+        Assert.fail();
     }
 
     @Test
@@ -44,9 +44,11 @@ public class AbstractPostRequestHandlerTest {
         Answer answer = testObject.processBodyImpl(bodyText);
 
         //assert
-        assertEquals(Params.STATUS_OK, answer.getCode());
+        /*assertEquals(Params.STATUS_OK, answer.getCode());
         LinkContract[] contracts = new Gson().fromJson(answer.getBody(), LinkContract[].class);
         assertEquals(0, contracts.length);
+        */
+        Assert.fail();
     }
 
     @Test

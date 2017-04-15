@@ -4,16 +4,15 @@ import org.matsim.vis.snapshotwriters.AgentSnapshotInfo;
 import org.matsim.vis.snapshotwriters.SnapshotWriter;
 import org.matsim.webvis.contracts.Contracts;
 
+import java.io.IOException;
+
 public class SnapshotWriterImpl implements SnapshotWriter {
 
-    private Contracts.SimulationData.Builder simulationDataBuilder;
     private Contracts.Snapshot.Builder currentSnapshotBuilder;
+    private SimulationDataAsBytes simData;
 
     public SnapshotWriterImpl(double timestepSize) {
-        this.simulationDataBuilder = Contracts.SimulationData.newBuilder();
-        simulationDataBuilder.setTimestepSize(timestepSize);
-        simulationDataBuilder.setFirstTimestep(Double.MAX_VALUE);
-        simulationDataBuilder.setLastTimestep(Double.MIN_VALUE);
+        simData = new SimulationDataAsBytes(timestepSize);
     }
 
     @Override
@@ -21,13 +20,16 @@ public class SnapshotWriterImpl implements SnapshotWriter {
 
         currentSnapshotBuilder = Contracts.Snapshot.newBuilder();
         currentSnapshotBuilder.setTime(v);
-        setFirstOrLastTimestep(v);
     }
 
     @Override
     public void endSnapshot() {
         Contracts.Snapshot snapshot = currentSnapshotBuilder.build();
-        simulationDataBuilder.addSnapshots(snapshot);
+        try {
+            simData.addSnapshot(snapshot);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -41,19 +43,10 @@ public class SnapshotWriterImpl implements SnapshotWriter {
 
     @Override
     public void finish() {
-
+        currentSnapshotBuilder = null;
     }
 
-    public Contracts.SimulationData getSimulationData() {
-        return simulationDataBuilder.build();
-    }
-
-    private void setFirstOrLastTimestep(double time) {
-        if (time < simulationDataBuilder.getFirstTimestep()) {
-            simulationDataBuilder.setFirstTimestep(time);
-        }
-        if (time > simulationDataBuilder.getLastTimestep()) {
-            simulationDataBuilder.setLastTimestep(time);
-        }
+    public SimulationDataAsBytes getSimulationData() {
+        return simData;
     }
 }

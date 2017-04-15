@@ -1,12 +1,11 @@
 package requestHandling;
 
-import com.google.gson.Gson;
+import constants.Params;
 import contracts.AgentRequest;
-import contracts.SnapshotContract;
 import data.MatsimDataProvider;
 import org.matsim.core.utils.collections.QuadTree;
 
-import java.util.List;
+import java.io.IOException;
 
 public class AgentRequestHandler extends AbstractPostRequestHandler<AgentRequest> {
 
@@ -20,17 +19,17 @@ public class AgentRequestHandler extends AbstractPostRequestHandler<AgentRequest
         QuadTree.Rect bounds = body.getBounds().copyToMatsimRect();
         double startTime = body.getFromTimestep();
         int size = body.getSize();
-        List<SnapshotContract> snapshots = null;
 
-        /*try {
-            snapshots = dataProvider.getSnapshot(bounds, startTime, size);
+        byte[] bytes = new byte[0];
+        try {
+            bytes = dataProvider.getSnapshots(bounds, startTime, size);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return new Answer(Params.STATUS_INTERNAL_SERVER_ERROR, "Sorry.");
         } catch (RuntimeException e) {
-            System.out.println(e.getMessage());
             e.printStackTrace();
             return new Answer(Params.STATUS_BADREQUEST, e.getMessage());
         }
-        */
-        String result = new Gson().toJson(snapshots);
-        return Answer.ok(result);
+        return Answer.ok(bytes);
     }
 }

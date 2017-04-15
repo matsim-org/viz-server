@@ -13,16 +13,6 @@ public class ConfigurationRequestHandler extends AbstractPostRequestHandler<Conf
 
     @Override
     public Answer process(ConfigurationRequest body) {
-        /*RectContract bounds = dataProvider.getBounds();
-        double timestepSize = dataProvider.getTimestepSize();
-        double firstTimestep = dataProvider.getFirstTimestep();
-        double lastTimestep = dataProvider.getLastTimestep();
-        ConfigurationResponse response = new ConfigurationResponse(body.getId(), bounds, firstTimestep, lastTimestep,
-                timestepSize);
-        String result = new Gson().toJson(response);
-        */
-
-        //create a test repsonse with protobuf
 
         Configuration.Builder config = Configuration.newBuilder();
         config.setId("some id")
@@ -30,8 +20,6 @@ public class ConfigurationRequestHandler extends AbstractPostRequestHandler<Conf
                 .setFirstTimestep(dataProvider.getFirstTimestep())
                 .setLastTimestep(dataProvider.getLastTimestep())
                 .setTimestepSize(dataProvider.getTimestepSize());
-
-        byte[] result = config.build().toByteArray();
-        return Answer.ok(result);
+        return Answer.ok(config.build());
     }
 }

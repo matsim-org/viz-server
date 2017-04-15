@@ -3,6 +3,7 @@ package data;
 import org.matsim.core.utils.collections.QuadTree;
 import org.matsim.webvis.contracts.Contracts;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -10,7 +11,7 @@ public class MatsimDataProvider {
 
     private double snapshotPeriod;
     private QuadTree<Contracts.Link> networkData;
-    private Contracts.SimulationData simulationData;
+    private SimulationDataAsBytes simulationData;
 
     public MatsimDataProvider(String networkFilePath, String eventsFilePath, double snapshotPeriod) {
 
@@ -33,13 +34,9 @@ public class MatsimDataProvider {
         return result;
     }
 
-   /* public List<SnapshotContract> getSnapshot(QuadTree.Rect bounds, double startTime, int size) {
-        //This will be more sophisticated later
-        return simulationData.getSnapshots(startTime, size);
-    }*/
-
-    public Contracts.SimulationData getSnapshots() {
-        return simulationData;
+    public byte[] getSnapshots(QuadTree.Rect bounds, double fromTimestep, int numberOfTimesteps) throws IOException {
+        //This will respect the given bounds later
+        return simulationData.getSnapshots(fromTimestep, numberOfTimesteps);
     }
 
     public Contracts.Rect getBounds() {

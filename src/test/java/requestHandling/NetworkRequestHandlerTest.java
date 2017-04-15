@@ -1,10 +1,9 @@
 package requestHandling;
 
-import com.google.gson.Gson;
 import constants.Params;
-import contracts.LinkContract;
 import contracts.RectContract;
 import data.MatsimDataProvider;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import utils.TestUtils;
@@ -43,8 +42,11 @@ public class NetworkRequestHandlerTest {
         //assert
         assertEquals(expectedStatus, answer.getCode());
 
-        Gson gson = new Gson();
+        /*Gson gson = new Gson();
         LinkContract[] contracts = gson.fromJson(answer.getBody(), LinkContract[].class);
         assertEquals(expectedNumberOfLinks, contracts.length);
+        */
+        Assert.fail();
+
     }
 }

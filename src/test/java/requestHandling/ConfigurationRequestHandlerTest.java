@@ -1,11 +1,9 @@
 package requestHandling;
 
-import com.google.gson.Gson;
 import constants.Params;
 import contracts.ConfigurationRequest;
-import contracts.ConfigurationResponse;
-import contracts.RectContract;
 import data.MatsimDataProvider;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import utils.TestUtils;
@@ -40,13 +38,15 @@ public class ConfigurationRequestHandlerTest {
         //assert
         assertNotNull(answer);
         assertEquals(Params.STATUS_OK, answer.getCode());
-        RectContract bounds = new RectContract(left, right, top, bottom);
+        /*RectContract bounds = new RectContract(left, right, top, bottom);
         ConfigurationResponse response = new Gson().fromJson(answer.getBody(), ConfigurationResponse.class);
         assertEquals(id, response.getId());
         assertEquals(bounds.getLeft(), response.getBounds().getLeft());
         assertEquals(bounds.getRight(), response.getBounds().getRight());
         assertEquals(bounds.getTop(), response.getBounds().getTop());
         assertEquals(bounds.getBottom(), response.getBounds().getBottom());
+        */
+        Assert.fail();
     }
 
 }

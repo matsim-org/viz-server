@@ -1,34 +1,37 @@
 package requestHandling;
 
 
+import com.google.protobuf.MessageLite;
 import constants.Params;
 
 public class Answer {
 
     private int code;
-    private String body;
-    private byte[] content;
+    private MessageLite message;
+    private byte[] encodedMessage;
+    private String text;
 
-    public Answer(int code) {
-        this(code, "");
-    }
-
-    Answer(int code, String body) {
+    public Answer(int code, String text) {
         this.code = code;
-        this.body = body;
+        this.text = text;
     }
 
-    Answer(int code, byte[] content) {
+    Answer(int code, MessageLite message) {
         this.code = code;
-        this.content = content;
+        this.message = message;
     }
 
-    static Answer ok(String body) {
-        return new Answer(Params.STATUS_OK, body);
+    Answer(int code, byte[] delimitedMessage) {
+        this.code = code;
+        encodedMessage = delimitedMessage;
     }
 
-    static Answer ok(byte[] content) {
-        return new Answer(Params.STATUS_OK, content);
+    static Answer ok(byte[] delimitedMessage) {
+        return new Answer(Params.STATUS_OK, delimitedMessage);
+    }
+
+    static Answer ok(MessageLite message) {
+        return new Answer(Params.STATUS_OK, message);
     }
 
     int getCode() {
@@ -39,15 +42,36 @@ public class Answer {
         this.code = code;
     }
 
-    String getBody() {
-        return body;
+    public byte[] getEncodedMessage() {
+        if (!hasEncodedMessage()) {
+            throw new RuntimeException("no encoded message!");
+        }
+        return encodedMessage;
     }
 
-    public void setBody(String body) {
-        this.body = body;
+    public MessageLite getMessage() {
+        if (!hasMessage()) {
+            throw new RuntimeException("no message set");
+        }
+        return message;
     }
 
-    byte[] getContent() {
-        return content;
+    public String getText() {
+        if (!hastText()) {
+            throw new RuntimeException("no body set");
+        }
+        return text;
+    }
+
+    public boolean hasEncodedMessage() {
+        return (this.encodedMessage != null);
+    }
+
+    public boolean hasMessage() {
+        return (this.message != null);
+    }
+
+    public boolean hastText() {
+        return (this.text != null);
     }
 }

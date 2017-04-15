@@ -21,6 +21,6 @@ public class NetworkRequestHandler extends AbstractPostRequestHandler<RectContra
 
         Contracts.Network network = Contracts.Network.newBuilder()
                 .addAllLinks(links).build();
-        return Answer.ok(network.toByteArray());
+        return Answer.ok(network);
     }
 }

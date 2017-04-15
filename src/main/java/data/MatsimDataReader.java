@@ -72,8 +72,8 @@ public final class MatsimDataReader {
         return new QuadTree.Rect(minEasting, minNorthing, maxEasting, maxNorthing);
     }
 
-    public static Contracts.SimulationData readEventsFile(String eventsFilePath,
-                                                          String networkFilePath, double snapshotPeriod) {
+    public static SimulationDataAsBytes readEventsFile(String eventsFilePath,
+                                                       String networkFilePath, double snapshotPeriod) {
         Network network = loadNetworkFile(networkFilePath);
         Config config = ConfigUtils.createConfig();
         config.qsim().setSnapshotStyle(QSimConfigGroup.SnapshotStyle.queue);
@@ -85,7 +85,6 @@ public final class MatsimDataReader {
         MatsimEventsReader reader = new MatsimEventsReader(eventsManager);
         reader.readFile(eventsFilePath);
         generator.finish();
-        writer.finish();
         return writer.getSimulationData();
     }
 }

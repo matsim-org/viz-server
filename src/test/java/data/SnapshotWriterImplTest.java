@@ -1,14 +1,14 @@
 package data;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.matsim.api.core.v01.Id;
 import org.matsim.vis.snapshotwriters.AgentSnapshotInfo;
 import org.matsim.vis.snapshotwriters.AgentSnapshotInfoFactory;
 import org.matsim.vis.snapshotwriters.SnapshotLinkWidthCalculator;
-import org.matsim.webvis.contracts.Contracts;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 public class SnapshotWriterImplTest {
 
@@ -29,13 +29,14 @@ public class SnapshotWriterImplTest {
 
         //assert
         testObject.endSnapshot();
-        Contracts.SimulationData result = testObject.getSimulationData();
+       /* Contracts.SimulationData result = testObject.getSimulationData();
         assertNotNull(result);
         assertEquals(1, result.getSnapshotsCount());
         assertEquals(0, result.getFirstTimestep(), 0.1);
         assertEquals(0, result.getLastTimestep(), 0.1);
         Contracts.Snapshot snapshot = result.getSnapshots(0);
-        assertEquals(time, snapshot.getTime(), 0.1);
+        assertEquals(time, snapshot.getTime(), 0.1);*/
+        Assert.fail();
     }
 
     @Test
@@ -49,11 +50,12 @@ public class SnapshotWriterImplTest {
         testObject.endSnapshot();
 
         //assert
-        Contracts.SimulationData result = testObject.getSimulationData();
+        /*Contracts.SimulationData result = testObject.getSimulationData();
         assertNotNull(result);
         assertEquals(1, result.getSnapshotsCount());
         Contracts.Snapshot snapshot = result.getSnapshots(0);
-        assertEquals(timestep, snapshot.getTime(), 0.1);
+        assertEquals(timestep, snapshot.getTime(), 0.1);*/
+        Assert.fail();
     }
 
     @Test
@@ -73,7 +75,7 @@ public class SnapshotWriterImplTest {
 
         //assert
         testObject.endSnapshot();
-        Contracts.SimulationData result = testObject.getSimulationData();
+        /*Contracts.SimulationData result = testObject.getSimulationData();
         assertNotNull(result);
 
         Contracts.Snapshot snapshot = result.getSnapshots(0);
@@ -83,7 +85,8 @@ public class SnapshotWriterImplTest {
         Contracts.Position position = snapshot.getPositions(0);
         assertEquals(id, position.getAgentId());
         assertEquals(easting, position.getX(), 0.1);
-        assertEquals(northing, position.getY(), 0.1);
+        assertEquals(northing, position.getY(), 0.1);*/
+        Assert.fail();
     }
 
     @Test
