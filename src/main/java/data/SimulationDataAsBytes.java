@@ -1,7 +1,7 @@
 package data;
 
 
-import org.matsim.webvis.contracts.Contracts;
+import contracts.SnapshotContract;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -34,11 +34,15 @@ public class SimulationDataAsBytes {
      * @param snapshot - The snapshot to be added
      * @throws IOException
      */
-    public void addSnapshot(Contracts.Snapshot snapshot) throws IOException {
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+    public void addSnapshot(SnapshotContract snapshot) throws IOException {
+        /*ByteArrayOutputStream stream = new ByteArrayOutputStream();
         snapshot.writeDelimitedTo(stream);
         byte[] bytes = stream.toByteArray();
         snapshotsAsBytes.add(bytes);
+        setFirstOrLastTimestep(snapshot.getTime());
+        */
+        byte[] snapshotAsBytes = snapshot.toByteArray();
+        snapshotsAsBytes.add(snapshotAsBytes);
         setFirstOrLastTimestep(snapshot.getTime());
     }
 
