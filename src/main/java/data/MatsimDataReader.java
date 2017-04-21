@@ -1,6 +1,5 @@
 package data;
 
-import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
@@ -14,14 +13,13 @@ import org.matsim.core.events.algorithms.SnapshotGenerator;
 import org.matsim.core.network.MatsimNetworkReader;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.utils.collections.QuadTree;
-import org.matsim.webvis.contracts.Contracts;
 
 public final class MatsimDataReader {
 
     private MatsimDataReader() {
     }
 
-    static QuadTree<Contracts.Link> readNetworkFile(String path) {
+    static NetworkData readNetworkFile(String path) {
 
         Network network = loadNetworkFile(path);
         return initNetworkData(network);
@@ -34,23 +32,15 @@ public final class MatsimDataReader {
         return network;
     }
 
-    private static QuadTree<Contracts.Link> initNetworkData(Network network) {
+    private static NetworkData initNetworkData(Network network) {
 
         QuadTree.Rect bounds = calculateBoundingRectangle(network);
-        QuadTree<Contracts.Link> links = new QuadTree<>(bounds.minX, bounds.minY, bounds.maxX, bounds.maxY);
+        NetworkData networkData = new NetworkData(bounds);
 
         for (final Link link : network.getLinks().values()) {
-            Coord center = link.getCoord();
-
-            //put the links as protobuf inside the tree
-            Contracts.Link.Builder linkBuilder = Contracts.Link.newBuilder()
-                    .setFromX(link.getFromNode().getCoord().getX())
-                    .setFromY(link.getFromNode().getCoord().getY())
-                    .setToX(link.getToNode().getCoord().getX())
-                    .setToY(link.getToNode().getCoord().getY());
-            links.put(center.getX(), center.getY(), linkBuilder.build());
+            networkData.addLink(link);
         }
-        return links;
+        return networkData;
     }
 
     private static QuadTree.Rect calculateBoundingRectangle(Network network) {

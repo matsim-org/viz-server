@@ -1,11 +1,11 @@
 package requestHandling;
 
+import constants.Params;
 import contracts.RectContract;
 import data.MatsimDataProvider;
 import org.matsim.core.utils.collections.QuadTree;
-import org.matsim.webvis.contracts.Contracts;
 
-import java.util.Collection;
+import java.io.IOException;
 
 public class NetworkRequestHandler extends AbstractPostRequestHandler<RectContract> {
 
@@ -17,10 +17,18 @@ public class NetworkRequestHandler extends AbstractPostRequestHandler<RectContra
     @Override
     public Answer process(RectContract body) {
         QuadTree.Rect bounds = body.copyToMatsimRect();
-        Collection<Contracts.Link> links = dataProvider.getLinks(bounds);
 
-        Contracts.Network network = Contracts.Network.newBuilder()
-                .addAllLinks(links).build();
-        return Answer.ok(network);
+        byte[] bytes;
+
+        try {
+            bytes = dataProvider.getLinks(bounds);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return new Answer(Params.STATUS_INTERNAL_SERVER_ERROR, "Sorry");
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+            return new Answer(Params.STATUS_BADREQUEST, e.getMessage());
+        }
+        return Answer.ok(bytes);
     }
 }

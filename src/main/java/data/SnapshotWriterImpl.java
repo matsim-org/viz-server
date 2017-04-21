@@ -37,11 +37,6 @@ public class SnapshotWriterImpl implements SnapshotWriter {
 
     @Override
     public void addAgent(AgentSnapshotInfo agentSnapshotInfo) {
-        /*Contracts.Position position = Contracts.Position.newBuilder()
-                .setAgentId(agentSnapshotInfo.getId().toString())
-                .setX(agentSnapshotInfo.getEasting())
-                .setY(agentSnapshotInfo.getNorthing()).build();
-        currentSnapshotBuilder.addPositions(position);*/
         currentSnapshot.add(agentSnapshotInfo);
     }
 

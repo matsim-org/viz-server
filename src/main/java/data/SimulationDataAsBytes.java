@@ -35,28 +35,9 @@ public class SimulationDataAsBytes {
      * @throws IOException
      */
     public void addSnapshot(SnapshotContract snapshot) throws IOException {
-        /*ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        snapshot.writeDelimitedTo(stream);
-        byte[] bytes = stream.toByteArray();
-        snapshotsAsBytes.add(bytes);
-        setFirstOrLastTimestep(snapshot.getTime());
-        */
         byte[] snapshotAsBytes = snapshot.toByteArray();
         snapshotsAsBytes.add(snapshotAsBytes);
         setFirstOrLastTimestep(snapshot.getTime());
-    }
-
-    /**
-     * retreives a single encoded snapshot for the given timestep as byte[] the first byte delimits
-     * the byte length of the message
-     *
-     * @param timestep
-     * @return
-     */
-    public byte[] getSnapshot(int timestep) {
-
-        int startingIndex = getStartingIndex(timestep, 1);
-        return snapshotsAsBytes.get(startingIndex);
     }
 
     /**

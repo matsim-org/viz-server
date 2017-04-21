@@ -20,7 +20,7 @@ public class AgentRequestHandler extends AbstractPostRequestHandler<AgentRequest
         double startTime = body.getFromTimestep();
         int size = body.getSize();
 
-        byte[] bytes = new byte[0];
+        byte[] bytes;
         try {
             bytes = dataProvider.getSnapshots(bounds, startTime, size);
         } catch (IOException e) {
