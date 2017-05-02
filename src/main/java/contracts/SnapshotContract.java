@@ -17,10 +17,6 @@ public class SnapshotContract {
         this.time = roundFourDecimals(time);
     }
 
-    public List<AgentSnapshotContract> getAgentInformations() {
-        return positions;
-    }
-
     public double getTime() {
         return time;
     }

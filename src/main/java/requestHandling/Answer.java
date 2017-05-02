@@ -1,24 +1,17 @@
 package requestHandling;
 
 
-import com.google.protobuf.MessageLite;
 import constants.Params;
 
 public class Answer {
 
     private int code;
-    private MessageLite message;
     private byte[] encodedMessage;
     private String text;
 
     public Answer(int code, String text) {
         this.code = code;
         this.text = text;
-    }
-
-    Answer(int code, MessageLite message) {
-        this.code = code;
-        this.message = message;
     }
 
     Answer(int code, byte[] delimitedMessage) {
@@ -30,7 +23,7 @@ public class Answer {
         return new Answer(Params.STATUS_OK, delimitedMessage);
     }
 
-    static Answer ok(MessageLite message) {
+    static Answer ok(String message) {
         return new Answer(Params.STATUS_OK, message);
     }
 
@@ -49,13 +42,6 @@ public class Answer {
         return encodedMessage;
     }
 
-    public MessageLite getMessage() {
-        if (!hasMessage()) {
-            throw new RuntimeException("no message set");
-        }
-        return message;
-    }
-
     public String getText() {
         if (!hastText()) {
             throw new RuntimeException("no body set");
@@ -67,11 +53,11 @@ public class Answer {
         return (this.encodedMessage != null);
     }
 
-    public boolean hasMessage() {
-        return (this.message != null);
-    }
-
     public boolean hastText() {
         return (this.text != null);
+    }
+
+    public boolean isOk() {
+        return (this.code == Params.STATUS_OK);
     }
 }

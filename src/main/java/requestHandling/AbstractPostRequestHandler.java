@@ -2,7 +2,6 @@ package requestHandling;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-import com.google.protobuf.MessageLite;
 import constants.Params;
 import data.MatsimDataProvider;
 import spark.Request;
@@ -27,24 +26,26 @@ public abstract class AbstractPostRequestHandler<T> implements Route {
 
         Answer answer = processBody(request.body());
 
-        //send an error message if necessarys
-        if (answer.hastText()) {
+        //send an error message as response
+        if (!answer.isOk()) {
             response.body(answer.getText());
             response.status(answer.getCode());
             response.type(Params.RESPONSETYPE_TEXT);
             return answer.getCode();
         }
 
-        //prepare the response as bytes
+        //send a response as JSON
+        if (answer.hastText()) {
+            response.body(answer.getText());
+            response.status(answer.getCode());
+            response.type(Params.RESPONSETYPE_JSON);
+            return answer.getText();
+        }
+
+        //send raw bytes as response
         response.type(Params.RESPONSETYPE_OCTET_STREAM);
         response.raw().setContentType(Params.RESPONSETYPE_OCTET_STREAM);
-
-        if (answer.hasMessage()) {
-            MessageLite message = answer.getMessage();
-            message.writeDelimitedTo(response.raw().getOutputStream());
-        } else if (answer.hasEncodedMessage()) {
-            response.raw().getOutputStream().write(answer.getEncodedMessage());
-        }
+        response.raw().getOutputStream().write(answer.getEncodedMessage());
         response.raw().getOutputStream().close();
         return answer.getCode();
     }

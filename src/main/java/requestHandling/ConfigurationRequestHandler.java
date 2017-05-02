@@ -1,9 +1,10 @@
 package requestHandling;
 
+import com.google.gson.Gson;
 import contracts.ConfigurationRequest;
+import contracts.ConfigurationResponse;
+import contracts.RectContract;
 import data.MatsimDataProvider;
-
-import static org.matsim.webvis.contracts.Contracts.Configuration;
 
 public class ConfigurationRequestHandler extends AbstractPostRequestHandler<ConfigurationRequest> {
 
@@ -14,12 +15,13 @@ public class ConfigurationRequestHandler extends AbstractPostRequestHandler<Conf
     @Override
     public Answer process(ConfigurationRequest body) {
 
-        Configuration.Builder config = Configuration.newBuilder();
-        config.setId("some id")
-                .setBounds(dataProvider.getBounds())
-                .setFirstTimestep(dataProvider.getFirstTimestep())
-                .setLastTimestep(dataProvider.getLastTimestep())
-                .setTimestepSize(dataProvider.getTimestepSize());
-        return Answer.ok(config.build());
+        RectContract bounds = dataProvider.getBounds();
+        double timestepSize = dataProvider.getTimestepSize();
+        double firstTimestep = dataProvider.getFirstTimestep();
+        double lastTimestep = dataProvider.getLastTimestep();
+        ConfigurationResponse response = new ConfigurationResponse(body.getId(), bounds, firstTimestep, lastTimestep,
+                timestepSize);
+        String result = new Gson().toJson(response);
+        return Answer.ok(result);
     }
 }

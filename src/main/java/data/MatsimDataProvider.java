@@ -1,7 +1,7 @@
 package data;
 
+import contracts.RectContract;
 import org.matsim.core.utils.collections.QuadTree;
-import org.matsim.webvis.contracts.Contracts;
 
 import java.io.IOException;
 
@@ -35,7 +35,7 @@ public class MatsimDataProvider {
         return simulationData.getSnapshots(fromTimestep, numberOfTimesteps);
     }
 
-    public Contracts.Rect getBounds() {
+    public RectContract getBounds() {
         return networkData.getBounds();
     }
 

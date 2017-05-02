@@ -1,8 +1,8 @@
 package data;
 
+import contracts.RectContract;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.core.utils.collections.QuadTree;
-import org.matsim.webvis.contracts.Contracts;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -45,13 +45,13 @@ public class NetworkData {
         return stream.toByteArray();
     }
 
-    public Contracts.Rect getBounds() {
-        Contracts.Rect bounds = Contracts.Rect.newBuilder()
-                .setLeft(networkAsBytes.getMinEasting())
-                .setRight(networkAsBytes.getMaxEasting())
-                .setTop(networkAsBytes.getMaxNorthing())
-                .setBottom(networkAsBytes.getMinNorthing())
-                .build();
-        return bounds;
+    public RectContract getBounds() {
+
+        return new RectContract(
+                networkAsBytes.getMinEasting(),
+                networkAsBytes.getMaxEasting(),
+                networkAsBytes.getMinNorthing(),
+                networkAsBytes.getMaxNorthing()
+        );
     }
 }
