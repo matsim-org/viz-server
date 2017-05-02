@@ -31,7 +31,7 @@ public abstract class AbstractPostRequestHandler<T> implements Route {
             response.body(answer.getText());
             response.status(answer.getCode());
             response.type(Params.RESPONSETYPE_TEXT);
-            return answer.getCode();
+            return answer.getText();
         }
 
         //send a response as JSON
@@ -39,6 +39,7 @@ public abstract class AbstractPostRequestHandler<T> implements Route {
             response.body(answer.getText());
             response.status(answer.getCode());
             response.type(Params.RESPONSETYPE_JSON);
+            response.header("Content-Encoding", "gzip");
             return answer.getText();
         }
 
