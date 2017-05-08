@@ -14,13 +14,13 @@ public class Answer {
         this.text = text;
     }
 
-    Answer(int code, byte[] delimitedMessage) {
+    Answer(int code, byte[] encodedMessage) {
         this.code = code;
-        encodedMessage = delimitedMessage;
+        this.encodedMessage = encodedMessage;
     }
 
-    static Answer ok(byte[] delimitedMessage) {
-        return new Answer(Params.STATUS_OK, delimitedMessage);
+    static Answer ok(byte[] encodedMessage) {
+        return new Answer(Params.STATUS_OK, encodedMessage);
     }
 
     static Answer ok(String message) {
@@ -29,10 +29,6 @@ public class Answer {
 
     int getCode() {
         return code;
-    }
-
-    public void setCode(int code) {
-        this.code = code;
     }
 
     public byte[] getEncodedMessage() {

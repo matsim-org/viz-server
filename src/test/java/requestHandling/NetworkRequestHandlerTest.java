@@ -3,15 +3,12 @@ package requestHandling;
 import constants.Params;
 import contracts.RectContract;
 import data.MatsimDataProvider;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import utils.TestUtils;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class NetworkRequestHandlerTest {
 
@@ -27,26 +24,14 @@ public class NetworkRequestHandlerTest {
     public void processTest() {
 
         //arrange
-        Map<String, String[]> parameters = new HashMap<>();
-        parameters.put(Params.BOUNDINGBOX_BOTTOM, new String[]{"0"});
-        parameters.put(Params.BOUNDINGBOX_TOP, new String[]{"-1000"});
-        parameters.put(Params.BOUNDINGBOX_LEFT, new String[]{"-1000"});
-        parameters.put(Params.BOUNDINGBOX_RIGHT, new String[]{"0"});
-        RectContract bounds = new RectContract(-1000, 0, -1000, 0);
-        final int expectedStatus = Params.STATUS_OK;
-        final int expectedNumberOfLinks = 4;
+        RectContract request = new RectContract(-1000, 1000, -1000, 1000);
 
         //act
-        Answer answer = testObject.process(bounds);
+        Answer answer = testObject.process(request);
 
         //assert
-        assertEquals(expectedStatus, answer.getCode());
-
-        /*Gson gson = new Gson();
-        LinkContract[] contracts = gson.fromJson(answer.getBody(), LinkContract[].class);
-        assertEquals(expectedNumberOfLinks, contracts.length);
-        */
-        Assert.fail();
-
+        assertEquals(Params.STATUS_OK, answer.getCode());
+        assertTrue(answer.hasEncodedMessage());
+        assertTrue(answer.getEncodedMessage().length > 0);
     }
 }

@@ -45,6 +45,13 @@ public class SnapshotContract {
         return buffer.array();
     }
 
+    /**
+     * This method is for unittesting
+     */
+    public List<AgentSnapshotContract> getAgentContracts() {
+        return this.positions;
+    }
+
     private double roundFourDecimals(double value) {
         return (double) Math.round(value * 10000) / 10000;
     }

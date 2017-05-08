@@ -6,6 +6,12 @@ public class AgentRequest {
     private int size;
     private RectContract bounds;
 
+    public AgentRequest(RectContract bounds, double fromTimestep, int size) {
+        this.bounds = bounds;
+        this.fromTimestep = fromTimestep;
+        this.size = size;
+    }
+
     public double getFromTimestep() {
         return fromTimestep;
     }
@@ -17,6 +23,4 @@ public class AgentRequest {
     public RectContract getBounds() {
         return bounds;
     }
-
-
 }

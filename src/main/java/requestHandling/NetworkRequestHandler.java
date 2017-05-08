@@ -25,9 +25,6 @@ public class NetworkRequestHandler extends AbstractPostRequestHandler<RectContra
         } catch (IOException e) {
             e.printStackTrace();
             return new Answer(Params.STATUS_INTERNAL_SERVER_ERROR, "Sorry");
-        } catch (RuntimeException e) {
-            e.printStackTrace();
-            return new Answer(Params.STATUS_BADREQUEST, e.getMessage());
         }
         return Answer.ok(bytes);
     }

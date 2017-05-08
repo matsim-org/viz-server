@@ -1,12 +1,15 @@
 package data;
 
-import org.junit.Assert;
+import contracts.RectContract;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.matsim.core.utils.collections.QuadTree;
 import utils.TestUtils;
 
-import static org.junit.Assert.fail;
+import java.io.IOException;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class MatsimDataProviderTest {
 
@@ -18,21 +21,21 @@ public class MatsimDataProviderTest {
     }
 
     @Test
-    public void getLinksTest() {
+    public void getLinksTest() throws IOException {
 
         //arrange
         QuadTree.Rect bounds = new QuadTree.Rect(-500, -500, 500, 500);
 
         //act
-        /*Collection<Link> result = testObject.getLinks(bounds);
+        byte[] result = testObject.getLinks(bounds);
 
         //assert
-        assertEquals(5, result.size());*/
-        fail();
+        assertNotNull(result);
+        assertEquals(80, result.length); //this is very deterministic...
     }
 
     @Test
-    public void getSnapshotTest() {
+    public void getSnapshotTest() throws IOException {
 
         //arrange
         QuadTree.Rect bounds = new QuadTree.Rect(-500, -500, 500, 500);
@@ -40,14 +43,11 @@ public class MatsimDataProviderTest {
         int size = 2;
 
         //act
-       /* List<SnapshotContract> result = testObject.getSnapshot(bounds, startTime, size);
+        byte[] result = testObject.getSnapshots(bounds, startTime, size);
 
         //assert
-        assertEquals(size, result.size());
-        assertEquals(startTime, result.get(0).getTime(), 0.0001);
-        assertEquals(startTime + 1, result.get(1).getTime(), 0.0001);
-        */
-
+        assertNotNull(result);
+        assertEquals(32, result.length);
     }
 
     @Test
@@ -56,11 +56,10 @@ public class MatsimDataProviderTest {
         //arrange
         final double left = -2500;
         final double right = 1001;
-        final double top = 401;
-        final double bottom = -1000;
+        final double top = -1000;
+        final double bottom = 401;
 
         //act
-        /*
         RectContract bounds = testObject.getBounds();
 
         //assert
@@ -68,7 +67,7 @@ public class MatsimDataProviderTest {
         assertEquals(right, bounds.getRight(), 0.1);
         assertEquals(top, bounds.getTop(), 0.1);
         assertEquals(bottom, bounds.getBottom(), 0.1);
-        */
-        Assert.fail();
+
+
     }
 }

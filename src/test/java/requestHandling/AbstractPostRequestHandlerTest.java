@@ -1,54 +1,52 @@
 package requestHandling;
 
 
+import com.google.gson.Gson;
 import constants.Params;
 import contracts.RectContract;
 import data.MatsimDataProvider;
-import org.junit.Assert;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import utils.TestUtils;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 public class AbstractPostRequestHandlerTest {
 
-    private AbstractPostRequestHandlerTestable testObject;
+    private static AbstractPostRequestHandlerTestable testObject;
 
-    @Before
-    public void setUp() {
+    @BeforeClass
+    public static void setUp() {
+
         testObject = new AbstractPostRequestHandlerTestable();
     }
 
     @Test
     public void processBodyTest() {
         //arrange
-        String bodyText = "{\"left\":-1000,\"right\":0,\"top\":-1000,\"bottom\":0}";
+        String bodyText = "{\"left\":-1000.0,\"right\":0.0,\"top\":-1000.0,\"bottom\":0.0}";
 
         //act
         Answer answer = testObject.processBodyImpl(bodyText);
 
         //assert
-        /*assertEquals(Params.STATUS_OK, answer.getCode());
-        LinkContract[] contracts = new Gson().fromJson(answer.getBody(), LinkContract[].class);
-        assertEquals(4, contracts.length);*/
-        Assert.fail();
+        assertEquals(Params.STATUS_OK, answer.getCode());
+        assertEquals(bodyText, answer.getText());
     }
 
     @Test
-    public void processBodyTest_wrongJSONObject_zeroLinks() {
+    public void processBodyTest_wrongJSONObject() {
         //arrange
-        String bodyText = "{\"wrong\":-1000,\"json\":0,\"object\":-1000, \"body\": 0}";
+        String bodyText = "{\"wrong\":-1000.0,\"parameters\":0.0,\"in\":-1000.0,\"request\":0.0}";
+        String expected = "{\"left\":0.0,\"right\":0.0,\"top\":0.0,\"bottom\":0.0}";
 
         //act
         Answer answer = testObject.processBodyImpl(bodyText);
 
         //assert
-        /*assertEquals(Params.STATUS_OK, answer.getCode());
-        LinkContract[] contracts = new Gson().fromJson(answer.getBody(), LinkContract[].class);
-        assertEquals(0, contracts.length);
-        */
-        Assert.fail();
+        assertEquals(Params.STATUS_OK, answer.getCode());
+        assertTrue(answer.hastText());
+        assertEquals(expected, answer.getText());
     }
 
     @Test
@@ -62,12 +60,14 @@ public class AbstractPostRequestHandlerTest {
 
         //assert
         assertEquals(Params.STATUS_BADREQUEST, answer.getCode());
+        assertTrue(answer.hastText());
+        assertNotNull(answer.getText());
     }
 
-    private class AbstractPostRequestHandlerTestable extends NetworkRequestHandler {
+    private static class AbstractPostRequestHandlerTestable extends AbstractPostRequestHandler<RectContract> {
 
         public AbstractPostRequestHandlerTestable() {
-            super(new MatsimDataProvider(TestUtils.NETWORK_FILE, TestUtils.EVENTS_FILE, 1));
+            super(RectContract.class, new MatsimDataProvider(TestUtils.NETWORK_FILE, TestUtils.EVENTS_FILE, 1));
         }
 
         public Answer processBodyImpl(String body) {
@@ -76,7 +76,7 @@ public class AbstractPostRequestHandlerTest {
 
         @Override
         public Answer process(RectContract body) {
-            return super.process(body);
+            return Answer.ok(new Gson().toJson(body));
         }
     }
 }

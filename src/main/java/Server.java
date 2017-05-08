@@ -10,7 +10,6 @@ import static spark.Spark.post;
 
 public class Server {
 
-
     private static MatsimDataProvider data;
 
     private static String networkPath = "network.xml";

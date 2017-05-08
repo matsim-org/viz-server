@@ -27,9 +27,8 @@ public class SimulationDataAsBytes {
     }
 
     /**
-     * Adds a Snapshot message to the simulation data the message is stored as
-     * delimited byte[] see
-     * https://developers.google.com/protocol-buffers/docs/reference/java/com/google/protobuf/AbstractMessageLite
+     * Adds a snapshot after requesting its data as ByteArray, also adjusts the first and last
+     * timestep if necessary
      *
      * @param snapshot - The snapshot to be added
      * @throws IOException
@@ -41,13 +40,12 @@ public class SimulationDataAsBytes {
     }
 
     /**
-     * Retreives encoded snapshots as byte[] before each message one byte delimits the
-     * length of the following message
+     * Retreives encoded snapshots as byte[] each Snapshot consists of
+     *  timestep, sizeOfPositions, [x,y, x,y, x,y, ...] all encoded as Float32
      *
      * @param fromTimestep      - first Timestep included into the result
      * @param numberOfTimesteps - retreived from simulation data
-     * @return encoded snapshots seperated by one byte delimiting the length of each
-     * individual message
+     * @return encoded snapshots
      * @throws IOException
      */
     public byte[] getSnapshots(double fromTimestep, int numberOfTimesteps) throws IOException {

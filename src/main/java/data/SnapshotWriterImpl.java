@@ -8,7 +8,6 @@ import java.io.IOException;
 
 public class SnapshotWriterImpl implements SnapshotWriter {
 
-    // private Contracts.Snapshot.Builder currentSnapshotBuilder;
     private SnapshotContract currentSnapshot;
     private SimulationDataAsBytes simData;
 
@@ -18,15 +17,11 @@ public class SnapshotWriterImpl implements SnapshotWriter {
 
     @Override
     public void beginSnapshot(double v) {
-
-        //currentSnapshotBuilder = Contracts.Snapshot.newBuilder();
-        //currentSnapshotBuilder.setTime(v);
         currentSnapshot = new SnapshotContract(v);
     }
 
     @Override
     public void endSnapshot() {
-        //Contracts.Snapshot snapshot = currentSnapshotBuilder.build();
         try {
             simData.addSnapshot(currentSnapshot);
         } catch (IOException e) {
@@ -37,15 +32,25 @@ public class SnapshotWriterImpl implements SnapshotWriter {
 
     @Override
     public void addAgent(AgentSnapshotInfo agentSnapshotInfo) {
+
         currentSnapshot.add(agentSnapshotInfo);
     }
 
     @Override
     public void finish() {
+
         currentSnapshot = null;
     }
 
     public SimulationDataAsBytes getSimulationData() {
+
         return simData;
+    }
+
+    /**
+     * This is for unittesting
+     */
+    SnapshotContract getCurrentSnapshot() {
+        return currentSnapshot;
     }
 }
