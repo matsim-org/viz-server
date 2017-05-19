@@ -11,7 +11,7 @@ public class SnapshotWriterImpl implements SnapshotWriter {
     private SnapshotContract currentSnapshot;
     private SimulationDataAsBytes simData;
 
-    public SnapshotWriterImpl(double timestepSize) {
+    SnapshotWriterImpl(double timestepSize) {
         simData = new SimulationDataAsBytes(timestepSize);
     }
 
@@ -33,7 +33,9 @@ public class SnapshotWriterImpl implements SnapshotWriter {
     @Override
     public void addAgent(AgentSnapshotInfo agentSnapshotInfo) {
 
-        currentSnapshot.add(agentSnapshotInfo);
+        if (agentSnapshotInfo.getAgentState() != AgentSnapshotInfo.AgentState.PERSON_AT_ACTIVITY) {
+            currentSnapshot.add(agentSnapshotInfo);
+        }
     }
 
     @Override
@@ -42,8 +44,7 @@ public class SnapshotWriterImpl implements SnapshotWriter {
         currentSnapshot = null;
     }
 
-    public SimulationDataAsBytes getSimulationData() {
-
+    SimulationDataAsBytes getSimulationData() {
         return simData;
     }
 

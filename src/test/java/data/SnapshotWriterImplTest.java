@@ -68,6 +68,24 @@ public class SnapshotWriterImplTest {
     }
 
     @Test
+    public void addAgentTest_StateIsAtActivity_NotAdded() {
+
+        //Arrange
+        AgentSnapshotInfo info = TestUtils.createAgentSnapshotInfo(1, 12, 13);
+        info.setAgentState(AgentSnapshotInfo.AgentState.PERSON_AT_ACTIVITY);
+        final double timestep = 3;
+        testObject.beginSnapshot(timestep);
+
+        //act
+        testObject.addAgent(info);
+
+        //assert
+        SnapshotContract current = testObject.getCurrentSnapshot();
+        assertEquals(timestep, current.getTime(), 0.001);
+        assertEquals(0, current.getAgentContracts().size());
+    }
+
+    @Test
     public void finishTest() {
         //nothing to test, since nothing is done
         assertTrue(true);
