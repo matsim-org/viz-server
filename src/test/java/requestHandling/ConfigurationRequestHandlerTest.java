@@ -19,8 +19,7 @@ public class ConfigurationRequestHandlerTest {
 
     @BeforeClass
     public static void setUp() {
-        MatsimDataProvider data = new MatsimDataProvider(TestUtils.NETWORK_FILE, TestUtils.EVENTS_FILE, 1);
-        testObject = new ConfigurationRequestHandler(data);
+        testObject = new ConfigurationRequestHandler(TestUtils.getDataProvider());
     }
 
     @Test

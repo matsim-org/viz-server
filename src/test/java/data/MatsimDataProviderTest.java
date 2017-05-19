@@ -17,7 +17,7 @@ public class MatsimDataProviderTest {
 
     @BeforeClass
     public static void setUp() {
-        testObject = new MatsimDataProvider(TestUtils.NETWORK_FILE, TestUtils.EVENTS_FILE, 1);
+        testObject = TestUtils.getDataProvider();
     }
 
     @Test
@@ -39,7 +39,7 @@ public class MatsimDataProviderTest {
 
         //arrange
         QuadTree.Rect bounds = new QuadTree.Rect(-500, -500, 500, 500);
-        double startTime = 25202;
+        double startTime = testObject.getFirstTimestep();
         int size = 2;
 
         //act
@@ -47,7 +47,7 @@ public class MatsimDataProviderTest {
 
         //assert
         assertNotNull(result);
-        assertEquals(32, result.length);
+        assertEquals(48, result.length);
     }
 
     @Test

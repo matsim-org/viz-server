@@ -27,7 +27,7 @@ public class MatsimDataReaderTest {
         final double snapshotPeriod = 0.0167;
 
         //act
-        SimulationDataAsBytes data = MatsimDataReader.readEventsFile(TestUtils.EVENTS_FILE, TestUtils.NETWORK_FILE, snapshotPeriod);
+        SnapshotData data = MatsimDataReader.readEventsFile(TestUtils.EVENTS_FILE, TestUtils.NETWORK_FILE, snapshotPeriod);
 
         //assert
         assertNotNull(data);

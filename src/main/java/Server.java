@@ -68,7 +68,7 @@ public class Server {
 
     private static void initializeData() {
 
-        data = new MatsimDataProvider(networkPath, eventsPath, snapshotPeriod);
+        data = new MatsimDataProvider(networkPath, eventsPath, "", snapshotPeriod);
     }
 
     private static void initializeRoutes() {

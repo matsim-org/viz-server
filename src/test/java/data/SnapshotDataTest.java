@@ -4,6 +4,7 @@ import contracts.AgentSnapshotContract;
 import contracts.SnapshotContract;
 import org.junit.Before;
 import org.junit.Test;
+import org.matsim.api.core.v01.Id;
 import org.matsim.vis.snapshotwriters.AgentSnapshotInfo;
 import utils.TestUtils;
 
@@ -16,13 +17,13 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-public class SimulationDataAsBytesTest {
+public class SnapshotDataTest {
 
-    private SimulationDataAsBytes testObject;
+    private SnapshotData testObject;
 
     @Before
     public void setUp() {
-        testObject = new SimulationDataAsBytes(2);
+        testObject = new SnapshotData(2);
     }
 
     @Test
@@ -46,8 +47,11 @@ public class SimulationDataAsBytesTest {
 
         //arrange
         List<SnapshotContract> contracts = new ArrayList<>();
+        List<List<AgentSnapshotInfo>> snapshotInfos = new ArrayList<>();
+
         for (int time = 100; time < 300; time += 2) {
             List<AgentSnapshotInfo> infos = TestUtils.createAgentSnapshotInfos(100);
+            snapshotInfos.add(infos);
             SnapshotContract contract = new SnapshotContract(time);
             for (AgentSnapshotInfo info : infos) {
                 contract.add(info);
@@ -70,18 +74,54 @@ public class SimulationDataAsBytesTest {
 
             float time = buffer.getFloat();
             float size = buffer.getFloat();
+
             SnapshotContract expectedContract = contracts.get(contractsIndex);
             assertEquals((float) expectedContract.getTime(), time, 0.001);
-            assertEquals((float) expectedContract.getAgentContracts().size() * 2, size, 0.001);
+
+            List<AgentSnapshotInfo> expectedInfos = snapshotInfos.get(contractsIndex);
+            assertEquals((float) expectedInfos.size() * 2, size, 0.001);
 
             for (int i = 0; i < size / 2; i++) {
                 float x = buffer.getFloat();
                 float y = buffer.getFloat();
-                AgentSnapshotContract position = expectedContract.getAgentContracts().get(i);
-                assertEquals((float) position.getX(), x, 0.001);
-                assertEquals((float) position.getY(), y, 0.001);
+                AgentSnapshotInfo info = expectedInfos.get(i);
+                assertEquals((float) info.getEasting(), x, 0.001);
+                assertEquals((float) info.getNorthing(), y, 0.001);
             }
             contractsIndex++;
+        }
+    }
+
+    @Test
+    public void getId() throws IOException {
+
+        //arrange
+        List<SnapshotContract> contracts = new ArrayList<>();
+        List<List<AgentSnapshotInfo>> snapshotInfos = new ArrayList<>();
+
+        for (int time = 100; time < 300; time += 2) {
+            List<AgentSnapshotInfo> infos = TestUtils.createAgentSnapshotInfos(100);
+            snapshotInfos.add(infos);
+            SnapshotContract contract = new SnapshotContract(time);
+            for (AgentSnapshotInfo info : infos) {
+                contract.add(info);
+            }
+            testObject.addSnapshot(contract);
+            contracts.add(contract);
+        }
+
+        //act & assert
+        for(int i = 0; i < contracts.size(); i++) {
+
+            SnapshotContract contract = contracts.get(i);
+            List<AgentSnapshotInfo> infos = snapshotInfos.get(i);
+
+            for(int p = 0; p < infos.size(); p++) {
+
+                AgentSnapshotInfo info = infos.get(p);
+                Id id = testObject.getId(contract.getTime(), p);
+                assertEquals(info.getId(), id);
+            }
         }
     }
 }
