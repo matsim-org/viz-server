@@ -1,6 +1,7 @@
 package data;
 
 import contracts.RectContract;
+import contracts.geoJSON.FeatureCollection;
 import org.matsim.api.core.v01.Id;
 import org.matsim.core.utils.collections.QuadTree;
 
@@ -16,21 +17,13 @@ public class MatsimDataProvider {
     public MatsimDataProvider(String networkFilePath, String eventsFilePath, String populationFilePath, double snapshotPeriod) {
 
         this.snapshotPeriod = snapshotPeriod;
-        initializeNetwork(networkFilePath);
-        initializeAgents(eventsFilePath, networkFilePath, snapshotPeriod);
-        initializePopulation(populationFilePath, networkFilePath);
-    }
 
-    private void initializeNetwork(String filePath) {
-        networkData = MatsimDataReader.readNetworkFile(filePath);
-    }
+        MatsimDataReader reader = new MatsimDataReader(networkFilePath, eventsFilePath, populationFilePath);
+        reader.readAllFiles(snapshotPeriod);
 
-    private void initializeAgents(String eventsFilePath, String networkFilePath, double snapshotPeriod) {
-        simulationData = MatsimDataReader.readEventsFile(eventsFilePath, networkFilePath, snapshotPeriod);
-    }
-
-    private void initializePopulation(String populationFilePath, String networkFilePath) {
-        populationData = MatsimDataReader.readPopulationFile(populationFilePath, networkFilePath);
+        networkData = reader.getNetworkData();
+        simulationData = reader.getSnapshotData();
+        populationData = reader.getPopulationData();
     }
 
     public byte[] getLinks(QuadTree.Rect bounds) throws IOException {
@@ -42,10 +35,9 @@ public class MatsimDataProvider {
         return simulationData.getSnapshots(fromTimestep, numberOfTimesteps);
     }
 
-    public Object getPlan(double timestep, int index) {
+    public FeatureCollection getPlan(double timestep, int index) {
         Id id = simulationData.getId(timestep, index);
-        populationData.getPlan(id);
-        return null;
+        return populationData.getSelectedPlan(id);
     }
 
     public RectContract getBounds() {

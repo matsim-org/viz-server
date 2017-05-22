@@ -4,6 +4,7 @@ import data.MatsimDataProvider;
 import requestHandling.AgentRequestHandler;
 import requestHandling.ConfigurationRequestHandler;
 import requestHandling.NetworkRequestHandler;
+import requestHandling.PlanRequestHandler;
 
 import static spark.Spark.port;
 import static spark.Spark.post;
@@ -81,10 +82,6 @@ public class Server {
         post(Path.CONFIGURATION, new ConfigurationRequestHandler(data));
         post(Path.NETWORK, new NetworkRequestHandler(data));
         post(Path.AGENTS, new AgentRequestHandler(data));
-
-       /* after((request, response) -> {
-            response.header("Content-Encoding", "gzip");
-        });
-        */
+        post(Path.PLAN, new PlanRequestHandler(data));
     }
 }

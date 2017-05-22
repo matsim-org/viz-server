@@ -3,36 +3,23 @@ package data;
 import org.junit.Test;
 import utils.TestUtils;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 public class MatsimDataReaderTest {
 
     @Test
-    public void readNetworkTest() {
-
-        //act
-        NetworkData data = MatsimDataReader.readNetworkFile(TestUtils.NETWORK_FILE);
-
-        //assert
-        assertNotNull(data);
-    }
-
-    @Test
-    public void readEventsTest() {
+    public void read() {
 
         //arrange
-        final double firstTimestep = 25200.0161;
-        final double lastTimestep = 25475.98;
-        final double snapshotPeriod = 0.0167;
+        MatsimDataReader reader =
+                new MatsimDataReader(TestUtils.NETWORK_FILE, TestUtils.EVENTS_FILE, TestUtils.POPULATION_FILE);
 
         //act
-        SnapshotData data = MatsimDataReader.readEventsFile(TestUtils.EVENTS_FILE, TestUtils.NETWORK_FILE, snapshotPeriod);
+        reader.readAllFiles(2);
 
         //assert
-        assertNotNull(data);
-
-        assertEquals(firstTimestep, data.getFirstTimestep(), 0.1);
-        assertEquals(lastTimestep, data.getLastTimestep(), 0.1);
+        assertNotNull(reader.getNetworkData());
+        assertNotNull(reader.getSnapshotData());
+        assertNotNull(reader.getPopulationData());
     }
 }

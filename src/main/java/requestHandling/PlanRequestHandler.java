@@ -1,9 +1,10 @@
 package requestHandling;
 
+import com.google.gson.Gson;
 import constants.Params;
 import contracts.PlanRequest;
+import contracts.geoJSON.FeatureCollection;
 import data.MatsimDataProvider;
-import data.MatsimDataReader;
 
 public class PlanRequestHandler extends AbstractPostRequestHandler<PlanRequest>{
 
@@ -14,7 +15,13 @@ public class PlanRequestHandler extends AbstractPostRequestHandler<PlanRequest>{
     @Override
     public Answer process(PlanRequest body) {
 
-        Object result = dataProvider.getPlan(body.getTimestep(), body.getIndex());
-        return new Answer(Params.STATUS_INTERNAL_SERVER_ERROR, "not yet implemented");
+        FeatureCollection result;
+        try {
+            result = dataProvider.getPlan(body.getTimestep(), body.getIndex());
+        } catch (RuntimeException e) {
+            return new Answer(Params.STATUS_BADREQUEST, e.getMessage());
+        }
+        String json = new Gson().toJson(result);
+        return Answer.ok(json);
     }
 }

@@ -1,6 +1,5 @@
 package data;
 
-import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
@@ -16,33 +15,56 @@ import org.matsim.core.network.MatsimNetworkReader;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.population.MatsimPopulationReader;
 import org.matsim.core.population.PopulationReader;
+import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.collections.QuadTree;
 
-public final class MatsimDataReader {
+final class MatsimDataReader {
 
-    private static Network cachedNetwork;
+    private String networkFilePath;
+    private String eventsFilePath;
+    private String populationFilePath;
 
-    private MatsimDataReader() {
+    private Network rawNetwork;
+
+    private NetworkData networkData;
+    private SnapshotData snapshotData;
+    private PopulationData populationData;
+
+    MatsimDataReader(String networkFilePath, String eventsFilePath, String populationFilePath) {
+        this.networkFilePath = networkFilePath;
+        this.eventsFilePath = eventsFilePath;
+        this.populationFilePath = populationFilePath;
     }
 
-    static NetworkData readNetworkFile(String path) {
-
-        Network network = loadNetworkFile(path);
-        return initNetworkData(network);
+    NetworkData getNetworkData() {
+        return networkData;
     }
 
-    private static Network loadNetworkFile(String path) {
-
-        if(cachedNetwork == null) {
-            cachedNetwork = NetworkUtils.createNetwork();
-            MatsimNetworkReader reader = new MatsimNetworkReader(cachedNetwork);
-            reader.readFile(path);
-        }
-        return cachedNetwork;
+    SnapshotData getSnapshotData() {
+        return snapshotData;
     }
 
-    private static NetworkData initNetworkData(Network network) {
+    PopulationData getPopulationData() {
+        return populationData;
+    }
+
+    void setRawNetwork(Network network) {
+        this.rawNetwork = network;
+    }
+
+    void readAllFiles(double snapshotPeriod) {
+        initNetworkData();
+        initSnapshotData(snapshotPeriod);
+        initPopulationData();
+    }
+
+    private void initNetworkData() {
+        rawNetwork = readNetworkFile();
+        networkData = initNetworkData(rawNetwork);
+    }
+
+    private NetworkData initNetworkData(Network network) {
 
         QuadTree.Rect bounds = calculateBoundingRectangle(network);
         NetworkData networkData = new NetworkData(bounds);
@@ -53,7 +75,23 @@ public final class MatsimDataReader {
         return networkData;
     }
 
-    private static QuadTree.Rect calculateBoundingRectangle(Network network) {
+    private void initSnapshotData(double snapshotPeriod) {
+        snapshotData = readEventsFile(snapshotPeriod);
+    }
+
+    private void initPopulationData() {
+        Population pop = readPopulationFile();
+        populationData = new PopulationData(pop, rawNetwork);
+    }
+
+    Network readNetworkFile() {
+        Network net = NetworkUtils.createNetwork();
+        MatsimNetworkReader reader = new MatsimNetworkReader(net);
+        reader.readFile(networkFilePath);
+        return net;
+    }
+
+    private QuadTree.Rect calculateBoundingRectangle(Network network) {
         double minEasting = Double.POSITIVE_INFINITY;
         double maxEasting = Double.NEGATIVE_INFINITY;
         double minNorthing = Double.POSITIVE_INFINITY;
@@ -72,12 +110,11 @@ public final class MatsimDataReader {
         return new QuadTree.Rect(minEasting, minNorthing, maxEasting, maxNorthing);
     }
 
-    public static SnapshotData readEventsFile(String eventsFilePath,
-                                              String networkFilePath, double snapshotPeriod) {
-        Network network = loadNetworkFile(networkFilePath);
+    SnapshotData readEventsFile(double snapshotPeriod) {
+
         Config config = ConfigUtils.createConfig();
         config.qsim().setSnapshotStyle(QSimConfigGroup.SnapshotStyle.queue);
-        SnapshotGenerator generator = new SnapshotGenerator(network, snapshotPeriod, config.qsim());
+        SnapshotGenerator generator = new SnapshotGenerator(this.rawNetwork, snapshotPeriod, config.qsim());
         SnapshotWriterImpl writer = new SnapshotWriterImpl(snapshotPeriod);
         generator.addSnapshotWriter(writer);
         EventsManager eventsManager = EventsUtils.createEventsManager();
@@ -88,12 +125,12 @@ public final class MatsimDataReader {
         return writer.getSimulationData();
     }
 
-    public static PopulationData readPopulationFile(String populationFilePath, String networkFilePath) {
-        Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
-        Network network = loadNetworkFile(networkFilePath);
+    Population readPopulationFile() {
+
+        MutableScenario scenario = (MutableScenario) ScenarioUtils.createScenario(ConfigUtils.createConfig());
+        scenario.setNetwork(this.rawNetwork);
         PopulationReader reader = new MatsimPopulationReader(scenario);
         reader.readFile(populationFilePath);
-        Population population = scenario.getPopulation();
-        return new PopulationData(population);
+        return scenario.getPopulation();
     }
 }
