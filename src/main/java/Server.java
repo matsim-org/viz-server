@@ -15,6 +15,7 @@ public class Server {
 
     private static String networkPath = "network.xml";
     private static String eventsPath = "events.xml.gz";
+    private static String plansPath = "plans.xml";
     private static double snapshotPeriod = 1.0;
     private static int port = 3001;
 
@@ -53,6 +54,9 @@ public class Server {
             case Params.ARG_EVENTS:
                 eventsPath = arg;
                 break;
+            case Params.ARG_PLANS:
+                plansPath = arg;
+                break;
             case Params.ARG_PERIOD:
                 snapshotPeriod = Double.parseDouble(arg);
                 break;
@@ -69,7 +73,7 @@ public class Server {
 
     private static void initializeData() {
 
-        data = new MatsimDataProvider(networkPath, eventsPath, "", snapshotPeriod);
+        data = new MatsimDataProvider(networkPath, eventsPath, plansPath, snapshotPeriod);
     }
 
     private static void initializeRoutes() {

@@ -50,8 +50,8 @@ public class NetworkData {
         return new RectContract(
                 networkAsBytes.getMinEasting(),
                 networkAsBytes.getMaxEasting(),
-                networkAsBytes.getMinNorthing(),
-                networkAsBytes.getMaxNorthing()
+                networkAsBytes.getMaxNorthing(),
+                networkAsBytes.getMinNorthing()
         );
     }
 }

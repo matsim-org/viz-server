@@ -14,6 +14,6 @@ public abstract class GeoJsonElement {
 
     //there are more geoJSON types which can be implemented if necessary
     public enum Type {
-        Feature, FeatureCollection, Point, LineString
+        Feature, FeatureCollection, Point, LineString, Polygon
     }
 }
