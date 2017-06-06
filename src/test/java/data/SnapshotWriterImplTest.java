@@ -43,7 +43,7 @@ public class SnapshotWriterImplTest {
         testObject.endSnapshot();
 
         //assert
-        SimulationDataAsBytes data = testObject.getSimulationData();
+        SnapshotData data = testObject.getSimulationData();
         assertEquals(timestep, data.getLastTimestep(), 0.001);
         assertEquals(timestep, data.getFirstTimestep(), 0.001);
     }

@@ -35,7 +35,8 @@ public class SnapshotContractTest {
         testObject.add(info);
 
         //assert
-        byte[] snapshots = testObject.toByteArray();
+        testObject.encodeSnapshot();
+        byte[] snapshots = testObject.getEncodedMessage();
         ByteBuffer buffer = ByteBuffer.wrap(snapshots);
         buffer.order(ByteOrder.BIG_ENDIAN);
 
@@ -49,6 +50,9 @@ public class SnapshotContractTest {
         float y = buffer.getFloat();
         assertEquals(info.getNorthing(), y, 0.001);
         assertEquals(buffer.capacity(), buffer.position());
+
+        Id id = testObject.getIdForIndex(0);
+        assertEquals(info.getId(), id);
     }
 
     @Test
@@ -62,7 +66,8 @@ public class SnapshotContractTest {
         }
 
         //assert
-        byte[] snapshots = testObject.toByteArray();
+        testObject.encodeSnapshot();
+        byte[] snapshots = testObject.getEncodedMessage();
         ByteBuffer buffer = ByteBuffer.wrap(snapshots);
         buffer.order(ByteOrder.BIG_ENDIAN);
 
@@ -72,17 +77,20 @@ public class SnapshotContractTest {
         float size = buffer.getFloat();
         assertEquals(infos.size() * 2, size, 0.001);
 
-        for (AgentSnapshotInfo info : infos) {
+        for (int i = 0; i < infos.size(); i++) {
+            AgentSnapshotInfo info = infos.get(i);
             float x = buffer.getFloat();
             assertEquals(info.getEasting(), x, 0.001);
             float y = buffer.getFloat();
             assertEquals(info.getNorthing(), y, 0.001);
+            Id id = testObject.getIdForIndex(i);
+            assertEquals(info.getId(), id);
         }
         assertEquals(buffer.capacity(), buffer.position());
     }
 
     @Test
-    public void toByteArray() {
+    public void encodeSnapshot() {
 
         //arrange
         SnapshotLinkWidthCalculator calc = new SnapshotLinkWidthCalculator();
@@ -102,9 +110,10 @@ public class SnapshotContractTest {
         }
 
         //act
-        byte[] snapshots = testObject.toByteArray();
+        testObject.encodeSnapshot();
 
         //assert
+        byte[] snapshots = testObject.getEncodedMessage();
         ByteBuffer buffer = ByteBuffer.wrap(snapshots);
         buffer.order(ByteOrder.BIG_ENDIAN);
 
@@ -121,6 +130,25 @@ public class SnapshotContractTest {
             assertEquals(info.getNorthing(), y, 0.001);
         }
         assertEquals(buffer.capacity(), buffer.position());
+    }
+
+    @Test
+    public void getIdForIndex() {
+
+        //arrange
+        List<AgentSnapshotInfo> infos = TestUtils.createAgentSnapshotInfos(100);
+        for (AgentSnapshotInfo info : infos) {
+            testObject.add(info);
+        }
+
+        //act
+        for (int i = 0; i < infos.size(); i++) {
+            AgentSnapshotInfo info = infos.get(i);
+            Id id = testObject.getIdForIndex(i);
+
+            //assert
+            assertEquals(info.getId(), id);
+        }
     }
 
 }

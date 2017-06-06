@@ -2,19 +2,20 @@ package data;
 
 
 import contracts.SnapshotContract;
+import org.matsim.api.core.v01.Id;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SimulationDataAsBytes {
-    private List<byte[]> snapshotsAsBytes = new ArrayList<>();
+public class SnapshotData {
+    private List<SnapshotContract> snapshots = new ArrayList<>();
     private double firstTimestep = Double.MAX_VALUE;
     private double lastTimestep = Double.MIN_VALUE;
     private double timestepSize = 1;
 
-    public SimulationDataAsBytes(double timestepSize) {
+    public SnapshotData(double timestepSize) {
         this.timestepSize = timestepSize;
     }
 
@@ -34,8 +35,8 @@ public class SimulationDataAsBytes {
      * @throws IOException
      */
     public void addSnapshot(SnapshotContract snapshot) throws IOException {
-        byte[] snapshotAsBytes = snapshot.toByteArray();
-        snapshotsAsBytes.add(snapshotAsBytes);
+        snapshot.encodeSnapshot();
+        snapshots.add(snapshot);
         setFirstOrLastTimestep(snapshot.getTime());
     }
 
@@ -50,16 +51,21 @@ public class SimulationDataAsBytes {
      */
     public byte[] getSnapshots(double fromTimestep, int numberOfTimesteps) throws IOException {
 
-        int startingIndex = getStartingIndex(fromTimestep, numberOfTimesteps);
+        int startingIndex = getStartingIndex(fromTimestep);
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
 
-        for (int i = startingIndex; i < startingIndex + numberOfTimesteps && i < snapshotsAsBytes.size(); i++) {
-            stream.write(snapshotsAsBytes.get(i));
+        for (int i = startingIndex; i < startingIndex + numberOfTimesteps && i < snapshots.size(); i++) {
+            stream.write(snapshots.get(i).getEncodedMessage());
         }
         return stream.toByteArray();
     }
 
-    private int getStartingIndex(double fromTimestep, int numberOfTimesteps) {
+    public Id getId(double timestep, int index) {
+        int snapshotIndex = getStartingIndex(timestep);
+        return snapshots.get(snapshotIndex).getIdForIndex(index);
+    }
+
+    private int getStartingIndex(double fromTimestep) {
         if (firstTimestep - 0.001 > fromTimestep) {
             throw new RuntimeException("fromTimestep was smaller than first cached Timestep");
         }

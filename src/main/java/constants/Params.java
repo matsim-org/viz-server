@@ -4,6 +4,7 @@ public final class Params {
 
     public static final String ARG_NETWORK = "network";
     public static final String ARG_EVENTS = "events";
+    public static final String ARG_PLANS = "plans";
     public static final String ARG_PERIOD = "snapshotPeriod";
     public static final String ARG_PORT = "port";
 

@@ -1,5 +1,6 @@
 package utils;
 
+import data.MatsimDataProvider;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Person;
@@ -15,6 +16,9 @@ import java.util.List;
 public class TestUtils {
     public static final String NETWORK_FILE = "src/test/data/test-network.xml";
     public static final String EVENTS_FILE = "src/test/data/test-events-100.xml.gz";
+    public static final String POPULATION_FILE = "src/test/data/test-plans-100.xml";
+
+    private static MatsimDataProvider dataProvider = new MatsimDataProvider(NETWORK_FILE, EVENTS_FILE, POPULATION_FILE, 3);
 
     public static Network loadTestNetwork() {
         Network network = NetworkUtils.createNetwork();
@@ -38,7 +42,11 @@ public class TestUtils {
     public static AgentSnapshotInfo createAgentSnapshotInfo(long key, double easting, double northing) {
         SnapshotLinkWidthCalculator calc = new SnapshotLinkWidthCalculator();
         AgentSnapshotInfoFactory factory = new AgentSnapshotInfoFactory(calc);
-        Id<Person> id = Id.createPersonId(1);
+        Id<Person> id = Id.createPersonId(key);
         return factory.createAgentSnapshotInfo(id, easting, northing, 0, 0);
+    }
+
+    public static MatsimDataProvider getDataProvider() {
+        return dataProvider;
     }
 }

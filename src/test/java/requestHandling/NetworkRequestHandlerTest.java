@@ -16,8 +16,7 @@ public class NetworkRequestHandlerTest {
 
     @Before
     public void SetUp() {
-        MatsimDataProvider data = new MatsimDataProvider(TestUtils.NETWORK_FILE, TestUtils.EVENTS_FILE, 1);
-        testObject = new NetworkRequestHandler(data);
+        testObject = new NetworkRequestHandler(TestUtils.getDataProvider());
     }
 
     @Test

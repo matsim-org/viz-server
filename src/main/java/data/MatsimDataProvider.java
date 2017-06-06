@@ -1,6 +1,8 @@
 package data;
 
 import contracts.RectContract;
+import contracts.geoJSON.FeatureCollection;
+import org.matsim.api.core.v01.Id;
 import org.matsim.core.utils.collections.QuadTree;
 
 import java.io.IOException;
@@ -9,21 +11,19 @@ public class MatsimDataProvider {
 
     private double snapshotPeriod;
     private NetworkData networkData;
-    private SimulationDataAsBytes simulationData;
+    private SnapshotData simulationData;
+    private PopulationData populationData;
 
-    public MatsimDataProvider(String networkFilePath, String eventsFilePath, double snapshotPeriod) {
+    public MatsimDataProvider(String networkFilePath, String eventsFilePath, String populationFilePath, double snapshotPeriod) {
 
         this.snapshotPeriod = snapshotPeriod;
-        initializeNetwork(networkFilePath);
-        initializeAgents(eventsFilePath, networkFilePath, snapshotPeriod);
-    }
 
-    private void initializeNetwork(String filePath) {
-        networkData = MatsimDataReader.readNetworkFile(filePath);
-    }
+        MatsimDataReader reader = new MatsimDataReader(networkFilePath, eventsFilePath, populationFilePath);
+        reader.readAllFiles(snapshotPeriod);
 
-    private void initializeAgents(String eventsFilePath, String networkFilePath, double snapshotPeriod) {
-        simulationData = MatsimDataReader.readEventsFile(eventsFilePath, networkFilePath, snapshotPeriod);
+        networkData = reader.getNetworkData();
+        simulationData = reader.getSnapshotData();
+        populationData = reader.getPopulationData();
     }
 
     public byte[] getLinks(QuadTree.Rect bounds) throws IOException {
@@ -33,6 +33,11 @@ public class MatsimDataProvider {
     public byte[] getSnapshots(QuadTree.Rect bounds, double fromTimestep, int numberOfTimesteps) throws IOException {
         //This will respect the given bounds later
         return simulationData.getSnapshots(fromTimestep, numberOfTimesteps);
+    }
+
+    public FeatureCollection getPlan(double timestep, int index) {
+        Id id = simulationData.getId(timestep, index);
+        return populationData.getSelectedPlan(id);
     }
 
     public RectContract getBounds() {

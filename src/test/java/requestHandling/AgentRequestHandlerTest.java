@@ -17,8 +17,7 @@ public class AgentRequestHandlerTest {
 
     @BeforeClass
     public static void setUp() {
-        MatsimDataProvider data = new MatsimDataProvider(TestUtils.NETWORK_FILE, TestUtils.EVENTS_FILE, 1);
-        testObject = new AgentRequestHandler(data);
+        testObject = new AgentRequestHandler(TestUtils.getDataProvider());
     }
 
     @Test

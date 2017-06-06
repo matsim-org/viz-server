@@ -9,10 +9,10 @@ import java.io.IOException;
 public class SnapshotWriterImpl implements SnapshotWriter {
 
     private SnapshotContract currentSnapshot;
-    private SimulationDataAsBytes simData;
+    private SnapshotData simData;
 
     SnapshotWriterImpl(double timestepSize) {
-        simData = new SimulationDataAsBytes(timestepSize);
+        simData = new SnapshotData(timestepSize);
     }
 
     @Override
@@ -44,7 +44,7 @@ public class SnapshotWriterImpl implements SnapshotWriter {
         currentSnapshot = null;
     }
 
-    SimulationDataAsBytes getSimulationData() {
+    SnapshotData getSimulationData() {
         return simData;
     }
 

@@ -67,7 +67,7 @@ public class AbstractPostRequestHandlerTest {
     private static class AbstractPostRequestHandlerTestable extends AbstractPostRequestHandler<RectContract> {
 
         public AbstractPostRequestHandlerTestable() {
-            super(RectContract.class, new MatsimDataProvider(TestUtils.NETWORK_FILE, TestUtils.EVENTS_FILE, 1));
+            super(RectContract.class, TestUtils.getDataProvider());
         }
 
         public Answer processBodyImpl(String body) {
