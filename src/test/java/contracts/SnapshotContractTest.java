@@ -132,4 +132,23 @@ public class SnapshotContractTest {
         assertEquals(buffer.capacity(), buffer.position());
     }
 
+    @Test
+    public void getIdForIndex() {
+
+        //arrange
+        List<AgentSnapshotInfo> infos = TestUtils.createAgentSnapshotInfos(100);
+        for (AgentSnapshotInfo info : infos) {
+            testObject.add(info);
+        }
+
+        //act
+        for (int i = 0; i < infos.size(); i++) {
+            AgentSnapshotInfo info = infos.get(i);
+            Id id = testObject.getIdForIndex(i);
+
+            //assert
+            assertEquals(info.getId(), id);
+        }
+    }
+
 }

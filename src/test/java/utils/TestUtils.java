@@ -42,7 +42,7 @@ public class TestUtils {
     public static AgentSnapshotInfo createAgentSnapshotInfo(long key, double easting, double northing) {
         SnapshotLinkWidthCalculator calc = new SnapshotLinkWidthCalculator();
         AgentSnapshotInfoFactory factory = new AgentSnapshotInfoFactory(calc);
-        Id<Person> id = Id.createPersonId(1);
+        Id<Person> id = Id.createPersonId(key);
         return factory.createAgentSnapshotInfo(id, easting, northing, 0, 0);
     }
 

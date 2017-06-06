@@ -102,8 +102,8 @@ public class NetworkDataTest {
 
         //assert
         assertEquals(bounds.getLeft(), -10000, 0.001);
-        assertEquals(bounds.getTop(), -10000, 0.001);
+        assertEquals(bounds.getTop(), 10000, 0.001);
         assertEquals(bounds.getRight(), 10000, 0.001);
-        assertEquals(bounds.getBottom(), 10000, 0.001);
+        assertEquals(bounds.getBottom(), -10000, 0.001);
     }
 }

@@ -1,6 +1,7 @@
 package data;
 
 import contracts.RectContract;
+import contracts.geoJSON.FeatureCollection;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.matsim.core.utils.collections.QuadTree;
@@ -51,13 +52,29 @@ public class MatsimDataProviderTest {
     }
 
     @Test
+    public void getPlanTest() {
+
+        //arrange
+        String expectedJson = "{\"features\":[{\"type\":\"Feature\",\"properties\":{\"type\":\"leg\"},\"geometry\":" +
+                "{\"coordinates\":[[-2000.0,0.0],[-1500.0,0.0],[-1500.0,0.0],[-469.8,400.0],[-469.8,400.0]," +
+                "[-439.8,400.0],[-439.8,400.0],[0.0,0.0],[0.0,0.0],[1000.0,0.0]],\"type\":\"LineString\"}}],\"type\":" +
+                "\"FeatureCollection\"}";
+
+        //act
+        FeatureCollection result = testObject.getPlan(testObject.getLastTimestep(), 0);
+
+        //assert
+        assertEquals(expectedJson, result.toGeoJson());
+    }
+
+    @Test
     public void getBoundsTest() {
 
         //arrange
         final double left = -2500;
         final double right = 1001;
-        final double top = -1000;
-        final double bottom = 401;
+        final double top = 401;
+        final double bottom = -1000;
 
         //act
         RectContract bounds = testObject.getBounds();
@@ -67,7 +84,5 @@ public class MatsimDataProviderTest {
         assertEquals(right, bounds.getRight(), 0.1);
         assertEquals(top, bounds.getTop(), 0.1);
         assertEquals(bottom, bounds.getBottom(), 0.1);
-
-
     }
 }

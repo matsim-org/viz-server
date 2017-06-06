@@ -5,7 +5,6 @@ import constants.Params;
 import contracts.ConfigurationRequest;
 import contracts.ConfigurationResponse;
 import contracts.RectContract;
-import data.MatsimDataProvider;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import utils.TestUtils;
@@ -29,8 +28,8 @@ public class ConfigurationRequestHandlerTest {
         final String id = "id";
         final double left = -2500;
         final double right = 1001;
-        final double top = -1000;
-        final double bottom = 401;
+        final double top = 401;
+        final double bottom = -1000;
         ConfigurationRequest request = new ConfigurationRequest(id);
 
         //act

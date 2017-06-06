@@ -1,9 +1,11 @@
 package requestHandling;
 
-import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import constants.Params;
 import contracts.PlanRequest;
+import contracts.geoJSON.Feature;
 import contracts.geoJSON.FeatureCollection;
+import contracts.geoJSON.FeatureSerializer;
 import data.MatsimDataProvider;
 
 public class PlanRequestHandler extends AbstractPostRequestHandler<PlanRequest>{
@@ -19,9 +21,10 @@ public class PlanRequestHandler extends AbstractPostRequestHandler<PlanRequest>{
         try {
             result = dataProvider.getPlan(body.getTimestep(), body.getIndex());
         } catch (RuntimeException e) {
-            return new Answer(Params.STATUS_BADREQUEST, e.getMessage());
+            return new Answer(Params.STATUS_BADREQUEST, "Timestep or index for timestep not available");
         }
-        String json = new Gson().toJson(result);
+        String json = new GsonBuilder().registerTypeAdapter(Feature.class, new FeatureSerializer()).
+                create().toJson(result);
         return Answer.ok(json);
     }
 }
