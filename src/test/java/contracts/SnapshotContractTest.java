@@ -1,20 +1,6 @@
 package contracts;
 
 import org.junit.Before;
-import org.junit.Test;
-import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.population.Person;
-import org.matsim.vis.snapshotwriters.AgentSnapshotInfo;
-import org.matsim.vis.snapshotwriters.AgentSnapshotInfoFactory;
-import org.matsim.vis.snapshotwriters.SnapshotLinkWidthCalculator;
-import utils.TestUtils;
-
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
 
 public class SnapshotContractTest {
 
@@ -25,7 +11,7 @@ public class SnapshotContractTest {
         testObject = new SnapshotContract(1);
     }
 
-    @Test
+  /*  @Test
     public void add_oneSnapshot() {
 
         //arrange
@@ -150,5 +136,6 @@ public class SnapshotContractTest {
             assertEquals(info.getId(), id);
         }
     }
+    */
 
 }

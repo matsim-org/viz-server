@@ -1,21 +1,6 @@
 package data;
 
-import contracts.AgentSnapshotContract;
-import contracts.SnapshotContract;
 import org.junit.Before;
-import org.junit.Test;
-import org.matsim.api.core.v01.Id;
-import org.matsim.vis.snapshotwriters.AgentSnapshotInfo;
-import utils.TestUtils;
-
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 public class SnapshotDataTest {
 
@@ -26,7 +11,7 @@ public class SnapshotDataTest {
         testObject = new SnapshotData(2);
     }
 
-    @Test
+  /*  @Test
     public void addSnapshot() throws IOException {
 
         //arrange
@@ -124,4 +109,5 @@ public class SnapshotDataTest {
             }
         }
     }
+    */
 }

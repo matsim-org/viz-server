@@ -5,17 +5,23 @@ import org.matsim.vis.snapshotwriters.AgentSnapshotInfo;
 public class AgentSnapshotContract {
 
     private String id;
+    private int idIndex;
     private double x;
     private double y;
 
-    public AgentSnapshotContract(AgentSnapshotInfo info) {
+    public AgentSnapshotContract(AgentSnapshotInfo info, int idIndex) {
         this.id = info.getId().toString();
+        this.idIndex = idIndex;
         this.x = info.getEasting();
         this.y = info.getNorthing();
     }
 
     public String getId() {
         return id;
+    }
+
+    public int getIdIndex() {
+        return idIndex;
     }
 
     public double getX() {

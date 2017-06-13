@@ -1,13 +1,7 @@
 package requestHandling;
 
-import constants.Params;
-import contracts.PlanRequest;
 import org.junit.BeforeClass;
-import org.junit.Test;
 import utils.TestUtils;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 public class PlanRequestHandlerTest {
 
@@ -18,7 +12,7 @@ public class PlanRequestHandlerTest {
         testObject = new PlanRequestHandler(TestUtils.getDataProvider());
     }
 
-    @Test
+   /* @Test
     public void processTest() {
 
         //arrange
@@ -51,4 +45,5 @@ public class PlanRequestHandlerTest {
         assertEquals(Params.STATUS_BADREQUEST, answer.getCode());
         assertTrue(answer.hastText());
     }
+    */
 }

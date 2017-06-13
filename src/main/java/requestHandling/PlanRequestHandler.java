@@ -19,7 +19,7 @@ public class PlanRequestHandler extends AbstractPostRequestHandler<PlanRequest>{
 
         FeatureCollection result;
         try {
-            result = dataProvider.getPlan(body.getTimestep(), body.getIndex());
+            result = dataProvider.getPlan(body.getIdIndex());
         } catch (RuntimeException e) {
             return new Answer(Params.STATUS_BADREQUEST, "Timestep or index for timestep not available");
         }

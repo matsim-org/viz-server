@@ -1,18 +1,17 @@
 package contracts;
 
-import org.matsim.api.core.v01.Id;
 import org.matsim.vis.snapshotwriters.AgentSnapshotInfo;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class SnapshotContract {
 
     private double time;
     private List<AgentSnapshotContract> positions = new ArrayList<>();
-    private List<Id> ids = new ArrayList<>();
     private byte[] encodedSnapshot;
 
     public SnapshotContract(double time) {
@@ -24,9 +23,8 @@ public class SnapshotContract {
         return time;
     }
 
-    public void add(AgentSnapshotInfo info) {
-        ids.add(info.getId());
-        positions.add(new AgentSnapshotContract(info));
+    public void add(AgentSnapshotInfo info, int idIndex) {
+        positions.add(new AgentSnapshotContract(info, idIndex));
     }
 
     /**
@@ -34,8 +32,11 @@ public class SnapshotContract {
      * The previously addes positions are deleted
      */
     public void encodeSnapshot() {
+
+        positions.sort(Comparator.comparingInt(AgentSnapshotContract::getIdIndex));
+
         int valueSize = Float.BYTES;
-        int numberOfPositionsValues = positions.size() * 2; // we are sending (x,y) coordinates
+        int numberOfPositionsValues = positions.size() * 3; // we are sending (x,y) coordinates and and idIndex
         ByteBuffer buffer = ByteBuffer.allocate(valueSize + valueSize + valueSize * numberOfPositionsValues);
         buffer.order(ByteOrder.BIG_ENDIAN);
 
@@ -45,10 +46,11 @@ public class SnapshotContract {
         //put the length of the positionsarray
         buffer.putFloat(numberOfPositionsValues);
 
-        //put positions as x,y,z
+        //put positions as x,y and idIndex
         for (AgentSnapshotContract pos : positions) {
             buffer.putFloat((float) pos.getX());
             buffer.putFloat((float) pos.getY());
+            buffer.putFloat((float) pos.getIdIndex());
         }
         encodedSnapshot = buffer.array();
         positions.clear();
@@ -61,10 +63,6 @@ public class SnapshotContract {
      */
     public byte[] getEncodedMessage() {
         return encodedSnapshot;
-    }
-
-    public Id getIdForIndex(int index) {
-        return ids.get(index);
     }
 
     /**

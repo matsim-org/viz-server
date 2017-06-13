@@ -35,8 +35,8 @@ public class MatsimDataProvider {
         return simulationData.getSnapshots(fromTimestep, numberOfTimesteps);
     }
 
-    public FeatureCollection getPlan(double timestep, int index) {
-        Id id = simulationData.getId(timestep, index);
+    public FeatureCollection getPlan(int idIndex) {
+        Id id = simulationData.getId(idIndex);
         return populationData.getSelectedPlan(id);
     }
 

@@ -34,7 +34,8 @@ public class SnapshotWriterImpl implements SnapshotWriter {
     public void addAgent(AgentSnapshotInfo agentSnapshotInfo) {
 
         if (agentSnapshotInfo.getAgentState() != AgentSnapshotInfo.AgentState.PERSON_AT_ACTIVITY) {
-            currentSnapshot.add(agentSnapshotInfo);
+            int idIndex = simData.addId(agentSnapshotInfo.getId());
+            currentSnapshot.add(agentSnapshotInfo, idIndex);
         }
     }
 
