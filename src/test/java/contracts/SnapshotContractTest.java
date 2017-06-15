@@ -32,7 +32,7 @@ public class SnapshotContractTest {
         AgentSnapshotInfo info = TestUtils.createAgentSnapshotInfo(1, 1, 1);
 
         //act
-        testObject.add(info);
+        testObject.add(info, 0);
 
         //assert
         testObject.encodeSnapshot();
@@ -40,19 +40,18 @@ public class SnapshotContractTest {
         ByteBuffer buffer = ByteBuffer.wrap(snapshots);
         buffer.order(ByteOrder.BIG_ENDIAN);
 
-        //the snapshots should include time, sizeOfPositions, positionX, positionY
+        //the snapshots should include time, sizeOfPositions, positionX, positionY, id
         float time = buffer.getFloat();
         assertEquals(testObject.getTime(), time, 0.001);
         float size = buffer.getFloat();
-        assertEquals(2.0, size, 0.001);
+        assertEquals(3.0, size, 0.001);
         float x = buffer.getFloat();
         assertEquals(info.getEasting(), x, 0.001);
         float y = buffer.getFloat();
         assertEquals(info.getNorthing(), y, 0.001);
+        float id = buffer.getFloat();
+        assertEquals(0, id, 0.0001);
         assertEquals(buffer.capacity(), buffer.position());
-
-        Id id = testObject.getIdForIndex(0);
-        assertEquals(info.getId(), id);
     }
 
     @Test
@@ -61,8 +60,9 @@ public class SnapshotContractTest {
         List<AgentSnapshotInfo> infos = TestUtils.createAgentSnapshotInfos(100);
 
         //act
-        for (AgentSnapshotInfo info : infos) {
-            testObject.add(info);
+        for (int i = 0; i < infos.size(); i++) {
+            AgentSnapshotInfo info = infos.get(i);
+            testObject.add(info, i);
         }
 
         //assert
@@ -71,11 +71,11 @@ public class SnapshotContractTest {
         ByteBuffer buffer = ByteBuffer.wrap(snapshots);
         buffer.order(ByteOrder.BIG_ENDIAN);
 
-        //the snapshots should include time, sizeOfPositions and positionX, positionY for each info
+        //the snapshots should include time, sizeOfPositions and positionX, positionY, ids for each info
         float time = buffer.getFloat();
         assertEquals(testObject.getTime(), time, 0.001);
         float size = buffer.getFloat();
-        assertEquals(infos.size() * 2, size, 0.001);
+        assertEquals(infos.size() * 3, size, 0.001);
 
         for (int i = 0; i < infos.size(); i++) {
             AgentSnapshotInfo info = infos.get(i);
@@ -83,8 +83,8 @@ public class SnapshotContractTest {
             assertEquals(info.getEasting(), x, 0.001);
             float y = buffer.getFloat();
             assertEquals(info.getNorthing(), y, 0.001);
-            Id id = testObject.getIdForIndex(i);
-            assertEquals(info.getId(), id);
+            float id = buffer.getFloat();
+            assertEquals(i, id, 0.001);
         }
         assertEquals(buffer.capacity(), buffer.position());
     }
@@ -105,8 +105,9 @@ public class SnapshotContractTest {
             infos.add(info);
         }
 
-        for (AgentSnapshotInfo info : infos) {
-            testObject.add(info);
+        for (int i = 0; i < infos.size(); i++) {
+            AgentSnapshotInfo info = infos.get(i);
+            testObject.add(info, i);
         }
 
         //act
@@ -121,34 +122,17 @@ public class SnapshotContractTest {
         float time = buffer.getFloat();
         assertEquals(testObject.getTime(), time, 0.001);
         float size = buffer.getFloat();
-        assertEquals(infos.size() * 2, size, 0.001);
+        assertEquals(infos.size() * 3, size, 0.001);
 
-        for (AgentSnapshotInfo info : infos) {
+        for (int i = 0; i < infos.size(); i++) {
+            AgentSnapshotInfo info = infos.get(i);
             float x = buffer.getFloat();
             assertEquals(info.getEasting(), x, 0.001);
             float y = buffer.getFloat();
             assertEquals(info.getNorthing(), y, 0.001);
+            float id = buffer.getFloat();
+            assertEquals(i, id, 0.001);
         }
         assertEquals(buffer.capacity(), buffer.position());
     }
-
-    @Test
-    public void getIdForIndex() {
-
-        //arrange
-        List<AgentSnapshotInfo> infos = TestUtils.createAgentSnapshotInfos(100);
-        for (AgentSnapshotInfo info : infos) {
-            testObject.add(info);
-        }
-
-        //act
-        for (int i = 0; i < infos.size(); i++) {
-            AgentSnapshotInfo info = infos.get(i);
-            Id id = testObject.getIdForIndex(i);
-
-            //assert
-            assertEquals(info.getId(), id);
-        }
-    }
-
 }

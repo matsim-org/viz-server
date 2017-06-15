@@ -1,6 +1,5 @@
 package data;
 
-import contracts.AgentSnapshotContract;
 import contracts.SnapshotContract;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,7 +31,7 @@ public class SnapshotDataTest {
         //arrange
         AgentSnapshotInfo info = TestUtils.createAgentSnapshotInfo(1, 1, 1);
         SnapshotContract contract = new SnapshotContract(1);
-        contract.add(info);
+        contract.add(info, 1);
 
         //act
         testObject.addSnapshot(contract);
@@ -53,8 +52,9 @@ public class SnapshotDataTest {
             List<AgentSnapshotInfo> infos = TestUtils.createAgentSnapshotInfos(100);
             snapshotInfos.add(infos);
             SnapshotContract contract = new SnapshotContract(time);
-            for (AgentSnapshotInfo info : infos) {
-                contract.add(info);
+            for (int i = 0; i < infos.size(); i++) {
+                AgentSnapshotInfo info = infos.get(i);
+                contract.add(info, i);
             }
             testObject.addSnapshot(contract);
             contracts.add(contract);
@@ -79,14 +79,16 @@ public class SnapshotDataTest {
             assertEquals((float) expectedContract.getTime(), time, 0.001);
 
             List<AgentSnapshotInfo> expectedInfos = snapshotInfos.get(contractsIndex);
-            assertEquals((float) expectedInfos.size() * 2, size, 0.001);
+            assertEquals((float) expectedInfos.size() * 3, size, 0.001);
 
-            for (int i = 0; i < size / 2; i++) {
+            for (int i = 0; i < size / 3; i++) {
                 float x = buffer.getFloat();
                 float y = buffer.getFloat();
+                float id = buffer.getFloat();
                 AgentSnapshotInfo info = expectedInfos.get(i);
                 assertEquals((float) info.getEasting(), x, 0.001);
                 assertEquals((float) info.getNorthing(), y, 0.001);
+                assertEquals(i, id, 0.001);
             }
             contractsIndex++;
         }
@@ -103,25 +105,23 @@ public class SnapshotDataTest {
             List<AgentSnapshotInfo> infos = TestUtils.createAgentSnapshotInfos(100);
             snapshotInfos.add(infos);
             SnapshotContract contract = new SnapshotContract(time);
-            for (AgentSnapshotInfo info : infos) {
-                contract.add(info);
+            for (int i = 0; i < infos.size(); i++) {
+                AgentSnapshotInfo info = infos.get(i);
+                int index = testObject.addId(info.getId());
+                contract.add(info, index);
             }
             testObject.addSnapshot(contract);
             contracts.add(contract);
         }
 
-        //act & assert
-        for(int i = 0; i < contracts.size(); i++) {
+        List<AgentSnapshotInfo> infosOfFirstSnapshot = snapshotInfos.get(0);
+        for (int i = 0; i < 100; i++) {
 
-            SnapshotContract contract = contracts.get(i);
-            List<AgentSnapshotInfo> infos = snapshotInfos.get(i);
+            //act
+            Id id = testObject.getId(i);
 
-            for(int p = 0; p < infos.size(); p++) {
-
-                AgentSnapshotInfo info = infos.get(p);
-                Id id = testObject.getId(contract.getTime(), p);
-                assertEquals(info.getId(), id);
-            }
+            //assert
+            assertEquals(infosOfFirstSnapshot.get(i).getId(), id);
         }
     }
 }

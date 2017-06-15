@@ -11,6 +11,7 @@ import java.util.List;
 
 public class SnapshotData {
     private List<SnapshotContract> snapshots = new ArrayList<>();
+    private List<Id> agentIds = new ArrayList<>();
     private double firstTimestep = Double.MAX_VALUE;
     private double lastTimestep = Double.MIN_VALUE;
     private double timestepSize = 1;
@@ -25,6 +26,19 @@ public class SnapshotData {
 
     public double getLastTimestep() {
         return lastTimestep;
+    }
+
+    public int addId(Id id) {
+        int indexOfId = agentIds.indexOf(id);
+        if (indexOfId < 0) {
+            agentIds.add(id);
+            indexOfId = agentIds.size() - 1;
+        }
+        return indexOfId;
+    }
+
+    public Id getId(int index) {
+        return agentIds.get(index);
     }
 
     /**
@@ -58,11 +72,6 @@ public class SnapshotData {
             stream.write(snapshots.get(i).getEncodedMessage());
         }
         return stream.toByteArray();
-    }
-
-    public Id getId(double timestep, int index) {
-        int snapshotIndex = getStartingIndex(timestep);
-        return snapshots.get(snapshotIndex).getIdForIndex(index);
     }
 
     private int getStartingIndex(double fromTimestep) {

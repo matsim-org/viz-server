@@ -1,19 +1,13 @@
 package contracts;
 
 public class PlanRequest {
-    private double timestep;
-    private int index;
+    private int idIndex;
 
-    public PlanRequest(double timestep, int index) {
-        this.timestep = timestep;
-        this.index = index;
+    public PlanRequest(int idIndex) {
+        this.idIndex = idIndex;
     }
 
-    public double getTimestep() {
-        return timestep;
-    }
-
-    public int getIndex() {
-        return index;
+    public int getIdIndex() {
+        return idIndex;
     }
 }
