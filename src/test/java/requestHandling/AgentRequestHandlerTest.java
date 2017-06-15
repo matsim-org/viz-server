@@ -3,7 +3,6 @@ package requestHandling;
 import constants.Params;
 import contracts.AgentRequest;
 import contracts.RectContract;
-import data.MatsimDataProvider;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import utils.TestUtils;
@@ -25,7 +24,7 @@ public class AgentRequestHandlerTest {
 
         //arrange
         RectContract bounds = new RectContract(-1000, 1000, -1000, 1000);
-        AgentRequest request = new AgentRequest(bounds, 25210, 10);
+        AgentRequest request = new AgentRequest(bounds, 25210, 10, 1);
 
         //act
         Answer answer = testObject.process(request);
@@ -41,7 +40,7 @@ public class AgentRequestHandlerTest {
 
         //arrange
         RectContract bounds = new RectContract(-1000, 1000, -1000, 1000);
-        AgentRequest request = new AgentRequest(bounds, -1, 10);
+        AgentRequest request = new AgentRequest(bounds, -1, 10, 1);
 
         //act
         Answer answer = testObject.process(request);

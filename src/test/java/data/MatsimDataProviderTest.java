@@ -44,7 +44,7 @@ public class MatsimDataProviderTest {
         int size = 2;
 
         //act
-        byte[] result = testObject.getSnapshots(bounds, startTime, size);
+        byte[] result = testObject.getSnapshots(bounds, startTime, size, 1);
 
         //assert
         assertNotNull(result);

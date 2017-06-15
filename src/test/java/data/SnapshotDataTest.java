@@ -61,7 +61,7 @@ public class SnapshotDataTest {
         }
 
         //act
-        byte[] result = testObject.getSnapshots(150, 50);
+        byte[] result = testObject.getSnapshots(150, 50, 1);
 
         //assert
         assertNotNull(result);

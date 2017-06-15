@@ -30,9 +30,10 @@ public class MatsimDataProvider {
         return networkData.getLinks(bounds);
     }
 
-    public byte[] getSnapshots(QuadTree.Rect bounds, double fromTimestep, int numberOfTimesteps) throws IOException {
+    public byte[] getSnapshots(QuadTree.Rect bounds, double fromTimestep, int numberOfTimesteps, double speedFactor)
+            throws IOException {
         //This will respect the given bounds later
-        return simulationData.getSnapshots(fromTimestep, numberOfTimesteps);
+        return simulationData.getSnapshots(fromTimestep, numberOfTimesteps, speedFactor);
     }
 
     public FeatureCollection getPlan(int idIndex) {

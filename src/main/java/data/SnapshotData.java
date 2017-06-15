@@ -63,12 +63,16 @@ public class SnapshotData {
      * @return encoded snapshots
      * @throws IOException
      */
-    public byte[] getSnapshots(double fromTimestep, int numberOfTimesteps) throws IOException {
+    public byte[] getSnapshots(double fromTimestep, int numberOfTimesteps, double speedFactor) throws IOException {
 
         int startingIndex = getStartingIndex(fromTimestep);
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
 
-        for (int i = startingIndex; i < startingIndex + numberOfTimesteps && i < snapshots.size(); i++) {
+        if (speedFactor < 1.0) {
+            speedFactor = 1.0;
+        }
+
+        for (int i = startingIndex; i < startingIndex + numberOfTimesteps && i < snapshots.size(); i += speedFactor) {
             stream.write(snapshots.get(i).getEncodedMessage());
         }
         return stream.toByteArray();

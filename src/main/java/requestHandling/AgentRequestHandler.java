@@ -19,10 +19,11 @@ public class AgentRequestHandler extends AbstractPostRequestHandler<AgentRequest
         QuadTree.Rect bounds = body.getBounds().copyToMatsimRect();
         double startTime = body.getFromTimestep();
         int size = body.getSize();
+        double speedFactor = body.getSpeedFactor();
 
         byte[] bytes;
         try {
-            bytes = dataProvider.getSnapshots(bounds, startTime, size);
+            bytes = dataProvider.getSnapshots(bounds, startTime, size, speedFactor);
         } catch (IOException e) {
             e.printStackTrace();
             return new Answer(Params.STATUS_INTERNAL_SERVER_ERROR, "Sorry.");
