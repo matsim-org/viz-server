@@ -21,6 +21,8 @@ public class PlanRequestHandler extends AbstractPostRequestHandler<PlanRequest>{
         try {
             result = dataProvider.getPlan(body.getIdIndex());
         } catch (RuntimeException e) {
+            System.out.println("Error in PlanRequestHandler: requestedIndexId: " + body.getIdIndex());
+            System.out.println(e.getMessage());
             return new Answer(Params.STATUS_BADREQUEST, "Timestep or index for timestep not available");
         }
         String json = new GsonBuilder().registerTypeAdapter(Feature.class, new FeatureSerializer()).
