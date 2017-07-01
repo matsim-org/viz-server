@@ -33,7 +33,7 @@ public class Server {
                 handleArg(arg, args[i + 1]);
                 i++;
             } else {
-                WrongArgs();
+                WrongArgs(arg, "wrong order");
             }
         }
     }
@@ -41,7 +41,7 @@ public class Server {
     private static void handleArg(String argName, String arg) {
 
         if (arg.charAt(0) == '-') {
-            WrongArgs();
+            WrongArgs(argName, arg);
         }
 
         //cut of '-'
@@ -62,13 +62,20 @@ public class Server {
                 break;
             case Params.ARG_PORT:
                 port = Integer.parseInt(arg);
+                break;
             default:
-                WrongArgs();
+                WrongArgs(argName, arg);
         }
     }
 
-    private static void WrongArgs() {
-        throw new RuntimeException("Please supply correct arguments like \n\n'-network path/To/network'\n'-events path/to/events");
+    private static void WrongArgs(String argName, String arg) {
+        throw new RuntimeException("Couldn't parse argumentName: " + argName + " and value: " + arg +
+                                           "\n\nPossible arguments and values are: \n\n" +
+                                           "'-network path/To/network'\n" +
+                                           "'-events path/to/events'\n" +
+                                           "'-plans path/to/plans'\n" +
+                                           "'-snapshotPeriod [some number]\n" +
+                                           "'-port [some number]");
     }
 
     private static void initializeData() {
