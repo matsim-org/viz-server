@@ -1,20 +1,20 @@
 package requestHandling;
 
 import constants.Params;
-import contracts.AgentRequest;
+import contracts.SnapshotRequest;
 import data.MatsimDataProvider;
 import org.matsim.core.utils.collections.QuadTree;
 
 import java.io.IOException;
 
-public class AgentRequestHandler extends AbstractPostRequestHandler<AgentRequest> {
+public class SnapshotRequestHandler extends AbstractPostRequestHandler<SnapshotRequest> {
 
-    public AgentRequestHandler(MatsimDataProvider data) {
-        super(AgentRequest.class, data);
+    public SnapshotRequestHandler(MatsimDataProvider data) {
+        super(SnapshotRequest.class, data);
     }
 
     @Override
-    public Answer process(AgentRequest body) {
+    public Answer process(SnapshotRequest body) {
 
         QuadTree.Rect bounds = body.getBounds().copyToMatsimRect();
         double startTime = body.getFromTimestep();

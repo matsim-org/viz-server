@@ -1,10 +1,10 @@
 package constants;
 
 public final class Path {
-    public static final String NETWORK = "data/network";
-    public static final String AGENTS = "data/agents";
-    public static final String CONFIGURATION = "data/configuration";
-    public static final String PLAN = "data/plan";
+    public static final String NETWORK = "network";
+    public static final String SNAPSHOTS = "snapshots";
+    public static final String CONFIGURATION = "configuration";
+    public static final String PLAN = "plan";
 
     private Path() {
     }

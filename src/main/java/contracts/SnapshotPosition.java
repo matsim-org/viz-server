@@ -2,14 +2,14 @@ package contracts;
 
 import org.matsim.vis.snapshotwriters.AgentSnapshotInfo;
 
-public class AgentSnapshotContract {
+public class SnapshotPosition {
 
     private String id;
     private int idIndex;
     private double x;
     private double y;
 
-    public AgentSnapshotContract(AgentSnapshotInfo info, int idIndex) {
+    public SnapshotPosition(AgentSnapshotInfo info, int idIndex) {
         this.id = info.getId().toString();
         this.idIndex = idIndex;
         this.x = info.getEasting();
