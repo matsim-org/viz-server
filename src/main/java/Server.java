@@ -1,7 +1,7 @@
 import constants.Params;
 import constants.Path;
 import data.MatsimDataProvider;
-import requestHandling.AgentRequestHandler;
+import requestHandling.SnapshotRequestHandler;
 import requestHandling.ConfigurationRequestHandler;
 import requestHandling.NetworkRequestHandler;
 import requestHandling.PlanRequestHandler;
@@ -92,7 +92,7 @@ public class Server {
 
         post(Path.CONFIGURATION, new ConfigurationRequestHandler(data));
         post(Path.NETWORK, new NetworkRequestHandler(data));
-        post(Path.AGENTS, new AgentRequestHandler(data));
+        post(Path.SNAPSHOTS, new SnapshotRequestHandler(data));
         post(Path.PLAN, new PlanRequestHandler(data));
     }
 }

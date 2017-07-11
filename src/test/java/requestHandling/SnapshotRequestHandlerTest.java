@@ -1,7 +1,7 @@
 package requestHandling;
 
 import constants.Params;
-import contracts.AgentRequest;
+import contracts.SnapshotRequest;
 import contracts.RectContract;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -10,13 +10,13 @@ import utils.TestUtils;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class AgentRequestHandlerTest {
+public class SnapshotRequestHandlerTest {
 
-    private static AgentRequestHandler testObject;
+    private static SnapshotRequestHandler testObject;
 
     @BeforeClass
     public static void setUp() {
-        testObject = new AgentRequestHandler(TestUtils.getDataProvider());
+        testObject = new SnapshotRequestHandler(TestUtils.getDataProvider());
     }
 
     @Test
@@ -24,7 +24,7 @@ public class AgentRequestHandlerTest {
 
         //arrange
         RectContract bounds = new RectContract(-1000, 1000, -1000, 1000);
-        AgentRequest request = new AgentRequest(bounds, 25210, 10, 1);
+        SnapshotRequest request = new SnapshotRequest(bounds, 25210, 10, 1);
 
         //act
         Answer answer = testObject.process(request);
@@ -40,7 +40,7 @@ public class AgentRequestHandlerTest {
 
         //arrange
         RectContract bounds = new RectContract(-1000, 1000, -1000, 1000);
-        AgentRequest request = new AgentRequest(bounds, -1, 10, 1);
+        SnapshotRequest request = new SnapshotRequest(bounds, -1, 10, 1);
 
         //act
         Answer answer = testObject.process(request);

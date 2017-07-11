@@ -11,7 +11,7 @@ import java.util.List;
 public class SnapshotContract {
 
     private double time;
-    private List<AgentSnapshotContract> positions = new ArrayList<>();
+    private List<SnapshotPosition> positions = new ArrayList<>();
     private byte[] encodedSnapshot;
 
     public SnapshotContract(double time) {
@@ -24,7 +24,7 @@ public class SnapshotContract {
     }
 
     public void add(AgentSnapshotInfo info, int idIndex) {
-        positions.add(new AgentSnapshotContract(info, idIndex));
+        positions.add(new SnapshotPosition(info, idIndex));
     }
 
     /**
@@ -33,7 +33,7 @@ public class SnapshotContract {
      */
     public void encodeSnapshot() {
 
-        positions.sort(Comparator.comparingInt(AgentSnapshotContract::getIdIndex));
+        positions.sort(Comparator.comparingInt(SnapshotPosition::getIdIndex));
 
         int valueSize = Float.BYTES;
         int numberOfPositionsValues = positions.size() * 3; // we are sending (x,y) coordinates and and idIndex
@@ -47,7 +47,7 @@ public class SnapshotContract {
         buffer.putFloat(numberOfPositionsValues);
 
         //put positions as x,y and idIndex
-        for (AgentSnapshotContract pos : positions) {
+        for (SnapshotPosition pos : positions) {
             buffer.putFloat((float) pos.getX());
             buffer.putFloat((float) pos.getY());
             buffer.putFloat((float) pos.getIdIndex());
@@ -68,7 +68,7 @@ public class SnapshotContract {
     /**
      * This method is for unittesting
      */
-    public List<AgentSnapshotContract> getAgentContracts() {
+    public List<SnapshotPosition> getAgentContracts() {
 
         return this.positions;
     }

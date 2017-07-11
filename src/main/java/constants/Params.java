@@ -8,11 +8,6 @@ public final class Params {
     public static final String ARG_PERIOD = "snapshotPeriod";
     public static final String ARG_PORT = "port";
 
-    public static final String BOUNDINGBOX_LEFT = "l";
-    public static final String BOUNDINGBOX_RIGHT = "r";
-    public static final String BOUNDINGBOX_TOP = "t";
-    public static final String BOUNDINGBOX_BOTTOM = "b";
-
     public static final String RESPONSETYPE_JSON = "application/json";
     public static final String RESPONSETYPE_TEXT = "text/plain";
     public static final String RESPONSETYPE_OCTET_STREAM = "application/octet-stream";

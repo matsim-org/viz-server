@@ -1,13 +1,13 @@
 package contracts;
 
-public class AgentRequest {
+public class SnapshotRequest {
 
     double speedFactor;
     private double fromTimestep;
     private int size;
     private RectContract bounds;
 
-    public AgentRequest(RectContract bounds, double fromTimestep, int size, double speedFactor) {
+    public SnapshotRequest(RectContract bounds, double fromTimestep, int size, double speedFactor) {
         this.bounds = bounds;
         this.fromTimestep = fromTimestep;
         this.size = size;
