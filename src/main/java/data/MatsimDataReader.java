@@ -1,6 +1,5 @@
 package data;
 
-import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
 import org.matsim.api.core.v01.population.Population;
@@ -66,13 +65,9 @@ final class MatsimDataReader {
 
     private NetworkData initNetworkData(Network network) {
 
-        QuadTree.Rect bounds = calculateBoundingRectangle(network);
-        NetworkData networkData = new NetworkData(bounds);
-
-        for (final Link link : network.getLinks().values()) {
-            networkData.addLink(link);
-        }
-        return networkData;
+        NetworkData data = new NetworkData();
+        data.addNetwork(network);
+        return data;
     }
 
     private void initSnapshotData(double snapshotPeriod) {

@@ -27,7 +27,8 @@ public class MatsimDataProvider {
     }
 
     public byte[] getLinks(QuadTree.Rect bounds) throws IOException {
-        return networkData.getLinks(bounds);
+        //return networkData.getLinks(bounds);
+        return networkData.getLinks();
     }
 
     public byte[] getSnapshots(QuadTree.Rect bounds, double fromTimestep, int numberOfTimesteps, double speedFactor)
