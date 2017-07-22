@@ -1,6 +1,5 @@
 package data;
 
-import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
 import org.matsim.api.core.v01.population.Population;
@@ -66,13 +65,9 @@ final class MatsimDataReader {
 
     private NetworkData initNetworkData(Network network) {
 
-        QuadTree.Rect bounds = calculateBoundingRectangle(network);
-        NetworkData networkData = new NetworkData(bounds);
-
-        for (final Link link : network.getLinks().values()) {
-            networkData.addLink(link);
-        }
-        return networkData;
+        NetworkData data = new NetworkData();
+        data.addNetwork(network);
+        return data;
     }
 
     private void initSnapshotData(double snapshotPeriod) {
@@ -89,25 +84,6 @@ final class MatsimDataReader {
         MatsimNetworkReader reader = new MatsimNetworkReader(net);
         reader.readFile(networkFilePath);
         return net;
-    }
-
-    private QuadTree.Rect calculateBoundingRectangle(Network network) {
-        double minEasting = Double.POSITIVE_INFINITY;
-        double maxEasting = Double.NEGATIVE_INFINITY;
-        double minNorthing = Double.POSITIVE_INFINITY;
-        double maxNorthing = Double.NEGATIVE_INFINITY;
-
-        for (Node node : network.getNodes().values()) {
-            minEasting = Math.min(minEasting, node.getCoord().getX());
-            maxEasting = Math.max(maxEasting, node.getCoord().getX());
-            minNorthing = Math.min(minNorthing, node.getCoord().getY());
-            maxNorthing = Math.max(maxNorthing, node.getCoord().getY());
-        }
-        //all nodes should lie within the bounding rectangle
-        maxEasting += 1;
-        maxNorthing += 1;
-
-        return new QuadTree.Rect(minEasting, minNorthing, maxEasting, maxNorthing);
     }
 
     SnapshotData readEventsFile(double snapshotPeriod) {

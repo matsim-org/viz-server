@@ -2,7 +2,6 @@ package requestHandling;
 
 import com.google.gson.Gson;
 import constants.Params;
-import contracts.ConfigurationRequest;
 import contracts.ConfigurationResponse;
 import contracts.RectContract;
 import org.junit.BeforeClass;
@@ -30,17 +29,15 @@ public class ConfigurationRequestHandlerTest {
         final double right = 1001;
         final double top = 401;
         final double bottom = -1000;
-        ConfigurationRequest request = new ConfigurationRequest(id);
 
         //act
-        Answer answer = testObject.process(request);
+        Answer answer = testObject.process(new Object());
 
         //assert
         assertNotNull(answer);
         assertEquals(Params.STATUS_OK, answer.getCode());
         RectContract bounds = new RectContract(left, right, top, bottom);
         ConfigurationResponse response = new Gson().fromJson(answer.getText(), ConfigurationResponse.class);
-        assertEquals(id, response.getId());
         assertEquals(bounds.getLeft(), response.getBounds().getLeft());
         assertEquals(bounds.getRight(), response.getBounds().getRight());
         assertEquals(bounds.getTop(), response.getBounds().getTop());

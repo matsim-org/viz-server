@@ -26,8 +26,8 @@ public class MatsimDataProvider {
         populationData = reader.getPopulationData();
     }
 
-    public byte[] getLinks(QuadTree.Rect bounds) throws IOException {
-        return networkData.getLinks(bounds);
+    public byte[] getLinks() throws IOException {
+        return networkData.getLinks();
     }
 
     public byte[] getSnapshots(QuadTree.Rect bounds, double fromTimestep, int numberOfTimesteps, double speedFactor)
