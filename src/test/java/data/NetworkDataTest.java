@@ -21,7 +21,7 @@ public class NetworkDataTest {
     private static Network network;
     private NetworkData testObject;
 
-    @BeforeClass
+   /* @BeforeClass
     public static void setUpClass() {
         network = TestUtils.loadTestNetwork();
     }
@@ -106,4 +106,5 @@ public class NetworkDataTest {
         assertEquals(bounds.getRight(), 10000, 0.001);
         assertEquals(bounds.getBottom(), -10000, 0.001);
     }
+    */
 }

@@ -86,25 +86,6 @@ final class MatsimDataReader {
         return net;
     }
 
-    private QuadTree.Rect calculateBoundingRectangle(Network network) {
-        double minEasting = Double.POSITIVE_INFINITY;
-        double maxEasting = Double.NEGATIVE_INFINITY;
-        double minNorthing = Double.POSITIVE_INFINITY;
-        double maxNorthing = Double.NEGATIVE_INFINITY;
-
-        for (Node node : network.getNodes().values()) {
-            minEasting = Math.min(minEasting, node.getCoord().getX());
-            maxEasting = Math.max(maxEasting, node.getCoord().getX());
-            minNorthing = Math.min(minNorthing, node.getCoord().getY());
-            maxNorthing = Math.max(maxNorthing, node.getCoord().getY());
-        }
-        //all nodes should lie within the bounding rectangle
-        maxEasting += 1;
-        maxNorthing += 1;
-
-        return new QuadTree.Rect(minEasting, minNorthing, maxEasting, maxNorthing);
-    }
-
     SnapshotData readEventsFile(double snapshotPeriod) {
 
         Config config = ConfigUtils.createConfig();

@@ -7,21 +7,20 @@ import org.matsim.core.utils.collections.QuadTree;
 
 import java.io.IOException;
 
-public class NetworkRequestHandler extends AbstractPostRequestHandler<RectContract> {
+public class NetworkRequestHandler extends AbstractPostRequestHandler<Object> {
 
     public NetworkRequestHandler(MatsimDataProvider dataProvider) {
 
-        super(RectContract.class, dataProvider);
+        super(Object.class, dataProvider);
     }
 
     @Override
-    public Answer process(RectContract body) {
-        QuadTree.Rect bounds = body.copyToMatsimRect();
+    public Answer process(Object body) {
 
         byte[] bytes;
 
         try {
-            bytes = dataProvider.getLinks(bounds);
+            bytes = dataProvider.getLinks();
         } catch (IOException e) {
             e.printStackTrace();
             return new Answer(Params.STATUS_INTERNAL_SERVER_ERROR, "Sorry");
