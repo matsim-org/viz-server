@@ -8,6 +8,7 @@ import org.apache.logging.log4j.Logger;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
+import javax.persistence.RollbackException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
@@ -38,6 +39,8 @@ public class UserService {
         credentials.setUser(user);
         try {
             return userDAO.saveCredentials(credentials).getUser();
+        } catch (RollbackException e) {
+            throw new Exception("user already exists");
         } catch (Exception e) {
             logger.error(e);
         }

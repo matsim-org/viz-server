@@ -66,8 +66,8 @@ public class UserServiceTest {
         assertEquals(mail, first.getEMail());
     }
 
-    @Test
-    public void createUser_userExists_null() throws Exception {
+    @Test(expected = Exception.class)
+    public void createUser_userExists_exception() throws Exception {
         final char[] password = "longpassword".toCharArray();
         final String mail = "mail";
 
