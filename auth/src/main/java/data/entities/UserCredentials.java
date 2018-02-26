@@ -1,4 +1,4 @@
-package data;
+package data.entities;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -16,7 +16,7 @@ public class UserCredentials extends AbstractEntity {
     private String password;
     private byte[] salt;
 
-    @OneToOne(cascade = CascadeType.PERSIST)
+    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     @JoinColumn(name = "user_id")
     private User user;
 }
