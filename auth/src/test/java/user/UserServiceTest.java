@@ -1,9 +1,9 @@
+package user;
+
 import data.entities.User;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import user.UserDAO;
-import user.UserService;
 
 import static junit.framework.Assert.fail;
 import static junit.framework.TestCase.assertEquals;

@@ -56,7 +56,6 @@ public abstract class AbstractDAO {
         EntityManager em = getEntityManager();
         em.getTransaction().begin();
         for (T entity : entities) {
-            //T merged = em.merge(entity);
             em.remove(entity);
         }
         em.getTransaction().commit();
