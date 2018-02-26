@@ -1,7 +1,7 @@
 package user;
 
-import data.User;
-import data.UserCredentials;
+import data.entities.User;
+import data.entities.UserCredentials;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -36,7 +36,16 @@ public class UserService {
         User user = new User();
         user.setEMail(eMail);
         credentials.setUser(user);
-        return userDAO.saveCredentials(credentials).getUser();
+        try {
+            return userDAO.saveCredentials(credentials).getUser();
+        } catch (Exception e) {
+            logger.error(e);
+        }
+        return null;
+    }
+
+    public void deleteUser(User user) {
+        userDAO.deleteUser(user);
     }
 
     private boolean isValidPassword(char[] password) {

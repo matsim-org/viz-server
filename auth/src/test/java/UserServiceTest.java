@@ -1,6 +1,8 @@
-import data.User;
+import data.entities.User;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import user.UserDAO;
 import user.UserService;
 
 import static junit.framework.Assert.fail;
@@ -10,10 +12,16 @@ import static junit.framework.TestCase.assertNull;
 public class UserServiceTest {
 
     private UserService testObject;
+    private UserDAO userDAO = new UserDAO();
 
     @Before
     public void setUp() {
         testObject = new UserService();
+    }
+
+    @After
+    public void tearDown() {
+        userDAO.removeAllUsers();
     }
 
     @Test(expected = Exception.class)
