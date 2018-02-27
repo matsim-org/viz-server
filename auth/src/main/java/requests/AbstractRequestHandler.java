@@ -9,7 +9,8 @@ import spark.Route;
 
 public abstract class AbstractRequestHandler<T> implements Route {
 
-    private static final String RESPONSETYPE_JSON = "application/json";
+    private static final String TYPE_JSON = "application/json";
+    private static final String TYPE_FORM_URL_ENCODED = "application/x-www-form-urlencoded";
 
     private static Gson gson = new GsonBuilder().
             registerTypeHierarchyAdapter(Iterable.class, new IterableSerializer()).
@@ -37,7 +38,10 @@ public abstract class AbstractRequestHandler<T> implements Route {
 
         T body;
         try {
-            body = processBody(request.body());
+            if (request.contentType().equals(TYPE_JSON))
+                body = parseJsonBody(request.body());
+            else
+                body = parseBody(request);
         } catch (Exception e) {
             return Answer.badRequest(e.getMessage());
         }
@@ -48,7 +52,7 @@ public abstract class AbstractRequestHandler<T> implements Route {
     private String createResponse(Answer answer, Response response) {
 
         response.status(answer.getStatusCode());
-        response.type(RESPONSETYPE_JSON);
+        response.type(TYPE_JSON);
 
         if (answer.isOk()) {
             response.body(answer.getText());
@@ -59,7 +63,19 @@ public abstract class AbstractRequestHandler<T> implements Route {
         return response.body();
     }
 
-    private T processBody(String body) throws Exception {
+    /**
+     * AbstractRequestHandler only handles JSON requests. All other request-types must be parsed by the extending
+     * class.
+     *
+     * @param request The request
+     * @return parsed request
+     * @throws Exception if the request could not be parsed with a meaningful message
+     */
+    protected T parseBody(Request request) throws Exception {
+        throw new Exception("content type is not supported for this request");
+    }
+
+    private T parseJsonBody(String body) throws Exception {
 
         T contract;
         try {

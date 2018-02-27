@@ -18,6 +18,7 @@ import java.util.Base64;
 public class UserService {
     private static final Logger logger = LogManager.getLogger(UserService.class);
     private static final SecureRandom random = new SecureRandom();
+    private static final String algorithm = "PBKDF2WithHmacSHA512";
     private static final int iterations = 1024;
     private static final int keyLength = 256;
     private static final int minPasswordLength = 10;
@@ -47,6 +48,20 @@ public class UserService {
         return null;
     }
 
+    public User authenticate(String eMail, char[] password) throws Exception {
+
+        UserCredentials credentials = userDAO.findUserCredentials(eMail);
+
+        if (credentials == null) throw new Exception("username was not found.");
+
+        String hashedPassword = getEncodedPassword(password, credentials.getSalt());
+
+        if (!doPasswordsMatch(credentials.getPassword(), hashedPassword)) {
+            throw new Exception("password did not match.");
+        }
+        return credentials.getUser();
+    }
+
     public void deleteUser(User user) {
         userDAO.deleteUser(user);
     }
@@ -66,25 +81,36 @@ public class UserService {
         return true;
     }
 
-    private UserCredentials createUserCredentials(char[] password) throws InvalidKeySpecException {
+    private boolean doPasswordsMatch(String password, String otherPathword) {
+        return password.equals(otherPathword);
+    }
+
+    private UserCredentials createUserCredentials(char[] password) throws Exception {
+
+
+        byte[] salt = getSalt();
+
+        String hashedPassword = getEncodedPassword(password, salt);
+        UserCredentials credentials = new UserCredentials();
+        credentials.setPassword(hashedPassword);
+        credentials.setSalt(salt);
+        return credentials;
+    }
+
+    private String getEncodedPassword(char[] password, byte[] salt) throws Exception {
         try {
             if (keyFactory == null) {
-                keyFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512");
+                keyFactory = SecretKeyFactory.getInstance(algorithm);
             }
-            byte[] salt = getSalt();
             PBEKeySpec spec = new PBEKeySpec(password, salt, iterations, keyLength);
             SecretKey key = keyFactory.generateSecret(spec);
             byte[] res = key.getEncoded();
-
-            UserCredentials credentials = new UserCredentials();
-            credentials.setPassword(Base64.getEncoder().encodeToString(res));
-            credentials.setSalt(salt);
-            return credentials;
-        } catch (NoSuchAlgorithmException e) {
+            return Base64.getEncoder().encodeToString(res);
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
             logger.error(e.getMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
+            throw new Exception("failed to hash passwords");
         }
-        return null;
     }
 
     private byte[] getSalt() {

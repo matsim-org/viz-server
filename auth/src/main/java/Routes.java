@@ -1,3 +1,4 @@
+import token.TokenRequestHandler;
 import user.CreateUserRequestHandler;
 
 import static spark.Spark.post;
