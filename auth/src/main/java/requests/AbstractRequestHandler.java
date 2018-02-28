@@ -10,7 +10,7 @@ import spark.Route;
 public abstract class AbstractRequestHandler<T> implements Route {
 
     private static final String TYPE_JSON = "application/json";
-    private static final String TYPE_FORM_URL_ENCODED = "application/x-www-form-urlencoded";
+
 
     private static Gson gson = new GsonBuilder().
             registerTypeHierarchyAdapter(Iterable.class, new IterableSerializer()).
@@ -22,7 +22,7 @@ public abstract class AbstractRequestHandler<T> implements Route {
         this.contractClass = contractClass;
     }
 
-    protected Gson getGson() {
+    private Gson getGson() {
         return gson;
     }
 
@@ -38,12 +38,12 @@ public abstract class AbstractRequestHandler<T> implements Route {
 
         T body;
         try {
-            if (request.contentType().equals(TYPE_JSON))
+            if (request.contentType() != null && request.contentType().equals(TYPE_JSON))
                 body = parseJsonBody(request.body());
             else
                 body = parseBody(request);
-        } catch (Exception e) {
-            return Answer.badRequest(e.getMessage());
+        } catch (RequestException e) {
+            return Answer.badRequest(e.getErrorCode(), e.getMessage());
         }
 
         return process(body);
@@ -53,13 +53,8 @@ public abstract class AbstractRequestHandler<T> implements Route {
 
         response.status(answer.getStatusCode());
         response.type(TYPE_JSON);
-
-        if (answer.isOk()) {
-            response.body(answer.getText());
-        } else {
-            String json = getGson().toJson(new ErrorResponse(answer.getStatusCode(), answer.getText()));
-            response.body(json);
-        }
+        String json = getGson().toJson(answer.getResponse());
+        response.body(json);
         return response.body();
     }
 
@@ -69,19 +64,19 @@ public abstract class AbstractRequestHandler<T> implements Route {
      *
      * @param request The request
      * @return parsed request
-     * @throws Exception if the request could not be parsed with a meaningful message
+     * @throws RequestException if the request could not be parsed with a meaningful message
      */
-    protected T parseBody(Request request) throws Exception {
-        throw new Exception("content type is not supported for this request");
+    protected T parseBody(Request request) throws RequestException {
+        throw new RequestException(ErrorCode.UNSUPPORTED_CONTENT_TYPE, "content type is not supported for this request");
     }
 
-    private T parseJsonBody(String body) throws Exception {
+    private T parseJsonBody(String body) throws RequestException {
 
         T contract;
         try {
             contract = getGson().fromJson(body, contractClass);
         } catch (JsonSyntaxException e) {
-            throw new Exception("the request body could not be parsed");
+            throw new RequestException(ErrorCode.INVALID_REQUEST, "the request body could not be parsed");
         }
         return contract;
     }

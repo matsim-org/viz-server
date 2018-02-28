@@ -1,16 +1,16 @@
 package data.entities;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
-import javax.persistence.Entity;
-import javax.persistence.ForeignKey;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 import java.util.Date;
 
 @Entity
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@EqualsAndHashCode(callSuper = true)
 @Data
-class Token {
+public abstract class Token extends AbstractEntity {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "TOKEN_USER_FK"))

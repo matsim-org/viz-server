@@ -16,15 +16,14 @@ public class TokenService {
 
     private static final Logger logger = LogManager.getLogger();
 
-    UserService userService = new UserService();
-    TokenDAO tokenDAO = new TokenDAO();
+    private UserService userService = new UserService();
+    private TokenDAO tokenDAO = new TokenDAO();
 
-    public AccessTokenResponse grantWithPassword(String username, char[] password) throws Exception {
+    public AccessToken grantWithPassword(String username, char[] password) throws Exception {
         User user = userService.authenticate(username, password);
         RefreshToken refreshToken = createRefreshToken(user);
-        AccessToken accessToken = createAccessToken(user, refreshToken);
 
-        return new AccessTokenResponse(accessToken);
+        return createAccessToken(user, refreshToken);
     }
 
     private AccessToken createAccessToken(User user, RefreshToken refreshToken) {
@@ -43,6 +42,7 @@ public class TokenService {
             token.setToken(jwt);
         } catch (UnsupportedEncodingException e) {
             logger.error(e);
+            return null;
         }
         return tokenDAO.persist(token);
     }
@@ -50,6 +50,7 @@ public class TokenService {
     private RefreshToken createRefreshToken(User user) {
         String dummySecret = "dummy secret";
         RefreshToken token = new RefreshToken();
+        token.setUser(user);
 
         String userId = Long.toString(user.getId());
         try {

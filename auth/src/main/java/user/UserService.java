@@ -39,6 +39,7 @@ public class UserService {
         user.setEMail(eMail);
         credentials.setUser(user);
         try {
+            logger.info("creting user with eMail: " + user.getEMail());
             return userDAO.saveCredentials(credentials).getUser();
         } catch (RollbackException e) {
             throw new Exception("user already exists");

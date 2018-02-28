@@ -3,6 +3,7 @@ package user;
 import data.entities.User;
 import requests.AbstractRequestHandler;
 import requests.Answer;
+import requests.ErrorCode;
 
 public class CreateUserRequestHandler extends AbstractRequestHandler<CreateUserRequest> {
 
@@ -18,9 +19,9 @@ public class CreateUserRequestHandler extends AbstractRequestHandler<CreateUserR
 
         try {
             User user = userService.createUser(body.eMail, body.password, body.passwordRepeated);
-            answer = Answer.ok(getGson().toJson(user));
+            answer = Answer.ok(user);
         } catch (Exception e) {
-            answer = Answer.internalError(e.getMessage());
+            answer = Answer.internalError(ErrorCode.RESOURCE_EXISTS, e.getMessage());
         }
         return answer;
     }

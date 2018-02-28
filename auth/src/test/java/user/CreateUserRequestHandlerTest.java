@@ -1,13 +1,14 @@
 package user;
 
-import com.google.gson.Gson;
 import data.entities.User;
 import org.junit.Before;
 import org.junit.Test;
 import requests.Answer;
+import requests.ErrorResponse;
 import requests.HttpStatus;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -36,8 +37,8 @@ public class CreateUserRequestHandlerTest {
 
         Answer answer = testObject.process(request);
 
-        assertEquals(HttpStatus.STATUS_INTERNAL_SERVER_ERROR, answer.getStatusCode());
-        assertEquals(errorMessage, answer.getText());
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, answer.getStatusCode());
+        assertTrue(answer.getResponse() instanceof ErrorResponse);
 
     }
 
@@ -56,7 +57,7 @@ public class CreateUserRequestHandlerTest {
 
         Answer answer = testObject.process(request);
 
-        assertEquals(HttpStatus.STATUS_OK, answer.getStatusCode());
-        assertEquals(new Gson().toJson(user), answer.getText());
+        assertEquals(HttpStatus.OK, answer.getStatusCode());
+        assertEquals(user, answer.getResponse());
     }
 }

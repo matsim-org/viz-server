@@ -1,12 +1,16 @@
 package requests;
 
-class ErrorResponse {
+import lombok.Getter;
 
-    private int statusCode;
-    private String message;
+@Getter
+public class ErrorResponse {
 
-    ErrorResponse(int statusCode, String message) {
-        this.statusCode = statusCode;
-        this.message = message;
+    private final String error;
+    private final String error_description;
+
+    ErrorResponse(String errorCode, String message) {
+
+        this.error = errorCode;
+        this.error_description = message;
     }
 }
