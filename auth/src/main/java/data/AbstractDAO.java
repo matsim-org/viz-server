@@ -64,7 +64,8 @@ public abstract class AbstractDAO {
 
     protected <T> void removeOne(T entity, EntityManager entityManager) {
         entityManager.getTransaction().begin();
-        entityManager.remove(entity);
+        T mergedEntity = entityManager.merge(entity);
+        entityManager.remove(mergedEntity);
         entityManager.getTransaction().commit();
         entityManager.close();
     }
