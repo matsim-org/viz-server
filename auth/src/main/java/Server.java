@@ -4,6 +4,7 @@ import org.apache.logging.log4j.Logger;
 import user.UserService;
 
 import static spark.Spark.port;
+import static spark.Spark.staticFiles;
 
 public class Server {
     private static final Logger logger = LogManager.getLogger(Server.class);
@@ -22,6 +23,7 @@ public class Server {
         final int port = 3000;
 
         port(port);
+        staticFiles.location("/public");
         Routes.initialize();
 
         logger.info("\n\nStarted Server on Port: " + port + "\n");
