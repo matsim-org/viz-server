@@ -3,20 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <title>Log In</title>
+
+    <style>
+	html, body {
+		height: 100%;
+		width: 100%;
+		padding: 0;
+		margin: 0;
+		font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+	}
+
+	.content {
+		display: flex;
+		flex-direction: row;
+		justify-content: center;
+		align-items: center;
+		height: 100%
+	}
+
+	.login {
+		min-width: 20rem;
+	}
+
+	.error {
+		display: flex;
+		flex-direction: row;
+		justify-content: center;
+		color: white;
+		background-color: #EF5350;
+		border-radius: 2px;
+		padding: 0.4rem 0 0.4rem 0.5rem;
+		margin: 0.5rem 0 0.5rem 0;
+	}
+
+	.loginForm {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.inputElement {
+		display: flex;
+		flex-direction: column;
+		padding-bottom: 0.5rem;
+	}
+
+	.secondaryText {
+		color: rgb(94, 94, 94);
+		font-size: 0.8rem;
+	}
+
+	input {
+		min-height: 1.5rem;
+		padding: 0.2rem 0.4rem;
+		margin-top: 0.16rem;
+		border: 1px solid black;
+		border-radius: 2px;
+	}
+
+	button {
+		align-self: flex-end;
+		min-width: 5rem;
+		margin-top: 0.5rem;
+		border: 1px solid black;
+		border-radius: 2px;
+		background-color: transparent;
+		color: currentColor;
+		min-height: 2rem;
+		transition-duration: 0.2s;
+		cursor: pointer;
+	}
+
+	button:hover {
+		background-color: #03A9F4;
+	}
+
+	button:active {
+		background-color: #0091EA;
+		color: white;
+	}
+
+    </style>
 </head>
 <body>
-<form action="/login/" method="post">
-    <label for="username">Username</label>
-    <input type="text" id="username" name="username" required/>
-    <label for="password">Password</label>
-    <input type="password" id="password" name="password" required/>
-    <button type="submit">Login</button>
-</form>
-
-{{#error}}
-    <span>{{errorMessage}}</span>
-{{/error}}
-
-
+<div class="content">
+    <div class="login">
+        <h2>Login</h2>
+        <form class="loginForm" action="/login/" method="post">
+            <div class="inputElement">
+                <label for="username" class="secondaryText">Username</label>
+                <input type="text" id="username" name="username" required/>
+            </div>
+            <div class="inputElement">
+                <label for="password" class="secondaryText">Password</label>
+                <input type="password" id="password" name="password" required/>
+            </div>
+            {{#error}}
+                <div class="error">
+                    <span>{{errorMessage}}</span>
+                </div>
+            {{/error}}
+            <button type="submit">Login</button>
+        </form>
+    </div>
+</div>
 </body>
 </html>
