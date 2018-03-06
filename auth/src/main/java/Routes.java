@@ -18,6 +18,7 @@ public class Routes {
 
         put(USER, new CreateUserRequestHandler());
         post(TOKEN, new TokenRequestHandler());
+        post(AUTHORIZE, new AuthorizationRequestHandler());
         get(AUTHORIZE, new AuthorizationRequestHandler());
         post(LOGIN, new LoginUserRequestHandler());
 
