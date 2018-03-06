@@ -3,6 +3,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import user.UserService;
 
+import java.io.UnsupportedEncodingException;
+
 import static spark.Spark.port;
 import static spark.Spark.staticFiles;
 
@@ -16,10 +18,14 @@ public class Server {
 
         if (ca.debug) insertDummyUsersIntoDatabase();
 
-        startSparkServer();
+        try {
+            startSparkServer();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
     }
 
-    private static void startSparkServer() {
+    private static void startSparkServer() throws UnsupportedEncodingException {
         final int port = 3000;
 
         port(port);

@@ -8,6 +8,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import user.UserService;
 
+import java.io.UnsupportedEncodingException;
+
 import static org.junit.Assert.*;
 
 public class TokenServiceTest {
@@ -24,7 +26,7 @@ public class TokenServiceTest {
     }
 
     @Before
-    public void setUp() {
+    public void setUp() throws UnsupportedEncodingException {
         testObject = new TokenService();
     }
 

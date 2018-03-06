@@ -11,6 +11,7 @@ import requests.HttpStatus;
 import spark.Request;
 import spark.Response;
 
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,7 +25,7 @@ public class TokenRequestHandlerTest {
     private TokenRequestHandler testObject;
 
     @Before
-    public void setUp() {
+    public void setUp() throws UnsupportedEncodingException {
         testObject = new TokenRequestHandler();
     }
 

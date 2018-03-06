@@ -22,6 +22,11 @@ public class UserDAO extends AbstractDAO {
         return executeQuery(query -> query.selectFrom(credentials).where(credentials.user.eMail.eq(eMail)).fetchOne());
     }
 
+    public User findUser(long id) {
+        QUser user = QUser.user;
+        return executeQuery(query -> query.selectFrom(user).where(user.id.eq(id)).fetchOne());
+    }
+
     public void deleteUser(User user) {
         QUserCredentials userCredentials = QUserCredentials.userCredentials;
         UserCredentials credentials = executeQuery(query -> query.selectFrom(userCredentials).where(userCredentials.user.eq(user)).fetchFirst());

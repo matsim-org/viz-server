@@ -16,6 +16,10 @@ class TokenDAO extends AbstractDAO {
         return persistOne(token);
     }
 
+    public IdToken persist(IdToken token) {
+        return persistOne(token);
+    }
+
     public void removeAllTokensForUser(User user) {
         EntityManager em = getEntityManager();
         em.getTransaction().begin();
