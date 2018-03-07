@@ -4,16 +4,14 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import data.entities.AccessToken;
-import data.entities.IdToken;
-import data.entities.RefreshToken;
-import data.entities.User;
+import data.entities.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import user.UserService;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
+import java.util.UUID;
 
 public class TokenService {
 
@@ -40,6 +38,10 @@ public class TokenService {
     }
 
     public IdToken createIdToken(User user) {
+        return createIdToken(user, "");
+    }
+
+    public IdToken createIdToken(User user, String nonce) {
 
         IdToken token = new IdToken();
         token.setUser(user);
@@ -48,6 +50,7 @@ public class TokenService {
         String userId = Long.toString(user.getId());
 
         String jwt = JWT.create().withSubject(userId)
+                .withClaim("nonce", nonce)
                 .withIssuedAt(token.getCreatedAt())
                 .sign(algorithm);
         token.setToken(jwt);
@@ -61,6 +64,16 @@ public class TokenService {
 
         String userId = decodedToken.getSubject();
         return userService.findUser(Long.parseLong(userId));
+    }
+
+    public Token createAuthorizationCode(User user, String clientId) {
+
+        AuthorizationCode code = new AuthorizationCode();
+        code.setUser(user);
+
+        String token = UUID.randomUUID().toString();
+        code.setToken(token);
+        return tokenDAO.persist(code, clientId);
     }
 
     private AccessToken createAccessToken(User user, RefreshToken refreshToken) {

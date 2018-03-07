@@ -20,6 +20,17 @@ class TokenDAO extends AbstractDAO {
         return persistOne(token);
     }
 
+    public AuthorizationCode persist(AuthorizationCode token, String clientId) {
+
+        EntityManager em = getEntityManager();
+        em.getTransaction().begin();
+        token.setClient(em.getReference(Client.class, clientId));
+        em.persist(token);
+        em.getTransaction().commit();
+        em.close();
+        return token;
+    }
+
     public void removeAllTokensForUser(User user) {
         EntityManager em = getEntityManager();
         em.getTransaction().begin();

@@ -1,4 +1,6 @@
+import client.ClientService;
 import com.beust.jcommander.JCommander;
+import data.entities.Client;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import user.UserService;
@@ -37,9 +39,15 @@ public class Server {
 
     private static void insertDummyUsersIntoDatabase() {
         UserService userService = new UserService();
+        ClientService clientService = new ClientService();
+        Client client;
         try {
             userService.createUser("user@mail.de", "longpassword".toCharArray(), "longpassword".toCharArray());
             userService.createUser("otherUser@mail.de", "longpassword".toCharArray(), "longpassword".toCharArray());
+
+            client = clientService.createClient("test client", "http://localhost:3001/callback");
+            logger.info(client.getId().toString());
+
         } catch (Exception e) {
             System.out.println("error while creating dummy users.");
         }
