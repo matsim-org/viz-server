@@ -1,16 +1,15 @@
 package authorization;
 
-import client.ClientDAO;
+import client.ClientService;
 import data.entities.*;
 import token.TokenService;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
-import java.util.UUID;
 
 public class AuthorizationService {
 
-    private ClientDAO clientDAO = new ClientDAO();
+    private ClientService clientService = new ClientService();
     private TokenService tokenService = new TokenService();
 
     AuthorizationService() throws UnsupportedEncodingException {
@@ -19,15 +18,9 @@ public class AuthorizationService {
     public boolean isValidClientInformation(AuthenticationRequest request) {
 
         boolean isValid = false;
-        UUID uuid;
-        //check whether client_id is registered
-        try {
 
-            uuid = UUID.fromString(request.getClientId());
-        } catch (IllegalArgumentException e) {
-            return false;
-        }
-        Client client = clientDAO.findClient(uuid);
+        //check whether client_id is registered
+        Client client = clientService.findClient(request.getClientId());
 
         //check whether redirect uri is registered
         if (client != null) {

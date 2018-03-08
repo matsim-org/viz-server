@@ -12,13 +12,12 @@ import java.util.Arrays;
 @Getter
 public class AuthenticationRequest {
 
-    private static final String NONCE = "nonce";
-
-    private static final String RESPONSE_TYPE = "response_type";
-    private static final String REDIRECT_URI = "redirect_uri";
-    private static final String SCOPE = "scope";
-    private static final String CLIENT_ID = "client_id";
-    private static final String STATE = "state";
+    public static final String RESPONSE_TYPE = "response_type";
+    public static final String REDIRECT_URI = "redirect_uri";
+    public static final String SCOPE = "scope";
+    public static final String CLIENT_ID = "client_id";
+    public static final String STATE = "state";
+    public static final String NONCE = "nonce";
 
     AuthenticationRequest(QueryParamsMap params) throws RequestException, URIException {
 
@@ -46,10 +45,10 @@ public class AuthenticationRequest {
 
     private void initializeRequiredParameters(QueryParamsMap params) throws RequestException, URIException {
 
+        initRedirectURI(params);
         initScope(params);
         initResponseType(params);
         clientId = extractRequiredValue(CLIENT_ID, params);
-        initRedirectURI(params);
 
         if (!this.type.equals(Type.AuthCode))
             nonce = extractRequiredValue(NONCE, params);

@@ -1,16 +1,16 @@
 package data.entities;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.persistence.Entity;
 import javax.persistence.ForeignKey;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
-@EqualsAndHashCode(callSuper = true)
+@Getter
+@Setter
 @Entity
-@Data
 public class RedirectUri extends AbstractEntity {
     private String uri;
 

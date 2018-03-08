@@ -6,6 +6,7 @@ import org.apache.logging.log4j.Logger;
 import user.UserService;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
 
 import static spark.Spark.port;
 import static spark.Spark.staticFiles;
@@ -45,7 +46,7 @@ public class Server {
             userService.createUser("user@mail.de", "longpassword".toCharArray(), "longpassword".toCharArray());
             userService.createUser("otherUser@mail.de", "longpassword".toCharArray(), "longpassword".toCharArray());
 
-            client = clientService.createClient("test client", "http://localhost:3001/callback");
+            client = clientService.createClient("test client", URI.create("http://localhost:3001/callback"));
             logger.info(client.getId().toString());
 
         } catch (Exception e) {
