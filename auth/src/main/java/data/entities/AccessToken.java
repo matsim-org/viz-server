@@ -10,7 +10,6 @@ import javax.persistence.Entity;
 @Data
 public class AccessToken extends Token {
 
-    private int expiresIn = 84600;
     private String refreshToken;
 
     public AccessToken() {

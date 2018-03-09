@@ -11,7 +11,8 @@ import requests.HttpStatus;
 import spark.Request;
 import spark.Response;
 
-import java.io.UnsupportedEncodingException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,7 +26,7 @@ public class TokenRequestHandlerTest {
     private TokenRequestHandler testObject;
 
     @Before
-    public void setUp() throws UnsupportedEncodingException {
+    public void setUp() {
         testObject = new TokenRequestHandler();
     }
 
@@ -128,6 +129,7 @@ public class TokenRequestHandlerTest {
         testToken.setUser(new User());
         testToken.setToken("token");
         testToken.setId(1);
+        testToken.setExpiresAt(Instant.now().plus(Duration.ofHours(1)));
 
         TokenService mockService = mock(TokenService.class);
         testObject.tokenService = mockService;

@@ -3,13 +3,14 @@ package authorization;
 import data.entities.User;
 import requests.ErrorCode;
 import requests.RequestException;
-import spark.*;
-import spark.template.mustache.MustacheTemplateEngine;
+import spark.Request;
+import spark.Response;
+import spark.Route;
+import spark.Session;
 import token.TokenService;
+import user.LoginPrompt;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -17,20 +18,17 @@ public class AuthorizationRequestHandler implements Route {
 
     private static Map<String, AuthenticationRequest> loginSession = new ConcurrentHashMap<>();
 
-    private TokenService tokenService = new TokenService();
-    private AuthorizationService authService = new AuthorizationService();
+    TokenService tokenService = new TokenService();
+    AuthorizationService authService = new AuthorizationService();
 
-    public AuthorizationRequestHandler() throws UnsupportedEncodingException {
+    public AuthorizationRequestHandler() {
     }
 
-    private static String renderLogin() {
-        return new MustacheTemplateEngine().render(new ModelAndView(new HashMap<>(), "login.mustache"));
-    }
-
+    @SuppressWarnings("SuspiciousMethodCalls")
     @Override
     public Object handle(Request request, Response response) {
 
-        AuthenticationRequest authRequest = null;
+        AuthenticationRequest authRequest;
 
         //parse the request
         try {
@@ -41,7 +39,6 @@ public class AuthorizationRequestHandler implements Route {
             return redirectIfPossible(e.getErrorCode(), e.getMessage(), request, response);
         }
 
-        //validate client and redirect_uri
         if (!authService.isValidClientInformation(authRequest)) {
             return errorResponse(ErrorCode.UNAUTHORIZED_CLIENT,
                                  "client was not registered or redirect url was not registered");
@@ -55,7 +52,7 @@ public class AuthorizationRequestHandler implements Route {
         } catch (Exception e) {
             request.session(true);
             loginSession.put(request.session().id(), authRequest);
-            return renderLogin();
+            return LoginPrompt.renderLogin();
         }
 
         //delete login session
@@ -86,7 +83,7 @@ public class AuthorizationRequestHandler implements Route {
 
     private Object redirectIfPossible(String code, String message, Request request, Response response) {
         if (request.queryMap().hasKey(AuthenticationRequest.REDIRECT_URI))
-            return redirectOnError(URI.create(request.queryMap(AuthenticationRequest.REDIRECT_URI).value()), code, message, response);
+            return redirectOnError(URI.create(request.queryMap().get(AuthenticationRequest.REDIRECT_URI).value()), code, message, response);
         return errorResponse(code, message);
     }
 

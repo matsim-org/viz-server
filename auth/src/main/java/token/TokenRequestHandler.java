@@ -23,7 +23,7 @@ public class TokenRequestHandler extends AbstractRequestHandler<TokenRequest> {
 
     TokenService tokenService = new TokenService();
 
-    public TokenRequestHandler() throws UnsupportedEncodingException {
+    public TokenRequestHandler() {
         super(TokenRequest.class);
     }
 

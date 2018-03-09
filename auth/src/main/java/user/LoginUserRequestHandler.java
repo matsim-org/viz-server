@@ -9,16 +9,14 @@ import spark.Route;
 import spark.template.mustache.MustacheTemplateEngine;
 import token.TokenService;
 
-import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
 import java.util.Map;
 
 public class LoginUserRequestHandler implements Route {
 
-    UserService userService = new UserService();
-    TokenService tokenService;
+    private UserService userService = new UserService();
+    private TokenService tokenService;
 
-    public LoginUserRequestHandler() throws UnsupportedEncodingException {
+    public LoginUserRequestHandler() {
         tokenService = new TokenService();
     }
 
@@ -29,38 +27,31 @@ public class LoginUserRequestHandler implements Route {
     @Override
     public Object handle(Request request, Response response) {
 
-        request.session(true);
-
-        //get username and password from request
         String username = request.queryParams("username");
         char[] password = request.queryParams("password").toCharArray();
 
         //if no params were sent show login
         if (username == null || password.length == 0) {
-            return render(new HashMap<>(), "login.mustache");
+            return LoginPrompt.renderLogin();
         }
 
-        //authenticate in user service
         User user;
         try {
             user = userService.authenticate(username, password);
         } catch (Exception e) {
             //if user was not authenticated display login page with error message
-            Map<String, Object> parameters = new HashMap<>();
-            parameters.put("error", true);
-            parameters.put("errorMessage", "username or password was wrong");
-            return render(parameters, "login.mustache");
+            return LoginPrompt.renderLoginWithError();
         }
 
-        //create a token
         IdToken idToken = tokenService.createIdToken(user);
 
-        //put token into a secure httpOnly cookie
+        //put token into a httpOnly cookie
+        //TODO: make it a secure cookie when TLS is implemented
         response.cookie("/", "id_token", idToken.getToken(), -1, false, true);
 
-        //redirect to route which redirected to login
+        //redirect to route which redirected to login for now it's always authorize
         response.redirect("/authorize/", 302);
 
-        return "";
+        return "OK";
     }
 }

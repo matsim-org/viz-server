@@ -8,8 +8,7 @@ import org.junit.Test;
 
 import java.net.URI;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.*;
 
 public class ClientServiceTest {
 
@@ -41,6 +40,26 @@ public class ClientServiceTest {
         RedirectUri redirect = client.getRedirectUris().iterator().next();
         assertEquals(uri.toString(), redirect.getUri());
         assertEquals(client, redirect.getClient());
+    }
+
+    @Test
+    public void findClient_notPresent_null() {
+
+        Client client = testObject.findClient("someId");
+        assertNull(client);
+    }
+
+    @Test
+    public void findClient_present_client() {
+
+        final String name = "name";
+        final URI uri = URI.create("http://test.org");
+        Client client = testObject.createClient(name, uri);
+
+        Client found = testObject.findClient(client.getId());
+
+        assertEquals(client.getName(), found.getName());
+        assertEquals(client.getId(), found.getId());
     }
 
 }

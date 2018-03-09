@@ -45,9 +45,9 @@ public class AuthenticationRequest {
 
     private void initializeRequiredParameters(QueryParamsMap params) throws RequestException, URIException {
 
-        initRedirectURI(params);
-        initScope(params);
-        initResponseType(params);
+        this.redirectUri = initRedirectURI(params);
+        this.scopes = initScope(params);
+        this.responseType = initResponseType(params);
         clientId = extractRequiredValue(CLIENT_ID, params);
 
         if (!this.type.equals(Type.AuthCode))
@@ -59,33 +59,32 @@ public class AuthenticationRequest {
         state = extractOptionalValue(STATE, params);
     }
 
-    private void initScope(QueryParamsMap params) throws RequestException {
+    private String[] initScope(QueryParamsMap params) throws RequestException {
         String[] scopes = extractRequiredValue(SCOPE, params).split(" ");
         boolean openid = Arrays.stream(scopes).anyMatch(scope -> scope.equals("openid"));
 
         if (!openid) throw new RequestException(ErrorCode.INVALID_REQUEST, "scope must contain 'openid'");
-        this.scopes = scopes;
+        return scopes;
     }
 
-    private void initRedirectURI(QueryParamsMap params) throws URIException {
-        if (!params.hasKey(REDIRECT_URI)) {
-            throw new URIException();
-        }
+    private URI initRedirectURI(QueryParamsMap params) throws URIException {
         try {
-            this.redirectUri = new URI(params.get(REDIRECT_URI).value());
-        } catch (URISyntaxException e) {
-            throw new URIException();
+            if (params.hasKey(REDIRECT_URI)) {
+                return new URI(params.get(REDIRECT_URI).value());
+            }
+        } catch (URISyntaxException ignored) {
         }
+        throw new URIException();
     }
 
-    private void initResponseType(QueryParamsMap params) throws RequestException {
+    private String[] initResponseType(QueryParamsMap params) throws RequestException {
         String[] responseTypes = extractRequiredValue(RESPONSE_TYPE, params).split(" ");
 
         if (responseTypes.length == 1 && responseTypes[0].equals("code")) {
             this.type = Type.AuthCode;
         }
         else if (responseTypes.length == 1 && responseTypes[0].equals("id_token"))
-            this.type = Type.AccessToken;
+            this.type = Type.IdToken;
         else if (responseTypes.length == 2 &&
                 responseTypes[0].equals("id_token") &&
                 responseTypes[1].equals("token"))
@@ -93,7 +92,7 @@ public class AuthenticationRequest {
         else
             throw new RequestException(ErrorCode.INVALID_REQUEST, "response types may be: 'code', 'id_token', 'id_token token'.");
 
-        this.responseType = responseTypes;
+        return responseTypes;
     }
 
     private String extractOptionalValue(String key, QueryParamsMap params) {
@@ -109,7 +108,7 @@ public class AuthenticationRequest {
         return params.get(key).value();
     }
 
-    public enum Type {AuthCode, AccessAndIdToken, AccessToken}
+    public enum Type {AuthCode, AccessAndIdToken, IdToken}
 
 
 }

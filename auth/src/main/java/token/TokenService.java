@@ -1,6 +1,7 @@
 package token;
 
 import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTCreator;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
@@ -10,27 +11,35 @@ import org.apache.logging.log4j.Logger;
 import user.UserService;
 
 import java.io.UnsupportedEncodingException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 public class TokenService {
 
     private static final Logger logger = LogManager.getLogger();
     private static final String dummySecret = "dummy secret";
-    private static Algorithm algorithm;
+    static Algorithm algorithm;
 
     private UserService userService = new UserService();
-    private TokenDAO tokenDAO = new TokenDAO();
+    TokenDAO tokenDAO = new TokenDAO();
 
-    public TokenService() throws UnsupportedEncodingException {
-        algorithm = Algorithm.HMAC512(dummySecret);
+    public TokenService() {
+        try {
+            algorithm = Algorithm.HMAC512(dummySecret);
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     public AccessToken grantWithPassword(String username, char[] password) throws Exception {
         User user = userService.authenticate(username, password);
-        RefreshToken refreshToken = createRefreshToken(user);
+        Token refreshToken = createRefreshToken(user);
 
-        return createAccessToken(user, refreshToken);
+        return createAccessToken(user, (RefreshToken) refreshToken);
     }
 
     public AccessToken grantAccess(User user) {
@@ -43,30 +52,28 @@ public class TokenService {
 
     public IdToken createIdToken(User user, String nonce) {
 
-        IdToken token = new IdToken();
-        token.setUser(user);
-        token.setCreatedAt(new Date());
-
-        String userId = Long.toString(user.getId());
-
-        String jwt = JWT.create().withSubject(userId)
-                .withClaim("nonce", nonce)
-                .withIssuedAt(token.getCreatedAt())
-                .sign(algorithm);
-        token.setToken(jwt);
-        return tokenDAO.persist(token);
+        if (nonce.isEmpty()) {
+            return createSignedToken(user, new IdToken());
+        } else {
+            Map<String, String> claims = new HashMap<>();
+            claims.put("nonce", nonce);
+            return createSignedToken(user, new IdToken(), claims);
+        }
     }
 
-    public User validateIdToken(String token) {
+    public User validateIdToken(String token) throws Exception {
 
         JWTVerifier verifier = JWT.require(algorithm).build();
         DecodedJWT decodedToken = verifier.verify(token);
 
         String userId = decodedToken.getSubject();
-        return userService.findUser(Long.parseLong(userId));
+        User user = userService.findUser(Long.parseLong(userId));
+
+        if (user == null) throw new Exception("user doesn't exist");
+        return user;
     }
 
-    public Token createAuthorizationCode(User user, String clientId) {
+    public AuthorizationCode createAuthorizationCode(User user, String clientId) {
 
         AuthorizationCode code = new AuthorizationCode();
         code.setUser(user);
@@ -79,29 +86,39 @@ public class TokenService {
     private AccessToken createAccessToken(User user, RefreshToken refreshToken) {
 
         AccessToken token = new AccessToken();
-        token.setUser(user);
 
-        if (refreshToken != null)
+        if (refreshToken != null) {
             token.setRefreshToken(refreshToken.getToken());
+        }
 
-        String userId = Long.toString(user.getId());
-
-        String jwt = JWT.create().withSubject(userId)
-                .withExpiresAt(new Date(token.getExpiresIn()))
-                .sign(algorithm);
-        token.setToken(jwt);
-        return tokenDAO.persist(token);
+        return createSignedToken(user, token);
     }
 
     private RefreshToken createRefreshToken(User user) {
 
-        RefreshToken token = new RefreshToken();
+        return createSignedToken(user, new RefreshToken());
+    }
+
+    private <T extends Token> T createSignedToken(User user, T token) {
+        return createSignedToken(user, token, null);
+    }
+
+    private <T extends Token> T createSignedToken(User user, T token, Map<String, String> claims) {
         token.setUser(user);
+        token.setExpiresAt(Instant.now().plus(Duration.ofHours(24)));
 
         String userId = Long.toString(user.getId());
-        String jwt = JWT.create().withSubject(userId)
-                .sign(algorithm);
-        token.setToken(jwt);
+        JWTCreator.Builder jwt = JWT.create().withSubject(userId)
+                .withIssuer("http://this.should/be/a/proper/domain")
+                .withIssuedAt(Date.from(token.getCreatedAt()))
+                .withExpiresAt(Date.from(token.getExpiresAt()));
+
+        if (claims != null) {
+            claims.forEach(jwt::withClaim);
+        }
+
+        String tokenValue = jwt.sign(algorithm);
+        token.setToken(tokenValue);
         return tokenDAO.persist(token);
     }
 }

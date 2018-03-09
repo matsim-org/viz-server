@@ -1,18 +1,21 @@
 package authorization;
 
 import client.ClientService;
-import data.entities.*;
+import data.entities.Client;
+import data.entities.Token;
+import data.entities.User;
 import token.TokenService;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URLEncoder;
 
 public class AuthorizationService {
 
-    private ClientService clientService = new ClientService();
-    private TokenService tokenService = new TokenService();
+    ClientService clientService = new ClientService();
+    TokenService tokenService = new TokenService();
 
-    AuthorizationService() throws UnsupportedEncodingException {
+    AuthorizationService() {
     }
 
     public boolean isValidClientInformation(AuthenticationRequest request) {
@@ -51,8 +54,9 @@ public class AuthorizationService {
 
         String query = "?code=" + code.getToken();
 
-        if (!request.getState().isEmpty())
-            query += "&state=" + request.getState();
+        if (!request.getState().isEmpty()) {
+            query += "&state=" + urlEncode(request.getState());
+        }
 
         return URI.create(request.getRedirectUri().toString() + query);
     }
@@ -61,18 +65,30 @@ public class AuthorizationService {
 
         String fragment = "#token_type=bearer";
 
-        IdToken idToken = tokenService.createIdToken(user, request.getNonce());
+        Token idToken = tokenService.createIdToken(user, request.getNonce());
         fragment += "&id_token=" + idToken.getToken();
 
         if (request.getType().equals(AuthenticationRequest.Type.AccessAndIdToken)) {
-            AccessToken accessToken = tokenService.grantAccess(user);
+            Token accessToken = tokenService.grantAccess(user);
             fragment += "&access_token=" + accessToken.getToken();
         }
         if (!request.getState().isEmpty()) {
-            fragment += "&state=" + request.getState();
+            fragment += "&state=" + urlEncode(request.getState());
         }
         return URI.create(request.getRedirectUri().toString() + fragment);
     }
 
-
+    /**
+     * in case the os we are running on does not support utf-8...
+     *
+     * @param toEncode message to encode into url encoding
+     * @return urlEncoded string
+     */
+    private String urlEncode(String toEncode) {
+        try {
+            return URLEncoder.encode(toEncode, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
