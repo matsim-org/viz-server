@@ -8,12 +8,21 @@ import javax.persistence.EntityManager;
 import java.util.List;
 
 class TokenDAO extends AbstractDAO {
-    public AccessToken persist(AccessToken token) {
+
+
+    public <T extends Token> T persist(T token) {
         return persistOne(token);
     }
 
-    public RefreshToken persist(RefreshToken token) {
-        return persistOne(token);
+    public AuthorizationCode persist(AuthorizationCode token, String clientId) {
+
+        EntityManager em = getEntityManager();
+        em.getTransaction().begin();
+        token.setClient(em.getReference(Client.class, clientId));
+        em.persist(token);
+        em.getTransaction().commit();
+        em.close();
+        return token;
     }
 
     public void removeAllTokensForUser(User user) {

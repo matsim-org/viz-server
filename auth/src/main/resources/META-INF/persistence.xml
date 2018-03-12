@@ -11,7 +11,11 @@
         <class>data.entities.User</class>
         <class>data.entities.UserCredentials</class>
         <class>data.entities.AccessToken</class>
+        <class>data.entities.IdToken</class>
         <class>data.entities.RefreshToken</class>
+        <class>data.entities.AuthorizationCode</class>
+        <class>data.entities.Client</class>
+        <class>data.entities.RedirectUri</class>
 
         <properties>
             <!-- Using a H2 in memory Database for now -->

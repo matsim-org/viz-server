@@ -119,4 +119,8 @@ public class UserService {
         random.nextBytes(result);
         return result;
     }
+
+    public User findUser(long id) {
+        return userDAO.findUser(id);
+    }
 }

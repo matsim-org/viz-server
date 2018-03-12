@@ -8,11 +8,9 @@ import javax.persistence.Entity;
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Data
-public class AccessToken extends Token {
+public class IdToken extends Token {
 
-    private String refreshToken;
-
-    public AccessToken() {
-        this.tokenType = "Bearer";
+    public IdToken() {
+        this.tokenType = "id_token";
     }
 }
