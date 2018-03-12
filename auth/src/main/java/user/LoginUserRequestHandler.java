@@ -2,42 +2,30 @@ package user;
 
 import data.entities.IdToken;
 import data.entities.User;
-import spark.ModelAndView;
 import spark.Request;
 import spark.Response;
 import spark.Route;
-import spark.template.mustache.MustacheTemplateEngine;
 import token.TokenService;
-
-import java.util.Map;
 
 public class LoginUserRequestHandler implements Route {
 
-    private UserService userService = new UserService();
-    private TokenService tokenService;
-
-    public LoginUserRequestHandler() {
-        tokenService = new TokenService();
-    }
-
-    public static String render(Map<String, Object> model, String path) {
-        return new MustacheTemplateEngine().render(new ModelAndView(model, path));
-    }
+    UserService userService = new UserService();
+    TokenService tokenService = new TokenService();
 
     @Override
     public Object handle(Request request, Response response) {
 
         String username = request.queryParams("username");
-        char[] password = request.queryParams("password").toCharArray();
+        String password = request.queryParams("password");
 
         //if no params were sent show login
-        if (username == null || password.length == 0) {
+        if (username == null || password == null) {
             return LoginPrompt.renderLogin();
         }
 
         User user;
         try {
-            user = userService.authenticate(username, password);
+            user = userService.authenticate(username, password.toCharArray());
         } catch (Exception e) {
             //if user was not authenticated display login page with error message
             return LoginPrompt.renderLoginWithError();

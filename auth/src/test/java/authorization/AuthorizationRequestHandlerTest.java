@@ -31,7 +31,7 @@ public class AuthorizationRequestHandlerTest {
     @Test
     public void handle_missingOrInvalidUri_errorResponse() {
 
-        Request req = TestUtils.mockRequestWithParams(AuthenticationRequest.REDIRECT_URI, "invalid uri");
+        Request req = AuthorizationTestUtils.mockRequestWithParams(AuthenticationRequest.REDIRECT_URI, "invalid uri");
         Object result = testObject.handle(req, null);
 
         assertErrorResponse(result, ErrorCode.INVALID_REQUEST);
@@ -40,7 +40,7 @@ public class AuthorizationRequestHandlerTest {
     @Test
     public void handle_missingOrInvalidRequiredParameter_redirect() {
 
-        Request req = TestUtils.mockRequestWithParams(AuthenticationRequest.SCOPE, "notopenid");
+        Request req = AuthorizationTestUtils.mockRequestWithParams(AuthenticationRequest.SCOPE, "notopenid");
         Response res = mock(Response.class);
         final String expectedQuery = "error=invalid_request";
 
@@ -53,7 +53,7 @@ public class AuthorizationRequestHandlerTest {
     @Test
     public void handle_invalidClientInformation_errorResponse() {
 
-        Request req = TestUtils.mockRequestWithParams();
+        Request req = AuthorizationTestUtils.mockRequestWithParams();
         when(testObject.authService.isValidClientInformation(any())).thenReturn(false);
 
         Object result = testObject.handle(req, null);
@@ -64,7 +64,7 @@ public class AuthorizationRequestHandlerTest {
     @Test
     public void handle_userIsNotLoggedIn_loginPrompt() throws Exception {
 
-        Request req = TestUtils.mockRequestWithParams();
+        Request req = AuthorizationTestUtils.mockRequestWithParams();
         when(testObject.tokenService.validateIdToken(any())).thenThrow(new RuntimeException("message"));
 
         Object result = testObject.handle(req, null);
@@ -76,7 +76,7 @@ public class AuthorizationRequestHandlerTest {
     @Test
     public void handle_unknownUser_loginPrompt() throws Exception {
 
-        Request req = TestUtils.mockRequestWithParams();
+        Request req = AuthorizationTestUtils.mockRequestWithParams();
         when(testObject.tokenService.validateIdToken(any())).thenThrow(new Exception("user error"));
 
         Object result = testObject.handle(req, null);
@@ -93,7 +93,7 @@ public class AuthorizationRequestHandlerTest {
         when(testObject.tokenService.validateIdToken(any())).thenReturn(user);
         when(testObject.authService.generateResponse(any(), any())).thenReturn(uri);
 
-        Request req = TestUtils.mockRequestWithParams();
+        Request req = AuthorizationTestUtils.mockRequestWithParams();
         Response res = mock(Response.class);
 
         Object result = testObject.handle(req, res);

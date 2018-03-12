@@ -3,8 +3,8 @@ package authorization;
 import spark.QueryParamsMap;
 import spark.Request;
 import spark.Session;
+import util.TestUtils;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -12,7 +12,7 @@ import java.util.UUID;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class TestUtils {
+public class AuthorizationTestUtils {
 
     public static Map<String, String[]> createDefaultParameterMap() {
         Map<String, String[]> parameterMap = new HashMap<>();
@@ -24,21 +24,14 @@ public class TestUtils {
         return parameterMap;
     }
 
-    public static QueryParamsMap createQueryParams(Map<String, String[]> parameterMap) {
-        HttpServletRequest servletRequest = mock(HttpServletRequest.class);
-        when(servletRequest.getParameterMap()).thenReturn(parameterMap);
-
-        return new QueryParamsMap(servletRequest);
-    }
-
-    public static QueryParamsMap createQueryParams(String keyToReplace, String valueToReplace) {
+    public static QueryParamsMap mockQueryParams(String keyToReplace, String valueToReplace) {
 
         Map<String, String[]> parameterMap = createDefaultParameterMap();
 
         if (!keyToReplace.isEmpty())
             parameterMap.put(keyToReplace, new String[]{valueToReplace});
 
-        return createQueryParams(parameterMap);
+        return TestUtils.mockQueryParamsMap(parameterMap);
     }
 
     public static Request mockRequestWithParams() {
@@ -47,7 +40,7 @@ public class TestUtils {
 
     public static Request mockRequestWithParams(String keyToReplace, String valueToReplace) {
 
-        QueryParamsMap map = createQueryParams(keyToReplace, valueToReplace);
+        QueryParamsMap map = mockQueryParams(keyToReplace, valueToReplace);
         Session session = mock(Session.class);
         when(session.id()).thenReturn(UUID.randomUUID().toString());
         Request req = mock(Request.class);
