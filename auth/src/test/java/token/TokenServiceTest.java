@@ -11,6 +11,8 @@ import org.junit.Test;
 import user.UserService;
 
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -135,9 +137,11 @@ public class TokenServiceTest {
     }
 
     @Test
-    public void createAuthorizationCode_allRight_Token() {
+    public void createAuthorizationCode_allRight_Token() throws Exception {
 
-        Client client = new ClientService().createClient("some name", URI.create("http://callback.uri"));
+        List<URI> uris = new ArrayList<>();
+        uris.add(URI.create("http://callback.uri"));
+        Client client = new ClientService().createClient("some name", uris);
 
         AuthorizationCode token = testObject.createAuthorizationCode(user, client.getId());
 

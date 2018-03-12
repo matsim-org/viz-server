@@ -1,5 +1,6 @@
 package user;
 
+import config.ConfigUser;
 import data.entities.User;
 import data.entities.UserCredentials;
 import org.apache.logging.log4j.LogManager;
@@ -26,6 +27,10 @@ public class UserService {
 
     private UserDAO userDAO = new UserDAO();
 
+    public User createUser(ConfigUser user) throws Exception {
+        return createUser(user.getUsername(), user.getPassword().toCharArray(), user.getPassword().toCharArray());
+    }
+
     public User createUser(String eMail, char[] password, char[] passwordRepeated) throws Exception {
 
         if (!isValidPassword(password)) {
@@ -39,7 +44,7 @@ public class UserService {
         user.setEMail(eMail);
         credentials.setUser(user);
         try {
-            logger.info("creting user with eMail: " + user.getEMail());
+            logger.info("creating user with eMail: " + user.getEMail());
             return userDAO.saveCredentials(credentials).getUser();
         } catch (RollbackException e) {
             throw new Exception("user already exists");
