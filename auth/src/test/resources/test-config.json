@@ -1,0 +1,19 @@
+{
+  "port": 3000,
+  "users": [
+    {
+      "username": "some@email.adress",
+      "password": "longpassword"
+    }
+  ],
+  "clients": [
+    {
+      "name": "test-client",
+      "redirectUris": [
+        {
+          "uri": "http://valid.uri"
+        }
+      ]
+    }
+  ]
+}

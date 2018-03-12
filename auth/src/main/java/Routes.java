@@ -5,7 +5,6 @@ import token.TokenRequestHandler;
 import user.CreateUserRequestHandler;
 import user.LoginUserRequestHandler;
 
-import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,7 +18,7 @@ public class Routes {
     private final static String LOGIN = "login/";
     private final static String LOGIN_FORM = "login/form/";
 
-    static void initialize() throws UnsupportedEncodingException {
+    static void initialize() {
 
         // this allows cross origin requests for all sites for all http-methods
         options("/*", (request, response) -> {
