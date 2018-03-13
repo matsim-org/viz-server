@@ -4,6 +4,8 @@ import spark.QueryParamsMap;
 import spark.Request;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.anyString;
@@ -27,5 +29,9 @@ public class TestUtils {
         }).when(result).queryParams(anyString());
 
         return result;
+    }
+
+    public static String getTestConfigPath() throws UnsupportedEncodingException {
+        return URLDecoder.decode(TestUtils.class.getClassLoader().getResource("test-config.json").getFile(), "UTF-8");
     }
 }

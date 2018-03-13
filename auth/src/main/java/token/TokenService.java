@@ -5,6 +5,7 @@ import com.auth0.jwt.JWTCreator;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import config.Configuration;
 import data.entities.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -28,9 +29,15 @@ public class TokenService {
     TokenDAO tokenDAO = new TokenDAO();
 
     public TokenService() {
-        try {
-            algorithm = Algorithm.HMAC512(dummySecret);
-        } catch (UnsupportedEncodingException e) {
+        this(Configuration.getInstance().getKeyStoreLocation());
+    }
+
+    //for unit testing
+    TokenService(String keyStorePath) {
+        try{
+            RSAKeyProvider provider = new RSAKeyProvider(keyStorePath);
+            algorithm = Algorithm.RSA512(provider.getPublicKey(), provider.getPrivateKey());
+        }catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
     }

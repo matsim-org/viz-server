@@ -18,10 +18,11 @@ public class Configuration {
     private List<ConfigUser> users = new ArrayList<>();
     private List<Client> clients = new ArrayList<>();
 
-    private String keyStoreLocation = "";
-    private String keyStorePassword = "";
+    private String keyStoreLocation = "keystore.jks";
+    private String keyStorePassword = "chocopause";
 
     private Configuration() {
+
     }
 
     public static Configuration getInstance() {
