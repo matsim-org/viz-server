@@ -15,5 +15,7 @@
         }
       ]
     }
-  ]
+  ],
+  "keyStoreLocation": "path/to/keystore",
+  "keyStorePassword": "keystorepassword"
 }

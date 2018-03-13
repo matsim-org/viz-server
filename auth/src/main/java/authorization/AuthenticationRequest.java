@@ -45,8 +45,8 @@ public class AuthenticationRequest {
 
     private void initializeRequiredParameters(QueryParamsMap params) throws RequestException, URIException {
 
-        this.redirectUri = initRedirectURI(params);
         this.scopes = initScope(params);
+        this.redirectUri = initRedirectURI(params);
         this.responseType = initResponseType(params);
         clientId = extractRequiredValue(CLIENT_ID, params);
 

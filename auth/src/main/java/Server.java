@@ -8,7 +8,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import user.UserService;
 
-import static spark.Spark.port;
+import static spark.Spark.*;
 
 public class Server {
     private static final Logger logger = LogManager.getLogger(Server.class);
@@ -24,7 +24,7 @@ public class Server {
             logger.error(e);
         }
 
-        startSparkServer();
+        startSparkServer(ca);
     }
 
     static void loadConfigFile(CommandlineArgs ca) throws Exception {
@@ -43,11 +43,32 @@ public class Server {
         }
     }
 
-    private static void startSparkServer() {
+    private static void startSparkServer(CommandlineArgs ca) {
 
         port(Configuration.getInstance().getPort());
+        initExceptionHandler(Server::handleInitializationFailure);
+
+        if (!ca.debug) {
+            secure(Configuration.getInstance().getKeyStoreLocation(), Configuration.getInstance().getKeyStorePassword(), null, null);
+        }
         Routes.initialize();
 
         logger.info("\n\nStarted Server on Port: " + Configuration.getInstance().getPort() + "\n");
+    }
+
+    private static void handleInitializationFailure(Exception e) {
+
+        String keystoreLocation = Configuration.getInstance().getKeyStoreLocation();
+        String keystorePassword = Configuration.getInstance().getKeyStorePassword();
+
+        if (keystoreLocation == null || keystoreLocation.isEmpty()) {
+            logger.error("\n\nInitialization failed. Keystore location was not present.\n\n");
+        } else if (keystorePassword == null || keystorePassword.isEmpty()) {
+            logger.error("\n\nInitialization failed. Keystore password was not present\n\n");
+        } else {
+            logger.error("\n\nInitialization failed.\n\n");
+        }
+        logger.error("Exception which caused failure was: ", e);
+        System.exit(100);
     }
 }

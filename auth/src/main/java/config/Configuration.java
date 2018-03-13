@@ -13,9 +13,13 @@ import java.util.List;
 public class Configuration {
 
     private static Configuration instance = new Configuration();
+
     private int port = 3000;
     private List<ConfigUser> users = new ArrayList<>();
     private List<Client> clients = new ArrayList<>();
+
+    private String keyStoreLocation = "";
+    private String keyStorePassword = "";
 
     private Configuration() {
     }
