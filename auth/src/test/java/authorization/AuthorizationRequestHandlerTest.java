@@ -2,12 +2,16 @@ package authorization;
 
 import data.entities.User;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import requests.ErrorCode;
 import spark.Request;
 import spark.Response;
 import token.TokenService;
+import util.TestUtils;
 
+import java.io.FileNotFoundException;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 
 import static junit.framework.TestCase.*;
@@ -20,8 +24,13 @@ public class AuthorizationRequestHandlerTest {
 
     private AuthorizationRequestHandler testObject;
 
+    @BeforeClass
+    public static void setUpFixture() throws UnsupportedEncodingException, FileNotFoundException {
+        TestUtils.loadTestConfig();
+    }
+
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         testObject = new AuthorizationRequestHandler();
         testObject.authService = mock(AuthorizationService.class);
         when(testObject.authService.isValidClientInformation(any())).thenReturn(true);

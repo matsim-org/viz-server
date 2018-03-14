@@ -15,7 +15,7 @@ public class AuthorizationService {
     ClientService clientService = new ClientService();
     TokenService tokenService = new TokenService();
 
-    AuthorizationService() {
+    AuthorizationService() throws Exception {
     }
 
     public boolean isValidClientInformation(AuthenticationRequest request) {

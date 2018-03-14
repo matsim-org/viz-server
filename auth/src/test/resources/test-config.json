@@ -16,6 +16,10 @@
       ]
     }
   ],
-  "keyStoreLocation": "path/to/keystore",
-  "keyStorePassword": "keystorepassword"
+  "tlsKeyStore": "keystore.jks",
+  "tlsKeyStorePassword": "chocopause",
+  "tlsKeyAlias": "selfsigned",
+  "tokenSigningKeyStore": "keystore.jks",
+  "tokenSigningKeyStorePassword": "chocopause",
+  "tokenSigningKeyAlias": "selfsigned"
 }

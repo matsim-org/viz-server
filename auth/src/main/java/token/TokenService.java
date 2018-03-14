@@ -5,13 +5,11 @@ import com.auth0.jwt.JWTCreator;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import config.Configuration;
 import data.entities.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import user.UserService;
 
-import java.io.UnsupportedEncodingException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
@@ -28,18 +26,9 @@ public class TokenService {
     private UserService userService = new UserService();
     TokenDAO tokenDAO = new TokenDAO();
 
-    public TokenService() {
-        this(Configuration.getInstance().getKeyStoreLocation());
-    }
-
-    //for unit testing
-    TokenService(String keyStorePath) {
-        try{
-            RSAKeyProvider provider = new RSAKeyProvider(keyStorePath);
-            algorithm = Algorithm.RSA512(provider.getPublicKey(), provider.getPrivateKey());
-        }catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
-        }
+    public TokenService() throws Exception {
+        TokenSigningKeyProvider provider = new TokenSigningKeyProvider();
+        algorithm = Algorithm.RSA512(provider.getPublicKey(), provider.getPrivateKey());
     }
 
     public AccessToken grantWithPassword(String username, char[] password) throws Exception {
@@ -70,6 +59,7 @@ public class TokenService {
 
     public User validateIdToken(String token) throws Exception {
 
+        logger.info(algorithm.toString());
         JWTVerifier verifier = JWT.require(algorithm).build();
         DecodedJWT decodedToken = verifier.verify(token);
 
@@ -124,6 +114,7 @@ public class TokenService {
             claims.forEach(jwt::withClaim);
         }
 
+        logger.info(algorithm.toString());
         String tokenValue = jwt.sign(algorithm);
         token.setToken(tokenValue);
         return tokenDAO.persist(token);

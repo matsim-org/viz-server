@@ -9,10 +9,9 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import user.UserService;
+import util.TestUtils;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
-import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,8 +27,9 @@ public class TokenServiceTest {
 
     @BeforeClass
     public static void setUpFixture() throws Exception {
-        UserService servivce = new UserService();
-        user = servivce.createUser(username, userpassword, userpassword);
+        TestUtils.loadTestConfig();
+        UserService service = new UserService();
+        user = service.createUser(username, userpassword, userpassword);
     }
 
     @AfterClass
@@ -43,9 +43,8 @@ public class TokenServiceTest {
     }
 
     @Before
-    public void setUp() throws UnsupportedEncodingException {
-        String keystorePath = URLDecoder.decode(this.getClass().getResource("/keystore.jks").getFile(), "UTF-8");
-        testObject = new TokenService(keystorePath);
+    public void setUp() throws Exception {
+        testObject = new TokenService();
         testObject.tokenDAO = spy(new TokenDAO());
     }
 

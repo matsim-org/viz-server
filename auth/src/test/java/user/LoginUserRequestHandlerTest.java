@@ -1,14 +1,18 @@
 package user;
 
+import config.Configuration;
 import data.entities.IdToken;
 import data.entities.User;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import spark.Request;
 import spark.Response;
 import token.TokenService;
 import util.TestUtils;
 
+import java.io.FileNotFoundException;
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,10 +29,14 @@ public class LoginUserRequestHandlerTest {
 
     private LoginUserRequestHandler testObject;
 
-    @Before
-    public void setUp() {
-        testObject = new LoginUserRequestHandler();
+    @BeforeClass
+    public static void setUpFixture() throws UnsupportedEncodingException, FileNotFoundException {
+        Configuration.loadConfigFile(TestUtils.getTestConfigPath(), true);
+    }
 
+    @Before
+    public void setUp() throws Exception {
+        testObject = new LoginUserRequestHandler();
     }
 
 

@@ -29,8 +29,8 @@ public class Server {
 
     static void loadConfigFile(CommandlineArgs ca) throws Exception {
 
-        if (ca.configFile != null)
-            Configuration.loadConfigFile(ca.configFile);
+        if (!ca.getConfigFile().isEmpty())
+            Configuration.loadConfigFile(ca.getConfigFile(), ca.isDebug());
 
         UserService userService = new UserService();
         for (ConfigUser user : Configuration.getInstance().getUsers()) {
@@ -48,23 +48,35 @@ public class Server {
         port(Configuration.getInstance().getPort());
         initExceptionHandler(Server::handleInitializationFailure);
 
-        if (!ca.debug) {
-            secure(Configuration.getInstance().getKeyStoreLocation(), Configuration.getInstance().getKeyStorePassword(), null, null);
+        if (!ca.isDebug()) {
+            secure(Configuration.getInstance().getTlsKeyStore(), Configuration.getInstance().getTlsKeyStorePassword(), null, null);
         }
-        Routes.initialize();
+
+        try {
+            Routes.initialize();
+        } catch (Exception e) {
+            handleInitializationFailure(e);
+        }
 
         logger.info("\n\nStarted Server on Port: " + Configuration.getInstance().getPort() + "\n");
     }
 
     private static void handleInitializationFailure(Exception e) {
 
-        String keystoreLocation = Configuration.getInstance().getKeyStoreLocation();
-        String keystorePassword = Configuration.getInstance().getKeyStorePassword();
+        String tlsKeyStore = Configuration.getInstance().getTlsKeyStore();
+        String tlsKeyStorePassword = Configuration.getInstance().getTlsKeyStorePassword();
 
-        if (keystoreLocation == null || keystoreLocation.isEmpty()) {
-            logger.error("\n\nInitialization failed. Keystore location was not present.\n\n");
-        } else if (keystorePassword == null || keystorePassword.isEmpty()) {
-            logger.error("\n\nInitialization failed. Keystore password was not present\n\n");
+        String signingKeyStore = Configuration.getInstance().getTokenSigningKeyStore();
+        String signingKeyStorePassword = Configuration.getInstance().getTokenSigningKeyStorePassword();
+
+        if (tlsKeyStore == null || tlsKeyStore.isEmpty()) {
+            logger.error("\n\nInitialization failed. TlsKeystore location was not present.\n\n");
+        } else if (tlsKeyStorePassword == null || tlsKeyStorePassword.isEmpty()) {
+            logger.error("\n\nInitialization failed. TlsKeystore password was not present\n\n");
+        } else if (signingKeyStore == null || signingKeyStore.isEmpty()) {
+            logger.error("\n\nInitialization failed. Signing keystore was not present\n\n");
+        } else if (signingKeyStorePassword == null || signingKeyStorePassword.isEmpty()) {
+            logger.error("\n\nInitialization failed. Signing keystore password was not present\n\n");
         } else {
             logger.error("\n\nInitialization failed.\n\n");
         }

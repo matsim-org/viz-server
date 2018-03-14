@@ -3,6 +3,7 @@ package token;
 import data.entities.AccessToken;
 import data.entities.User;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import requests.Answer;
 import requests.ErrorCode;
@@ -10,7 +11,10 @@ import requests.ErrorResponse;
 import requests.HttpStatus;
 import spark.Request;
 import spark.Response;
+import util.TestUtils;
 
+import java.io.FileNotFoundException;
+import java.io.UnsupportedEncodingException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.HashMap;
@@ -25,8 +29,13 @@ public class TokenRequestHandlerTest {
 
     private TokenRequestHandler testObject;
 
+    @BeforeClass
+    public static void setUpFixture() throws UnsupportedEncodingException, FileNotFoundException {
+        TestUtils.loadTestConfig();
+    }
+
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         testObject = new TokenRequestHandler();
     }
 
