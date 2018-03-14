@@ -1,0 +1,11 @@
+{
+  "port": 0,
+  "users": [],
+  "clients": [],
+  "tlsKeyStore": "",
+  "tlsKeyStorePassword": "",
+  "tlsKeyAlias": "",
+  "tokenSigningKeyStore": "",
+  "tokenSigningKeyStorePassword": "",
+  "tokenSigningKeyAlias": ""
+}

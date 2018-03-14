@@ -21,7 +21,7 @@ public class AuthorizationRequestHandler implements Route {
     TokenService tokenService = new TokenService();
     AuthorizationService authService = new AuthorizationService();
 
-    public AuthorizationRequestHandler() {
+    public AuthorizationRequestHandler() throws Exception {
     }
 
     @SuppressWarnings("SuspiciousMethodCalls")

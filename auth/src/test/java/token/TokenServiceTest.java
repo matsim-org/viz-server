@@ -9,6 +9,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import user.UserService;
+import util.TestUtils;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -26,8 +27,9 @@ public class TokenServiceTest {
 
     @BeforeClass
     public static void setUpFixture() throws Exception {
-        UserService servivce = new UserService();
-        user = servivce.createUser(username, userpassword, userpassword);
+        TestUtils.loadTestConfig();
+        UserService service = new UserService();
+        user = service.createUser(username, userpassword, userpassword);
     }
 
     @AfterClass
@@ -41,7 +43,7 @@ public class TokenServiceTest {
     }
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         testObject = new TokenService();
         testObject.tokenDAO = spy(new TokenDAO());
     }

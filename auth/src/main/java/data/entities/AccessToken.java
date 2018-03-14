@@ -3,6 +3,7 @@ package data.entities;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 
 @EqualsAndHashCode(callSuper = true)
@@ -10,6 +11,7 @@ import javax.persistence.Entity;
 @Data
 public class AccessToken extends Token {
 
+    @Column(length = 10000)
     private String refreshToken;
 
     public AccessToken() {

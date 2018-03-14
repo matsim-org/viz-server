@@ -18,7 +18,7 @@ public class Routes {
     private final static String LOGIN = "login/";
     private final static String LOGIN_FORM = "login/form/";
 
-    static void initialize() {
+    static void initialize() throws Exception {
 
         // this allows cross origin requests for all sites for all http-methods
         options("/*", (request, response) -> {

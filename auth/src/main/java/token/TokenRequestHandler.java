@@ -23,7 +23,7 @@ public class TokenRequestHandler extends AbstractRequestHandler<TokenRequest> {
 
     TokenService tokenService = new TokenService();
 
-    public TokenRequestHandler() {
+    public TokenRequestHandler() throws Exception {
         super(TokenRequest.class);
     }
 

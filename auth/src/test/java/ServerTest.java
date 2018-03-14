@@ -1,4 +1,5 @@
 import client.ClientDAO;
+import com.beust.jcommander.JCommander;
 import config.CommandlineArgs;
 import config.Configuration;
 import org.junit.After;
@@ -21,7 +22,6 @@ public class ServerTest {
     public void loadConfigFile_noConfigFile_defaultConfig() throws Exception {
 
         CommandlineArgs args = new CommandlineArgs();
-        args.configFile = null;
 
         Server.loadConfigFile(args);
 
@@ -33,10 +33,12 @@ public class ServerTest {
     @Test
     public void loadConfigFile_configFile_loadTestConfig() throws Exception {
 
-        CommandlineArgs args = new CommandlineArgs();
-        args.configFile = URLDecoder.decode(this.getClass().getResource("test-config.json").getFile(), "UTF-8");
+        String testconfig = URLDecoder.decode(this.getClass().getResource("test-config.json").getFile(), "UTF-8");
+        String[] args = new String[]{"-c", testconfig};
+        CommandlineArgs commandlineArgs = new CommandlineArgs();
+        JCommander.newBuilder().addObject(commandlineArgs).build().parse(args);
 
-        Server.loadConfigFile(args);
+        Server.loadConfigFile(commandlineArgs);
 
         assertEquals(3000, Configuration.getInstance().getPort());
         assertEquals(1, Configuration.getInstance().getUsers().size());

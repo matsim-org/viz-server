@@ -18,7 +18,7 @@ public class AuthorizationServiceTest {
     private AuthorizationService testObject;
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         testObject = new AuthorizationService();
         testObject.clientService = mock(ClientService.class);
         testObject.tokenService = mock(TokenService.class);

@@ -1,9 +1,13 @@
 package util;
 
+import config.Configuration;
 import spark.QueryParamsMap;
 import spark.Request;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.FileNotFoundException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.anyString;
@@ -27,5 +31,25 @@ public class TestUtils {
         }).when(result).queryParams(anyString());
 
         return result;
+    }
+
+    public static void loadTestConfig() throws UnsupportedEncodingException, FileNotFoundException {
+        Configuration.loadTestConfig(getTestConfigPath());
+    }
+
+    public static void loadEmptyTestConfig() throws UnsupportedEncodingException, FileNotFoundException {
+        Configuration.loadTestConfig(getEmptyTestConfigPath());
+    }
+
+    public static String getTestConfigPath() throws UnsupportedEncodingException {
+        return getResourcePath("test-config.json");
+    }
+
+    public static String getEmptyTestConfigPath() throws UnsupportedEncodingException {
+        return getResourcePath("empty-test-config.json");
+    }
+
+    public static String getResourcePath(String resourceFile) throws UnsupportedEncodingException {
+        return URLDecoder.decode(TestUtils.class.getClassLoader().getResource(resourceFile).getFile(), "UTF-8");
     }
 }

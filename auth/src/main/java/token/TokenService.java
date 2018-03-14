@@ -10,7 +10,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import user.UserService;
 
-import java.io.UnsupportedEncodingException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
@@ -27,12 +26,9 @@ public class TokenService {
     private UserService userService = new UserService();
     TokenDAO tokenDAO = new TokenDAO();
 
-    public TokenService() {
-        try {
-            algorithm = Algorithm.HMAC512(dummySecret);
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e.getMessage());
-        }
+    public TokenService() throws Exception {
+        TokenSigningKeyProvider provider = new TokenSigningKeyProvider();
+        algorithm = Algorithm.RSA512(provider.getPublicKey(), provider.getPrivateKey());
     }
 
     public AccessToken grantWithPassword(String username, char[] password) throws Exception {

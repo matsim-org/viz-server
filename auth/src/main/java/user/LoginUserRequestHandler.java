@@ -12,6 +12,9 @@ public class LoginUserRequestHandler implements Route {
     UserService userService = new UserService();
     TokenService tokenService = new TokenService();
 
+    public LoginUserRequestHandler() throws Exception {
+    }
+
     @Override
     public Object handle(Request request, Response response) {
 
