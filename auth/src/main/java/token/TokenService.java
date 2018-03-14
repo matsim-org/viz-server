@@ -59,7 +59,6 @@ public class TokenService {
 
     public User validateIdToken(String token) throws Exception {
 
-        logger.info(algorithm.toString());
         JWTVerifier verifier = JWT.require(algorithm).build();
         DecodedJWT decodedToken = verifier.verify(token);
 
@@ -114,7 +113,6 @@ public class TokenService {
             claims.forEach(jwt::withClaim);
         }
 
-        logger.info(algorithm.toString());
         String tokenValue = jwt.sign(algorithm);
         token.setToken(tokenValue);
         return tokenDAO.persist(token);
