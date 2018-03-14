@@ -20,7 +20,7 @@ public class TokenSigningKeyProviderTest {
         assertNotNull(provider.getPublicKey());
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test(expected = Exception.class)
     public void initialization_noKeyStoreFile_exception() throws Exception {
 
         Configuration.loadConfigFile(TestUtils.getEmptyTestConfigPath(), false);
