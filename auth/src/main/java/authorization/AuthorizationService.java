@@ -1,9 +1,9 @@
 package authorization;
 
-import client.ClientService;
 import data.entities.Client;
 import data.entities.Token;
 import data.entities.User;
+import relyingParty.RelyingPartyService;
 import token.TokenService;
 
 import java.io.UnsupportedEncodingException;
@@ -12,7 +12,7 @@ import java.net.URLEncoder;
 
 public class AuthorizationService {
 
-    ClientService clientService = new ClientService();
+    RelyingPartyService relyingPartyService = new RelyingPartyService();
     TokenService tokenService = new TokenService();
 
     AuthorizationService() throws Exception {
@@ -23,7 +23,7 @@ public class AuthorizationService {
         boolean isValid = false;
 
         //check whether client_id is registered
-        Client client = clientService.findClient(request.getClientId());
+        Client client = relyingPartyService.findClient(request.getClientId());
 
         //check whether redirect uri is registered
         if (client != null) {

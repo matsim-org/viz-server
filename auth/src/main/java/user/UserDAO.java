@@ -24,7 +24,7 @@ public class UserDAO extends AbstractDAO {
                 .fetchOne());
     }
 
-    public User findUser(long id) {
+    public User findUser(String id) {
         QUser user = QUser.user;
         return executeQuery(query -> query.selectFrom(user)
                 .where(user.id.eq(id))

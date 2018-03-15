@@ -25,6 +25,13 @@ class TokenDAO extends AbstractDAO {
         return token;
     }
 
+    public Token find(String tokenValue) {
+
+        QToken token = QToken.token1;
+        return executeQuery(query -> query.selectFrom(token)
+                .where(token.token.eq(tokenValue)).fetchOne());
+    }
+
     public void removeAllTokensForUser(User user) {
         EntityManager em = getEntityManager();
         em.getTransaction().begin();

@@ -137,7 +137,7 @@ public class TokenRequestHandlerTest {
         testToken.setRefreshToken("refreshToken");
         testToken.setUser(new User());
         testToken.setToken("token");
-        testToken.setId(1);
+        testToken.setId("id");
         testToken.setExpiresAt(Instant.now().plus(Duration.ofHours(1)));
 
         TokenService mockService = mock(TokenService.class);

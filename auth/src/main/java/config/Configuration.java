@@ -2,6 +2,7 @@ package config;
 
 import com.google.gson.Gson;
 import data.entities.Client;
+import data.entities.RelyingParty;
 import lombok.Getter;
 
 import java.io.FileNotFoundException;
@@ -21,6 +22,7 @@ public class Configuration {
     private int port = 3000;
     private List<ConfigUser> users = new ArrayList<>();
     private List<Client> clients = new ArrayList<>();
+    private List<RelyingParty> protectedResources = new ArrayList<>();
 
     private String tlsKeyStore = "";
     private String tlsKeyStorePassword = "";

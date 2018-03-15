@@ -1,6 +1,7 @@
 package data.entities;
 
 import lombok.Data;
+import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -11,6 +12,7 @@ import javax.persistence.MappedSuperclass;
 public abstract class AbstractEntity {
 
     @Id
-    @GeneratedValue
-    private long id;
+    @GeneratedValue(generator = "uuid")
+    @GenericGenerator(name = "uuid", strategy = "uuid2")
+    private String id;
 }
