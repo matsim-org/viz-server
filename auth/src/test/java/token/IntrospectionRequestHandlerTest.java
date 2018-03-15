@@ -1,15 +1,15 @@
 package token;
 
+import communication.Answer;
+import communication.ErrorResponse;
+import communication.HttpStatus;
+import communication.RequestException;
 import data.entities.IdToken;
 import data.entities.Token;
 import data.entities.User;
 import org.junit.Before;
 import org.junit.Test;
 import relyingParty.RelyingPartyService;
-import requests.Answer;
-import requests.ErrorResponse;
-import requests.HttpStatus;
-import requests.RequestException;
 import spark.Request;
 import util.TestUtils;
 

@@ -17,7 +17,6 @@ public class UserDAO extends AbstractDAO {
     }
 
     public UserCredentials findUserCredentials(String eMail) {
-
         QUserCredentials credentials = QUserCredentials.userCredentials;
         return executeQuery(query -> query.selectFrom(credentials)
                 .where(credentials.user.eMail.eq(eMail))

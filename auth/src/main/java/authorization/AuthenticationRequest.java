@@ -1,8 +1,8 @@
 package authorization;
 
+import communication.ErrorCode;
+import communication.RequestException;
 import lombok.Getter;
-import requests.ErrorCode;
-import requests.RequestException;
 import spark.QueryParamsMap;
 
 import java.net.URI;

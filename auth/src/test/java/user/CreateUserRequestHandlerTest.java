@@ -1,11 +1,11 @@
 package user;
 
+import communication.Answer;
+import communication.ErrorResponse;
+import communication.HttpStatus;
 import data.entities.User;
 import org.junit.Before;
 import org.junit.Test;
-import requests.Answer;
-import requests.ErrorResponse;
-import requests.HttpStatus;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

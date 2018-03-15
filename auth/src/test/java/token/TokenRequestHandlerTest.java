@@ -1,14 +1,14 @@
 package token;
 
+import communication.Answer;
+import communication.ErrorCode;
+import communication.ErrorResponse;
+import communication.HttpStatus;
 import data.entities.AccessToken;
 import data.entities.User;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import requests.Answer;
-import requests.ErrorCode;
-import requests.ErrorResponse;
-import requests.HttpStatus;
 import spark.Request;
 import spark.Response;
 import util.TestUtils;

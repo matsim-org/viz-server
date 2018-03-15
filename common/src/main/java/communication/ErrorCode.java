@@ -1,4 +1,4 @@
-package requests;
+package communication;
 
 public class ErrorCode {
     public static final String INVALID_REQUEST = "invalid_request";

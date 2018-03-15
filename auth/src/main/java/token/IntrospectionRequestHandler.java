@@ -1,11 +1,11 @@
 package token;
 
+import communication.AbstractRequestHandler;
+import communication.Answer;
+import communication.ErrorCode;
+import communication.RequestException;
 import data.entities.Token;
 import relyingParty.RelyingPartyService;
-import requests.AbstractRequestHandler;
-import requests.Answer;
-import requests.ErrorCode;
-import requests.RequestException;
 import spark.Request;
 
 public class IntrospectionRequestHandler extends AbstractRequestHandler<IntrospectionRequest> {

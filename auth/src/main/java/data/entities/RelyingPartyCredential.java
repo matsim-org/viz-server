@@ -1,5 +1,6 @@
 package data.entities;
 
+import data.AbstractEntity;
 import lombok.Getter;
 import lombok.Setter;
 

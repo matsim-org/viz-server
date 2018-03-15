@@ -1,12 +1,11 @@
 package authorization;
 
+import communication.ErrorCode;
+import communication.RequestException;
 import data.entities.User;
-import requests.ErrorCode;
-import requests.RequestException;
 import spark.Request;
 import spark.Response;
 import spark.Route;
-import spark.Session;
 import token.TokenService;
 import user.LoginPrompt;
 
@@ -24,7 +23,6 @@ public class AuthorizationRequestHandler implements Route {
     public AuthorizationRequestHandler() throws Exception {
     }
 
-    @SuppressWarnings("SuspiciousMethodCalls")
     @Override
     public Object handle(Request request, Response response) {
 
@@ -67,14 +65,7 @@ public class AuthorizationRequestHandler implements Route {
 
     private AuthenticationRequest parse(Request request) throws RequestException, URIException {
 
-        try {
-            return new AuthenticationRequest(request.queryMap());
-        } catch (RequestException e) {
-            Session session = request.session();
-            if (session != null && loginSession.containsKey(session.id()))
-                return loginSession.get(session.id());
-            throw e;
-        }
+        return new AuthenticationRequest(request.queryMap());
     }
 
     private Object errorResponse(String code, String message) {
