@@ -16,6 +16,11 @@
       ]
     }
   ],
+  "protectedResources": [
+    {
+      "name": "test-resource"
+    }
+  ],
   "tlsKeyStore": "keystore.jks",
   "tlsKeyStorePassword": "chocopause",
   "tlsKeyAlias": "selfsigned",

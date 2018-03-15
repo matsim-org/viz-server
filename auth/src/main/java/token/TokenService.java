@@ -62,11 +62,14 @@ public class TokenService {
         JWTVerifier verifier = JWT.require(algorithm).build();
         DecodedJWT decodedToken = verifier.verify(token);
 
-        String userId = decodedToken.getSubject();
-        User user = userService.findUser(Long.parseLong(userId));
+        User user = userService.findUser(decodedToken.getSubject());
 
         if (user == null) throw new Exception("user doesn't exist");
         return user;
+    }
+
+    public Token getToken(String token) {
+        return tokenDAO.find(token);
     }
 
     public AuthorizationCode createAuthorizationCode(User user, String clientId) {
@@ -103,8 +106,7 @@ public class TokenService {
         token.setUser(user);
         token.setExpiresAt(Instant.now().plus(Duration.ofHours(24)));
 
-        String userId = Long.toString(user.getId());
-        JWTCreator.Builder jwt = JWT.create().withSubject(userId)
+        JWTCreator.Builder jwt = JWT.create().withSubject(user.getId())
                 .withIssuer("http://this.should/be/a/proper/domain")
                 .withIssuedAt(Date.from(token.getCreatedAt()))
                 .withExpiresAt(Date.from(token.getExpiresAt()));

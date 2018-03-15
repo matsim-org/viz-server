@@ -1,18 +1,16 @@
-package client;
+package relyingParty;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import data.AbstractDAO;
-import data.entities.Client;
-import data.entities.QClient;
-import data.entities.QRedirectUri;
+import data.entities.*;
 
 import javax.persistence.EntityManager;
 import java.util.List;
 
-public class ClientDAO extends AbstractDAO {
+public class RelyingPartyDAO extends AbstractDAO {
 
-    public Client persist(Client client) {
-        return persistOne(client);
+    public RelyingPartyCredential persist(RelyingPartyCredential credentials) {
+        return persistOne(credentials);
     }
 
     public Client findClient(String clientId) {
@@ -25,13 +23,21 @@ public class ClientDAO extends AbstractDAO {
                 .fetchOne());
     }
 
+    public RelyingPartyCredential findCredential(String clientId) {
+        QRelyingPartyCredential credential = QRelyingPartyCredential.relyingPartyCredential;
+        return executeQuery(query -> query.selectFrom(credential)
+                .where(credential.relyingParty.id.eq(clientId))
+                .fetchOne());
+    }
+
     public void removeAllClients() {
 
         EntityManager em = getEntityManager();
         em.getTransaction().begin();
         JPAQueryFactory query = getQueryFactory(em);
+        QRelyingPartyCredential credential = QRelyingPartyCredential.relyingPartyCredential;
 
-        List<Client> clients = query.selectFrom(QClient.client).fetch();
+        List<RelyingPartyCredential> clients = query.selectFrom(credential).fetch();
 
         clients.forEach(em::remove);
         em.getTransaction().commit();

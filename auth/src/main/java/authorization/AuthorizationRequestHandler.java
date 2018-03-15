@@ -41,7 +41,7 @@ public class AuthorizationRequestHandler implements Route {
 
         if (!authService.isValidClientInformation(authRequest)) {
             return errorResponse(ErrorCode.UNAUTHORIZED_CLIENT,
-                                 "client was not registered or redirect url was not registered");
+                                 "relyingParty was not registered or redirect url was not registered");
         }
 
         //authenticate user by token or by login

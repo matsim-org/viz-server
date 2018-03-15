@@ -1,11 +1,12 @@
-import client.ClientService;
 import com.beust.jcommander.JCommander;
 import config.CommandlineArgs;
 import config.ConfigUser;
 import config.Configuration;
 import data.entities.Client;
+import data.entities.RelyingParty;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import relyingParty.RelyingPartyService;
 import user.UserService;
 
 import static spark.Spark.*;
@@ -37,9 +38,13 @@ public class Server {
             userService.createUser(user);
         }
 
-        ClientService clientService = new ClientService();
+        RelyingPartyService relyingPartyService = new RelyingPartyService();
         for (Client client : Configuration.getInstance().getClients()) {
-            clientService.persistNewClient(client);
+            relyingPartyService.persistNewClient(client);
+        }
+
+        for (RelyingParty party : Configuration.getInstance().getProtectedResources()) {
+            relyingPartyService.persistNewRelyingParty(party);
         }
     }
 

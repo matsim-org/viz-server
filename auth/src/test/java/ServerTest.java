@@ -1,9 +1,9 @@
-import client.ClientDAO;
 import com.beust.jcommander.JCommander;
 import config.CommandlineArgs;
 import config.Configuration;
 import org.junit.After;
 import org.junit.Test;
+import relyingParty.RelyingPartyDAO;
 import user.UserDAO;
 
 import java.net.URLDecoder;
@@ -14,7 +14,7 @@ public class ServerTest {
 
     @After
     public void tearDown() {
-        new ClientDAO().removeAllClients();
+        new RelyingPartyDAO().removeAllClients();
         new UserDAO().removeAllUsers();
     }
 
@@ -43,5 +43,6 @@ public class ServerTest {
         assertEquals(3000, Configuration.getInstance().getPort());
         assertEquals(1, Configuration.getInstance().getUsers().size());
         assertEquals(1, Configuration.getInstance().getClients().size());
+        assertEquals(1, Configuration.getInstance().getProtectedResources().size());
     }
 }

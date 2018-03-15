@@ -1,9 +1,9 @@
 package authorization;
 
-import client.ClientService;
 import data.entities.*;
 import org.junit.Before;
 import org.junit.Test;
+import relyingParty.RelyingPartyService;
 import token.TokenService;
 
 import java.net.URI;
@@ -20,14 +20,14 @@ public class AuthorizationServiceTest {
     @Before
     public void setUp() throws Exception {
         testObject = new AuthorizationService();
-        testObject.clientService = mock(ClientService.class);
+        testObject.relyingPartyService = mock(RelyingPartyService.class);
         testObject.tokenService = mock(TokenService.class);
     }
 
     @Test
     public void isValidClientInformation_clientNotRegistered_invalid() {
 
-        when(testObject.clientService.findClient(any())).thenReturn(null);
+        when(testObject.relyingPartyService.findClient(any())).thenReturn(null);
         AuthenticationRequest request = mock(AuthenticationRequest.class);
 
         boolean result = testObject.isValidClientInformation(request);
@@ -44,7 +44,7 @@ public class AuthorizationServiceTest {
         client.getRedirectUris().add(someUri);
         URI otherUri = URI.create("http://some-other.uri");
 
-        when(testObject.clientService.findClient(any())).thenReturn(client);
+        when(testObject.relyingPartyService.findClient(any())).thenReturn(client);
         AuthenticationRequest request = mock(AuthenticationRequest.class);
         when(request.getRedirectUri()).thenReturn(otherUri);
 
@@ -62,7 +62,7 @@ public class AuthorizationServiceTest {
         someUri.setUri(redirectUri.toString());
         client.getRedirectUris().add(someUri);
 
-        when(testObject.clientService.findClient(any())).thenReturn(client);
+        when(testObject.relyingPartyService.findClient(any())).thenReturn(client);
         AuthenticationRequest request = mock(AuthenticationRequest.class);
         when(request.getRedirectUri()).thenReturn(redirectUri);
 

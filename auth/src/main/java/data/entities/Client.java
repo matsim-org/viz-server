@@ -3,23 +3,19 @@ package data.entities;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.OneToMany;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 
 @Getter
 @Setter
 @Entity
-public class Client {
+public class Client extends RelyingParty {
 
     private ClientType type = ClientType.Confidential;
-
-    @Id
-    private String id = UUID.randomUUID().toString();
-
-    private String secret = UUID.randomUUID().toString();
-    private String name;
 
     @OneToMany(mappedBy = "client", cascade = {CascadeType.ALL}, fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<RedirectUri> redirectUris = new HashSet<>();
@@ -28,5 +24,4 @@ public class Client {
     private Set<AuthorizationCode> authorizationCodes = new HashSet<>();
 
     enum ClientType {Confidential, Public}
-
 }

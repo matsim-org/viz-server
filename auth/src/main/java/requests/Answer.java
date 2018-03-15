@@ -26,6 +26,10 @@ public class Answer<T> {
         return Answer.error(HttpStatus.FORBIDDEN, ErrorCode.FORBIDDEN, message);
     }
 
+    public static Answer unauthorized(String errorCode, String message) {
+        return Answer.error(HttpStatus.UNAUTHORIZED, errorCode, message);
+    }
+
     public static Answer badRequest(String errorCode, String message) {
         return error(HttpStatus.BAD_REQUEST, errorCode, message);
     }
@@ -33,6 +37,7 @@ public class Answer<T> {
     public static Answer internalError(String errorCode, String message) {
         return error(HttpStatus.INTERNAL_SERVER_ERROR, errorCode, message);
     }
+
 
     private static Answer error(int code, String errorCode, String message) {
         return new Answer<>(code, new ErrorResponse(errorCode, message));

@@ -15,6 +15,8 @@
         <class>data.entities.RefreshToken</class>
         <class>data.entities.AuthorizationCode</class>
         <class>data.entities.Client</class>
+        <class>data.entities.RelyingParty</class>
+        <class>data.entities.RelyingPartyCredential</class>
         <class>data.entities.RedirectUri</class>
 
         <properties>
