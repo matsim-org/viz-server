@@ -60,4 +60,8 @@ public class Configuration {
         instance.tokenSigningKeyStore = URLDecoder.decode(
                 Configuration.class.getClassLoader().getResource(instance.tokenSigningKeyStore).getFile(), "UTF-8");
     }
+
+    public static void clearConfig() {
+        instance = new Configuration();
+    }
 }
