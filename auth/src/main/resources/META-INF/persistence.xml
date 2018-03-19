@@ -8,16 +8,16 @@
             Persistence Unit for the parking project mockup
         </description>
 
-        <class>data.entities.User</class>
-        <class>data.entities.UserCredentials</class>
-        <class>data.entities.AccessToken</class>
-        <class>data.entities.IdToken</class>
-        <class>data.entities.RefreshToken</class>
-        <class>data.entities.AuthorizationCode</class>
-        <class>data.entities.Client</class>
-        <class>data.entities.RelyingParty</class>
-        <class>data.entities.RelyingPartyCredential</class>
-        <class>data.entities.RedirectUri</class>
+        <class>entities.User</class>
+        <class>entities.UserCredentials</class>
+        <class>entities.AccessToken</class>
+        <class>entities.IdToken</class>
+        <class>entities.RefreshToken</class>
+        <class>entities.AuthorizationCode</class>
+        <class>entities.Client</class>
+        <class>entities.RelyingParty</class>
+        <class>entities.RelyingPartyCredential</class>
+        <class>entities.RedirectUri</class>
 
         <properties>
             <!-- Using a H2 in memory Database for now -->

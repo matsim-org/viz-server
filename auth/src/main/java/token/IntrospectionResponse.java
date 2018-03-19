@@ -1,6 +1,6 @@
 package token;
 
-import data.entities.Token;
+import entities.Token;
 import lombok.Getter;
 
 @Getter

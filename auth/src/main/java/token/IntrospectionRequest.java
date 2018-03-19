@@ -1,8 +1,8 @@
 package token;
 
+import communication.ErrorCode;
+import communication.RequestException;
 import lombok.Getter;
-import requests.ErrorCode;
-import requests.RequestException;
 import spark.Request;
 
 import java.util.Base64;

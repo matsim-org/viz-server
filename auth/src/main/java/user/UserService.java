@@ -1,8 +1,8 @@
 package user;
 
 import config.ConfigUser;
-import data.entities.User;
-import data.entities.UserCredentials;
+import entities.User;
+import entities.UserCredentials;
 import helper.SecretHelper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

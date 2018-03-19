@@ -1,7 +1,7 @@
 package token;
 
 import com.auth0.jwt.JWT;
-import data.entities.*;
+import entities.*;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;

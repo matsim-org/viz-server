@@ -1,10 +1,10 @@
 package authorization;
 
-import data.entities.User;
+import communication.ErrorCode;
+import entities.User;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import requests.ErrorCode;
 import spark.Request;
 import spark.Response;
 import token.TokenService;

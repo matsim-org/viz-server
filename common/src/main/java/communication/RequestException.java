@@ -1,4 +1,4 @@
-package requests;
+package communication;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;

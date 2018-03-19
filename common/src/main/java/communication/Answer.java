@@ -1,4 +1,4 @@
-package requests;
+package communication;
 
 public class Answer<T> {
 

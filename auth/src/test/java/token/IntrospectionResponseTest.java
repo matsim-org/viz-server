@@ -1,8 +1,8 @@
 package token;
 
-import data.entities.IdToken;
-import data.entities.Token;
-import data.entities.User;
+import entities.IdToken;
+import entities.Token;
+import entities.User;
 import org.junit.Test;
 
 import java.time.Duration;

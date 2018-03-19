@@ -1,12 +1,12 @@
 package token;
 
-import data.entities.AccessToken;
+import communication.AbstractRequestHandler;
+import communication.Answer;
+import communication.ErrorCode;
+import communication.RequestException;
+import entities.AccessToken;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import requests.AbstractRequestHandler;
-import requests.Answer;
-import requests.ErrorCode;
-import requests.RequestException;
 import spark.Request;
 
 import java.io.UnsupportedEncodingException;

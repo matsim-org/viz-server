@@ -1,9 +1,9 @@
 package user;
 
-import data.entities.User;
-import requests.AbstractRequestHandler;
-import requests.Answer;
-import requests.ErrorCode;
+import communication.AbstractRequestHandler;
+import communication.Answer;
+import communication.ErrorCode;
+import entities.User;
 
 public class CreateUserRequestHandler extends AbstractRequestHandler<CreateUserRequest> {
 

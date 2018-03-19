@@ -1,7 +1,7 @@
 package authorization;
 
+import communication.RequestException;
 import org.junit.Test;
-import requests.RequestException;
 import spark.QueryParamsMap;
 import util.TestUtils;
 

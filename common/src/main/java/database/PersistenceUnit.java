@@ -1,4 +1,4 @@
-package data;
+package database;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.apache.logging.log4j.LogManager;
@@ -10,25 +10,28 @@ import javax.persistence.Persistence;
 import java.util.List;
 import java.util.function.Function;
 
-public abstract class AbstractDAO {
+public class PersistenceUnit {
 
     private static final Logger logger = LogManager.getLogger();
-    private static String persistenceUnitName = "org.matsim.matsim-webvis.auth";
-    private static EntityManagerFactory eManagerFactory = Persistence.createEntityManagerFactory(persistenceUnitName);
+    private EntityManagerFactory entityManagerFactory;
 
-    protected EntityManager getEntityManager() {
-        return eManagerFactory.createEntityManager();
+    public PersistenceUnit(String unitName) {
+        entityManagerFactory = Persistence.createEntityManagerFactory(unitName);
     }
 
-    protected JPAQueryFactory getQueryFactory(EntityManager manager) {
+    public EntityManager getEntityManager() {
+        return entityManagerFactory.createEntityManager();
+    }
+
+    public JPAQueryFactory createQuery(EntityManager manager) {
         return new JPAQueryFactory(manager);
     }
 
-    protected <T> T persistOne(T entity) {
+    public <T> T persistOne(T entity) {
         return persistOne(entity, getEntityManager());
     }
 
-    protected <T> T persistOne(T entity, EntityManager entityManager) {
+    public <T> T persistOne(T entity, EntityManager entityManager) {
         entityManager.getTransaction().begin();
         entityManager.persist(entity);
         entityManager.getTransaction().commit();
@@ -36,11 +39,11 @@ public abstract class AbstractDAO {
         return entity;
     }
 
-    protected <T> T updateOne(T entity) {
+    public <T> T updateOne(T entity) {
         return updateOne(entity, getEntityManager());
     }
 
-    protected <T> T updateOne(T entity, EntityManager entityManager) {
+    public <T> T updateOne(T entity, EntityManager entityManager) {
         entityManager.getTransaction().begin();
         T result = entityManager.merge(entity);
         entityManager.getTransaction().commit();
@@ -48,11 +51,20 @@ public abstract class AbstractDAO {
         return result;
     }
 
-    protected <T> void removeOne(T entity) {
+    public <T> void removeOne(T entity) {
+
         removeOne(entity, getEntityManager());
     }
 
-    protected <T> void removeMany(List<T> entities) {
+    public <T> void removeOne(T entity, EntityManager entityManager) {
+        entityManager.getTransaction().begin();
+        T mergedEntity = entityManager.merge(entity);
+        entityManager.remove(mergedEntity);
+        entityManager.getTransaction().commit();
+        entityManager.close();
+    }
+
+    public <T> void removeMany(List<T> entities) {
         EntityManager em = getEntityManager();
         em.getTransaction().begin();
         for (T entity : entities) {
@@ -62,17 +74,9 @@ public abstract class AbstractDAO {
         em.close();
     }
 
-    protected <T> void removeOne(T entity, EntityManager entityManager) {
-        entityManager.getTransaction().begin();
-        T mergedEntity = entityManager.merge(entity);
-        entityManager.remove(mergedEntity);
-        entityManager.getTransaction().commit();
-        entityManager.close();
-    }
-
-    protected <T> T executeQuery(Function<JPAQueryFactory, T> query) {
+    public <T> T executeQuery(Function<JPAQueryFactory, T> query) {
         EntityManager em = getEntityManager();
-        JPAQueryFactory queryFactory = getQueryFactory(em);
+        JPAQueryFactory queryFactory = createQuery(em);
         T result = null;
         try {
             result = query.apply(queryFactory);

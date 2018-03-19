@@ -1,8 +1,8 @@
 package token;
 
+import communication.RequestException;
 import org.junit.Before;
 import org.junit.Test;
-import requests.RequestException;
 import spark.Request;
 
 import java.util.Base64;

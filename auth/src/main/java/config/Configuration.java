@@ -1,8 +1,8 @@
 package config;
 
 import com.google.gson.Gson;
-import data.entities.Client;
-import data.entities.RelyingParty;
+import entities.Client;
+import entities.RelyingParty;
 import lombok.Getter;
 
 import java.io.FileNotFoundException;
@@ -59,5 +59,9 @@ public class Configuration {
         loadConfigFile(filePath, true);
         instance.tokenSigningKeyStore = URLDecoder.decode(
                 Configuration.class.getClassLoader().getResource(instance.tokenSigningKeyStore).getFile(), "UTF-8");
+    }
+
+    public static void clearConfig() {
+        instance = new Configuration();
     }
 }

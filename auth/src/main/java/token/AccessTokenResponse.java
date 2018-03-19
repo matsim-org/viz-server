@@ -1,6 +1,6 @@
 package token;
 
-import data.entities.AccessToken;
+import entities.AccessToken;
 
 class AccessTokenResponse {
     private String access_token;

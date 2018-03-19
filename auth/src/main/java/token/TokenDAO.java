@@ -1,22 +1,21 @@
 package token;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import data.AbstractDAO;
-import data.entities.*;
+import entities.*;
 
 import javax.persistence.EntityManager;
 import java.util.List;
 
-class TokenDAO extends AbstractDAO {
+class TokenDAO extends DAO {
 
 
     public <T extends Token> T persist(T token) {
-        return persistOne(token);
+        return database.persistOne(token);
     }
 
     public AuthorizationCode persist(AuthorizationCode token, String clientId) {
 
-        EntityManager em = getEntityManager();
+        EntityManager em = database.getEntityManager();
         em.getTransaction().begin();
         token.setClient(em.getReference(Client.class, clientId));
         em.persist(token);
@@ -28,14 +27,14 @@ class TokenDAO extends AbstractDAO {
     public Token find(String tokenValue) {
 
         QToken token = QToken.token1;
-        return executeQuery(query -> query.selectFrom(token)
+        return database.executeQuery(query -> query.selectFrom(token)
                 .where(token.token.eq(tokenValue)).fetchOne());
     }
 
     public void removeAllTokensForUser(User user) {
-        EntityManager em = getEntityManager();
+        EntityManager em = database.getEntityManager();
         em.getTransaction().begin();
-        JPAQueryFactory query = getQueryFactory(em);
+        JPAQueryFactory query = database.createQuery(em);
 
         QToken token = QToken.token1;
         List<Token> tokens = query.selectFrom(token).where(token.user.eq(user)).fetch();

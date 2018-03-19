@@ -1,9 +1,9 @@
 package relyingParty;
 
-import data.entities.Client;
-import data.entities.RedirectUri;
-import data.entities.RelyingParty;
-import data.entities.RelyingPartyCredential;
+import entities.Client;
+import entities.RedirectUri;
+import entities.RelyingParty;
+import entities.RelyingPartyCredential;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

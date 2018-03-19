@@ -2,15 +2,23 @@ import com.beust.jcommander.JCommander;
 import config.CommandlineArgs;
 import config.Configuration;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import relyingParty.RelyingPartyDAO;
 import user.UserDAO;
 
+import java.io.FileNotFoundException;
 import java.net.URLDecoder;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class ServerTest {
+
+    @Before
+    public void setUp() {
+        Configuration.clearConfig();
+    }
 
     @After
     public void tearDown() {
@@ -23,11 +31,24 @@ public class ServerTest {
 
         CommandlineArgs args = new CommandlineArgs();
 
+        org.apache.logging.log4j.LogManager.getLogger().info("config file name" + args.getConfigFile());
         Server.loadConfigFile(args);
 
         assertEquals(3000, Configuration.getInstance().getPort());
         assertEquals(0, Configuration.getInstance().getUsers().size());
         assertEquals(0, Configuration.getInstance().getClients().size());
+    }
+
+    @Test(expected = FileNotFoundException.class)
+    public void loadConfigFile_invalidFileName_exception() throws Exception {
+
+        String[] args = new String[]{"-c", "invalid/config/path"};
+        CommandlineArgs commandlineArgs = new CommandlineArgs();
+        JCommander.newBuilder().addObject(commandlineArgs).build().parse(args);
+
+        Server.loadConfigFile(commandlineArgs);
+
+        fail("invalid config file path should throw exception");
     }
 
     @Test
