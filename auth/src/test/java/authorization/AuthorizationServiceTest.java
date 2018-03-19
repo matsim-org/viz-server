@@ -1,6 +1,6 @@
 package authorization;
 
-import data.entities.*;
+import entities.*;
 import org.junit.Before;
 import org.junit.Test;
 import relyingParty.RelyingPartyService;

@@ -1,7 +1,7 @@
 package user;
 
-import data.entities.IdToken;
-import data.entities.User;
+import entities.IdToken;
+import entities.User;
 import spark.Request;
 import spark.Response;
 import spark.Route;

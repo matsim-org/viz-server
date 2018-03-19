@@ -4,7 +4,7 @@ import communication.AbstractRequestHandler;
 import communication.Answer;
 import communication.ErrorCode;
 import communication.RequestException;
-import data.entities.Token;
+import entities.Token;
 import relyingParty.RelyingPartyService;
 import spark.Request;
 

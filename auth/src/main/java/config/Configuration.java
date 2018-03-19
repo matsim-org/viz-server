@@ -1,8 +1,8 @@
 package config;
 
 import com.google.gson.Gson;
-import data.entities.Client;
-import data.entities.RelyingParty;
+import entities.Client;
+import entities.RelyingParty;
 import lombok.Getter;
 
 import java.io.FileNotFoundException;

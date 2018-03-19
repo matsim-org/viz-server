@@ -4,7 +4,7 @@ import communication.AbstractRequestHandler;
 import communication.Answer;
 import communication.ErrorCode;
 import communication.RequestException;
-import data.entities.AccessToken;
+import entities.AccessToken;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import spark.Request;

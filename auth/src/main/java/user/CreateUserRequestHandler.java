@@ -3,7 +3,7 @@ package user;
 import communication.AbstractRequestHandler;
 import communication.Answer;
 import communication.ErrorCode;
-import data.entities.User;
+import entities.User;
 
 public class CreateUserRequestHandler extends AbstractRequestHandler<CreateUserRequest> {
 

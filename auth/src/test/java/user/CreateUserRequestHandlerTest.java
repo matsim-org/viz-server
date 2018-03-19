@@ -3,7 +3,7 @@ package user;
 import communication.Answer;
 import communication.ErrorResponse;
 import communication.HttpStatus;
-import data.entities.User;
+import entities.User;
 import org.junit.Before;
 import org.junit.Test;
 

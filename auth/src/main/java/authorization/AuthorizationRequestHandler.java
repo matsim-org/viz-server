@@ -2,7 +2,7 @@ package authorization;
 
 import communication.ErrorCode;
 import communication.RequestException;
-import data.entities.User;
+import entities.User;
 import spark.Request;
 import spark.Response;
 import spark.Route;

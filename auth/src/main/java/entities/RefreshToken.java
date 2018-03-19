@@ -1,4 +1,4 @@
-package data.entities;
+package entities;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;

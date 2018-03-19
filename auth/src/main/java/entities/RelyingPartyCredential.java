@@ -1,6 +1,6 @@
-package data.entities;
+package entities;
 
-import data.AbstractEntity;
+import database.AbstractEntity;
 import lombok.Getter;
 import lombok.Setter;
 

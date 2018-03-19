@@ -1,8 +1,8 @@
 package authorization;
 
-import data.entities.Client;
-import data.entities.Token;
-import data.entities.User;
+import entities.Client;
+import entities.Token;
+import entities.User;
 import relyingParty.RelyingPartyService;
 import token.TokenService;
 

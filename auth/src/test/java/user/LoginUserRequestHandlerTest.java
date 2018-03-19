@@ -1,8 +1,8 @@
 package user;
 
 import config.Configuration;
-import data.entities.IdToken;
-import data.entities.User;
+import entities.IdToken;
+import entities.User;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
