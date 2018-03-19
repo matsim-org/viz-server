@@ -1,9 +1,9 @@
-package project;
+package org.matsim.matsimwebvis.files.project;
 
 import communication.AbstractRequestHandler;
 import communication.Answer;
 import communication.ErrorCode;
-import entities.Project;
+import org.matsim.matsimwebvis.files.entities.Project;
 
 public class CreateProjectRequestHandler extends AbstractRequestHandler<CreateProjectRequest> {
 
@@ -24,7 +24,7 @@ public class CreateProjectRequestHandler extends AbstractRequestHandler<CreatePr
         try {
             result = projectService.createNewProject(body.getName(), body.getUserId());
         } catch (Exception e) {
-            return Answer.conflict(ErrorCode.RESOURCE_EXISTS, "the resource exists");
+            return Answer.conflict(ErrorCode.RESOURCE_EXISTS, "project exists or user does not exist");
         }
         return Answer.ok(result);
     }

@@ -1,11 +1,11 @@
-package project;
+package org.matsim.matsimwebvis.files.project;
 
-import entities.Project;
-import entities.User;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import user.UserDAO;
+import org.matsim.matsimwebvis.files.entities.Project;
+import org.matsim.matsimwebvis.files.entities.User;
+import org.matsim.matsimwebvis.files.user.UserDAO;
 
 import static org.junit.Assert.*;
 

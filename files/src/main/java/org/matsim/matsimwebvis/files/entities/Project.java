@@ -1,4 +1,4 @@
-package entities;
+package org.matsim.matsimwebvis.files.entities;
 
 import database.AbstractEntity;
 import lombok.Getter;

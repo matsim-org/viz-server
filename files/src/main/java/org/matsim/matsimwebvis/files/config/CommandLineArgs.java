@@ -1,4 +1,4 @@
-package config;
+package org.matsim.matsimwebvis.files.config;
 
 import com.beust.jcommander.Parameter;
 import lombok.Getter;

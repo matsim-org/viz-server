@@ -1,12 +1,12 @@
-package project;
+package org.matsim.matsimwebvis.files.project;
 
 import communication.Answer;
 import communication.ErrorCode;
 import communication.ErrorResponse;
 import communication.HttpStatus;
-import entities.Project;
 import org.junit.Before;
 import org.junit.Test;
+import org.matsim.matsimwebvis.files.entities.Project;
 
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;

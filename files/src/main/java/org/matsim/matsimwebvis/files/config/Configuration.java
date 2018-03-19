@@ -1,4 +1,4 @@
-package config;
+package org.matsim.matsimwebvis.files.config;
 
 import com.google.gson.Gson;
 import lombok.Getter;
@@ -13,6 +13,7 @@ public class Configuration {
 
     private boolean debug = false;
     private int port = 3001;
+    private String filePath = "./files";
 
     private Configuration() {
     }

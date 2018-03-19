@@ -1,4 +1,4 @@
-package project;
+package org.matsim.matsimwebvis.files.project;
 
 import lombok.Getter;
 
