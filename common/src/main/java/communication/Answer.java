@@ -34,6 +34,10 @@ public class Answer<T> {
         return error(HttpStatus.BAD_REQUEST, errorCode, message);
     }
 
+    public static Answer conflict(String errorCode, String message) {
+        return error(HttpStatus.CONFLICT, errorCode, message);
+    }
+
     public static Answer internalError(String errorCode, String message) {
         return error(HttpStatus.INTERNAL_SERVER_ERROR, errorCode, message);
     }
