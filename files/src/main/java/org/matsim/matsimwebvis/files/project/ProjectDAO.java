@@ -35,6 +35,10 @@ public class ProjectDAO extends DAO {
                 .fetchOne());
     }
 
+    public void remove(Project project) {
+        database.removeOne(project);
+    }
+
     public void removeAllProjects() {
 
         QProject project = QProject.project;

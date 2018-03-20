@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.Collection;
 import java.util.Set;
 
 @Getter
@@ -22,4 +23,11 @@ public class Project extends AbstractEntity {
 
     @OneToMany(mappedBy = "project", cascade = {CascadeType.ALL}, fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<FileEntry> files;
+
+    public void addFileEntries(Collection<FileEntry> entries) {
+        for (FileEntry entry : entries) {
+            files.add(entry);
+            entry.setProject(this);
+        }
+    }
 }
