@@ -1,6 +1,7 @@
 package org.matsim.matsimwebvis.files.entities;
 
 import database.AbstractEntity;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,6 +10,7 @@ import java.util.Set;
 
 @Getter
 @Setter
+@EqualsAndHashCode(callSuper = true, exclude = "files")
 @Entity
 @Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"creator_id", "name"})})
 public class Project extends AbstractEntity {

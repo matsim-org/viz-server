@@ -5,7 +5,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.matsim.matsimwebvis.files.config.CommandLineArgs;
 import org.matsim.matsimwebvis.files.config.Configuration;
+import org.matsim.matsimwebvis.files.entities.Project;
 import org.matsim.matsimwebvis.files.entities.User;
+import org.matsim.matsimwebvis.files.project.ProjectService;
 import org.matsim.matsimwebvis.files.user.UserDAO;
 
 import java.io.FileNotFoundException;
@@ -48,7 +50,15 @@ public class Server {
 
     private static void initializeDummyEntities() {
 
-        User user = new UserDAO().persistUser(new User());
-        logger.info("\n\ntest user id: " + user.getId() + "\n\n");
+
+        try {
+            User user = new UserDAO().persistUser(new User());
+            Project project = new ProjectService().createNewProject("test-project", user.getId());
+            logger.info("\n\ntest user id: " + user.getId() + "\n\n");
+            logger.info("\n\ntest project id: " + project.getId() + "\n\n");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 }

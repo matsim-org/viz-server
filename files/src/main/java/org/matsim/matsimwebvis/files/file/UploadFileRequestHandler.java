@@ -8,14 +8,20 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.matsim.matsimwebvis.files.config.Configuration;
 import org.matsim.matsimwebvis.files.entities.Project;
 import org.matsim.matsimwebvis.files.project.ProjectService;
 import spark.Request;
 
-import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 public class UploadFileRequestHandler extends AbstractRequestHandler<FileUploadRequest> {
+
+    private static Logger logger = LogManager.getLogger();
 
     private ProjectService projectService = new ProjectService();
 
@@ -28,7 +34,8 @@ public class UploadFileRequestHandler extends AbstractRequestHandler<FileUploadR
 
         if (ServletFileUpload.isMultipartContent(request.raw())) {
             DiskFileItemFactory factory = new DiskFileItemFactory();
-            factory.setRepository(new File("C:\\Users\\Peter Lustich"));
+            Path repository = Paths.get(Configuration.getInstance().getFilePath());
+            factory.setRepository(repository.toFile());
 
             ServletFileUpload upload = new ServletFileUpload(factory);
             try {
@@ -49,6 +56,7 @@ public class UploadFileRequestHandler extends AbstractRequestHandler<FileUploadR
         try {
             project = projectService.addFilesToProject(body.getFiles(), body.getProject_id(), body.getUser_id());
         } catch (Exception e) {
+            logger.error("Error while saving files.", e);
             return Answer.internalError(ErrorCode.UNSPECIFIED_ERROR, "something went wrong");
         }
         return Answer.ok(project);

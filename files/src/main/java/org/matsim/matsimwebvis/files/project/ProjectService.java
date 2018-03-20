@@ -1,14 +1,22 @@
 package org.matsim.matsimwebvis.files.project;
 
 import org.apache.commons.fileupload.FileItem;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.matsimwebvis.files.config.Configuration;
 import org.matsim.matsimwebvis.files.entities.FileEntry;
 import org.matsim.matsimwebvis.files.entities.Project;
 
-import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ProjectService {
+
+    private static Logger logger = LogManager.getLogger();
 
     private ProjectDAO projectDAO = new ProjectDAO();
 
@@ -24,30 +32,66 @@ public class ProjectService {
 
         Project project = projectDAO.find(projectId);
 
-        //TODO: check whether user can add files to project
         if (project == null) {
-            throw new Exception();
+            throw new Exception("Project was not found.");
+        }
+        if (!mayUserAddFiles(project, userId)) {
+            throw new Exception("User is not allowed to add files to this project");
         }
 
-        //add file entries to the project
-        File projectDirectory = new File(Configuration.getInstance().getFilePath() + "/" + project.getName());
-        projectDirectory.mkdir();
+        Path directory = createProjectDirectory(project);
+        List<Path> writtenFiles = writeFilesToDisk(items, directory);
+        project = addWrittenFilesToProject(writtenFiles, project);
 
-        //set a flag to false that indicates not all files are stored where they belong
+        return project;
+    }
 
-        //write the files to their designated location
+    private boolean mayUserAddFiles(Project project, String userId) {
+        return project.getCreator().getId().equals(userId);
+    }
+
+    private Path createProjectDirectory(Project project) throws IOException {
+        Path directory = Paths.get(Configuration.getInstance().getFilePath(), project.getCreator().getId(), project.getName());
+        return Files.createDirectories(directory);
+    }
+
+    private List<Path> writeFilesToDisk(List<FileItem> items, Path directory) {
+
+        List<Path> writtenFiles = new ArrayList<>();
         for (FileItem item : items) {
-            String filename = item.getName();
 
+            String filename = item.getName();
+            try {
+                Path file = directory.resolve(filename);
+                item.write(file.toFile());
+                writtenFiles.add(file);
+            } catch (Exception e) {
+                logger.error("error while writing file.", e);
+            }
+        }
+        return writtenFiles;
+    }
+
+    private Project addWrittenFilesToProject(List<Path> writtenFiles, Project project) throws IOException {
+
+        for (Path file : writtenFiles) {
             FileEntry entry = new FileEntry();
-            entry.setFileName(filename);
+            entry.setFileName(file.getFileName().toString());
             entry.setProject(project);
             project.getFiles().add(entry);
-
-            File file = new File(projectDirectory.getAbsolutePath() + filename);
-            item.write(file);
         }
 
-        return projectDAO.persist(project);
+        try {
+            return projectDAO.persist(project);
+        } catch (Exception e) {
+            removeWrittenFiles(writtenFiles);
+        }
+        return project;
+    }
+
+    private void removeWrittenFiles(List<Path> writtenFiles) throws IOException {
+        for (Path file : writtenFiles) {
+            Files.delete(file);
+        }
     }
 }
