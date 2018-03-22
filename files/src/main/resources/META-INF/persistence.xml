@@ -8,16 +8,16 @@
             Persistence Unit for the file server of matsim-webvis
         </description>
 
-        <class>org.matsim.matsimwebvis.files.entities.User</class>
-        <class>org.matsim.matsimwebvis.files.entities.Project</class>
-        <class>org.matsim.matsimwebvis.files.entities.FileEntry</class>
+        <class>org.matsim.webvis.files.org.matsim.webvis.auth.entities.User</class>
+        <class>org.matsim.webvis.files.org.matsim.webvis.auth.entities.Project</class>
+        <class>org.matsim.webvis.files.org.matsim.webvis.auth.entities.FileEntry</class>
 
         <properties>
             <!-- Using a H2 in memory Database for now -->
 
             <property name="javax.persistence.jdbc.driver" value="org.h2.Driver"/>
             <property name="javax.persistence.jdbc.url" value="jdbc:h2:mem:db1;DB_CLOSE_DELAY=-1;MVCC=TRUE"/>
-            <property name="javax.persistence.jdbc.user" value="sa"/>
+            <property name="javax.persistence.jdbc.org.matsim.webvis.auth.user" value="sa"/>
             <property name="javax.persistence.jdbc.password" value=""/>
 
             <property name="hibernate.show_sql" value="true"/>

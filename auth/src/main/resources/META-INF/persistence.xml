@@ -8,23 +8,23 @@
             Persistence Unit for the parking project mockup
         </description>
 
-        <class>entities.User</class>
-        <class>entities.UserCredentials</class>
-        <class>entities.AccessToken</class>
-        <class>entities.IdToken</class>
-        <class>entities.RefreshToken</class>
-        <class>entities.AuthorizationCode</class>
-        <class>entities.Client</class>
-        <class>entities.RelyingParty</class>
-        <class>entities.RelyingPartyCredential</class>
-        <class>entities.RedirectUri</class>
+        <class>org.matsim.webvis.auth.entities.User</class>
+        <class>org.matsim.webvis.auth.entities.UserCredentials</class>
+        <class>org.matsim.webvis.auth.entities.AccessToken</class>
+        <class>org.matsim.webvis.auth.entities.IdToken</class>
+        <class>org.matsim.webvis.auth.entities.RefreshToken</class>
+        <class>org.matsim.webvis.auth.entities.AuthorizationCode</class>
+        <class>org.matsim.webvis.auth.entities.Client</class>
+        <class>org.matsim.webvis.auth.entities.RelyingParty</class>
+        <class>org.matsim.webvis.auth.entities.RelyingPartyCredential</class>
+        <class>org.matsim.webvis.auth.entities.RedirectUri</class>
 
         <properties>
             <!-- Using a H2 in memory Database for now -->
 
             <property name="javax.persistence.jdbc.driver" value="org.h2.Driver"/>
             <property name="javax.persistence.jdbc.url" value="jdbc:h2:mem:db1;DB_CLOSE_DELAY=-1;MVCC=TRUE"/>
-            <property name="javax.persistence.jdbc.user" value="sa"/>
+            <property name="javax.persistence.jdbc.org.matsim.webvis.auth.user" value="sa"/>
             <property name="javax.persistence.jdbc.password" value=""/>
 
             <property name="hibernate.show_sql" value="true"/>
