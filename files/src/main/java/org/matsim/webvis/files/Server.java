@@ -11,6 +11,10 @@ import org.matsim.webvis.files.project.ProjectService;
 import org.matsim.webvis.files.user.UserDAO;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import static spark.Spark.port;
 
@@ -25,10 +29,11 @@ public class Server {
 
         try {
             loadConfigFile(commandLineArgs);
-        } catch (FileNotFoundException e) {
+            createUploadDirectories();
+        } catch (IOException e) {
             logger.error(e);
+            System.exit(10);
         }
-
 
         startSparkServer(commandLineArgs);
         initializeDummyEntities();
@@ -39,6 +44,14 @@ public class Server {
         if (!args.getConfigFile().isEmpty()) {
             Configuration.loadConfigFile(args.getConfigFile(), args.isDebug());
         }
+    }
+
+    private static void createUploadDirectories() throws IOException {
+        Path tmpUploadDirectory = Paths.get(Configuration.getInstance().getTmpFilePath());
+        Files.createDirectories(tmpUploadDirectory);
+
+        Path uploadDirectory = Paths.get(Configuration.getInstance().getUploadedFilePath());
+        Files.createDirectories(uploadDirectory);
     }
 
     private static void startSparkServer(CommandLineArgs args) {

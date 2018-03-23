@@ -81,7 +81,7 @@ public class DiskProjectRepository {
     }
 
     private Path getProjectDirectory() throws IOException {
-        Path directory = Paths.get(Configuration.getInstance().getFilePath(), project.getCreator().getId(), project.getName());
+        Path directory = Paths.get(Configuration.getInstance().getUploadedFilePath(), project.getCreator().getId(), project.getName());
         return Files.createDirectories(directory);
     }
 }

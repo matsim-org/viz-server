@@ -1,6 +1,6 @@
 package org.matsim.webvis.files;
 
-import org.matsim.webvis.files.file.UploadFileRequestHandler;
+import org.matsim.webvis.files.file.FileUploadRequestHandler;
 import org.matsim.webvis.files.project.CreateProjectRequestHandler;
 
 import static spark.Spark.post;
@@ -14,6 +14,6 @@ public class Routes {
     static void initialize() {
 
         put(PROJECT, new CreateProjectRequestHandler());
-        post(FILE, new UploadFileRequestHandler());
+        post(FILE, new FileUploadRequestHandler());
     }
 }

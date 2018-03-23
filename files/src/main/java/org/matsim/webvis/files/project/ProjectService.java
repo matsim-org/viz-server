@@ -23,8 +23,7 @@ public class ProjectService {
 
     }
 
-    public Project addFilesToProject(List<FileItem> items, String projectId, String userId) throws Exception {
-
+    public Project getProjectIfAllowed(String projectId, String userId) throws Exception {
         Project project = projectDAO.find(projectId);
 
         if (project == null) {
@@ -33,6 +32,10 @@ public class ProjectService {
         if (!mayUserAddFiles(project, userId)) {
             throw new Exception("User is not allowed to add files to this project");
         }
+        return project;
+    }
+
+    public Project addFilesToProject(List<FileItem> items, Project project) throws Exception {
 
         DiskProjectRepository repository = new DiskProjectRepository(project);
         List<FileEntry> entries = repository.addFiles(items);
@@ -42,7 +45,7 @@ public class ProjectService {
             return projectDAO.persist(project);
         } catch (Exception e) {
             repository.removeFiles(entries);
-            return projectDAO.find(projectId);
+            throw new Exception("Error while persisting project", e);
         }
     }
 

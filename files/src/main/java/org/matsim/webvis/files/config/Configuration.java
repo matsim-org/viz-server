@@ -13,7 +13,8 @@ public class Configuration {
 
     private boolean debug = false;
     private int port = 3001;
-    private String filePath = "./files";
+    private String uploadedFilePath = "./files";
+    private String tmpFilePath = "./tmp";
 
     private Configuration() {
     }
