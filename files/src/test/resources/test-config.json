@@ -1,4 +1,5 @@
 {
   "port": 3001,
-  "filePath": "C:\\Users\\Peter Lustich\\fileUploads"
+  "uploadedFilePath": "G:\\Users\\Janek\\fileUploads",
+  "tmpFilePath": "G:\\Users\\Janek\\tmpUploads"
 }

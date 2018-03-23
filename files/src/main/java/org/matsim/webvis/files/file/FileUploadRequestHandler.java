@@ -12,8 +12,10 @@ import spark.Route;
 public class FileUploadRequestHandler implements Route {
 
     private static Gson gson = new GsonBuilder().
-            registerTypeHierarchyAdapter(Iterable.class, new IterableSerializer()).
-            registerTypeAdapterFactory(new EntityAdapterFactory()).create();
+            registerTypeHierarchyAdapter(Iterable.class, new IterableSerializer())
+            .registerTypeAdapterFactory(new EntityAdapterFactory())
+            .setExclusionStrategies(new FileEntryExclusionStrategy())
+            .create();
 
     private ProjectService projectService = new ProjectService();
 
@@ -24,6 +26,7 @@ public class FileUploadRequestHandler implements Route {
         Project project;
         try {
             uploadRequest = new FileUploadRequest(request);
+            uploadRequest.parseUpload(request);
             project = projectService.getProjectIfAllowed(uploadRequest.getProject_id(), uploadRequest.getUser_id());
         } catch (RequestException e) {
             return createJsonResponse(Answer.badRequest(e.getErrorCode(), e.getMessage()), response);

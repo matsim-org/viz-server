@@ -7,7 +7,7 @@ import org.matsim.webvis.files.config.CommandLineArgs;
 import org.matsim.webvis.files.config.Configuration;
 import org.matsim.webvis.files.entities.Project;
 import org.matsim.webvis.files.entities.User;
-import org.matsim.webvis.files.project.ProjectService;
+import org.matsim.webvis.files.project.ProjectDAO;
 import org.matsim.webvis.files.user.UserDAO;
 
 import java.io.FileNotFoundException;
@@ -65,8 +65,14 @@ public class Server {
 
 
         try {
-            User user = new UserDAO().persistUser(new User());
-            Project project = new ProjectService().createNewProject("test-project", user.getId());
+            User user = new User();
+            user.setId("test-user");
+            user = new UserDAO().persist(user);
+            Project project = new Project();
+            project.setName("test-project");
+            project.setCreator(user);
+            project.setId("test-project");
+            project = new ProjectDAO().persist(project);
             logger.info("\n\ntest org.matsim.webvis.auth.user id: " + user.getId() + "\n\n");
             logger.info("\n\ntest project id: " + project.getId() + "\n\n");
         } catch (Exception e) {

@@ -29,7 +29,7 @@ public class ProjectServiceTest {
     public void createNewProject_projectNameExists_exception() throws Exception {
 
         String name = "name";
-        User user = userDAO.persistUser(new User());
+        User user = userDAO.persistNewUser(new User());
 
         testObject.createNewProject(name, user.getId());
         testObject.createNewProject(name, user.getId());
@@ -52,7 +52,7 @@ public class ProjectServiceTest {
     public void createNewProject_allGood_newProject() throws Exception {
 
         String name = "name";
-        User user = userDAO.persistUser(new User());
+        User user = userDAO.persistNewUser(new User());
 
         Project project = testObject.createNewProject(name, user.getId());
 

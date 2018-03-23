@@ -1,6 +1,7 @@
 package org.matsim.webvis.files.project;
 
 import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.matsim.webvis.files.config.Configuration;
@@ -15,42 +16,43 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 public class DiskProjectRepository {
 
     private static Logger logger = LogManager.getLogger();
 
     private Project project;
+    private Path projectDirectory;
 
-    DiskProjectRepository(Project project) {
+    DiskProjectRepository(Project project) throws IOException {
+
         this.project = project;
+        this.projectDirectory = getProjectDirectory();
     }
 
-    public List<FileEntry> addFiles(List<FileItem> items) throws IOException {
+    public List<FileEntry> addFiles(List<FileItem> items) throws Exception {
 
-        Path directory = getProjectDirectory();
         List<FileEntry> writtenFiles = new ArrayList<>();
         for (FileItem item : items) {
-            FileEntry entry = addFile(item, directory);
+            FileEntry entry = addFile(item);
             writtenFiles.add(entry);
+
         }
         return writtenFiles;
     }
 
-    public FileEntry addFile(FileItem item) throws IOException {
-        return addFile(item, getProjectDirectory());
-    }
+    private FileEntry addFile(FileItem item) throws Exception {
 
-    private FileEntry addFile(FileItem item, Path directory) {
-        String filename = item.getName();
-        try {
-            Path file = directory.resolve(filename);
-            item.write(file.toFile());
-        } catch (Exception e) {
-            logger.error("error while writing file.", e);
-        }
+        String diskFileName = UUID.randomUUID().toString() + "." + FilenameUtils.getExtension(item.getName());
+        Path file = projectDirectory.resolve(diskFileName);
+        item.write(file.toFile());
+
         FileEntry entry = new FileEntry();
-        entry.setFileName(filename);
+        entry.setUserFileName(item.getName());
+        entry.setPersistedFileName(diskFileName);
+        entry.setContentType(item.getContentType());
+        entry.setSizeInBytes(item.getSize());
         return entry;
     }
 
@@ -76,12 +78,12 @@ public class DiskProjectRepository {
     }
 
     private void removeFile(FileEntry entry, Path directory) throws IOException {
-        Path file = directory.resolve(entry.getFileName());
+        Path file = directory.resolve(entry.getPersistedFileName());
         Files.delete(file);
     }
 
     private Path getProjectDirectory() throws IOException {
-        Path directory = Paths.get(Configuration.getInstance().getUploadedFilePath(), project.getCreator().getId(), project.getName());
+        Path directory = Paths.get(Configuration.getInstance().getUploadedFilePath(), project.getCreator().getId(), project.getId());
         return Files.createDirectories(directory);
     }
 }

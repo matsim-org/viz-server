@@ -2,7 +2,6 @@ package org.matsim.webvis.files.file;
 
 import lombok.Getter;
 import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileItemStream;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
@@ -28,20 +27,30 @@ class FileUploadRequest {
     private String project_id;
     private String user_id;
     private List<FileItem> files = new ArrayList<>();
-    private List<FileItemStream> uploads = new ArrayList<>();
+    private ServletFileUpload upload;
 
     FileUploadRequest(Request request) throws RequestException {
 
         if (!ServletFileUpload.isMultipartContent(request.raw())) {
             throw new RequestException(ErrorCode.INVALID_REQUEST, "must be a multipart request");
         }
-        ServletFileUpload upload = createUpload();
+        upload = createUpload();
+
+    }
+
+    public void parseUpload(Request request) throws RequestException {
         try {
             List<FileItem> fileItems = upload.parseRequest(request.raw());
             parseMetadata(fileItems);
             parseFiles(fileItems);
         } catch (FileUploadException e) {
             throw new RequestException(ErrorCode.INVALID_REQUEST, "An error occurred during file upload.");
+        }
+    }
+
+    public void removeTemporaryFiles() {
+        for (FileItem file : files) {
+            file.delete();
         }
     }
 
