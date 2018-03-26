@@ -11,29 +11,32 @@ import spark.Route;
 
 public class FileUploadRequestHandler implements Route {
 
+    ProjectService projectService = new ProjectService();
+
     private static Gson gson = new GsonBuilder().
             registerTypeHierarchyAdapter(Iterable.class, new IterableSerializer())
             .registerTypeAdapterFactory(new EntityAdapterFactory())
             .setExclusionStrategies(new FileEntryExclusionStrategy())
             .create();
-
-    private ProjectService projectService = new ProjectService();
+    RequestFactory requestFactory = new RequestFactory();
 
     @Override
     public Object handle(Request request, Response response) {
 
+        // Parsing and uploading of the request
         FileUploadRequest uploadRequest;
         Project project;
         try {
-            uploadRequest = new FileUploadRequest(request);
+            uploadRequest = requestFactory.createRequest(request);
             uploadRequest.parseUpload(request);
-            project = projectService.getProjectIfAllowed(uploadRequest.getProject_id(), uploadRequest.getUser_id());
+            project = projectService.getProjectIfAllowed(uploadRequest.getProjectId(), uploadRequest.getUserId());
         } catch (RequestException e) {
             return createJsonResponse(Answer.badRequest(e.getErrorCode(), e.getMessage()), response);
         } catch (Exception e) {
             return createJsonResponse(Answer.forbidden(e.getMessage()), response);
         }
 
+        // Processing of the uploaded content
         Answer answer;
         try {
             Project persisted = projectService.addFilesToProject(uploadRequest.getFiles(), project);
@@ -42,7 +45,14 @@ public class FileUploadRequestHandler implements Route {
             answer = Answer.internalError(ErrorCode.UNSPECIFIED_ERROR, "Error during file upload. Try again.");
         }
 
+        // Response
         return createJsonResponse(answer, response);
+    }
+
+    public class RequestFactory {
+        FileUploadRequest createRequest(Request request) throws RequestException {
+            return new FileUploadRequest(request);
+        }
     }
 
     private String createJsonResponse(Answer answer, Response response) {

@@ -7,6 +7,7 @@ import org.matsim.webvis.common.database.AbstractEntity;
 
 import javax.persistence.*;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 
 @Getter
@@ -22,7 +23,7 @@ public class Project extends AbstractEntity {
     private User creator;
 
     @OneToMany(mappedBy = "project", cascade = {CascadeType.ALL}, fetch = FetchType.LAZY, orphanRemoval = true)
-    private Set<FileEntry> files;
+    private Set<FileEntry> files = new HashSet<>();
 
     public void addFileEntries(Collection<FileEntry> entries) {
         for (FileEntry entry : entries) {

@@ -13,7 +13,8 @@ public class ProjectService {
 
     private static Logger logger = LogManager.getLogger();
 
-    private ProjectDAO projectDAO = new ProjectDAO();
+    ProjectDAO projectDAO = new ProjectDAO();
+    RepositoryFactory repositoryFactory = new RepositoryFactory();
 
     public Project createNewProject(String projectName, String userId) throws Exception {
 
@@ -37,7 +38,7 @@ public class ProjectService {
 
     public Project addFilesToProject(List<FileItem> items, Project project) throws Exception {
 
-        DiskProjectRepository repository = new DiskProjectRepository(project);
+        ProjectRepository repository = repositoryFactory.getRepository(project);
         List<FileEntry> entries = repository.addFiles(items);
         project.addFileEntries(entries);
 

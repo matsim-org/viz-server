@@ -18,7 +18,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
-public class DiskProjectRepository {
+public class DiskProjectRepository implements ProjectRepository {
 
     private static Logger logger = LogManager.getLogger();
 
@@ -31,13 +31,12 @@ public class DiskProjectRepository {
         this.projectDirectory = getProjectDirectory();
     }
 
-    public List<FileEntry> addFiles(List<FileItem> items) throws Exception {
+    public List<FileEntry> addFiles(Collection<FileItem> items) throws Exception {
 
         List<FileEntry> writtenFiles = new ArrayList<>();
         for (FileItem item : items) {
             FileEntry entry = addFile(item);
             writtenFiles.add(entry);
-
         }
         return writtenFiles;
     }

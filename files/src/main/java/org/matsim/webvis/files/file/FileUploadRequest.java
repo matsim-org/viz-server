@@ -24,10 +24,10 @@ class FileUploadRequest {
 
     private static Logger logger = LogManager.getLogger();
 
-    private String project_id;
-    private String user_id;
+    ServletFileUpload upload;
+    private String projectId;
     private List<FileItem> files = new ArrayList<>();
-    private ServletFileUpload upload;
+    private String userId;
 
     FileUploadRequest(Request request) throws RequestException {
 
@@ -35,7 +35,6 @@ class FileUploadRequest {
             throw new RequestException(ErrorCode.INVALID_REQUEST, "must be a multipart request");
         }
         upload = createUpload();
-
     }
 
     public void parseUpload(Request request) throws RequestException {
@@ -63,11 +62,11 @@ class FileUploadRequest {
 
     private void parseMetadata(List<FileItem> items) throws RequestException {
 
-        if (items.size() < 2) {
-            throw new RequestException(ErrorCode.INVALID_REQUEST, "file upload must contain: 'user_id', 'project_id'");
+        if (items.size() < 3) {
+            throw new RequestException(ErrorCode.INVALID_REQUEST, "file upload must contain: 'userId', 'projectId'and one file");
         }
-        user_id = findFormField(items, "user_id").getString();
-        project_id = findFormField(items, "project_id").getString();
+        userId = findFormField(items, "userId").getString();
+        projectId = findFormField(items, "projectId").getString();
     }
 
     private FileItem findFormField(List<FileItem> items, String fieldName) throws RequestException {
