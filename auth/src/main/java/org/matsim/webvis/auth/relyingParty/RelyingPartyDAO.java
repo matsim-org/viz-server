@@ -8,8 +8,20 @@ import java.util.List;
 
 public class RelyingPartyDAO extends DAO {
 
-    public RelyingPartyCredential persist(RelyingPartyCredential credentials) {
+    public RelyingPartyCredential persistCredential(RelyingPartyCredential credentials) {
         return database.persistOne(credentials);
+    }
+
+    public RelyingPartyCredential persistCredential(RelyingPartyCredential credential, String relyingPartyId) {
+
+        EntityManager manager = database.getEntityManager();
+        credential.setRelyingParty(manager.getReference(RelyingParty.class, relyingPartyId));
+        credential = database.persistOne(credential, manager);
+        return credential;
+    }
+
+    public RelyingParty update(RelyingParty party) {
+        return database.updateOne(party);
     }
 
     public Client findClient(String clientId) {

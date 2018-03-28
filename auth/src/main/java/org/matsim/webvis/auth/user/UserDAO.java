@@ -8,8 +8,18 @@ import java.util.List;
 
 public class UserDAO extends DAO {
 
-    public UserCredentials saveCredentials(UserCredentials credentials) {
+    public UserCredentials persistCredentials(UserCredentials credentials) {
         return database.persistOne(credentials);
+    }
+
+    public UserCredentials persistCredentials(UserCredentials credentials, String userId) {
+        EntityManager manager = database.getEntityManager();
+        credentials.setUser(manager.find(User.class, userId));
+        return database.persistOne(credentials, manager);
+    }
+
+    public User update(User user) {
+        return database.updateOne(user);
     }
 
     public UserCredentials findUserCredentials(String eMail) {

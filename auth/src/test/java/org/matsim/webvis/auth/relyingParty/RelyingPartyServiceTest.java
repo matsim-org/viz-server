@@ -96,7 +96,7 @@ public class RelyingPartyServiceTest {
         RelyingPartyCredential credential = new RelyingPartyCredential();
         credential.setRelyingParty(party);
 
-        RelyingPartyCredential persisted = relyingPartyDAO.persist(credential);
+        RelyingPartyCredential persisted = relyingPartyDAO.persistCredential(credential);
 
         testObject.validateRelyingParty(party.getId(), "wrong secret");
 
@@ -110,7 +110,7 @@ public class RelyingPartyServiceTest {
         RelyingPartyCredential credential = new RelyingPartyCredential();
         credential.setRelyingParty(party);
 
-        RelyingPartyCredential persisted = relyingPartyDAO.persist(credential);
+        RelyingPartyCredential persisted = relyingPartyDAO.persistCredential(credential);
 
         RelyingParty result = testObject.validateRelyingParty(party.getId(), persisted.getSecret());
 

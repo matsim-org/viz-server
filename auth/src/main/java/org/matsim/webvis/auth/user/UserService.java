@@ -3,6 +3,7 @@ package org.matsim.webvis.auth.user;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.matsim.webvis.auth.config.ConfigUser;
+import org.matsim.webvis.auth.config.Configuration;
 import org.matsim.webvis.auth.entities.User;
 import org.matsim.webvis.auth.entities.UserCredentials;
 import org.matsim.webvis.auth.helper.SecretHelper;
@@ -16,6 +17,19 @@ public class UserService {
     private UserDAO userDAO = new UserDAO();
 
     public User createUser(ConfigUser user) throws Exception {
+
+        if (Configuration.getInstance().isDebug()) {
+
+            UserCredentials credentials = createUserCredentials(user.getPassword().toCharArray());
+            User newUser = new User();
+            newUser.setEMail(user.getUsername());
+            newUser.setId(user.getId());
+
+            newUser = userDAO.update(newUser);
+            userDAO.persistCredentials(credentials, newUser.getId());
+            return newUser;
+        }
+
         return createUser(user.getUsername(), user.getPassword().toCharArray(), user.getPassword().toCharArray());
     }
 
@@ -32,10 +46,10 @@ public class UserService {
         user.setEMail(eMail);
         credentials.setUser(user);
         try {
-            logger.info("creating org.matsim.webvis.auth.user with eMail: " + user.getEMail());
-            return userDAO.saveCredentials(credentials).getUser();
+            logger.info("creating user with eMail: " + user.getEMail());
+            return userDAO.persistCredentials(credentials).getUser();
         } catch (RollbackException e) {
-            throw new Exception("org.matsim.webvis.auth.user already exists");
+            throw new Exception("user already exists");
         } catch (Exception e) {
             logger.error(e);
         }

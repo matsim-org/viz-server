@@ -1,5 +1,8 @@
 package org.matsim.webvis.auth.relyingParty;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.matsim.webvis.auth.config.ConfigRelyingParty;
 import org.matsim.webvis.auth.entities.Client;
 import org.matsim.webvis.auth.entities.RedirectUri;
 import org.matsim.webvis.auth.entities.RelyingParty;
@@ -10,12 +13,14 @@ import java.net.URI;
 
 public class RelyingPartyService {
 
+    private static Logger logger = LogManager.getLogger();
+
     private RelyingPartyDAO relyingPartyDAO = new RelyingPartyDAO();
 
     public Client persistNewClient(Client client) throws Exception {
 
         if (client.getRedirectUris().size() < 1) {
-            throw new Exception("org.matsim.webvis.auth.relyingParty must have at least one redirect_uri.");
+            throw new Exception("relyingParty must have at least one redirect_uri.");
         }
 
         client.getRedirectUris().forEach(uri -> uri.setClient(client));
@@ -24,10 +29,24 @@ public class RelyingPartyService {
         return client;
     }
 
-    public RelyingParty persistNewRelyingParty(RelyingParty party) {
+    private RelyingParty persistNewRelyingParty(RelyingParty party) {
         RelyingPartyCredential credential = new RelyingPartyCredential();
         credential.setRelyingParty(party);
-        return relyingPartyDAO.persist(credential).getRelyingParty();
+        RelyingParty persisted = relyingPartyDAO.persistCredential(credential).getRelyingParty();
+        logger.info("persisted relying party: (id: " + persisted.getId() + ", secret: " + credential.getSecret());
+        return persisted;
+    }
+
+    public RelyingPartyCredential createRelyingParty(ConfigRelyingParty configParty) {
+        RelyingParty party = new RelyingParty();
+        party.setName(configParty.getName());
+        party.setId(configParty.getId());
+        party = relyingPartyDAO.update(party);
+
+        RelyingPartyCredential credential = new RelyingPartyCredential();
+        credential.setRelyingParty(party);
+        credential.setSecret(configParty.getSecret());
+        return relyingPartyDAO.persistCredential(credential, party.getId());
     }
 
     public Client createClient(String name, Iterable<URI> redirectUris) throws Exception {
