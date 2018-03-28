@@ -15,6 +15,11 @@ public class Configuration {
     private int port = 3001;
     private String uploadedFilePath = "./files";
     private String tmpFilePath = "./tmp";
+    private String introspectionEndpoint = "https://localhost:3000/introspect/";
+    private String tlsTrustStore = "./trustStore.jks";
+    private String tlsTrustStorePassword = "nopassword";
+    private String relyingPartyId = "relyingPartyId";
+    private String relyingPartySecret = "secret";
 
     private Configuration() {
     }
