@@ -27,7 +27,6 @@ class FileUploadRequest {
     ServletFileUpload upload;
     private String projectId;
     private List<FileItem> files = new ArrayList<>();
-    private String userId;
 
     FileUploadRequest(Request request) throws RequestException {
 
@@ -62,10 +61,9 @@ class FileUploadRequest {
 
     private void parseMetadata(List<FileItem> items) throws RequestException {
 
-        if (items.size() < 3) {
-            throw new RequestException(ErrorCode.INVALID_REQUEST, "file upload must contain: 'userId', 'projectId'and one file");
+        if (items.size() < 2) {
+            throw new RequestException(ErrorCode.INVALID_REQUEST, "file upload must contain: 'projectId'and one file");
         }
-        userId = findFormField(items, "userId").getString();
         projectId = findFormField(items, "projectId").getString();
     }
 
