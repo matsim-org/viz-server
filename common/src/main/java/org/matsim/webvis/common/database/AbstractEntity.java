@@ -13,6 +13,6 @@ public abstract class AbstractEntity {
 
     @Id
     @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "uuid2")
+    @GenericGenerator(name = "uuid", strategy = "org.matsim.webvis.common.database.UUIDGenerator")
     private String id;
 }
