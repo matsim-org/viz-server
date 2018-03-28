@@ -2,6 +2,7 @@ package org.matsim.webvis.auth.relyingParty;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.matsim.webvis.auth.config.ConfigClient;
 import org.matsim.webvis.auth.config.ConfigRelyingParty;
 import org.matsim.webvis.auth.entities.Client;
 import org.matsim.webvis.auth.entities.RedirectUri;
@@ -10,6 +11,7 @@ import org.matsim.webvis.auth.entities.RelyingPartyCredential;
 import org.matsim.webvis.auth.helper.SecretHelper;
 
 import java.net.URI;
+import java.util.HashSet;
 
 public class RelyingPartyService {
 
@@ -43,6 +45,27 @@ public class RelyingPartyService {
         party.setId(configParty.getId());
         party = relyingPartyDAO.update(party);
 
+        logger.info("created relying party: " + party.getId());
+        return createCredential(party, configParty);
+    }
+
+    public Client createClient(ConfigClient configClient) {
+        Client client = new Client();
+        client.setRedirectUris(new HashSet<>(configClient.getRedirectUris()));
+        for (RedirectUri uri : client.getRedirectUris()) {
+            uri.setClient(client);
+        }
+        client.setName(configClient.getName());
+        client.setId(configClient.getId());
+        RelyingParty persistedClient = relyingPartyDAO.update(client);
+
+        logger.info("created client: " + persistedClient.getId());
+
+        createCredential(persistedClient, configClient);
+        return client;
+    }
+
+    private RelyingPartyCredential createCredential(RelyingParty party, ConfigRelyingParty configParty) {
         RelyingPartyCredential credential = new RelyingPartyCredential();
         credential.setRelyingParty(party);
         credential.setSecret(configParty.getSecret());

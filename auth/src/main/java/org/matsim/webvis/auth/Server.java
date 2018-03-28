@@ -3,11 +3,7 @@ package org.matsim.webvis.auth;
 import com.beust.jcommander.JCommander;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.matsim.webvis.auth.config.CommandlineArgs;
-import org.matsim.webvis.auth.config.ConfigRelyingParty;
-import org.matsim.webvis.auth.config.ConfigUser;
-import org.matsim.webvis.auth.config.Configuration;
-import org.matsim.webvis.auth.entities.Client;
+import org.matsim.webvis.auth.config.*;
 import org.matsim.webvis.auth.relyingParty.RelyingPartyService;
 import org.matsim.webvis.auth.user.UserService;
 
@@ -42,8 +38,8 @@ public class Server {
         }
 
         RelyingPartyService relyingPartyService = new RelyingPartyService();
-        for (Client client : Configuration.getInstance().getClients()) {
-            relyingPartyService.persistNewClient(client);
+        for (ConfigClient client : Configuration.getInstance().getClients()) {
+            relyingPartyService.createClient(client);
         }
 
         for (ConfigRelyingParty party : Configuration.getInstance().getProtectedResources()) {

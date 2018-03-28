@@ -2,7 +2,6 @@ package org.matsim.webvis.auth.config;
 
 import com.google.gson.Gson;
 import lombok.Getter;
-import org.matsim.webvis.auth.entities.Client;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -20,7 +19,7 @@ public class Configuration {
 
     private int port = 3000;
     private List<ConfigUser> users = new ArrayList<>();
-    private List<Client> clients = new ArrayList<>();
+    private List<ConfigClient> clients = new ArrayList<>();
     private List<ConfigRelyingParty> protectedResources = new ArrayList<>();
 
     private String tlsKeyStore = "";

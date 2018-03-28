@@ -63,7 +63,7 @@ public class TokenService {
 
         User user = userService.findUser(decodedToken.getSubject());
 
-        if (user == null) throw new Exception("org.matsim.webvis.auth.user doesn't exist");
+        if (user == null) throw new Exception("user doesn't exist");
         return user;
     }
 

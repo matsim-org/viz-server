@@ -39,7 +39,7 @@ public class AuthorizationRequestHandler implements Route {
 
         if (!authService.isValidClientInformation(authRequest)) {
             return errorResponse(ErrorCode.UNAUTHORIZED_CLIENT,
-                    "org.matsim.webvis.auth.relyingParty was not registered or redirect url was not registered");
+                                 "relyingParty was not registered or redirect url was not registered");
         }
 
         //authenticate org.matsim.webvis.auth.user by org.matsim.webvis.auth.token or by login
