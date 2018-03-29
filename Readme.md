@@ -46,3 +46,13 @@ keytool -keystore truststore.jks -alias selfsigned -import -file selfsigned.cert
 
 The public part of the RSA key is first exported as a certificate and then imported
 into a truststore file named 'truststore.jks'.
+
+### 4. Start the servers with a config file
+
+All server components can be configured with a configuration file in JSON-Format.
+To load a configuration file you can add the following parameter when starting the
+program:
+
+```
+-config /path/to/your/config/file.json
+```
