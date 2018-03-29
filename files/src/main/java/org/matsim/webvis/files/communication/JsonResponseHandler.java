@@ -5,20 +5,20 @@ import com.google.gson.GsonBuilder;
 import org.matsim.webvis.common.communication.Answer;
 import org.matsim.webvis.common.communication.EntityAdapterFactory;
 import org.matsim.webvis.common.communication.IterableSerializer;
-import org.matsim.webvis.files.entities.User;
 import spark.Request;
 import spark.Response;
+import spark.Route;
 
-public abstract class JsonResponseHandler extends AuthenticatedRequestHandler {
+public abstract class JsonResponseHandler implements Route {
 
     private Gson gson = new GsonBuilder().
             registerTypeHierarchyAdapter(Iterable.class, new IterableSerializer()).
             registerTypeAdapterFactory(new EntityAdapterFactory()).create();
 
     @Override
-    protected Object handle(Request request, Response response, User subject) {
+    public Object handle(Request request, Response response) {
 
-        Answer answer = process(request, response, subject);
+        Answer answer = process(request, response);
         return createJsonResponse(answer, response);
     }
 
@@ -38,5 +38,5 @@ public abstract class JsonResponseHandler extends AuthenticatedRequestHandler {
         return response.body();
     }
 
-    protected abstract Answer process(Request request, Response response, User subject);
+    protected abstract Answer process(Request request, Response response);
 }

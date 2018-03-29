@@ -6,7 +6,6 @@ import org.junit.Test;
 import org.matsim.webvis.common.communication.Answer;
 import org.matsim.webvis.common.communication.ErrorResponse;
 import org.matsim.webvis.files.entities.Project;
-import org.matsim.webvis.files.entities.User;
 import org.matsim.webvis.files.project.ProjectService;
 import org.matsim.webvis.files.util.TestUtils;
 import spark.Request;
@@ -33,7 +32,7 @@ public class FileUploadRequestHandlerTest {
         Request request = TestUtils.mockRequestWithRawRequest("Wrong", "request");
         Response response = mock(Response.class);
 
-        Answer answer = testObject.process(request, response, null);
+        Answer answer = testObject.process(request, response);
 
         assertEquals(HttpStatus.SC_BAD_REQUEST, answer.getStatusCode());
         assertTrue(answer.getResponse() instanceof ErrorResponse);
@@ -52,7 +51,7 @@ public class FileUploadRequestHandlerTest {
         testObject.projectService = mock(ProjectService.class);
         when(testObject.projectService.getProjectIfAllowed(any(), any())).thenThrow(new Exception());
 
-        Answer answer = testObject.process(request, response, new User());
+        Answer answer = testObject.process(request, response);
 
         assertEquals(HttpStatus.SC_FORBIDDEN, answer.getStatusCode());
         assertTrue(answer.getResponse() instanceof ErrorResponse);
@@ -72,7 +71,7 @@ public class FileUploadRequestHandlerTest {
         when(testObject.projectService.getProjectIfAllowed(any(), any())).thenReturn(new Project());
         when(testObject.projectService.addFilesToProject(any(), any())).thenThrow(new Exception());
 
-        Answer answer = testObject.process(request, response, new User());
+        Answer answer = testObject.process(request, response);
 
         assertEquals(HttpStatus.SC_INTERNAL_SERVER_ERROR, answer.getStatusCode());
         assertTrue(answer.getResponse() instanceof ErrorResponse);
@@ -91,7 +90,7 @@ public class FileUploadRequestHandlerTest {
         when(testObject.projectService.getProjectIfAllowed(any(), any())).thenReturn(new Project());
         when(testObject.projectService.addFilesToProject(any(), any())).thenReturn(new Project());
 
-        Answer answer = testObject.process(request, response, new User());
+        Answer answer = testObject.process(request, response);
 
         assertEquals(HttpStatus.SC_OK, answer.getStatusCode());
         assertTrue(answer.getResponse() instanceof Project);

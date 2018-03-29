@@ -4,22 +4,21 @@ import com.google.gson.JsonSyntaxException;
 import org.matsim.webvis.common.communication.Answer;
 import org.matsim.webvis.common.communication.ErrorCode;
 import org.matsim.webvis.common.communication.RequestException;
-import org.matsim.webvis.files.entities.User;
 import spark.Request;
 import spark.Response;
 
-public abstract class JsonRequestHandler<T> extends JsonResponseHandler {
+public abstract class AuthenticatedJsonRequestHandler<T> extends JsonResponseHandler {
 
     private Class<T> requestClass;
 
-    protected JsonRequestHandler(Class<T> requestClass) {
+    protected AuthenticatedJsonRequestHandler(Class<T> requestClass) {
         this.requestClass = requestClass;
     }
 
-    protected abstract Answer process(T body, User subject);
+    protected abstract Answer process(T body, Subject subject);
 
     @Override
-    protected Answer process(Request request, Response response, User subject) {
+    protected Answer process(Request request, Response response) {
 
         T body = null;
         try {
@@ -28,6 +27,7 @@ public abstract class JsonRequestHandler<T> extends JsonResponseHandler {
         } catch (RequestException e) {
             return Answer.badRequest(e.getErrorCode(), e.getMessage());
         }
+        Subject subject = Subject.getSubject(request);
         return process(body, subject);
     }
 

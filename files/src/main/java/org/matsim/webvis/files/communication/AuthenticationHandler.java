@@ -82,10 +82,10 @@ public class AuthenticationHandler implements Filter {
 
         try {
             AuthorizedRequest authorizedRequest = new AuthorizedRequest(request);
-            IntrospectionResponse authResponse = introspectToken(authorizedRequest.getToken());
+            AuthenticationResult authResponse = introspectToken(authorizedRequest.getToken());
 
             if (authResponse.isActive()) {
-                request.attribute(SUBJECT_ATTRIBUTE, authResponse);
+                Subject.setAuthenticationAsAttribute(request, authResponse);
             } else {
                 haltWithUnauthorizedError(ErrorCode.INVALID_TOKEN, "Token is invalid", response);
             }
@@ -96,7 +96,7 @@ public class AuthenticationHandler implements Filter {
         }
     }
 
-    private IntrospectionResponse introspectToken(String token) {
+    private AuthenticationResult introspectToken(String token) {
 
         HttpPost post = createIntrospectionRequest(token);
         try (CloseableHttpClient client = createHttpClient()) {
@@ -106,11 +106,11 @@ public class AuthenticationHandler implements Filter {
         }
     }
 
-    private IntrospectionResponse makeIntrospectionRequest(CloseableHttpClient client, HttpPost post) throws IOException {
+    private AuthenticationResult makeIntrospectionRequest(CloseableHttpClient client, HttpPost post) throws IOException {
         try (CloseableHttpResponse response = client.execute(post)) {
             if (isStatusOk(response)) {
                 String message = EntityUtils.toString(response.getEntity());
-                return gson.fromJson(message, IntrospectionResponse.class);
+                return gson.fromJson(message, AuthenticationResult.class);
             } else {
                 throw new RuntimeException("Could not authenticate at auth server");
             }
@@ -153,6 +153,7 @@ public class AuthenticationHandler implements Filter {
         response.type("application/json");
         response.header("WWW-Authenticate", "Bearer");
         ErrorResponse error = new ErrorResponse(errorCode, message);
+        //noinspection ThrowableNotThrown
         halt(status, gson.toJson(error));
     }
 

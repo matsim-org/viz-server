@@ -7,7 +7,6 @@ import org.matsim.webvis.common.communication.ErrorCode;
 import org.matsim.webvis.common.communication.ErrorResponse;
 import org.matsim.webvis.common.communication.HttpStatus;
 import org.matsim.webvis.files.entities.Project;
-import org.matsim.webvis.files.entities.User;
 
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
@@ -29,7 +28,7 @@ public class CreateProjectRequestHandlerTest {
 
         CreateProjectRequest request = new CreateProjectRequest("");
 
-        Answer answer = testObject.process(request, new User());
+        Answer answer = testObject.process(request, null);
 
         assertEquals(HttpStatus.BAD_REQUEST, answer.getStatusCode());
         assertTrue(answer.getResponse() instanceof ErrorResponse);
@@ -43,7 +42,7 @@ public class CreateProjectRequestHandlerTest {
         testObject.projectService = mock(ProjectService.class);
         when(testObject.projectService.createNewProject(any(), any())).thenThrow(new Exception());
 
-        Answer answer = testObject.process(request, new User());
+        Answer answer = testObject.process(request, null);
 
         assertEquals(HttpStatus.CONFLICT, answer.getStatusCode());
         assertTrue(answer.getResponse() instanceof ErrorResponse);
@@ -59,7 +58,7 @@ public class CreateProjectRequestHandlerTest {
         project.setId("id");
         when(testObject.projectService.createNewProject(any(), any())).thenReturn(project);
 
-        Answer answer = testObject.process(request, new User());
+        Answer answer = testObject.process(request, null);
 
         assertEquals(HttpStatus.OK, answer.getStatusCode());
         assertTrue(answer.getResponse() instanceof Project);

@@ -4,8 +4,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.matsim.webvis.common.communication.*;
 import org.matsim.webvis.files.communication.JsonResponseHandler;
+import org.matsim.webvis.files.communication.Subject;
 import org.matsim.webvis.files.entities.Project;
-import org.matsim.webvis.files.entities.User;
 import org.matsim.webvis.files.project.ProjectService;
 import spark.Request;
 import spark.Response;
@@ -25,14 +25,17 @@ public class FileUploadRequestHandler extends JsonResponseHandler {
     }
 
     @Override
-    protected Answer process(Request request, Response response, User subject) {
+    protected Answer process(Request request, Response response) {
+
+        Subject subject = Subject.getSubject(request);
+
         // Parsing and uploading of the request
         FileUploadRequest uploadRequest;
         Project project;
         try {
             uploadRequest = requestFactory.createRequest(request);
             uploadRequest.parseUpload(request);
-            project = projectService.getProjectIfAllowed(uploadRequest.getProjectId(), subject.getId());
+            project = projectService.getProjectIfAllowed(uploadRequest.getProjectId(), subject.getUser().getId());
         } catch (RequestException e) {
             return Answer.badRequest(e.getErrorCode(), e.getMessage());
         } catch (Exception e) {
