@@ -8,6 +8,7 @@ import org.matsim.webvis.common.communication.RequestException;
 import spark.Request;
 import spark.Response;
 import spark.Route;
+import spark.Session;
 
 import java.net.URI;
 import java.util.Map;
@@ -23,6 +24,7 @@ public class AuthorizationRequestHandler implements Route {
     public AuthorizationRequestHandler() throws Exception {
     }
 
+    @SuppressWarnings("SuspiciousMethodCalls")
     @Override
     public Object handle(Request request, Response response) {
 
@@ -39,7 +41,7 @@ public class AuthorizationRequestHandler implements Route {
 
         if (!authService.isValidClientInformation(authRequest)) {
             return errorResponse(ErrorCode.UNAUTHORIZED_CLIENT,
-                                 "relyingParty was not registered or redirect url was not registered");
+                    "relyingParty was not registered or redirect url was not registered");
         }
 
         //authenticate org.matsim.webvis.auth.user by org.matsim.webvis.auth.token or by login
@@ -65,7 +67,14 @@ public class AuthorizationRequestHandler implements Route {
 
     private AuthenticationRequest parse(Request request) throws RequestException, URIException {
 
-        return new AuthenticationRequest(request.queryMap());
+        try {
+            return new AuthenticationRequest(request.queryMap());
+        } catch (RequestException e) {
+            Session session = request.session();
+            if (session != null && loginSession.containsKey(session.id()))
+                return loginSession.get(session.id());
+            throw e;
+        }
     }
 
     private Object errorResponse(String code, String message) {
