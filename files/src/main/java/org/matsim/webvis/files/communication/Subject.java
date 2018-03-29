@@ -9,7 +9,7 @@ import spark.Request;
 public class Subject {
 
     private static final String SUBJECT_ATTRIBUTE = "subject";
-    private static UserService userService = new UserService();
+    static UserService userService = new UserService();
 
     private User user;
     private AuthenticationResult authentication;
@@ -22,6 +22,11 @@ public class Subject {
     public static Subject getSubject(Request request) {
 
         AuthenticationResult authentication = request.attribute(SUBJECT_ATTRIBUTE);
+
+        if (authentication == null) {
+            throw new RuntimeException("Attribute 'subject' was not set. 'setAuthenticationAsAttribute' must be called first");
+        }
+
         User user = userService.findByIdentityProviderId(authentication.getSub());
         if (user == null)
             user = userService.createUser(authentication.getSub());

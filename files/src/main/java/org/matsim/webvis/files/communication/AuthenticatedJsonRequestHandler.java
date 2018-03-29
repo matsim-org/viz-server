@@ -20,9 +20,11 @@ public abstract class AuthenticatedJsonRequestHandler<T> extends JsonResponseHan
     @Override
     protected Answer process(Request request, Response response) {
 
-        T body = null;
+        T body;
         try {
-            if (isContentTypeJson(request))
+            if (!isContentTypeJson(request))
+                return Answer.badRequest(ErrorCode.INVALID_REQUEST, "only content-type: 'application/json' allowed");
+            else
                 body = parseJsonBody(request.body());
         } catch (RequestException e) {
             return Answer.badRequest(e.getErrorCode(), e.getMessage());

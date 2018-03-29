@@ -11,6 +11,8 @@ import spark.Route;
 
 public abstract class JsonResponseHandler implements Route {
 
+    static final String TYPE_JSON = "application/json";
+
     private Gson gson = new GsonBuilder().
             registerTypeHierarchyAdapter(Iterable.class, new IterableSerializer()).
             registerTypeAdapterFactory(new EntityAdapterFactory()).create();
@@ -32,7 +34,7 @@ public abstract class JsonResponseHandler implements Route {
 
     private Object createJsonResponse(Answer answer, Response response) {
         response.status(answer.getStatusCode());
-        response.type("application/json");
+        response.type(TYPE_JSON);
         String json = getGson().toJson(answer.getResponse());
         response.body(json);
         return response.body();

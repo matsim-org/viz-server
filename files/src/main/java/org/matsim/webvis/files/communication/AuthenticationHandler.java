@@ -38,8 +38,6 @@ import static spark.Spark.halt;
 
 public class AuthenticationHandler implements Filter {
 
-    public static final String SUBJECT_ATTRIBUTE = "subject";
-
     private static Logger logger = LogManager.getLogger();
     private static Gson gson = new Gson();
 
@@ -65,7 +63,7 @@ public class AuthenticationHandler implements Filter {
         return new AuthenticationHandlerBuilder();
     }
 
-    private void initializeSSL(Path trustStore, char[] password)
+    void initializeSSL(Path trustStore, char[] password)
             throws CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException, KeyManagementException {
 
         SSLContext context = SSLContexts.custom()
@@ -80,19 +78,22 @@ public class AuthenticationHandler implements Filter {
     @Override
     public void handle(Request request, Response response) {
 
+        AuthenticationResult authResponse;
         try {
-            AuthorizedRequest authorizedRequest = new AuthorizedRequest(request);
-            AuthenticationResult authResponse = introspectToken(authorizedRequest.getToken());
-
-            if (authResponse.isActive()) {
-                Subject.setAuthenticationAsAttribute(request, authResponse);
-            } else {
-                haltWithUnauthorizedError(ErrorCode.INVALID_TOKEN, "Token is invalid", response);
-            }
+            AuthenticatedRequest authenticatedRequest = new AuthenticatedRequest(request);
+            authResponse = introspectToken(authenticatedRequest.getToken());
         } catch (RequestException e) {
             haltWithUnauthorizedError(e.getErrorCode(), e.getMessage(), response);
+            return;
         } catch (RuntimeException e) {
             haltWithInternalError(ErrorCode.UNSPECIFIED_ERROR, e.getMessage(), response);
+            return;
+        }
+
+        if (authResponse.isActive()) {
+            Subject.setAuthenticationAsAttribute(request, authResponse);
+        } else {
+            haltWithUnauthorizedError(ErrorCode.INVALID_TOKEN, "Token is invalid", response);
         }
     }
 
@@ -133,7 +134,7 @@ public class AuthenticationHandler implements Filter {
         return post;
     }
 
-    private CloseableHttpClient createHttpClient() {
+    CloseableHttpClient createHttpClient() {
         return HttpClients.custom().setSSLSocketFactory(sslFactory).build();
     }
 
@@ -175,7 +176,7 @@ public class AuthenticationHandler implements Filter {
             return this;
         }
 
-        public AuthenticationHandlerBuilder setRelyingPartyid(String id) {
+        public AuthenticationHandlerBuilder setRelyingPartyId(String id) {
             this.relyingPartyId = id;
             return this;
         }

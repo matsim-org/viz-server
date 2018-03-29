@@ -19,7 +19,7 @@ public class Routes {
 
         before(AuthenticationHandler.builder()
                        .setIntrospectionEndpoint(URI.create(Configuration.getInstance().getIntrospectionEndpoint()))
-                       .setRelyingPartyid(Configuration.getInstance().getRelyingPartyId())
+                .setRelyingPartyId(Configuration.getInstance().getRelyingPartyId())
                        .setRelyingPartySecret(Configuration.getInstance().getRelyingPartySecret())
                        .setTrustStore(Paths.get(Configuration.getInstance().getTlsTrustStore()))
                        .setTrustStorePassword(Configuration.getInstance().getTlsTrustStorePassword().toCharArray())

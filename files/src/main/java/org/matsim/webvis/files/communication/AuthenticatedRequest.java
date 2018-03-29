@@ -6,18 +6,18 @@ import org.matsim.webvis.common.communication.RequestException;
 import spark.Request;
 
 @Getter
-class AuthorizedRequest {
+class AuthenticatedRequest {
 
-    private static final String authorization = "Authorization";
+    static final String AUTHORIZATION = "Authorization";
 
     private String token;
 
-    AuthorizedRequest(Request request) throws RequestException {
+    AuthenticatedRequest(Request request) throws RequestException {
 
         if (hasAuthorization(request)) {
-            this.token = extractToken(request.headers(authorization));
+            this.token = extractToken(request.headers(AUTHORIZATION));
         } else
-            throw new RequestException(ErrorCode.INVALID_REQUEST, "Must specify authorization header");
+            throw new RequestException(ErrorCode.INVALID_REQUEST, "Must specify AUTHORIZATION header");
     }
 
     private static String extractToken(String authorizationHeader) throws RequestException {
@@ -30,6 +30,6 @@ class AuthorizedRequest {
     }
 
     private boolean hasAuthorization(Request request) {
-        return request.headers(authorization) != null && !request.headers(authorization).isEmpty();
+        return request.headers(AUTHORIZATION) != null && !request.headers(AUTHORIZATION).isEmpty();
     }
 }
