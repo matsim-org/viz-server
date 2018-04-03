@@ -1,6 +1,8 @@
 package org.matsim.webvis.files.util;
 
 import org.apache.commons.fileupload.FileItem;
+import org.matsim.webvis.files.communication.AuthenticationResult;
+import org.matsim.webvis.files.communication.Subject;
 import org.matsim.webvis.files.config.Configuration;
 import spark.Request;
 
@@ -50,6 +52,7 @@ public class TestUtils {
 
         Request result = mock(Request.class);
         when(result.raw()).thenReturn(raw);
+        when(result.attribute(Subject.SUBJECT_ATTRIBUTE)).thenReturn(new AuthenticationResult());
         return result;
     }
 }

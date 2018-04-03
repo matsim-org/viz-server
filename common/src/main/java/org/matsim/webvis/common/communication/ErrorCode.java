@@ -3,6 +3,7 @@ package org.matsim.webvis.common.communication;
 public class ErrorCode {
     public static final String INVALID_REQUEST = "invalid_request";
     public static final String INVALID_CLIENT = "invalid_client";
+    public static final String INVALID_TOKEN = "invalid_token";
     public static final String UNAUTHORIZED_CLIENT = "unauthorized_client";
     public static final String UNSUPPORTED_GRANT_TYPE = "unsupported_grant_type";
 

@@ -10,9 +10,7 @@
     {
       "name": "test-client",
       "redirectUris": [
-        {
-          "uri": "http://valid.uri"
-        }
+        "http://valid.uri"
       ]
     }
   ],

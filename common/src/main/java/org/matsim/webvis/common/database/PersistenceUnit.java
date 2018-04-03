@@ -87,4 +87,20 @@ public class PersistenceUnit {
         }
         return result;
     }
+
+    public <T> T executeTransactionalQuery(Function<JPAQueryFactory, T> query) {
+        EntityManager em = getEntityManager();
+        JPAQueryFactory queryFactory = createQuery(em);
+        em.getTransaction().begin();
+        T result = null;
+        try {
+            result = query.apply(queryFactory);
+            em.getTransaction().commit();
+        } catch (Exception e) {
+            logger.error(e);
+        } finally {
+            em.close();
+        }
+        return result;
+    }
 }

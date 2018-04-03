@@ -36,24 +36,6 @@ public class FileUploadRequestTest {
     }
 
     @Test(expected = RequestException.class)
-    public void parseUpload_noUserId_exception() throws RequestException, FileUploadException {
-
-        Request request = TestUtils.mockMultipartRequest();
-        FileUploadRequest upload = new FileUploadRequest(request);
-        upload.upload = mock(ServletFileUpload.class);
-
-        List<FileItem> items = new ArrayList<>();
-        items.add(TestUtils.mockFormFieldItem("invalidKey", "unimportant-value"));
-        items.add(TestUtils.mockFormFieldItem("project_id", "1234"));
-        items.add(TestUtils.mockFileItem("test", "test", 1L));
-        when(upload.upload.parseRequest(request.raw())).thenReturn(items);
-
-        upload.parseUpload(request);
-
-        fail("missing userId should throw exception");
-    }
-
-    @Test(expected = RequestException.class)
     public void parseUpload_noProjectId_exception() throws RequestException, FileUploadException {
         Request request = TestUtils.mockMultipartRequest();
         FileUploadRequest upload = new FileUploadRequest(request);
@@ -61,7 +43,6 @@ public class FileUploadRequestTest {
 
         List<FileItem> items = new ArrayList<>();
         items.add(TestUtils.mockFormFieldItem("invalidKey", "unimportant-value"));
-        items.add(TestUtils.mockFormFieldItem("userId", "1234"));
         items.add(TestUtils.mockFileItem("test", "test", 1L));
         when(upload.upload.parseRequest(request.raw())).thenReturn(items);
 
@@ -78,7 +59,6 @@ public class FileUploadRequestTest {
 
         List<FileItem> items = new ArrayList<>();
         items.add(TestUtils.mockFormFieldItem("projectId", "12345"));
-        items.add(TestUtils.mockFormFieldItem("userId", "1234"));
         when(upload.upload.parseRequest(request.raw())).thenReturn(items);
 
         upload.parseUpload(request);
@@ -94,7 +74,6 @@ public class FileUploadRequestTest {
 
         List<FileItem> items = new ArrayList<>();
         items.add(TestUtils.mockFormFieldItem("projectId", "12345"));
-        items.add(TestUtils.mockFormFieldItem("userId", "1234"));
         items.add(TestUtils.mockFormFieldItem("another", "form_field"));
         when(upload.upload.parseRequest(request.raw())).thenReturn(items);
 
@@ -104,7 +83,7 @@ public class FileUploadRequestTest {
     }
 
     @Test
-    public void parseUpload_userIdAndProjectIdAndFile_fileItems() throws RequestException, FileUploadException {
+    public void parseUpload_projectIdAndFile_fileItems() throws RequestException, FileUploadException {
 
         Request request = TestUtils.mockMultipartRequest();
         FileUploadRequest upload = new FileUploadRequest(request);
@@ -114,14 +93,12 @@ public class FileUploadRequestTest {
         final String projectId = "projectId";
         final String userId = "userId";
         items.add(TestUtils.mockFormFieldItem("projectId", projectId));
-        items.add(TestUtils.mockFormFieldItem("userId", userId));
         items.add(TestUtils.mockFileItem("test", "test", 1L));
         when(upload.upload.parseRequest(request.raw())).thenReturn(items);
 
         upload.parseUpload(request);
 
         assertEquals(upload.getProjectId(), projectId);
-        assertEquals(upload.getUserId(), userId);
         assertEquals(1, upload.getFiles().size());
     }
 }

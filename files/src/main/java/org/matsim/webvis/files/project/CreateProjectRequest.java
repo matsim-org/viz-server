@@ -6,13 +6,11 @@ import lombok.Getter;
 class CreateProjectRequest {
 
     private String name = "";
-    private String userId = "";
 
     public CreateProjectRequest() {
     }
 
-    CreateProjectRequest(String name, String userId) {
+    CreateProjectRequest(String name) {
         this.name = name;
-        this.userId = userId;
     }
 }

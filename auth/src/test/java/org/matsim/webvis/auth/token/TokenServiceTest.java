@@ -39,7 +39,7 @@ public class TokenServiceTest {
         tokenDAO.removeAllTokensForUser(user);
         UserService service = new UserService();
         service.deleteUser(user);
-        new RelyingPartyDAO().removeAllClients();
+        new RelyingPartyDAO().removeAllRelyingParties();
     }
 
     @Before
@@ -129,7 +129,7 @@ public class TokenServiceTest {
     }
 
     @Test
-    public void createAuthorizationCode_allRight_Token() throws Exception {
+    public void createAuthorizationCode_allRight_Token() {
 
         List<URI> uris = new ArrayList<>();
         uris.add(URI.create("http://callback.uri"));

@@ -18,7 +18,7 @@ public class ProjectDAO extends DAO {
         try {
             return database.persistOne(project, manager);
         } catch (PersistenceException e) {
-            throw new Exception("could not persist project");
+            throw new Exception("could not update project");
         }
     }
 

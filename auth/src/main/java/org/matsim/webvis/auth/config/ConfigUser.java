@@ -1,12 +1,17 @@
 package org.matsim.webvis.auth.config;
 
 import lombok.Getter;
-import lombok.Setter;
 
 @Getter
-@Setter
 public class ConfigUser {
 
     public String username;
     public String password;
+    public String id;
+
+    public ConfigUser(String username, String id, String password) {
+        this.id = id;
+        this.username = username;
+        this.password = password;
+    }
 }

@@ -3,6 +3,8 @@ package org.matsim.webvis.auth.relyingParty;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.matsim.webvis.auth.config.ConfigClient;
+import org.matsim.webvis.auth.config.ConfigRelyingParty;
 import org.matsim.webvis.auth.entities.Client;
 import org.matsim.webvis.auth.entities.RedirectUri;
 import org.matsim.webvis.auth.entities.RelyingParty;
@@ -26,11 +28,11 @@ public class RelyingPartyServiceTest {
 
     @After
     public void tearDown() {
-        relyingPartyDAO.removeAllClients();
+        relyingPartyDAO.removeAllRelyingParties();
     }
 
     @Test
-    public void createClient_allFine() throws Exception {
+    public void createClient_allFine() {
 
         final String name = "name";
         final URI uri = URI.create("http://test.org/callback");
@@ -48,14 +50,36 @@ public class RelyingPartyServiceTest {
         assertEquals(client, redirect.getClient());
     }
 
-    @Test(expected = Exception.class)
-    public void persistNewClient_tooFewRedirectUris_exception() throws Exception {
+    @Test
+    public void createClient_configClient_allFine() {
 
-        Client client = new Client();
+        String name = "name";
+        String id = "id";
+        String secret = "secret";
+        URI uri = URI.create("http://some.uri");
+        List<URI> uris = new ArrayList<>();
+        uris.add(uri);
+        ConfigClient configClient = new ConfigClient(name, id, secret, uris);
 
-        testObject.persistNewClient(client);
+        Client client = testObject.createClient(configClient);
 
-        fail("if client has no redirectUris exception should be thrown");
+        assertEquals(name, client.getName());
+        assertEquals(id, client.getId());
+        assertEquals(1, client.getRedirectUris().size());
+    }
+
+    @Test
+    public void createRelyingParty_allFine() {
+
+        String name = "name";
+        String id = "id";
+        String secret = "secret";
+        ConfigRelyingParty configRelyingParty = new ConfigRelyingParty(name, id, secret);
+
+        RelyingParty relyingParty = testObject.createRelyingParty(configRelyingParty);
+
+        assertEquals(name, relyingParty.getName());
+        assertEquals(id, relyingParty.getId());
     }
 
     @Test
@@ -66,7 +90,7 @@ public class RelyingPartyServiceTest {
     }
 
     @Test
-    public void findClient_present_client() throws Exception {
+    public void findClient_present_client() {
 
         final String name = "name";
         final URI uri = URI.create("http://test.org");
@@ -96,7 +120,7 @@ public class RelyingPartyServiceTest {
         RelyingPartyCredential credential = new RelyingPartyCredential();
         credential.setRelyingParty(party);
 
-        RelyingPartyCredential persisted = relyingPartyDAO.persist(credential);
+        RelyingPartyCredential persisted = relyingPartyDAO.persistCredential(credential);
 
         testObject.validateRelyingParty(party.getId(), "wrong secret");
 
@@ -110,7 +134,7 @@ public class RelyingPartyServiceTest {
         RelyingPartyCredential credential = new RelyingPartyCredential();
         credential.setRelyingParty(party);
 
-        RelyingPartyCredential persisted = relyingPartyDAO.persist(credential);
+        RelyingPartyCredential persisted = relyingPartyDAO.persistCredential(credential);
 
         RelyingParty result = testObject.validateRelyingParty(party.getId(), persisted.getSecret());
 

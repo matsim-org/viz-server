@@ -16,11 +16,15 @@ public class UserService {
     private UserDAO userDAO = new UserDAO();
 
     public User createUser(ConfigUser user) throws Exception {
-        return createUser(user.getUsername(), user.getPassword().toCharArray(), user.getPassword().toCharArray());
+        return createUser(user.getUsername(), user.getId(), user.getPassword().toCharArray(), user.getPassword().toCharArray());
     }
 
     public User createUser(String eMail, char[] password, char[] passwordRepeated) throws Exception {
 
+        return createUser(eMail, null, password, passwordRepeated);
+    }
+
+    private User createUser(String eMail, String id, char[] password, char[] passwordRepeated) throws Exception {
         if (!isValidPassword(password)) {
             throw new Exception("password is not valid");
         }
@@ -30,12 +34,13 @@ public class UserService {
         UserCredentials credentials = createUserCredentials(password);
         User user = new User();
         user.setEMail(eMail);
+        user.setId(id);
         credentials.setUser(user);
         try {
-            logger.info("creating org.matsim.webvis.auth.user with eMail: " + user.getEMail());
-            return userDAO.saveCredentials(credentials).getUser();
+            logger.info("creating user with eMail: " + user.getEMail());
+            return userDAO.persistCredentials(credentials).getUser();
         } catch (RollbackException e) {
-            throw new Exception("org.matsim.webvis.auth.user already exists");
+            throw new Exception("user already exists");
         } catch (Exception e) {
             logger.error(e);
         }
@@ -50,7 +55,7 @@ public class UserService {
 
         String hashedPassword = SecretHelper.getEncodedSecret(password, credentials.getSalt());
 
-        if (!SecretHelper.doSecretsMatch(credentials.getPassword(), hashedPassword)) {
+        if (!SecretHelper.match(credentials.getPassword(), hashedPassword)) {
             throw new Exception("password did not match.");
         }
         return credentials.getUser();
@@ -75,7 +80,7 @@ public class UserService {
         return true;
     }
 
-    private UserCredentials createUserCredentials(char[] password) throws Exception {
+    private UserCredentials createUserCredentials(char[] password) {
 
         byte[] salt = SecretHelper.getRandomSalt();
         String hashedPassword = SecretHelper.getEncodedSecret(password, salt);

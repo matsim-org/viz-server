@@ -74,7 +74,7 @@ public class ProjectServiceTest {
     public void getProjectIfAllowed_noProject_exception() throws Exception {
 
         User user = new User();
-        userDAO.persist(user);
+        userDAO.update(user);
 
         testObject.getProjectIfAllowed("invalid-project-id", user.getId());
 
@@ -85,7 +85,7 @@ public class ProjectServiceTest {
     public void getProjectIfAllowed_userNotAuthorized_exception() throws Exception {
 
         User user = new User();
-        userDAO.persist(user);
+        userDAO.update(user);
         Project project = new Project();
         projectDAO.persist(project);
 
@@ -98,7 +98,7 @@ public class ProjectServiceTest {
     public void getProjectIfAllowed_project() throws Exception {
 
         User user = new User();
-        user = userDAO.persist(user);
+        user = userDAO.update(user);
         Project project = testObject.createNewProject("name", user.getId());
 
         Project result = testObject.getProjectIfAllowed(project.getId(), user.getId());

@@ -24,7 +24,7 @@ public class ServerTest {
 
     @After
     public void tearDown() {
-        new RelyingPartyDAO().removeAllClients();
+        new RelyingPartyDAO().removeAllRelyingParties();
         new UserDAO().removeAllUsers();
     }
 

@@ -10,8 +10,16 @@ public class UserDAO extends DAO {
         return database.persistOne(user);
     }
 
-    public User persist(User user) {
+    public User update(User user) {
         return database.updateOne(user);
+    }
+
+    public User findByIdentityProviderId(String id) {
+
+        QUser user = QUser.user;
+        return database.executeQuery(query -> query.selectFrom(user)
+                .where(user.authId.eq(id))
+                .fetchOne());
     }
 
     public void removeAllUser() {

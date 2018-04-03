@@ -67,7 +67,7 @@ public class Server {
         try {
             User user = new User();
             user.setId("test-user");
-            user = new UserDAO().persist(user);
+            user = new UserDAO().update(user);
             Project project = new Project();
             project.setName("test-project");
             project.setCreator(user);
