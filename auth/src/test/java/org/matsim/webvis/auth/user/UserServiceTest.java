@@ -3,6 +3,7 @@ package org.matsim.webvis.auth.user;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.matsim.webvis.auth.config.ConfigUser;
 import org.matsim.webvis.auth.entities.User;
 
 import static org.junit.Assert.*;
@@ -87,6 +88,17 @@ public class UserServiceTest {
 
         assertEquals(mail, first.getEMail());
         assertEquals(mail2, second.getEMail());
+    }
+
+    @Test
+    public void createUser_configUser_allFine() throws Exception {
+
+        ConfigUser configUser = new ConfigUser("name", "id", "longpassword");
+
+        User result = testObject.createUser(configUser);
+
+        assertEquals(configUser.getId(), result.getId());
+        assertEquals(configUser.getUsername(), result.getEMail());
     }
 
     @Test(expected = Exception.class)

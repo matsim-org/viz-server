@@ -10,7 +10,6 @@ import javax.crypto.spec.PBEKeySpec;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
-import java.util.Arrays;
 import java.util.Base64;
 
 public class SecretHelper {
@@ -22,11 +21,11 @@ public class SecretHelper {
     private static final SecureRandom random = new SecureRandom();
     private static SecretKeyFactory keyFactory;
 
-    public static boolean doSecretsMatch(String secret, String compare) {
+    public static boolean match(String secret, String compare) {
         return secret.equals(compare);
     }
 
-    public static String getEncodedSecret(char[] secret, byte[] salt) throws Exception {
+    public static String getEncodedSecret(char[] secret, byte[] salt) {
         try {
             if (keyFactory == null) {
                 keyFactory = SecretKeyFactory.getInstance(algorithm);
@@ -36,9 +35,8 @@ public class SecretHelper {
             byte[] res = key.getEncoded();
             return Base64.getEncoder().encodeToString(res);
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-            logger.error(e.getMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
-            throw new Exception("failed to hash passwords");
+            logger.error("Error while hashing password.", e);
+            throw new RuntimeException("Failed to hash password", e);
         }
     }
 

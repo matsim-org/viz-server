@@ -3,7 +3,6 @@ package org.matsim.webvis.auth.user;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.matsim.webvis.auth.config.ConfigUser;
-import org.matsim.webvis.auth.config.Configuration;
 import org.matsim.webvis.auth.entities.User;
 import org.matsim.webvis.auth.entities.UserCredentials;
 import org.matsim.webvis.auth.helper.SecretHelper;
@@ -17,24 +16,15 @@ public class UserService {
     private UserDAO userDAO = new UserDAO();
 
     public User createUser(ConfigUser user) throws Exception {
-
-        if (Configuration.getInstance().isDebug()) {
-
-            UserCredentials credentials = createUserCredentials(user.getPassword().toCharArray());
-            User newUser = new User();
-            newUser.setEMail(user.getUsername());
-            newUser.setId(user.getId());
-
-            newUser = userDAO.update(newUser);
-            userDAO.persistCredentials(credentials, newUser.getId());
-            return newUser;
-        }
-
-        return createUser(user.getUsername(), user.getPassword().toCharArray(), user.getPassword().toCharArray());
+        return createUser(user.getUsername(), user.getId(), user.getPassword().toCharArray(), user.getPassword().toCharArray());
     }
 
     public User createUser(String eMail, char[] password, char[] passwordRepeated) throws Exception {
 
+        return createUser(eMail, null, password, passwordRepeated);
+    }
+
+    private User createUser(String eMail, String id, char[] password, char[] passwordRepeated) throws Exception {
         if (!isValidPassword(password)) {
             throw new Exception("password is not valid");
         }
@@ -44,6 +34,7 @@ public class UserService {
         UserCredentials credentials = createUserCredentials(password);
         User user = new User();
         user.setEMail(eMail);
+        user.setId(id);
         credentials.setUser(user);
         try {
             logger.info("creating user with eMail: " + user.getEMail());
@@ -64,7 +55,7 @@ public class UserService {
 
         String hashedPassword = SecretHelper.getEncodedSecret(password, credentials.getSalt());
 
-        if (!SecretHelper.doSecretsMatch(credentials.getPassword(), hashedPassword)) {
+        if (!SecretHelper.match(credentials.getPassword(), hashedPassword)) {
             throw new Exception("password did not match.");
         }
         return credentials.getUser();
@@ -89,7 +80,7 @@ public class UserService {
         return true;
     }
 
-    private UserCredentials createUserCredentials(char[] password) throws Exception {
+    private UserCredentials createUserCredentials(char[] password) {
 
         byte[] salt = SecretHelper.getRandomSalt();
         String hashedPassword = SecretHelper.getEncodedSecret(password, salt);

@@ -8,20 +8,19 @@ import java.util.List;
 
 public class RelyingPartyDAO extends DAO {
 
-    public RelyingPartyCredential persistCredential(RelyingPartyCredential credentials) {
-        return database.persistOne(credentials);
-    }
+    public RelyingPartyCredential persistCredential(RelyingPartyCredential credential) {
 
-    public RelyingPartyCredential persistCredential(RelyingPartyCredential credential, String relyingPartyId) {
+        if (credential.getRelyingParty().getId() == null)
+            return database.persistOne(credential);
 
         EntityManager manager = database.getEntityManager();
-        credential.setRelyingParty(manager.getReference(RelyingParty.class, relyingPartyId));
-        credential = database.persistOne(credential, manager);
+        manager.getTransaction().begin();
+        RelyingParty party = manager.merge(credential.getRelyingParty());
+        credential.setRelyingParty(party);
+        manager.persist(credential);
+        manager.getTransaction().commit();
+        manager.close();
         return credential;
-    }
-
-    public RelyingParty update(RelyingParty party) {
-        return database.updateOne(party);
     }
 
     public Client findClient(String clientId) {
@@ -41,16 +40,15 @@ public class RelyingPartyDAO extends DAO {
                 .fetchOne());
     }
 
-    public void removeAllClients() {
+    public void removeAllRelyingParties() {
 
         EntityManager em = database.getEntityManager();
         em.getTransaction().begin();
         JPAQueryFactory query = database.createQuery(em);
-        QRelyingPartyCredential credential = QRelyingPartyCredential.relyingPartyCredential;
 
-        List<RelyingPartyCredential> clients = query.selectFrom(credential).fetch();
+        List<RelyingPartyCredential> credentials = query.selectFrom(QRelyingPartyCredential.relyingPartyCredential).fetch();
 
-        clients.forEach(em::remove);
+        credentials.forEach(em::remove);
         em.getTransaction().commit();
         em.close();
     }

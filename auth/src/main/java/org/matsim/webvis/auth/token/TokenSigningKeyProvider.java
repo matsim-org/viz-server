@@ -87,6 +87,4 @@ class TokenSigningKeyProvider {
             throw new RuntimeException(e);
         }
     }
-
-
 }
