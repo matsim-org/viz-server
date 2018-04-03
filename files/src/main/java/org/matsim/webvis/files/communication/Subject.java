@@ -8,13 +8,15 @@ import spark.Request;
 @Getter
 public class Subject {
 
-    private static final String SUBJECT_ATTRIBUTE = "subject";
-    static UserService userService = new UserService();
+    public static final String SUBJECT_ATTRIBUTE = "subject";
+
+    //this property is public for unit testing
+    public static UserService userService = new UserService();
 
     private User user;
     private AuthenticationResult authentication;
 
-    private Subject(AuthenticationResult authentication, User user) {
+    public Subject(AuthenticationResult authentication, User user) {
         this.user = user;
         this.authentication = authentication;
     }

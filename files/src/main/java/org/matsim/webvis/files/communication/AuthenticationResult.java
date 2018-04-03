@@ -3,7 +3,7 @@ package org.matsim.webvis.files.communication;
 import lombok.Getter;
 
 @Getter
-class AuthenticationResult {
+public class AuthenticationResult {
 
     private boolean active;
     private String scope;

@@ -5,8 +5,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.matsim.webvis.common.communication.Answer;
 import org.matsim.webvis.common.communication.ErrorResponse;
+import org.matsim.webvis.files.communication.Subject;
 import org.matsim.webvis.files.entities.Project;
+import org.matsim.webvis.files.entities.User;
 import org.matsim.webvis.files.project.ProjectService;
+import org.matsim.webvis.files.user.UserService;
 import org.matsim.webvis.files.util.TestUtils;
 import spark.Request;
 import spark.Response;
@@ -23,7 +26,10 @@ public class FileUploadRequestHandlerTest {
 
     @Before
     public void setUp() {
+
         testObject = new FileUploadRequestHandler();
+        Subject.userService = mock(UserService.class);
+        when(Subject.userService.findByIdentityProviderId(any())).thenReturn(new User());
     }
 
     @Test
