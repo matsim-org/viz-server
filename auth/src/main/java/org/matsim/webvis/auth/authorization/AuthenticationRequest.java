@@ -50,6 +50,7 @@ public class AuthenticationRequest {
         this.responseType = initResponseType(params);
         clientId = extractRequiredValue(CLIENT_ID, params);
 
+        this.state = extractOptionalValue(STATE, params);
         if (!this.type.equals(Type.AuthCode))
             nonce = extractRequiredValue(NONCE, params);
 
