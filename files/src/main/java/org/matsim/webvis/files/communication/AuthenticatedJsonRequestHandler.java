@@ -39,8 +39,10 @@ public abstract class AuthenticatedJsonRequestHandler<T> extends JsonResponseHan
 
     private T parseJsonBody(String body) throws RequestException {
         try {
-            return getGson().fromJson(body, requestClass);
-        } catch (JsonSyntaxException e) {
+            T result = getGson().fromJson(body, requestClass);
+            if (result == null) throw new RequestException(ErrorCode.INVALID_REQUEST, "no json-body present");
+            return result;
+        } catch (Throwable e) {
             throw new RequestException(ErrorCode.INVALID_REQUEST, "could not parse json-request");
         }
     }
