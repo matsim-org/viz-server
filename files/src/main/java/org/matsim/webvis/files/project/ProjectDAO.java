@@ -7,6 +7,7 @@ import org.matsim.webvis.files.entities.User;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
+import java.util.List;
 
 public class ProjectDAO extends DAO {
 
@@ -33,6 +34,14 @@ public class ProjectDAO extends DAO {
                 .where(project.id.eq(projectId))
                 .leftJoin(project.files).fetchJoin()
                 .fetchOne());
+    }
+
+    public List<Project> findAllForUser(User user) {
+        QProject project = QProject.project;
+        return database.executeQuery(query -> query.selectFrom(project)
+            .where(project.creator.authId.eq(user.getAuthId()))
+                .fetch()
+        );
     }
 
     public void remove(Project project) {

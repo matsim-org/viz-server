@@ -5,6 +5,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.matsim.webvis.files.entities.FileEntry;
 import org.matsim.webvis.files.entities.Project;
+import org.matsim.webvis.files.entities.User;
 
 import java.io.IOException;
 import java.util.List;
@@ -34,6 +35,11 @@ public class ProjectService {
             throw new Exception("User is not allowed to add files to this project");
         }
         return project;
+    }
+
+    public List<Project> getAllProjectsForUser(User user) {
+
+        return projectDAO.findAllForUser(user);
     }
 
     public Project addFilesToProject(List<FileItem> items, Project project) throws Exception {
