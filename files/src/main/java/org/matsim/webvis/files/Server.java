@@ -9,6 +9,7 @@ import org.matsim.webvis.files.entities.Project;
 import org.matsim.webvis.files.entities.User;
 import org.matsim.webvis.files.project.ProjectDAO;
 import org.matsim.webvis.files.user.UserDAO;
+import org.matsim.webvis.files.user.UserService;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -44,6 +45,10 @@ public class Server {
         if (!args.getConfigFile().isEmpty()) {
             Configuration.loadConfigFile(args.getConfigFile(), args.isDebug());
         }
+        UserDAO userDAO = new UserDAO();
+        for (User user : Configuration.getInstance().getUsers()) {
+            userDAO.persist(user);
+        }
     }
 
     private static void createUploadDirectories() throws IOException {
@@ -73,7 +78,7 @@ public class Server {
             project.setCreator(user);
             project.setId("test-project");
             project = new ProjectDAO().persist(project);
-            logger.info("\n\ntest org.matsim.webvis.auth.user id: " + user.getId() + "\n\n");
+            logger.info("\n\ntest user id: " + user.getId() + "\n\n");
             logger.info("\n\ntest project id: " + project.getId() + "\n\n");
         } catch (Exception e) {
             e.printStackTrace();

@@ -38,7 +38,7 @@ public class ProjectServiceTest {
     public void createNewProject_projectNameExists_exception() throws Exception {
 
         String name = "name";
-        User user = userDAO.persistNewUser(new User());
+        User user = userDAO.persist(new User());
 
         testObject.createNewProject(name, user.getId());
         testObject.createNewProject(name, user.getId());
@@ -61,7 +61,7 @@ public class ProjectServiceTest {
     public void createNewProject_allGood_newProject() throws Exception {
 
         String name = "name";
-        User user = userDAO.persistNewUser(new User());
+        User user = userDAO.persist(new User());
 
         Project project = testObject.createNewProject(name, user.getId());
 
@@ -115,7 +115,7 @@ public class ProjectServiceTest {
         final long size = 1L;
 
         User user = new User();
-        user = userDAO.persistNewUser(user);
+        user = userDAO.persist(user);
         Project project = testObject.createNewProject("name", user.getId());
         List<FileItem> items = new ArrayList<>();
         items.add(TestUtils.mockFileItem(filename, contentType, size));

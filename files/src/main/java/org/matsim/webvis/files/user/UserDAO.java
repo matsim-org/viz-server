@@ -6,8 +6,12 @@ import org.matsim.webvis.files.entities.User;
 
 public class UserDAO extends DAO {
 
-    public User persistNewUser(User user) {
-        return database.persistOne(user);
+    public User persist(User user) {
+
+        if (user.getId() == null) {
+            return database.persistOne(user);
+        }
+        return database.updateOne(user);
     }
 
     public User update(User user) {
