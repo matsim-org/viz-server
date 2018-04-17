@@ -1,5 +1,7 @@
 package org.matsim.webvis.auth.authorization;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.webvis.auth.entities.Client;
 import org.matsim.webvis.auth.entities.Token;
 import org.matsim.webvis.auth.entities.User;
@@ -11,6 +13,8 @@ import java.net.URI;
 import java.net.URLEncoder;
 
 public class AuthorizationService {
+
+    private static Logger logger = LogManager.getLogger();
 
     RelyingPartyService relyingPartyService = new RelyingPartyService();
     TokenService tokenService = new TokenService();
@@ -51,6 +55,7 @@ public class AuthorizationService {
     private URI generateAuthResponse(AuthenticationRequest request, User user) {
 
         Token code = tokenService.createAuthorizationCode(user, request.getClientId());
+        logger.info("Issued token to user: " + user.getId() + " token: " + code.getToken());
 
         String query = "?code=" + code.getToken();
 

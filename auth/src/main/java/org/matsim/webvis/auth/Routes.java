@@ -4,6 +4,7 @@ import org.matsim.webvis.auth.authorization.AuthorizationRequestHandler;
 import org.matsim.webvis.auth.token.IntrospectionRequestHandler;
 import org.matsim.webvis.auth.token.TokenRequestHandler;
 import org.matsim.webvis.auth.user.CreateUserRequestHandler;
+import org.matsim.webvis.auth.user.LoginPrompt;
 import org.matsim.webvis.auth.user.LoginUserRequestHandler;
 import spark.ModelAndView;
 import spark.template.mustache.MustacheTemplateEngine;
@@ -24,23 +25,17 @@ public class Routes {
 
     static void initialize() throws Exception {
 
-        // this allows cross origin requests for all sites for all http-methods
-        options("/*", (request, response) -> {
-
-            response.header("Access-Control-Allow-Headers", "Content-Type");
-            response.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-
-            return "OK";
-        });
-
+        // this allows cross origin requests for all sites
         before("/*", (request, response) -> {
 
             String origin = request.headers("Origin");
             response.header("Access-Control-Allow-Origin", (origin != null) ? origin : "*");
-            response.header("Access-Control-Allow-Headers", "Content-Type");
+            response.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+            response.header("Access-Control-Allow-Credentials", "true");
             response.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+            response.header("Origin", origin);
         });
-
+        options("/*", (request, response) -> "OK");
         put(USER, new CreateUserRequestHandler());
         post(TOKEN, new TokenRequestHandler());
         post(INTROSPECT, new IntrospectionRequestHandler());
@@ -48,6 +43,7 @@ public class Routes {
         get(AUTHORIZE, new AuthorizationRequestHandler());
         get(LOGIN_FORM, (request, response) -> render(new HashMap<>(), "login.mustache"));
         post(LOGIN, new LoginUserRequestHandler());
+        get(LOGIN, ((request, response) -> LoginPrompt.renderLogin()));
 
         post("/", (req, res) -> "{ error: 'not found', request: " + req.url() + " }");
     }

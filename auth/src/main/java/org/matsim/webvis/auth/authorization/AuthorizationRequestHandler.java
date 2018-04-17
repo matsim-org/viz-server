@@ -52,7 +52,7 @@ public class AuthorizationRequestHandler implements Route {
         } catch (Exception e) {
             request.session(true);
             loginSession.put(request.session().id(), authRequest);
-            return LoginPrompt.renderLogin();
+            return redirectToLogin(response);
         }
 
         //delete login session
@@ -89,6 +89,12 @@ public class AuthorizationRequestHandler implements Route {
 
     private Object redirectOnError(URI redirectUri, String code, String message, Response response) {
         String redirect = redirectUri.toString() + "?error=" + code + "&error_description=" + message;
+        response.redirect(redirect, 302);
+        return response;
+    }
+
+    private Object redirectToLogin(Response response) {
+        String redirect = "/login/";
         response.redirect(redirect, 302);
         return response;
     }

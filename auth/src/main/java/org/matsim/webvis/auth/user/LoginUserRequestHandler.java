@@ -38,7 +38,7 @@ public class LoginUserRequestHandler implements Route {
 
         //put org.matsim.webvis.auth.token into a httpOnly cookie
         //TODO: make it a secure cookie when TLS is implemented
-        response.cookie("/", "id_token", idToken.getToken(), -1, false, true);
+        response.cookie("/", "id_token", idToken.getToken(), -1, true, true);
 
         //redirect to route which redirected to login for now it's always authorize
         response.redirect("/authorize/", 302);
