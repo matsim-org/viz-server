@@ -1,10 +1,7 @@
 package org.matsim.webvis.auth.token;
 
 import com.auth0.jwt.JWT;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 import org.matsim.webvis.auth.entities.*;
 import org.matsim.webvis.auth.relyingParty.RelyingPartyDAO;
 import org.matsim.webvis.auth.relyingParty.RelyingPartyService;
@@ -23,6 +20,7 @@ public class TokenServiceTest {
     private static String username = "mail";
     private static char[] userpassword = "somepassword".toCharArray();
     private static User user;
+    private static TokenDAO tokenDAO = new TokenDAO();
     private TokenService testObject;
 
     @BeforeClass
@@ -34,9 +32,6 @@ public class TokenServiceTest {
 
     @AfterClass
     public static void tearDownFixture() {
-
-        TokenDAO tokenDAO = new TokenDAO();
-        tokenDAO.removeAllTokensForUser(user);
         UserService service = new UserService();
         service.deleteUser(user);
         new RelyingPartyDAO().removeAllRelyingParties();
@@ -46,6 +41,11 @@ public class TokenServiceTest {
     public void setUp() throws Exception {
         testObject = new TokenService();
         testObject.tokenDAO = spy(new TokenDAO());
+    }
+
+    @After
+    public void tearDown() {
+        tokenDAO.removeAllTokensForUser(user);
     }
 
     @Test
