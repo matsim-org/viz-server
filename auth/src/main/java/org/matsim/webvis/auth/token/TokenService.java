@@ -30,7 +30,7 @@ public class TokenService {
         algorithm = Algorithm.RSA512(provider.getPublicKey(), provider.getPrivateKey());
     }
 
-    public AccessToken grantWithPassword(String username, char[] password) throws Exception {
+    AccessToken grantWithPassword(String username, char[] password) throws Exception {
         User user = userService.authenticate(username, password);
         Token refreshToken = createRefreshToken(user);
 
@@ -69,6 +69,10 @@ public class TokenService {
 
     public Token getToken(String token) {
         return tokenDAO.find(token);
+    }
+
+    AccessToken findAccessToken(String tokenValue) {
+        return tokenDAO.findAccessToken(tokenValue);
     }
 
     public AuthorizationCode createAuthorizationCode(User user, String clientId) {

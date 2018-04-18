@@ -17,7 +17,7 @@ class AuthenticatedRequest {
         if (hasAuthorization(request)) {
             this.token = extractToken(request.headers(AUTHORIZATION));
         } else
-            throw new RequestException(ErrorCode.INVALID_REQUEST, "Must specify AUTHORIZATION header");
+            throw new RequestException(ErrorCode.INVALID_REQUEST, "Must specify Authorization header");
     }
 
     private static String extractToken(String authorizationHeader) throws RequestException {

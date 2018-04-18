@@ -1,6 +1,6 @@
 package org.matsim.webvis.auth.token;
 
-import org.matsim.webvis.auth.entities.Token;
+import org.matsim.webvis.auth.entities.AccessToken;
 import org.matsim.webvis.auth.relyingParty.RelyingPartyService;
 import org.matsim.webvis.common.communication.AbstractRequestHandler;
 import org.matsim.webvis.common.communication.Answer;
@@ -31,7 +31,7 @@ public class IntrospectionRequestHandler extends AbstractRequestHandler<Introspe
             return Answer.unauthorized(ErrorCode.INVALID_CLIENT, e.getMessage());
         }
 
-        Token token = tokenService.getToken(body.getToken());
+        AccessToken token = tokenService.findAccessToken(body.getToken());
         return Answer.ok(new IntrospectionResponse(token));
     }
 }

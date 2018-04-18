@@ -1,8 +1,8 @@
 package org.matsim.webvis.auth.authorization;
 
+import org.matsim.webvis.auth.Routes;
 import org.matsim.webvis.auth.entities.User;
 import org.matsim.webvis.auth.token.TokenService;
-import org.matsim.webvis.auth.user.LoginPrompt;
 import org.matsim.webvis.common.communication.ErrorCode;
 import org.matsim.webvis.common.communication.RequestException;
 import spark.Request;
@@ -44,7 +44,7 @@ public class AuthorizationRequestHandler implements Route {
                     "relyingParty was not registered or redirect url was not registered");
         }
 
-        //authenticate org.matsim.webvis.auth.user by org.matsim.webvis.auth.token or by login
+        //authenticate user by cookie or login
         User user;
         try {
             String token = request.cookie("id_token");
@@ -52,7 +52,7 @@ public class AuthorizationRequestHandler implements Route {
         } catch (Exception e) {
             request.session(true);
             loginSession.put(request.session().id(), authRequest);
-            return LoginPrompt.renderLogin();
+            return redirectToLogin(response);
         }
 
         //delete login session
@@ -90,6 +90,11 @@ public class AuthorizationRequestHandler implements Route {
     private Object redirectOnError(URI redirectUri, String code, String message, Response response) {
         String redirect = redirectUri.toString() + "?error=" + code + "&error_description=" + message;
         response.redirect(redirect, 302);
+        return response;
+    }
+
+    private Object redirectToLogin(Response response) {
+        response.redirect(Routes.LOGIN, 302);
         return response;
     }
 }

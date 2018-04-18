@@ -35,7 +35,7 @@ public class DiskProjectRepositoryTest {
 
     @Before
     public void setUp() {
-        User user = userDAO.persistNewUser(new User());
+        User user = userDAO.persist(new User());
         Project toPersist = new Project();
         toPersist.setCreator(user);
         project = projectDAO.persist(toPersist);
@@ -84,7 +84,7 @@ public class DiskProjectRepositoryTest {
 
     private Project createProjectWithCreator() throws Exception {
 
-        User user = new UserDAO().persistNewUser(new User());
+        User user = new UserDAO().persist(new User());
         return new ProjectService().createNewProject("name", user.getId());
     }
 }

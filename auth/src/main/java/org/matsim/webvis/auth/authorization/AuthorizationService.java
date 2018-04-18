@@ -1,5 +1,7 @@
 package org.matsim.webvis.auth.authorization;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.webvis.auth.entities.Client;
 import org.matsim.webvis.auth.entities.Token;
 import org.matsim.webvis.auth.entities.User;
@@ -10,7 +12,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLEncoder;
 
-public class AuthorizationService {
+class AuthorizationService {
+
+    private static Logger logger = LogManager.getLogger();
 
     RelyingPartyService relyingPartyService = new RelyingPartyService();
     TokenService tokenService = new TokenService();
@@ -18,7 +22,7 @@ public class AuthorizationService {
     AuthorizationService() throws Exception {
     }
 
-    public boolean isValidClientInformation(AuthenticationRequest request) {
+    boolean isValidClientInformation(AuthenticationRequest request) {
 
         boolean isValid = false;
 
@@ -35,7 +39,7 @@ public class AuthorizationService {
         return isValid;
     }
 
-    public URI generateResponse(AuthenticationRequest request, User user) {
+    URI generateResponse(AuthenticationRequest request, User user) {
 
         URI result;
 
@@ -51,6 +55,7 @@ public class AuthorizationService {
     private URI generateAuthResponse(AuthenticationRequest request, User user) {
 
         Token code = tokenService.createAuthorizationCode(user, request.getClientId());
+        logger.info("Issued token to user: " + user.getEMail());
 
         String query = "?code=" + code.getToken();
 
@@ -67,6 +72,8 @@ public class AuthorizationService {
 
         Token idToken = tokenService.createIdToken(user, request.getNonce());
         fragment += "&id_token=" + idToken.getToken();
+
+        logger.info("Issued token to user: " + user.getEMail());
 
         if (request.getType().equals(AuthenticationRequest.Type.AccessAndIdToken)) {
             Token accessToken = tokenService.grantAccess(user);

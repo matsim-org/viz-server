@@ -30,15 +30,15 @@ public class ProjectServiceTest {
 
     @After
     public void tearDown() {
-        userDAO.removeAllUser();
         projectDAO.removeAllProjects();
+        userDAO.removeAllUser();
     }
 
     @Test(expected = Exception.class)
     public void createNewProject_projectNameExists_exception() throws Exception {
 
         String name = "name";
-        User user = userDAO.persistNewUser(new User());
+        User user = userDAO.persist(new User());
 
         testObject.createNewProject(name, user.getId());
         testObject.createNewProject(name, user.getId());
@@ -61,7 +61,7 @@ public class ProjectServiceTest {
     public void createNewProject_allGood_newProject() throws Exception {
 
         String name = "name";
-        User user = userDAO.persistNewUser(new User());
+        User user = userDAO.persist(new User());
 
         Project project = testObject.createNewProject(name, user.getId());
 
@@ -74,7 +74,7 @@ public class ProjectServiceTest {
     public void getProjectIfAllowed_noProject_exception() throws Exception {
 
         User user = new User();
-        userDAO.update(user);
+        userDAO.persist(user);
 
         testObject.getProjectIfAllowed("invalid-project-id", user.getId());
 
@@ -85,11 +85,11 @@ public class ProjectServiceTest {
     public void getProjectIfAllowed_userNotAuthorized_exception() throws Exception {
 
         User user = new User();
-        userDAO.update(user);
+        userDAO.persist(user);
         Project project = new Project();
-        projectDAO.persist(project);
+        projectDAO.persistNewProject(project, user.getId());
 
-        testObject.getProjectIfAllowed(project.getId(), user.getId());
+        testObject.getProjectIfAllowed(project.getId(), "some-other-user");
 
         fail("Should throw exception if user is not creator of the project");
     }
@@ -98,13 +98,45 @@ public class ProjectServiceTest {
     public void getProjectIfAllowed_project() throws Exception {
 
         User user = new User();
-        user = userDAO.update(user);
+        user = userDAO.persist(user);
         Project project = testObject.createNewProject("name", user.getId());
 
         Project result = testObject.getProjectIfAllowed(project.getId(), user.getId());
 
         assertEquals(project.getId(), result.getId());
         assertEquals(user.getId(), result.getCreator().getId());
+    }
+
+    @Test
+    public void findProjectsForUser_listOfProjects() throws Exception {
+        User user = new User();
+        user.setAuthId("auth-id");
+        user = userDAO.persist(user);
+        Project firstProject = testObject.createNewProject("first", user.getId());
+        testObject.createNewProject("second", user.getId());
+        List<String> projectIds = new ArrayList<>();
+        projectIds.add(firstProject.getId());
+
+        List<Project> result = testObject.findProjectsForUser(projectIds, user);
+
+        assertEquals(1, result.size());
+        assertEquals(firstProject.getId(), result.get(0).getId());
+    }
+
+    @Test
+    public void findAllProjectsForUser_listOfProjects() throws Exception {
+
+        User user = new User();
+        user.setAuthId("auth-id");
+        user = userDAO.persist(user);
+        Project firstProject = testObject.createNewProject("first", user.getId());
+        Project secondProject = testObject.createNewProject("second", user.getId());
+
+        List<Project> result = testObject.findAllProjectsForUser(user);
+
+        assertEquals(2, result.size());
+        assertEquals(firstProject.getName(), result.get(0).getName());
+        assertEquals(secondProject.getName(), result.get(1).getName());
     }
 
     @Test
@@ -115,7 +147,7 @@ public class ProjectServiceTest {
         final long size = 1L;
 
         User user = new User();
-        user = userDAO.persistNewUser(user);
+        user = userDAO.persist(user);
         Project project = testObject.createNewProject("name", user.getId());
         List<FileItem> items = new ArrayList<>();
         items.add(TestUtils.mockFileItem(filename, contentType, size));

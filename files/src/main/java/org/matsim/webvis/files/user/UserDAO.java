@@ -6,15 +6,19 @@ import org.matsim.webvis.files.entities.User;
 
 public class UserDAO extends DAO {
 
-    public User persistNewUser(User user) {
-        return database.persistOne(user);
+    public User persist(User user) {
+
+        if (user.getId() == null) {
+            return database.persistOne(user);
+        }
+        return database.updateOne(user);
     }
 
     public User update(User user) {
         return database.updateOne(user);
     }
 
-    public User findByIdentityProviderId(String id) {
+    User findByIdentityProviderId(String id) {
 
         QUser user = QUser.user;
         return database.executeQuery(query -> query.selectFrom(user)
@@ -25,6 +29,6 @@ public class UserDAO extends DAO {
     public void removeAllUser() {
 
         QUser user = QUser.user;
-        database.executeQuery(query -> query.delete(user).execute());
+        database.executeTransactionalQuery(query -> query.delete(user).execute());
     }
 }

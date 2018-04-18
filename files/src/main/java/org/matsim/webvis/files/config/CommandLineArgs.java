@@ -10,6 +10,6 @@ public class CommandLineArgs {
             "the use of plain http org.matsim.webvis.common.communication. OAuth must not be used without TLS in production!")
     private boolean debug = false;
 
-    @Parameter(names = {"-org.matsim.webvis.auth.config", "-c"}, description = "path to a configuration file")
+    @Parameter(names = {"-config", "-c"}, description = "path to a configuration file")
     private String configFile = "";
 }
