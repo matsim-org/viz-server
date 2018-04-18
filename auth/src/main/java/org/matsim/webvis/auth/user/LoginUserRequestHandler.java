@@ -30,14 +30,13 @@ public class LoginUserRequestHandler implements Route {
         try {
             user = userService.authenticate(username, password.toCharArray());
         } catch (Exception e) {
-            //if org.matsim.webvis.auth.user was not authenticated display login page with error message
+            //if user was not authenticated display login page with error message
             return LoginPrompt.renderLoginWithError();
         }
 
         IdToken idToken = tokenService.createIdToken(user);
 
-        //put org.matsim.webvis.auth.token into a httpOnly cookie
-        //TODO: make it a secure cookie when TLS is implemented
+        //put token into a httpOnly cookie
         response.cookie("/", "id_token", idToken.getToken(), -1, true, true);
 
         //redirect to route which redirected to login for now it's always authorize
