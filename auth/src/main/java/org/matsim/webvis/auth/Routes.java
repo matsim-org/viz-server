@@ -20,7 +20,7 @@ public class Routes {
     private final static String TOKEN = "token/";
     private final static String INTROSPECT = "introspect/";
     private final static String AUTHORIZE = "authorize/";
-    private final static String LOGIN = "login/";
+    public final static String LOGIN = "/login/";
     private final static String LOGIN_FORM = "login/form/";
 
     static void initialize() throws Exception {

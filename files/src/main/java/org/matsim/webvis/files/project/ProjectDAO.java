@@ -11,7 +11,7 @@ import java.util.List;
 
 public class ProjectDAO extends DAO {
 
-    public Project persistNewProject(Project project, String userId) throws Exception {
+    Project persistNewProject(Project project, String userId) throws Exception {
 
         EntityManager manager = database.getEntityManager();
         project.setCreator(manager.find(User.class, userId));
@@ -27,7 +27,7 @@ public class ProjectDAO extends DAO {
         return database.updateOne(project);
     }
 
-    public Project find(String projectId) {
+    Project find(String projectId) {
 
         QProject project = QProject.project;
         return database.executeQuery(query -> query.selectFrom(project)
@@ -36,7 +36,17 @@ public class ProjectDAO extends DAO {
                 .fetchOne());
     }
 
-    public List<Project> findAllForUser(User user) {
+    List<Project> findForUser(List<String> projectIds, User user) {
+        QProject project = QProject.project;
+        return database.executeQuery(query -> query.selectFrom(project)
+                .where(project.creator.authId.eq(user.getAuthId())
+                               .and(project.id.in(projectIds)))
+                .leftJoin(project.files).fetchJoin()
+                .fetch()
+        );
+    }
+
+    List<Project> findAllForUser(User user) {
         QProject project = QProject.project;
         return database.executeQuery(query -> query.selectFrom(project)
             .where(project.creator.authId.eq(user.getAuthId()))
@@ -44,11 +54,11 @@ public class ProjectDAO extends DAO {
         );
     }
 
-    public void remove(Project project) {
+    void remove(Project project) {
         database.removeOne(project);
     }
 
-    public void removeAllProjects() {
+    void removeAllProjects() {
 
         QProject project = QProject.project;
         database.executeQuery(query -> query.delete(project).execute());

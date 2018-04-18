@@ -7,19 +7,24 @@ import org.matsim.webvis.files.entities.Project;
 
 import java.util.List;
 
-public class ProjectRequestHandler extends AuthenticatedJsonRequestHandler<Object> {
+public class ProjectRequestHandler extends AuthenticatedJsonRequestHandler<ProjectRequest> {
 
     private ProjectService projectService = new ProjectService();
 
     public ProjectRequestHandler() {
-        super(Object.class);
+        super(ProjectRequest.class);
     }
 
     @Override
-    protected Answer process(Object body, Subject subject) {
+    protected Answer process(ProjectRequest body, Subject subject) {
 
-        List<Project> projects = projectService.getAllProjectsForUser(subject.getUser());
-        return Answer.ok(projects);
+        List<Project> result;
+        if (body.projectIds != null && body.projectIds.size() > 0) {
+            result = projectService.findProjectsForUser(body.projectIds, subject.getUser());
+        } else {
+            result = projectService.findAllProjectsForUser(subject.getUser());
+        }
+        return Answer.ok(result);
 
     }
 }

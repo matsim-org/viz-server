@@ -3,6 +3,7 @@ package org.matsim.webvis.auth.authorization;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.matsim.webvis.auth.Routes;
 import org.matsim.webvis.auth.entities.User;
 import org.matsim.webvis.auth.token.TokenService;
 import org.matsim.webvis.auth.util.TestUtils;
@@ -14,7 +15,8 @@ import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 
-import static junit.framework.TestCase.*;
+import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
@@ -75,23 +77,23 @@ public class AuthorizationRequestHandlerTest {
 
         Request req = AuthorizationTestUtils.mockRequestWithParams();
         when(testObject.tokenService.validateIdToken(any())).thenThrow(new RuntimeException("message"));
+        Response res = mock(Response.class);
 
-        Object result = testObject.handle(req, null);
+        Object result = testObject.handle(req, res);
 
-        assertTrue(result instanceof String);
-        assertFalse(((String) result).isEmpty());
+        verify(res).redirect(Routes.LOGIN, 302);
     }
 
     @Test
     public void handle_unknownUser_loginPrompt() throws Exception {
 
         Request req = AuthorizationTestUtils.mockRequestWithParams();
-        when(testObject.tokenService.validateIdToken(any())).thenThrow(new Exception("org.matsim.webvis.auth.user error"));
+        when(testObject.tokenService.validateIdToken(any())).thenThrow(new Exception("user error"));
+        Response res = mock(Response.class);
 
-        Object result = testObject.handle(req, null);
+        Object result = testObject.handle(req, res);
 
-        assertTrue(result instanceof String);
-        assertFalse(((String) result).isEmpty());
+        verify(res).redirect(Routes.LOGIN, 302);
     }
 
     @Test

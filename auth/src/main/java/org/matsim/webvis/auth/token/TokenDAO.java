@@ -9,11 +9,11 @@ import java.util.List;
 class TokenDAO extends DAO {
 
 
-    public <T extends Token> T persist(T token) {
+    <T extends Token> T persist(T token) {
         return database.persistOne(token);
     }
 
-    public AuthorizationCode persist(AuthorizationCode token, String clientId) {
+    AuthorizationCode persist(AuthorizationCode token, String clientId) {
 
         EntityManager em = database.getEntityManager();
         em.getTransaction().begin();
@@ -24,14 +24,25 @@ class TokenDAO extends DAO {
         return token;
     }
 
-    public Token find(String tokenValue) {
+    Token find(String tokenValue) {
 
         QToken token = QToken.token1;
         return database.executeQuery(query -> query.selectFrom(token)
                 .where(token.token.eq(tokenValue)).fetchOne());
     }
 
-    public void removeAllTokensForUser(User user) {
+    AccessToken findAccessToken(String tokenValue) {
+        QAccessToken accessToken = QAccessToken.accessToken;
+        return database.executeQuery(query -> query.selectFrom(accessToken)
+                .where(accessToken.token.eq(tokenValue)).fetchOne());
+    }
+
+    public List<Token> findAll() {
+        QToken token = QToken.token1;
+        return database.executeQuery(query -> query.selectFrom(token).fetch());
+    }
+
+    void removeAllTokensForUser(User user) {
         EntityManager em = database.getEntityManager();
         em.getTransaction().begin();
         JPAQueryFactory query = database.createQuery(em);

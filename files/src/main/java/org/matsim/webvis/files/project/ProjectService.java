@@ -17,7 +17,7 @@ public class ProjectService {
     ProjectDAO projectDAO = new ProjectDAO();
     RepositoryFactory repositoryFactory = new RepositoryFactory();
 
-    public Project createNewProject(String projectName, String userId) throws Exception {
+    Project createNewProject(String projectName, String userId) throws Exception {
 
         Project project = new Project();
         project.setName(projectName);
@@ -35,6 +35,14 @@ public class ProjectService {
             throw new Exception("User is not allowed to add files to this project");
         }
         return project;
+    }
+
+    List<Project> findProjectsForUser(List<String> projectIds, User user) {
+        return projectDAO.findForUser(projectIds, user);
+    }
+
+    List<Project> findAllProjectsForUser(User user) {
+        return projectDAO.findAllForUser(user);
     }
 
     public List<Project> getAllProjectsForUser(User user) {
