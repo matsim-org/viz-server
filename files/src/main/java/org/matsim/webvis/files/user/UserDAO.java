@@ -18,7 +18,7 @@ public class UserDAO extends DAO {
         return database.updateOne(user);
     }
 
-    public User findByIdentityProviderId(String id) {
+    User findByIdentityProviderId(String id) {
 
         QUser user = QUser.user;
         return database.executeQuery(query -> query.selectFrom(user)
@@ -29,6 +29,6 @@ public class UserDAO extends DAO {
     public void removeAllUser() {
 
         QUser user = QUser.user;
-        database.executeQuery(query -> query.delete(user).execute());
+        database.executeTransactionalQuery(query -> query.delete(user).execute());
     }
 }

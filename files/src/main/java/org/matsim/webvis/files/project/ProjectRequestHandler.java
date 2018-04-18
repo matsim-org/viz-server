@@ -9,7 +9,7 @@ import java.util.List;
 
 public class ProjectRequestHandler extends AuthenticatedJsonRequestHandler<ProjectRequest> {
 
-    private ProjectService projectService = new ProjectService();
+    ProjectService projectService = new ProjectService();
 
     public ProjectRequestHandler() {
         super(ProjectRequest.class);

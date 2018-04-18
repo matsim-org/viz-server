@@ -61,6 +61,6 @@ public class ProjectDAO extends DAO {
     void removeAllProjects() {
 
         QProject project = QProject.project;
-        database.executeQuery(query -> query.delete(project).execute());
+        database.executeTransactionalQuery(query -> query.delete(project).execute());
     }
 }
