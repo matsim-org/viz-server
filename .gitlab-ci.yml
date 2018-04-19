@@ -1,26 +1,13 @@
 image: maven:3-jdk-8
 
 stages:
-    - install
     - build
     - deploy
 
-install:
-    stage: install
+build:
+    stage: build
     script: "mvn install --batch-mode"
-
-package-auth:
-    stage: build
-    script: "mvn package assembly:single --file auth/pom.xml --batch-mode -DskipTests"
     artifacts:
-        name: "auth-server"
-        paths:
-            - target/*.jar
-
-package-files:
-    stage: build
-    script: "mvn package assembly:single --file files/pom.xml --batch-mode -DskipTests"
-    artifacts:
-        name: "file-server"
-        paths:
-            - target/*.jar
+      paths:
+        - auth/target/*.jar
+        - files/target/*.jar
