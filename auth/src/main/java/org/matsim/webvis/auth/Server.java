@@ -4,6 +4,8 @@ import com.beust.jcommander.JCommander;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.matsim.webvis.auth.config.*;
+import org.matsim.webvis.auth.entities.RelyingParty;
+import org.matsim.webvis.auth.entities.User;
 import org.matsim.webvis.auth.relyingParty.RelyingPartyService;
 import org.matsim.webvis.auth.user.UserService;
 
@@ -34,16 +36,20 @@ public class Server {
 
         UserService userService = new UserService();
         for (ConfigUser user : Configuration.getInstance().getUsers()) {
-            userService.createUser(user);
+            User created = userService.createUser(user);
+            logger.info("Created User: " + created.getEMail());
         }
 
         RelyingPartyService relyingPartyService = new RelyingPartyService();
         for (ConfigClient client : Configuration.getInstance().getClients()) {
-            relyingPartyService.createClient(client);
+            RelyingParty created = relyingPartyService.createClient(client);
+            logger.info("Created client: " + created.getName());
         }
 
         for (ConfigRelyingParty party : Configuration.getInstance().getProtectedResources()) {
-            relyingPartyService.createRelyingParty(party);
+            RelyingParty created = relyingPartyService.createRelyingParty(party);
+            logger.info("Created relying party: " + created.getName());
+
         }
     }
 

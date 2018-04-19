@@ -56,3 +56,20 @@ program:
 ```
 -config /path/to/your/config/file.json
 ```
+
+### 5. Build for deployment
+
+The server components use [sparkjava] (http://sparkjava.com/) for network communication.
+This framework comes with a build in Jetty server. To deploy it a 'fat jar' with all
+dependencies bundled within that jar-file needs to be generated. To achieve this the maven
+package command must be executed like this
+
+```
+mvn clean package assembly:single
+```
+
+The working directory must be set to the component that's supposed to be bundled. If you
+want to create a 'fat jar' for the auth server the working directory should be `<project-foler>/auth`.
+For the file server the working directory is `<project-folder>/files`.
+
+At the moment both components must be packaged individually.
