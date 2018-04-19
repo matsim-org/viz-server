@@ -11,7 +11,7 @@ install:
 
 package-auth:
     stage: build
-    script: "mvn package assembly:single --file auth/pom.xml --batch-mode --DskipTests"
+    script: "mvn package assembly:single --file auth/pom.xml --batch-mode -DskipTests"
     artifacts:
         name: "auth-server"
         paths:
@@ -19,7 +19,7 @@ package-auth:
 
 package-files:
     stage: build
-    script: "mvn package assembly:single --file files/pom.xml --batch-mode --DskipTests"
+    script: "mvn package assembly:single --file files/pom.xml --batch-mode -DskipTests"
     artifacts:
         name: "file-server"
         paths:
