@@ -5,7 +5,7 @@
 
     <persistence-unit name="org.matsim.matsim-webvis.auth">
         <description>
-            Persistence Unit for the parking project mockup
+            Persistence Unit for the authorization server of matsim-webvis
         </description>
 
         <class>org.matsim.webvis.auth.entities.User</class>
