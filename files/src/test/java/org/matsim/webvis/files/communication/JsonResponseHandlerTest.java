@@ -22,7 +22,7 @@ public class JsonResponseHandlerTest {
         handler.handle(null, response);
 
         verify(response).status(testAnswer.getStatusCode());
-        verify(response).type(JsonResponseHandler.TYPE_JSON);
+        verify(response).type(ContentType.APPLICATION_JSON);
         verify(response).body(new Gson().toJson(testAnswer.getResponse()));
     }
 

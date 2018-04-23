@@ -27,7 +27,7 @@ public class AuthenticatedJsonRequestHandlerTest {
 
         Request request = mock(Request.class);
         when(request.body()).thenReturn("invalidJson");
-        when(request.contentType()).thenReturn(JsonResponseHandler.TYPE_JSON);
+        when(request.contentType()).thenReturn(ContentType.APPLICATION_JSON);
 
         Answer answer = testObject.process(request, null);
 
@@ -53,7 +53,7 @@ public class AuthenticatedJsonRequestHandlerTest {
 
         Request request = mock(Request.class);
         when(request.body()).thenReturn("{\"someProperty\": \"some-value\"}");
-        when(request.contentType()).thenReturn(JsonResponseHandler.TYPE_JSON);
+        when(request.contentType()).thenReturn(ContentType.APPLICATION_JSON);
         when(request.attribute(anyString())).thenReturn(new AuthenticationResult());
 
         Answer answer = testObject.process(request, null);

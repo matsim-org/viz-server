@@ -1,6 +1,5 @@
 package org.matsim.webvis.files.communication;
 
-import com.google.gson.JsonSyntaxException;
 import org.matsim.webvis.common.communication.Answer;
 import org.matsim.webvis.common.communication.ErrorCode;
 import org.matsim.webvis.common.communication.RequestException;
@@ -22,7 +21,7 @@ public abstract class AuthenticatedJsonRequestHandler<T> extends JsonResponseHan
 
         T body;
         try {
-            if (!isContentTypeJson(request))
+            if (!ContentType.isJson(request.contentType()))
                 return Answer.badRequest(ErrorCode.INVALID_REQUEST, "only content-type: 'application/json' allowed");
             else
                 body = parseJsonBody(request.body());
@@ -33,15 +32,9 @@ public abstract class AuthenticatedJsonRequestHandler<T> extends JsonResponseHan
         return process(body, subject);
     }
 
-    private boolean isContentTypeJson(Request request) {
-        return request.contentType() != null && request.contentType().equals("application/json");
-    }
-
     private T parseJsonBody(String body) throws RequestException {
         try {
-            T result = getGson().fromJson(body, requestClass);
-            if (result == null) throw new RequestException(ErrorCode.INVALID_REQUEST, "no json-body present");
-            return result;
+            return JsonHelper.parseJson(body, requestClass);
         } catch (Throwable e) {
             throw new RequestException(ErrorCode.INVALID_REQUEST, "could not parse json-request");
         }
