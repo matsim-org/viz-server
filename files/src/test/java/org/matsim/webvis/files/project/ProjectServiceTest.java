@@ -2,14 +2,20 @@ package org.matsim.webvis.files.project;
 
 import org.apache.commons.fileupload.FileItem;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
+import org.matsim.webvis.files.config.Configuration;
 import org.matsim.webvis.files.entities.FileEntry;
 import org.matsim.webvis.files.entities.Project;
 import org.matsim.webvis.files.entities.User;
 import org.matsim.webvis.files.user.UserDAO;
 import org.matsim.webvis.files.util.TestUtils;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,6 +38,11 @@ public class ProjectServiceTest {
     public void tearDown() {
         projectDAO.removeAllProjects();
         userDAO.removeAllUser();
+    }
+
+    @AfterClass
+    public static void tearDownFixture() throws IOException {
+        TestUtils.removeFileTree(Paths.get(Configuration.getInstance().getUploadedFilePath()));
     }
 
     @Test(expected = Exception.class)
@@ -185,5 +196,65 @@ public class ProjectServiceTest {
         } catch (Exception e) {
             verify(repository).removeFiles(any());
         }
+    }
+
+    @Test
+    public void getFileStream_noProject_exception() {
+        try {
+            testObject.getFileStream("test", "test", new User());
+            fail("should throw exception");
+        } catch (Exception e) {
+            //expected
+        }
+    }
+
+    @Test
+    public void getFileStream_noFileEntry_exception() throws Exception {
+
+        Project project = persistProjectWithCreator("test");
+
+        try {
+            testObject.getFileStream(project.getId(), "test", project.getCreator());
+            fail("should throw exception");
+        } catch (Exception e) {
+            // expected
+        }
+    }
+
+    @Test
+    public void getFileStream_userNotAllowed_exception() throws Exception {
+        Project project = persistProjectWithCreator("test");
+
+        try {
+            testObject.getFileStream(project.getId(), "test", new User());
+            fail("should throw exception");
+        } catch (Exception e) {
+            // expected
+        }
+    }
+
+    @Test
+    public void getFileStream_inputStream() throws Exception {
+
+        Project project = persistProjectWithCreator("test");
+        FileEntry entry = new FileEntry();
+        project.getFiles().add(entry);
+        entry.setProject(project);
+        project = projectDAO.persist(project);
+        entry = project.getFiles().iterator().next();
+
+        testObject.repositoryFactory = mock(RepositoryFactory.class);
+        DiskProjectRepository repository = mock(DiskProjectRepository.class);
+        when(repository.getFileStream(any())).thenReturn(mock(FileInputStream.class));
+        when(testObject.repositoryFactory.getRepository(any())).thenReturn(repository);
+
+        InputStream result = testObject.getFileStream(project.getId(), entry.getId(), project.getCreator());
+        assertNotNull(result);
+    }
+
+    private Project persistProjectWithCreator(String name) throws Exception {
+        User user = new User();
+        userDAO.persist(user);
+        return testObject.createNewProject(name, user.getId());
     }
 }

@@ -55,8 +55,9 @@ public class DiskProjectRepository implements ProjectRepository {
         return entry;
     }
 
-    public InputStream getFileStream(FileEntry entry) {
-        return null;
+    public InputStream getFileStream(FileEntry entry) throws IOException {
+        Path filePath = getProjectDirectory().resolve(entry.getPersistedFileName());
+        return Files.newInputStream(filePath);
     }
 
     public void removeFile(FileEntry entry) throws IOException {
@@ -71,7 +72,7 @@ public class DiskProjectRepository implements ProjectRepository {
         }
     }
 
-    public void removeAllFiles() throws IOException {
+    void removeAllFiles() throws IOException {
 
         removeFiles(new ArrayList<>(project.getFiles()));
     }
@@ -81,7 +82,7 @@ public class DiskProjectRepository implements ProjectRepository {
         Files.delete(file);
     }
 
-    private Path getProjectDirectory() throws IOException {
+    Path getProjectDirectory() throws IOException {
         Path directory = Paths.get(Configuration.getInstance().getUploadedFilePath(), project.getCreator().getId(), project.getId());
         return Files.createDirectories(directory);
     }

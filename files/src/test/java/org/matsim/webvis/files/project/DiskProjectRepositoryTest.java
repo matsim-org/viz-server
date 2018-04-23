@@ -1,56 +1,64 @@
 package org.matsim.webvis.files.project;
 
 import org.apache.commons.fileupload.FileItem;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
+import org.matsim.webvis.files.config.Configuration;
 import org.matsim.webvis.files.entities.FileEntry;
 import org.matsim.webvis.files.entities.Project;
 import org.matsim.webvis.files.entities.User;
 import org.matsim.webvis.files.user.UserDAO;
 import org.matsim.webvis.files.util.TestUtils;
+import spark.utils.IOUtils;
 
-import java.io.FileNotFoundException;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertNotNull;
+import static junit.framework.TestCase.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
 
 public class DiskProjectRepositoryTest {
 
     private Project project;
     private ProjectDAO projectDAO = new ProjectDAO();
     private UserDAO userDAO = new UserDAO();
+    private DiskProjectRepository testObject;
 
     @BeforeClass
     public static void setUpFixture() throws UnsupportedEncodingException, FileNotFoundException {
         TestUtils.loadConfig();
     }
 
+    @AfterClass
+    public static void tearDownFixture() throws IOException {
+        Path start = Paths.get(Configuration.getInstance().getUploadedFilePath());
+        TestUtils.removeFileTree(start);
+    }
+
     @Before
-    public void setUp() {
+    public void setUp() throws IOException {
         User user = userDAO.persist(new User());
         Project toPersist = new Project();
         toPersist.setCreator(user);
         project = projectDAO.persist(toPersist);
+        testObject = new DiskProjectRepository(project);
     }
 
     @After
     public void tearDown() {
         userDAO.removeAllUser();
+        projectDAO.removeAllProjects();
     }
 
     @Test
     public void constructor_object() throws Exception {
 
         DiskProjectRepository repository = new DiskProjectRepository(project);
-
         assertNotNull(repository);
     }
 
@@ -60,16 +68,11 @@ public class DiskProjectRepositoryTest {
         final String filename = "filename.file";
         final String contentType = "content-type";
         final long size = 1L;
-        FileItem item = mock(FileItem.class);
-        when(item.getName()).thenReturn(filename);
-        when(item.getContentType()).thenReturn(contentType);
-        when(item.getSize()).thenReturn(size);
+        FileItem item = TestUtils.mockFileItem(filename, contentType, size);
         List<FileItem> items = new ArrayList<>();
         items.add(item);
 
-        DiskProjectRepository repository = new DiskProjectRepository(project);
-
-        List<FileEntry> entries = repository.addFiles(items);
+        List<FileEntry> entries = testObject.addFiles(items);
 
         verify(item).write(any());
         assertEquals(1, entries.size());
@@ -82,9 +85,29 @@ public class DiskProjectRepositoryTest {
         assertNotNull(uuid);
     }
 
-    private Project createProjectWithCreator() throws Exception {
+    @Test
+    public void getFileStream() throws IOException {
 
-        User user = new UserDAO().persist(new User());
-        return new ProjectService().createNewProject("name", user.getId());
+        FileEntry entry = new FileEntry();
+        entry.setPersistedFileName("test.txt");
+        Path directory = testObject.getProjectDirectory();
+
+        //write a test file
+        String testText = "this is a test file and should be removed after unit testing";
+
+        try (BufferedWriter writer = Files.newBufferedWriter(directory.resolve(entry.getPersistedFileName()))) {
+            writer.write(testText, 0, testText.length());
+        } catch (IOException e) {
+            fail("could not write test file");
+        }
+
+        try (InputStream result = testObject.getFileStream(entry)) {
+            assertNotNull(result);
+            try (StringWriter writer = new StringWriter()) {
+                IOUtils.copy(result, writer);
+                String text = writer.toString();
+                assertEquals(testText, text);
+            }
+        }
     }
 }

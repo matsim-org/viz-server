@@ -8,6 +8,7 @@ import org.matsim.webvis.files.entities.Project;
 import org.matsim.webvis.files.entities.User;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 public class ProjectService {
@@ -62,6 +63,19 @@ public class ProjectService {
             repository.removeFiles(entries);
             throw new Exception("Error while persisting project", e);
         }
+    }
+
+    public InputStream getFileStream(String projectId, String fileId, User subject) throws Exception {
+
+        Project project = projectDAO.find(projectId, subject);
+
+        if (project == null || project.getFiles() == null || project.getFiles().size() < 1) {
+            throw new Exception("could not find file. Id is wrong or user is not allowed");
+        }
+        ProjectRepository repository = repositoryFactory.getRepository(project);
+        @SuppressWarnings("ConstantConditions")
+        FileEntry file = project.getFiles().stream().filter(entry -> entry.getId().equals(fileId)).findFirst().get();
+        return repository.getFileStream(file);
     }
 
     public void removeProject(Project project) throws IOException {

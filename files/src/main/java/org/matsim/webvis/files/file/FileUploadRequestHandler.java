@@ -3,28 +3,26 @@ package org.matsim.webvis.files.file;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.matsim.webvis.common.communication.*;
-import org.matsim.webvis.files.communication.JsonResponseHandler;
+import org.matsim.webvis.files.communication.JsonHelper;
 import org.matsim.webvis.files.communication.Subject;
 import org.matsim.webvis.files.entities.Project;
 import org.matsim.webvis.files.project.ProjectService;
 import spark.Request;
 import spark.Response;
+import spark.Route;
 
-public class FileUploadRequestHandler extends JsonResponseHandler {
+
+public class FileUploadRequestHandler implements Route {
 
     ProjectService projectService = new ProjectService();
     RequestFactory requestFactory = new RequestFactory();
 
-    public FileUploadRequestHandler() {
-        Gson gson = new GsonBuilder().
-                registerTypeHierarchyAdapter(Iterable.class, new IterableSerializer())
-                .registerTypeAdapterFactory(new EntityAdapterFactory())
-                .setExclusionStrategies(new FileEntryExclusionStrategy())
-                .create();
-        this.setGson(gson);
-    }
+    private Gson gson = new GsonBuilder().
+            registerTypeHierarchyAdapter(Iterable.class, new IterableSerializer())
+            .registerTypeAdapterFactory(new EntityAdapterFactory())
+            .setExclusionStrategies(new FileEntryExclusionStrategy())
+            .create();
 
-    @Override
     protected Answer process(Request request, Response response) {
 
         Subject subject = Subject.getSubject(request);
@@ -51,7 +49,13 @@ public class FileUploadRequestHandler extends JsonResponseHandler {
         }
     }
 
-    public class RequestFactory {
+    @Override
+    public Object handle(Request request, Response response) {
+        Answer answer = process(request, response);
+        return JsonHelper.createJsonResponse(answer, response, gson);
+    }
+
+    class RequestFactory {
         FileUploadRequest createRequest(Request request) throws RequestException {
             return new FileUploadRequest(request);
         }

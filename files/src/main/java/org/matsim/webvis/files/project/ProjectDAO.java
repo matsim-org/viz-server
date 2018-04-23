@@ -9,7 +9,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 import java.util.List;
 
-public class ProjectDAO extends DAO {
+class ProjectDAO extends DAO {
 
     Project persistNewProject(Project project, String userId) throws Exception {
 
@@ -23,7 +23,10 @@ public class ProjectDAO extends DAO {
         }
     }
 
-    public Project persist(Project project) {
+    Project persist(Project project) {
+        if (project.getId() == null) {
+            return database.persistOne(project);
+        }
         return database.updateOne(project);
     }
 
@@ -34,6 +37,16 @@ public class ProjectDAO extends DAO {
                 .where(project.id.eq(projectId))
                 .leftJoin(project.files).fetchJoin()
                 .fetchOne());
+    }
+
+    Project find(String projectId, User subject) {
+        QProject project = QProject.project;
+        return database.executeQuery(query -> query.selectFrom(project)
+                .where(project.id.eq(projectId)
+                        .and(project.creator.eq(subject)))
+                .leftJoin(project.files).fetchJoin()
+                .fetchOne()
+        );
     }
 
     List<Project> findForUser(List<String> projectIds, User user) {
