@@ -80,7 +80,7 @@ public class FileDownloadRequestHandlerTest {
 
         testObject.handle(req, res);
 
-        verify(res).status(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        verify(res).status(HttpStatus.SC_BAD_REQUEST);
     }
 
     @Test

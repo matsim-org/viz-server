@@ -65,11 +65,8 @@ dependencies bundled within that jar-file needs to be generated. To achieve this
 package command must be executed like this
 
 ```
-mvn clean package assembly:single
+mvn clean package
 ```
 
-The working directory must be set to the component that's supposed to be bundled. If you
-want to create a 'fat jar' for the auth server the working directory should be `<project-foler>/auth`.
-For the file server the working directory is `<project-folder>/files`.
-
-At the moment both components must be packaged individually.
+The generated jar can be found in the projects target folder. For the auth component this
+woult be `<project-foler>/auth/target/`.

@@ -2,6 +2,7 @@ package org.matsim.webvis.files;
 
 import org.matsim.webvis.files.communication.AuthenticationHandler;
 import org.matsim.webvis.files.config.Configuration;
+import org.matsim.webvis.files.file.FileDownloadRequestHandler;
 import org.matsim.webvis.files.file.FileUploadRequestHandler;
 import org.matsim.webvis.files.project.CreateProjectRequestHandler;
 import org.matsim.webvis.files.project.ProjectRequestHandler;
@@ -14,6 +15,7 @@ import static spark.Spark.*;
 class Routes {
 
     private final static String FILE = "file/";
+    private final static String FILE_UPLOAD = FILE + "upload/";
     private final static String PROJECT = "project/";
 
     static void initialize() {
@@ -43,6 +45,7 @@ class Routes {
         options("/*", (request, response) -> "OK");
         put(PROJECT, new CreateProjectRequestHandler());
         post(PROJECT, new ProjectRequestHandler());
-        post(FILE, new FileUploadRequestHandler());
+        post(FILE_UPLOAD, new FileUploadRequestHandler());
+        post(FILE, new FileDownloadRequestHandler());
     }
 }
