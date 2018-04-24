@@ -12,7 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static spark.Spark.port;
+import static spark.Spark.*;
 
 public class Server {
 
@@ -51,8 +51,31 @@ public class Server {
 
     private static void startSparkServer(CommandLineArgs args) {
         port(Configuration.getInstance().getPort());
-        Routes.initialize();
+        initExceptionHandler(Server::handleInitializationFailure);
+
+        if (!args.isDebug() || !Configuration.getInstance().getTlsKeyStore().isEmpty()) {
+            secure(Configuration.getInstance().getTlsKeyStore(), Configuration.getInstance().getTlsKeyStorePassword(), null, null);
+        }
+        try {
+            Routes.initialize();
+        } catch (Exception e) {
+            handleInitializationFailure(e);
+        }
 
         logger.info("\n\nStarted Server on Port: " + Configuration.getInstance().getPort() + "\n");
+    }
+
+    private static void handleInitializationFailure(Exception e) {
+
+        String tlsKeyStore = Configuration.getInstance().getTlsKeyStore();
+        String tlsKeyStorePassword = Configuration.getInstance().getTlsKeyStorePassword();
+
+        if (tlsKeyStore == null || tlsKeyStore.isEmpty()) {
+            logger.error("\n\nInitialization failed. TlsKeystore location was not present.\n\n");
+        } else if (tlsKeyStorePassword == null || tlsKeyStorePassword.isEmpty()) {
+            logger.error("\n\nInitialization failed. TlsKeystore password was not present\n\n");
+        } else {
+            logger.error("Exception which caused failure was: ", e);
+        }
     }
 }

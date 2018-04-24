@@ -103,7 +103,7 @@ public class AuthenticationHandler implements Filter {
         try (CloseableHttpClient client = createHttpClient()) {
             return makeIntrospectionRequest(client, post);
         } catch (IOException e) {
-            throw new RuntimeException("Error during http call");
+            throw new RuntimeException("Could not connect to auth server.");
         }
     }
 

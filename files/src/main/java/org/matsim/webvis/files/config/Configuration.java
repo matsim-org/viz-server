@@ -18,6 +18,8 @@ public class Configuration {
     private String introspectionEndpoint = "https://localhost:3000/introspect/";
     private String tlsTrustStore = "./trustStore.jks";
     private String tlsTrustStorePassword = "nopassword";
+    private String tlsKeyStore = "./keystore.jks";
+    private String tlsKeyStorePassword = "nopassword";
     private String relyingPartyId = "relyingPartyId";
     private String relyingPartySecret = "secret";
 
