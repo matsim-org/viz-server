@@ -26,7 +26,7 @@ public class ProjectService {
 
     }
 
-    public Project getProjectIfAllowed(String projectId, String userId) throws Exception {
+    public Project findProjectIfAllowed(String projectId, String userId) throws Exception {
         Project project = projectDAO.find(projectId);
 
         if (project == null) {
@@ -65,16 +65,8 @@ public class ProjectService {
         }
     }
 
-    public InputStream getFileStream(String projectId, String fileId, User subject) throws Exception {
-
-        Project project = projectDAO.find(projectId, subject);
-
-        if (project == null || project.getFiles() == null || project.getFiles().size() < 1) {
-            throw new Exception("could not find file. Id is wrong or user is not allowed");
-        }
+    public InputStream getFileStream(Project project, FileEntry file) throws Exception {
         ProjectRepository repository = repositoryFactory.getRepository(project);
-        @SuppressWarnings("ConstantConditions")
-        FileEntry file = project.getFiles().stream().filter(entry -> entry.getId().equals(fileId)).findFirst().get();
         return repository.getFileStream(file);
     }
 

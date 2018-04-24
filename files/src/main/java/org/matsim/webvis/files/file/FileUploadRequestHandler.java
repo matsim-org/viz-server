@@ -33,7 +33,7 @@ public class FileUploadRequestHandler implements Route {
         try {
             uploadRequest = requestFactory.createRequest(request);
             uploadRequest.parseUpload(request);
-            project = projectService.getProjectIfAllowed(uploadRequest.getProjectId(), subject.getUser().getId());
+            project = projectService.findProjectIfAllowed(uploadRequest.getProjectId(), subject.getUser().getId());
         } catch (RequestException e) {
             return Answer.badRequest(e.getErrorCode(), e.getMessage());
         } catch (Exception e) {

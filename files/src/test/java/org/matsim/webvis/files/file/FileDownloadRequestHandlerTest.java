@@ -7,6 +7,8 @@ import org.junit.Test;
 import org.matsim.webvis.files.communication.AuthenticationResult;
 import org.matsim.webvis.files.communication.ContentType;
 import org.matsim.webvis.files.communication.Subject;
+import org.matsim.webvis.files.entities.FileEntry;
+import org.matsim.webvis.files.entities.Project;
 import org.matsim.webvis.files.entities.User;
 import org.matsim.webvis.files.project.ProjectService;
 import org.matsim.webvis.files.user.UserService;
@@ -61,7 +63,7 @@ public class FileDownloadRequestHandlerTest {
     public void handle_errorWhileCreatingInputStream_internalError() throws Exception {
 
         testObject.projectService = mock(ProjectService.class);
-        when(testObject.projectService.getFileStream(any(), any(), any())).thenThrow(new Exception("e"));
+        when(testObject.projectService.getFileStream(any(), any())).thenThrow(new Exception("e"));
 
         Request req = mock(Request.class);
         when(req.contentType()).thenReturn(ContentType.APPLICATION_JSON);
@@ -93,7 +95,8 @@ public class FileDownloadRequestHandlerTest {
             }
         };
         testObject.projectService = mock(ProjectService.class);
-        when(testObject.projectService.getFileStream(any(), any(), any())).thenReturn(inStream);
+        when(testObject.projectService.getFileStream(any(), any())).thenReturn(inStream);
+
 
         Request req = mock(Request.class);
         when(req.contentType()).thenReturn(ContentType.APPLICATION_JSON);
@@ -103,6 +106,13 @@ public class FileDownloadRequestHandlerTest {
         body.projectId = "pId";
         when(req.body()).thenReturn(new Gson().toJson(body));
         when(req.attribute(any())).thenReturn(new AuthenticationResult());
+
+        FileEntry entry = new FileEntry();
+        entry.setId(body.fileId);
+        Project project = new Project();
+        project.setId(body.projectId);
+        project.getFiles().add(entry);
+        when(testObject.projectService.findProjectIfAllowed(any(), any())).thenReturn(project);
 
         User subject = new User();
         Subject.userService = mock(UserService.class);

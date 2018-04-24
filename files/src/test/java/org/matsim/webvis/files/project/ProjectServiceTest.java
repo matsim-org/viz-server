@@ -87,7 +87,7 @@ public class ProjectServiceTest {
         User user = new User();
         userDAO.persist(user);
 
-        testObject.getProjectIfAllowed("invalid-project-id", user.getId());
+        testObject.findProjectIfAllowed("invalid-project-id", user.getId());
 
         fail("invalid project id should throw exception");
     }
@@ -100,7 +100,7 @@ public class ProjectServiceTest {
         Project project = new Project();
         projectDAO.persistNewProject(project, user.getId());
 
-        testObject.getProjectIfAllowed(project.getId(), "some-other-user");
+        testObject.findProjectIfAllowed(project.getId(), "some-other-user");
 
         fail("Should throw exception if user is not creator of the project");
     }
@@ -112,7 +112,7 @@ public class ProjectServiceTest {
         user = userDAO.persist(user);
         Project project = testObject.createNewProject("name", user.getId());
 
-        Project result = testObject.getProjectIfAllowed(project.getId(), user.getId());
+        Project result = testObject.findProjectIfAllowed(project.getId(), user.getId());
 
         assertEquals(project.getId(), result.getId());
         assertEquals(user.getId(), result.getCreator().getId());
@@ -199,41 +199,6 @@ public class ProjectServiceTest {
     }
 
     @Test
-    public void getFileStream_noProject_exception() {
-        try {
-            testObject.getFileStream("test", "test", new User());
-            fail("should throw exception");
-        } catch (Exception e) {
-            //expected
-        }
-    }
-
-    @Test
-    public void getFileStream_noFileEntry_exception() throws Exception {
-
-        Project project = persistProjectWithCreator("test");
-
-        try {
-            testObject.getFileStream(project.getId(), "test", project.getCreator());
-            fail("should throw exception");
-        } catch (Exception e) {
-            // expected
-        }
-    }
-
-    @Test
-    public void getFileStream_userNotAllowed_exception() throws Exception {
-        Project project = persistProjectWithCreator("test");
-
-        try {
-            testObject.getFileStream(project.getId(), "test", new User());
-            fail("should throw exception");
-        } catch (Exception e) {
-            // expected
-        }
-    }
-
-    @Test
     public void getFileStream_inputStream() throws Exception {
 
         Project project = persistProjectWithCreator("test");
@@ -248,7 +213,7 @@ public class ProjectServiceTest {
         when(repository.getFileStream(any())).thenReturn(mock(FileInputStream.class));
         when(testObject.repositoryFactory.getRepository(any())).thenReturn(repository);
 
-        InputStream result = testObject.getFileStream(project.getId(), entry.getId(), project.getCreator());
+        InputStream result = testObject.getFileStream(project, entry);
         assertNotNull(result);
     }
 
