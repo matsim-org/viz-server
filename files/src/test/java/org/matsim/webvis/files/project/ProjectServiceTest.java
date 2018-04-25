@@ -202,11 +202,12 @@ public class ProjectServiceTest {
     public void getFileStream_inputStream() throws Exception {
 
         Project project = persistProjectWithCreator("test");
-        FileEntry entry = new FileEntry();
+        /*FileEntry entry = new FileEntry();
         project.getFiles().add(entry);
         entry.setProject(project);
-        project = projectDAO.persist(project);
-        entry = project.getFiles().iterator().next();
+        project = projectDAO.persist(project);*/
+        project = addFileEntry(project);
+        FileEntry entry = project.getFiles().iterator().next();
 
         testObject.repositoryFactory = mock(RepositoryFactory.class);
         DiskProjectRepository repository = mock(DiskProjectRepository.class);
@@ -217,9 +218,48 @@ public class ProjectServiceTest {
         assertNotNull(result);
     }
 
+    @Test(expected = Exception.class)
+    public void removeFile_fileNotPartOfProject_exception() throws Exception {
+        Project project = persistProjectWithCreator("test");
+
+        testObject.removeFileFromProject(project.getId(), "test", project.getCreator());
+    }
+
+    @Test(expected = Exception.class)
+    public void removeFile_userNotProjectOwner_exception() throws Exception {
+
+        Project project = persistProjectWithCreator("test");
+
+        testObject.removeFileFromProject(project.getId(), "test", new User());
+    }
+
+    @Test
+    public void removeFile_fileIsRemoved() throws Exception {
+        Project project = persistProjectWithCreator("test");
+        project = addFileEntry(project);
+        FileEntry entry = project.getFiles().iterator().next();
+
+        testObject.repositoryFactory = mock(RepositoryFactory.class);
+        DiskProjectRepository repository = mock(DiskProjectRepository.class);
+        doNothing().when(repository).removeFile(any());
+        when(testObject.repositoryFactory.getRepository(any())).thenReturn(repository);
+
+        Project updated = testObject.removeFileFromProject(project.getId(), entry.getId(), project.getCreator());
+
+        assertEquals(0, updated.getFiles().size());
+        verify(repository).removeFile(any());
+    }
+
     private Project persistProjectWithCreator(String name) throws Exception {
         User user = new User();
         userDAO.persist(user);
         return testObject.createNewProject(name, user.getId());
+    }
+
+    private Project addFileEntry(Project project) {
+        FileEntry entry = new FileEntry();
+        project.getFiles().add(entry);
+        entry.setProject(project);
+        return projectDAO.persist(project);
     }
 }

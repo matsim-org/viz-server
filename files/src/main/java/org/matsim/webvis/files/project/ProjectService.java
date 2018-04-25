@@ -10,6 +10,7 @@ import org.matsim.webvis.files.entities.User;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Optional;
 
 public class ProjectService {
 
@@ -68,6 +69,21 @@ public class ProjectService {
     public InputStream getFileStream(Project project, FileEntry file) throws Exception {
         ProjectRepository repository = repositoryFactory.getRepository(project);
         return repository.getFileStream(file);
+    }
+
+    public Project removeFileFromProject(String projectId, String fileId, User subject) throws Exception {
+
+        Project project = findProjectIfAllowed(projectId, subject.getId());
+        Optional<FileEntry> optional = project.getFiles().stream().filter(e -> e.getId().equals(fileId)).findFirst();
+        if (!optional.isPresent()) {
+            throw new Exception("file id not present");
+        }
+
+        ProjectRepository repository = this.repositoryFactory.getRepository(project);
+        repository.removeFile(optional.get());
+        projectDAO.removeFileEntry(optional.get());
+        project.getFiles().remove(optional.get());
+        return project;
     }
 
     public void removeProject(Project project) throws IOException {

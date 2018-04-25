@@ -27,6 +27,7 @@ public class TestUtils {
     }
 
     private static String getResourcePath(String resourceFile) throws UnsupportedEncodingException {
+        //noinspection ConstantConditions
         return URLDecoder.decode(TestUtils.class.getClassLoader().getResource(resourceFile).getFile(), "UTF-8");
     }
 
@@ -69,6 +70,9 @@ public class TestUtils {
      * @throws IOException if something goes wrong
      */
     public static void removeFileTree(Path start) throws IOException {
+        if (!Files.exists(start)) {
+            return;
+        }
         Files.walkFileTree(start, new SimpleFileVisitor<Path>() {
 
             @Override

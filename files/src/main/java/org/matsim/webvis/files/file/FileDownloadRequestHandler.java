@@ -29,9 +29,9 @@ public class FileDownloadRequestHandler implements Route {
                     Answer.badRequest(ErrorCode.INVALID_REQUEST, "only content-type: 'application/json' allowed"),
                     response);
         }
-        FileDownloadRequest body;
+        FileRequest body;
         try {
-            body = JsonHelper.parseJson(request.body(), FileDownloadRequest.class);
+            body = JsonHelper.parseJson(request.body(), FileRequest.class);
         } catch (RuntimeException e) {
             return JsonHelper.createJsonResponse(Answer.badRequest(ErrorCode.INVALID_REQUEST,
                     "error while parsing message body"), response);

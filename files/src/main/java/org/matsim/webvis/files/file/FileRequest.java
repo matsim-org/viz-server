@@ -1,6 +1,6 @@
 package org.matsim.webvis.files.file;
 
-class FileDownloadRequest {
+class FileRequest {
 
     String fileId;
     String projectId;

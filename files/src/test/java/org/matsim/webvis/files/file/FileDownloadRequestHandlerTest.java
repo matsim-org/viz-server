@@ -68,7 +68,7 @@ public class FileDownloadRequestHandlerTest {
         Request req = mock(Request.class);
         when(req.contentType()).thenReturn(ContentType.APPLICATION_JSON);
 
-        FileDownloadRequest body = new FileDownloadRequest();
+        FileRequest body = new FileRequest();
         body.fileId = "id";
         body.projectId = "pId";
         when(req.body()).thenReturn(new Gson().toJson(body));
@@ -101,7 +101,7 @@ public class FileDownloadRequestHandlerTest {
         Request req = mock(Request.class);
         when(req.contentType()).thenReturn(ContentType.APPLICATION_JSON);
 
-        FileDownloadRequest body = new FileDownloadRequest();
+        FileRequest body = new FileRequest();
         body.fileId = "id";
         body.projectId = "pId";
         when(req.body()).thenReturn(new Gson().toJson(body));

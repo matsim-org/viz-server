@@ -41,7 +41,7 @@ public class DiskProjectRepository implements ProjectRepository {
         return writtenFiles;
     }
 
-    private FileEntry addFile(FileItem item) throws Exception {
+    public FileEntry addFile(FileItem item) throws Exception {
 
         String diskFileName = UUID.randomUUID().toString() + "." + FilenameUtils.getExtension(item.getName());
         Path file = projectDirectory.resolve(diskFileName);

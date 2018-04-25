@@ -1,9 +1,6 @@
 package org.matsim.webvis.files.project;
 
-import org.matsim.webvis.files.entities.DAO;
-import org.matsim.webvis.files.entities.Project;
-import org.matsim.webvis.files.entities.QProject;
-import org.matsim.webvis.files.entities.User;
+import org.matsim.webvis.files.entities.*;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
@@ -65,6 +62,16 @@ class ProjectDAO extends DAO {
             .where(project.creator.authId.eq(user.getAuthId()))
                 .fetch()
         );
+    }
+
+    void removeFileEntry(FileEntry entry) {
+
+        EntityManager em = database.getEntityManager();
+        em.getTransaction().begin();
+        Project project = em.merge(entry.getProject());
+        project.getFiles().remove(entry);
+        em.getTransaction().commit();
+        em.close();
     }
 
     void remove(Project project) {
