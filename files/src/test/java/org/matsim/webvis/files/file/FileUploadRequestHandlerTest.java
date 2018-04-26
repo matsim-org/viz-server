@@ -5,6 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.matsim.webvis.common.communication.Answer;
 import org.matsim.webvis.common.communication.ErrorResponse;
+import org.matsim.webvis.common.service.CodedException;
 import org.matsim.webvis.files.communication.Subject;
 import org.matsim.webvis.files.entities.Project;
 import org.matsim.webvis.files.entities.User;
@@ -55,7 +56,7 @@ public class FileUploadRequestHandlerTest {
         when(testObject.requestFactory.createRequest(any())).thenReturn(upload);
 
         testObject.projectService = mock(ProjectService.class);
-        when(testObject.projectService.findProjectIfAllowed(any(), any())).thenThrow(new Exception());
+        when(testObject.projectService.findProjectIfAllowed(any(), any())).thenThrow(new CodedException("code", "message"));
 
         Answer answer = testObject.process(request, response);
 
