@@ -2,6 +2,7 @@ package org.matsim.webvis.files;
 
 import org.matsim.webvis.files.communication.AuthenticationHandler;
 import org.matsim.webvis.files.config.Configuration;
+import org.matsim.webvis.files.file.FileDeleteRequestHandler;
 import org.matsim.webvis.files.file.FileDownloadRequestHandler;
 import org.matsim.webvis.files.file.FileUploadRequestHandler;
 import org.matsim.webvis.files.project.CreateProjectRequestHandler;
@@ -25,7 +26,7 @@ class Routes {
             String origin = request.headers("Origin");
             response.header("Access-Control-Allow-Origin", (origin != null) ? origin : "*");
             response.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-            response.header("Access-Control-Allow-Methods", "GET, POST, PUT, OPTIONS");
+            response.header("Access-Control-Allow-Methods", "GET, POST, PUT, OPTIONS, DELETE");
         });
 
         AuthenticationHandler authHandler = AuthenticationHandler.builder()
@@ -47,5 +48,6 @@ class Routes {
         post(PROJECT, new ProjectRequestHandler());
         post(FILE_UPLOAD, new FileUploadRequestHandler());
         post(FILE, new FileDownloadRequestHandler());
+        delete(FILE, new FileDeleteRequestHandler());
     }
 }

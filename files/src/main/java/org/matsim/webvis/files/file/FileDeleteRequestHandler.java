@@ -13,7 +13,7 @@ public class FileDeleteRequestHandler extends AuthenticatedJsonRequestHandler<Fi
 
     ProjectService projectService = new ProjectService();
 
-    FileDeleteRequestHandler() {
+    public FileDeleteRequestHandler() {
         super(FileRequest.class);
     }
 
