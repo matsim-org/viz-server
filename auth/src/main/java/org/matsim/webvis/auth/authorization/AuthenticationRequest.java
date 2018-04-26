@@ -1,7 +1,7 @@
 package org.matsim.webvis.auth.authorization;
 
 import lombok.Getter;
-import org.matsim.webvis.common.communication.ErrorCode;
+import org.matsim.webvis.common.communication.RequestError;
 import org.matsim.webvis.common.communication.RequestException;
 import spark.QueryParamsMap;
 
@@ -64,7 +64,7 @@ public class AuthenticationRequest {
         String[] scopes = extractRequiredValue(SCOPE, params).split(" ");
         boolean openid = Arrays.stream(scopes).anyMatch(scope -> scope.equals("openid"));
 
-        if (!openid) throw new RequestException(ErrorCode.INVALID_REQUEST, "scope must contain 'openid'");
+        if (!openid) throw new RequestException(RequestError.INVALID_REQUEST, "scope must contain 'openid'");
         return scopes;
     }
 
@@ -91,7 +91,7 @@ public class AuthenticationRequest {
                 responseTypes[1].equals("token"))
             this.type = Type.AccessAndIdToken;
         else
-            throw new RequestException(ErrorCode.INVALID_REQUEST, "response types may be: 'code', 'id_token', 'id_token token'.");
+            throw new RequestException(RequestError.INVALID_REQUEST, "response types may be: 'code', 'id_token', 'id_token token'.");
 
         return responseTypes;
     }
@@ -105,7 +105,7 @@ public class AuthenticationRequest {
 
     private String extractRequiredValue(String key, QueryParamsMap params) throws RequestException {
         if (!params.hasKey(key))
-            throw new RequestException(ErrorCode.INVALID_REQUEST, key + " missing");
+            throw new RequestException(RequestError.INVALID_REQUEST, key + " missing");
         return params.get(key).value();
     }
 

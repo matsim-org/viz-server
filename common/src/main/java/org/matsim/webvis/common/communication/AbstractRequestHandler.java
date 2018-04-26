@@ -67,7 +67,7 @@ public abstract class AbstractRequestHandler<T> implements Route {
      * @throws RequestException if the request could not be parsed with a meaningful message
      */
     protected T parseBody(Request request) throws RequestException {
-        throw new RequestException(ErrorCode.UNSUPPORTED_CONTENT_TYPE, "content type is not supported for this request");
+        throw new RequestException(RequestError.UNSUPPORTED_CONTENT_TYPE, "content type is not supported for this request");
     }
 
     private T parseJsonBody(String body) throws RequestException {
@@ -76,7 +76,7 @@ public abstract class AbstractRequestHandler<T> implements Route {
         try {
             contract = getGson().fromJson(body, contractClass);
         } catch (JsonSyntaxException e) {
-            throw new RequestException(ErrorCode.INVALID_REQUEST, "the request body could not be parsed");
+            throw new RequestException(RequestError.INVALID_REQUEST, "the request body could not be parsed");
         }
         return contract;
     }

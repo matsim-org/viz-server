@@ -5,7 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.matsim.webvis.auth.entities.AccessToken;
 import org.matsim.webvis.common.communication.AbstractRequestHandler;
 import org.matsim.webvis.common.communication.Answer;
-import org.matsim.webvis.common.communication.ErrorCode;
+import org.matsim.webvis.common.communication.RequestError;
 import org.matsim.webvis.common.communication.RequestException;
 import spark.Request;
 
@@ -31,7 +31,7 @@ public class TokenRequestHandler extends AbstractRequestHandler<TokenRequest> {
     protected TokenRequest parseBody(Request request) throws RequestException {
 
         if (!isFormUrlEncoded(request.contentType())) {
-            throw new RequestException(ErrorCode.INVALID_REQUEST, "only content type: " + TYPE_FORM_URL_ENCODED + " allowed");
+            throw new RequestException(RequestError.INVALID_REQUEST, "only content type: " + TYPE_FORM_URL_ENCODED + " allowed");
         }
 
         Map<String, String> parameters = Arrays.stream(request.body().split("&"))

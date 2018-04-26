@@ -7,9 +7,10 @@ import org.matsim.webvis.auth.entities.AccessToken;
 import org.matsim.webvis.auth.entities.User;
 import org.matsim.webvis.auth.util.TestUtils;
 import org.matsim.webvis.common.communication.Answer;
-import org.matsim.webvis.common.communication.ErrorCode;
 import org.matsim.webvis.common.communication.ErrorResponse;
 import org.matsim.webvis.common.communication.HttpStatus;
+import org.matsim.webvis.common.communication.RequestError;
+import org.matsim.webvis.common.service.Error;
 import spark.Request;
 import spark.Response;
 
@@ -80,7 +81,7 @@ public class TokenRequestHandlerTest {
 
         assertEquals(HttpStatus.BAD_REQUEST, answer.getStatusCode());
         ErrorResponse response = (ErrorResponse) answer.getResponse();
-        assertEquals(ErrorCode.UNSUPPORTED_GRANT_TYPE, response.getError());
+        assertEquals(RequestError.UNSUPPORTED_GRANT_TYPE, response.getError());
     }
 
     @Test
@@ -94,7 +95,7 @@ public class TokenRequestHandlerTest {
 
         assertEquals(HttpStatus.BAD_REQUEST, answer.getStatusCode());
         ErrorResponse response = (ErrorResponse) answer.getResponse();
-        assertEquals(ErrorCode.INVALID_REQUEST, response.getError());
+        assertEquals(RequestError.INVALID_REQUEST, response.getError());
     }
 
     @Test
@@ -108,7 +109,7 @@ public class TokenRequestHandlerTest {
 
         assertEquals(HttpStatus.BAD_REQUEST, answer.getStatusCode());
         ErrorResponse response = (ErrorResponse) answer.getResponse();
-        assertEquals(ErrorCode.INVALID_REQUEST, response.getError());
+        assertEquals(RequestError.INVALID_REQUEST, response.getError());
     }
 
     @Test
@@ -128,7 +129,7 @@ public class TokenRequestHandlerTest {
 
         assertEquals(HttpStatus.FORBIDDEN, answer.getStatusCode());
         ErrorResponse response = (ErrorResponse) answer.getResponse();
-        assertEquals(ErrorCode.FORBIDDEN, response.getError());
+        assertEquals(Error.FORBIDDEN, response.getError());
     }
 
     @Test

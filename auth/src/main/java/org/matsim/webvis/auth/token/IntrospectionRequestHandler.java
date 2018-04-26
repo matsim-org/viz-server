@@ -4,7 +4,7 @@ import org.matsim.webvis.auth.entities.AccessToken;
 import org.matsim.webvis.auth.relyingParty.RelyingPartyService;
 import org.matsim.webvis.common.communication.AbstractRequestHandler;
 import org.matsim.webvis.common.communication.Answer;
-import org.matsim.webvis.common.communication.ErrorCode;
+import org.matsim.webvis.common.communication.RequestError;
 import org.matsim.webvis.common.communication.RequestException;
 import spark.Request;
 
@@ -28,7 +28,7 @@ public class IntrospectionRequestHandler extends AbstractRequestHandler<Introspe
         try {
             rpService.validateRelyingParty(body.getRpId(), body.getRpSecret());
         } catch (Exception e) {
-            return Answer.unauthorized(ErrorCode.INVALID_CLIENT, e.getMessage());
+            return Answer.unauthorized(RequestError.INVALID_CLIENT, e.getMessage());
         }
 
         AccessToken token = tokenService.findAccessToken(body.getToken());

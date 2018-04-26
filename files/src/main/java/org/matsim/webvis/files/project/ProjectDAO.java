@@ -36,11 +36,11 @@ class ProjectDAO extends DAO {
                 .fetchOne());
     }
 
-    Project find(String projectId, User subject) {
+    Project find(String projectId, User user) {
         QProject project = QProject.project;
         return database.executeQuery(query -> query.selectFrom(project)
                 .where(project.id.eq(projectId)
-                        .and(project.creator.eq(subject)))
+                               .and(project.creator.eq(user)))
                 .leftJoin(project.files).fetchJoin()
                 .fetchOne()
         );
@@ -64,23 +64,22 @@ class ProjectDAO extends DAO {
         );
     }
 
-    void removeFileEntry(FileEntry entry) {
-
-        EntityManager em = database.getEntityManager();
-        em.getTransaction().begin();
-        Project project = em.merge(entry.getProject());
-        project.getFiles().remove(entry);
-        em.getTransaction().commit();
-        em.close();
-    }
-
     void remove(Project project) {
-        database.removeOne(project);
+
+        //all child entities must be removed first. We do it this way until it becomes too many child relations
+        //we would have to resort to jpa's cascading functionality then.
+        QProject projectTable = QProject.project;
+        QFileEntry fileEntry = QFileEntry.fileEntry;
+        database.executeTransactionalQuery(query -> query.delete(fileEntry).where(fileEntry.project.eq(project)).execute());
+        database.executeTransactionalQuery(query -> query.delete(projectTable).where(projectTable.eq(project)).execute());
+
+
     }
 
     void removeAllProjects() {
 
-        QProject project = QProject.project;
-        database.executeTransactionalQuery(query -> query.delete(project).execute());
+        //first we need to remove all related entities
+        database.executeTransactionalQuery(query -> query.delete(QFileEntry.fileEntry).execute());
+        database.executeTransactionalQuery(query -> query.delete(QProject.project).execute());
     }
 }

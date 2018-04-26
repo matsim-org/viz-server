@@ -15,9 +15,10 @@ import org.apache.http.ssl.SSLContexts;
 import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.matsim.webvis.common.communication.ErrorCode;
 import org.matsim.webvis.common.communication.ErrorResponse;
+import org.matsim.webvis.common.communication.RequestError;
 import org.matsim.webvis.common.communication.RequestException;
+import org.matsim.webvis.common.service.Error;
 import spark.Filter;
 import spark.Request;
 import spark.Response;
@@ -86,14 +87,14 @@ public class AuthenticationHandler implements Filter {
             haltWithUnauthorizedError(e.getErrorCode(), e.getMessage(), response);
             return;
         } catch (RuntimeException e) {
-            haltWithInternalError(ErrorCode.UNSPECIFIED_ERROR, e.getMessage(), response);
+            haltWithInternalError(Error.UNSPECIFIED_ERROR, e.getMessage(), response);
             return;
         }
 
         if (authResponse.isActive()) {
             Subject.setAuthenticationAsAttribute(request, authResponse);
         } else {
-            haltWithUnauthorizedError(ErrorCode.INVALID_TOKEN, "Token is invalid", response);
+            haltWithUnauthorizedError(RequestError.INVALID_TOKEN, "Token is invalid", response);
         }
     }
 

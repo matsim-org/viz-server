@@ -4,6 +4,7 @@ import org.apache.commons.fileupload.FileItem;
 import org.matsim.webvis.files.communication.AuthenticationResult;
 import org.matsim.webvis.files.communication.Subject;
 import org.matsim.webvis.files.config.Configuration;
+import org.matsim.webvis.files.entities.User;
 import spark.Request;
 
 import javax.servlet.http.HttpServletRequest;
@@ -61,6 +62,10 @@ public class TestUtils {
         when(result.raw()).thenReturn(raw);
         when(result.attribute(Subject.SUBJECT_ATTRIBUTE)).thenReturn(new AuthenticationResult());
         return result;
+    }
+
+    public static Subject createSubject(User user) {
+        return new Subject(null, user);
     }
 
     /**

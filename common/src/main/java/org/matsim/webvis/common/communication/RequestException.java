@@ -1,16 +1,10 @@
 package org.matsim.webvis.common.communication;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import org.matsim.webvis.common.service.CodedException;
 
-@EqualsAndHashCode(callSuper = true)
-@Data
-public class RequestException extends Exception {
-
-    private final String errorCode;
+public class RequestException extends CodedException {
 
     public RequestException(String errorCode, String message) {
-        super(message);
-        this.errorCode = errorCode;
+        super(errorCode, message);
     }
 }

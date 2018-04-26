@@ -1,5 +1,7 @@
 package org.matsim.webvis.common.communication;
 
+import org.matsim.webvis.common.service.Error;
+
 public class Answer<T> {
 
     private int statusCode;
@@ -15,15 +17,15 @@ public class Answer<T> {
     }
 
     public static Answer invalidRequest(String message) {
-        return badRequest(ErrorCode.INVALID_REQUEST, message);
+        return badRequest(RequestError.INVALID_REQUEST, message);
     }
 
     public static Answer unsupportedGrantType(String message) {
-        return Answer.badRequest(ErrorCode.UNSUPPORTED_GRANT_TYPE, message);
+        return Answer.badRequest(RequestError.UNSUPPORTED_GRANT_TYPE, message);
     }
 
     public static Answer forbidden(String message) {
-        return Answer.error(HttpStatus.FORBIDDEN, ErrorCode.FORBIDDEN, message);
+        return Answer.error(HttpStatus.FORBIDDEN, Error.FORBIDDEN, message);
     }
 
     public static Answer unauthorized(String errorCode, String message) {

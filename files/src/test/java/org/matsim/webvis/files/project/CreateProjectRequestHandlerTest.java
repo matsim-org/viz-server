@@ -3,9 +3,10 @@ package org.matsim.webvis.files.project;
 import org.junit.Before;
 import org.junit.Test;
 import org.matsim.webvis.common.communication.Answer;
-import org.matsim.webvis.common.communication.ErrorCode;
 import org.matsim.webvis.common.communication.ErrorResponse;
 import org.matsim.webvis.common.communication.HttpStatus;
+import org.matsim.webvis.common.communication.RequestError;
+import org.matsim.webvis.common.service.Error;
 import org.matsim.webvis.files.communication.Subject;
 import org.matsim.webvis.files.entities.Project;
 import org.matsim.webvis.files.entities.User;
@@ -37,7 +38,7 @@ public class CreateProjectRequestHandlerTest {
 
         assertEquals(HttpStatus.BAD_REQUEST, answer.getStatusCode());
         assertTrue(answer.getResponse() instanceof ErrorResponse);
-        assertEquals(ErrorCode.INVALID_REQUEST, ((ErrorResponse) answer.getResponse()).getError());
+        assertEquals(RequestError.INVALID_REQUEST, ((ErrorResponse) answer.getResponse()).getError());
     }
 
     @Test
@@ -54,7 +55,7 @@ public class CreateProjectRequestHandlerTest {
 
         assertEquals(HttpStatus.CONFLICT, answer.getStatusCode());
         assertTrue(answer.getResponse() instanceof ErrorResponse);
-        assertEquals(ErrorCode.RESOURCE_EXISTS, ((ErrorResponse) answer.getResponse()).getError());
+        assertEquals(Error.RESOURCE_EXISTS, ((ErrorResponse) answer.getResponse()).getError());
     }
 
     @Test

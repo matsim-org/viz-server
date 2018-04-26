@@ -1,7 +1,7 @@
 package org.matsim.webvis.auth.token;
 
 import lombok.Getter;
-import org.matsim.webvis.common.communication.ErrorCode;
+import org.matsim.webvis.common.communication.RequestError;
 import org.matsim.webvis.common.communication.RequestException;
 import spark.Request;
 
@@ -22,7 +22,7 @@ class IntrospectionRequest {
 
     private void parseCredentials(String authorization) throws RequestException {
         if (authorization == null) {
-            throw new RequestException(ErrorCode.INVALID_REQUEST, "request must contain 'Authorization' header");
+            throw new RequestException(RequestError.INVALID_REQUEST, "request must contain 'Authorization' header");
         }
         String[] args = authorization.split(" ");
 
@@ -38,13 +38,13 @@ class IntrospectionRequest {
             }
         }
         if (!isValidRequest) {
-            throw new RequestException(ErrorCode.INVALID_REQUEST, "Invalid Basic Authentication request");
+            throw new RequestException(RequestError.INVALID_REQUEST, "Invalid Basic Authentication request");
         }
     }
 
     private void parseParameters(String token) throws RequestException {
         if (token == null || token.isEmpty()) {
-            throw new RequestException(ErrorCode.INVALID_REQUEST, "'org.matsim.webvis.auth.token' is a required parameter");
+            throw new RequestException(RequestError.INVALID_REQUEST, "'org.matsim.webvis.auth.token' is a required parameter");
         }
         this.token = token;
     }

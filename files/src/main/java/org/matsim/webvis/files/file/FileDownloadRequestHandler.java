@@ -2,7 +2,8 @@ package org.matsim.webvis.files.file;
 
 import org.apache.commons.io.IOUtils;
 import org.matsim.webvis.common.communication.Answer;
-import org.matsim.webvis.common.communication.ErrorCode;
+import org.matsim.webvis.common.communication.RequestError;
+import org.matsim.webvis.common.service.Error;
 import org.matsim.webvis.files.communication.ContentType;
 import org.matsim.webvis.files.communication.JsonHelper;
 import org.matsim.webvis.files.communication.Subject;
@@ -26,23 +27,23 @@ public class FileDownloadRequestHandler implements Route {
 
         if (!ContentType.isJson(request.contentType())) {
             return JsonHelper.createJsonResponse(
-                    Answer.badRequest(ErrorCode.INVALID_REQUEST, "only content-type: 'application/json' allowed"),
+                    Answer.badRequest(RequestError.INVALID_REQUEST, "only content-type: 'application/json' allowed"),
                     response);
         }
         FileRequest body;
         try {
             body = JsonHelper.parseJson(request.body(), FileRequest.class);
         } catch (RuntimeException e) {
-            return JsonHelper.createJsonResponse(Answer.badRequest(ErrorCode.INVALID_REQUEST,
-                    "error while parsing message body"), response);
+            return JsonHelper.createJsonResponse(Answer.badRequest(RequestError.INVALID_REQUEST,
+                                                                   "error while parsing message body"), response);
         }
         Subject subject = Subject.getSubject(request);
 
         try {
 
-            Project project = projectService.findProjectIfAllowed(body.projectId, subject.getUser().getId());
+            Project project = projectService.findProjectIfAllowed(body.getProjectId(), subject.getUser().getId());
             @SuppressWarnings("ConstantConditions")
-            FileEntry fileEntry = project.getFiles().stream().filter(file -> file.getId().equals(body.fileId)).findFirst().get();
+            FileEntry fileEntry = project.getFiles().stream().filter(file -> file.getId().equals(body.getFileId())).findFirst().get();
             response.type(fileEntry.getContentType());
 
             try (InputStream inStream = projectService.getFileStream(project, fileEntry);
@@ -52,12 +53,12 @@ public class FileDownloadRequestHandler implements Route {
                 outStream.flush();
             } catch (IOException e) {
                 return JsonHelper.createJsonResponse(
-                        Answer.internalError(ErrorCode.UNSPECIFIED_ERROR, "something went wrong"),
+                        Answer.internalError(Error.UNSPECIFIED_ERROR, "something went wrong"),
                         response);
             }
         } catch (Exception e) {
             return JsonHelper.createJsonResponse(
-                    Answer.badRequest(ErrorCode.INVALID_REQUEST, e.getMessage()), response);
+                    Answer.badRequest(RequestError.INVALID_REQUEST, e.getMessage()), response);
         }
         return "OK";
     }

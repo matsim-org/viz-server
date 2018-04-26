@@ -1,7 +1,7 @@
 package org.matsim.webvis.files.communication;
 
 import org.matsim.webvis.common.communication.Answer;
-import org.matsim.webvis.common.communication.ErrorCode;
+import org.matsim.webvis.common.communication.RequestError;
 import org.matsim.webvis.common.communication.RequestException;
 import spark.Request;
 import spark.Response;
@@ -22,7 +22,7 @@ public abstract class AuthenticatedJsonRequestHandler<T> extends JsonResponseHan
         T body;
         try {
             if (!ContentType.isJson(request.contentType()))
-                return Answer.badRequest(ErrorCode.INVALID_REQUEST, "only content-type: 'application/json' allowed");
+                return Answer.badRequest(RequestError.INVALID_REQUEST, "only content-type: 'application/json' allowed");
             else
                 body = parseJsonBody(request.body());
         } catch (RequestException e) {
@@ -36,7 +36,7 @@ public abstract class AuthenticatedJsonRequestHandler<T> extends JsonResponseHan
         try {
             return JsonHelper.parseJson(body, requestClass);
         } catch (Throwable e) {
-            throw new RequestException(ErrorCode.INVALID_REQUEST, "could not parse json-request");
+            throw new RequestException(RequestError.INVALID_REQUEST, "could not parse json-request");
         }
     }
 }

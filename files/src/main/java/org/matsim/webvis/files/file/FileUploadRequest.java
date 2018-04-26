@@ -7,7 +7,7 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.matsim.webvis.common.communication.ErrorCode;
+import org.matsim.webvis.common.communication.RequestError;
 import org.matsim.webvis.common.communication.RequestException;
 import org.matsim.webvis.files.config.Configuration;
 import spark.Request;
@@ -31,18 +31,18 @@ class FileUploadRequest {
     FileUploadRequest(Request request) throws RequestException {
 
         if (!ServletFileUpload.isMultipartContent(request.raw())) {
-            throw new RequestException(ErrorCode.INVALID_REQUEST, "must be a multipart request");
+            throw new RequestException(RequestError.INVALID_REQUEST, "must be a multipart request");
         }
         upload = createUpload();
     }
 
-    public void parseUpload(Request request) throws RequestException {
+    void parseUpload(Request request) throws RequestException {
         try {
             List<FileItem> fileItems = upload.parseRequest(request.raw());
             parseMetadata(fileItems);
             parseFiles(fileItems);
         } catch (FileUploadException e) {
-            throw new RequestException(ErrorCode.INVALID_REQUEST, "An error occurred during file upload.");
+            throw new RequestException(RequestError.INVALID_REQUEST, "An error occurred during file upload.");
         }
     }
 
@@ -62,7 +62,7 @@ class FileUploadRequest {
     private void parseMetadata(List<FileItem> items) throws RequestException {
 
         if (items.size() < 2) {
-            throw new RequestException(ErrorCode.INVALID_REQUEST, "file upload must contain: 'projectId'and one file");
+            throw new RequestException(RequestError.INVALID_REQUEST, "file upload must contain: 'projectId'and one file");
         }
         projectId = findFormField(items, "projectId").getString();
     }
@@ -75,14 +75,14 @@ class FileUploadRequest {
         if (optional.isPresent()) {
             return optional.get();
         } else {
-            throw new RequestException(ErrorCode.INVALID_REQUEST, fieldName + " is missing");
+            throw new RequestException(RequestError.INVALID_REQUEST, fieldName + " is missing");
         }
     }
 
     private void parseFiles(List<FileItem> items) throws RequestException {
         files = items.stream().filter(item -> !item.isFormField()).collect(Collectors.toList());
         if (files.size() < 1) {
-            throw new RequestException(ErrorCode.INVALID_REQUEST, "file upload must contain at least one file");
+            throw new RequestException(RequestError.INVALID_REQUEST, "file upload must contain at least one file");
         }
     }
 }

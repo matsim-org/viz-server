@@ -68,9 +68,7 @@ public class FileDownloadRequestHandlerTest {
         Request req = mock(Request.class);
         when(req.contentType()).thenReturn(ContentType.APPLICATION_JSON);
 
-        FileRequest body = new FileRequest();
-        body.fileId = "id";
-        body.projectId = "pId";
+        FileRequest body = new FileRequest("id", "pid");
         when(req.body()).thenReturn(new Gson().toJson(body));
         when(req.attribute(any())).thenReturn(new AuthenticationResult());
 
@@ -101,16 +99,14 @@ public class FileDownloadRequestHandlerTest {
         Request req = mock(Request.class);
         when(req.contentType()).thenReturn(ContentType.APPLICATION_JSON);
 
-        FileRequest body = new FileRequest();
-        body.fileId = "id";
-        body.projectId = "pId";
+        FileRequest body = new FileRequest("id", "pId");
         when(req.body()).thenReturn(new Gson().toJson(body));
         when(req.attribute(any())).thenReturn(new AuthenticationResult());
 
         FileEntry entry = new FileEntry();
-        entry.setId(body.fileId);
+        entry.setId(body.getFileId());
         Project project = new Project();
-        project.setId(body.projectId);
+        project.setId(body.getProjectId());
         project.getFiles().add(entry);
         when(testObject.projectService.findProjectIfAllowed(any(), any())).thenReturn(project);
 

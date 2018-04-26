@@ -3,7 +3,7 @@ package org.matsim.webvis.auth.user;
 import org.matsim.webvis.auth.entities.User;
 import org.matsim.webvis.common.communication.AbstractRequestHandler;
 import org.matsim.webvis.common.communication.Answer;
-import org.matsim.webvis.common.communication.ErrorCode;
+import org.matsim.webvis.common.service.Error;
 
 public class CreateUserRequestHandler extends AbstractRequestHandler<CreateUserRequest> {
 
@@ -21,7 +21,7 @@ public class CreateUserRequestHandler extends AbstractRequestHandler<CreateUserR
             User user = userService.createUser(body.eMail, body.password, body.passwordRepeated);
             answer = Answer.ok(user);
         } catch (Exception e) {
-            answer = Answer.internalError(ErrorCode.RESOURCE_EXISTS, e.getMessage());
+            answer = Answer.internalError(Error.RESOURCE_EXISTS, e.getMessage());
         }
         return answer;
     }

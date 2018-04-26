@@ -2,7 +2,11 @@ package org.matsim.webvis.files.file;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import org.matsim.webvis.common.communication.*;
+import org.matsim.webvis.common.communication.Answer;
+import org.matsim.webvis.common.communication.EntityAdapterFactory;
+import org.matsim.webvis.common.communication.IterableSerializer;
+import org.matsim.webvis.common.communication.RequestException;
+import org.matsim.webvis.common.service.Error;
 import org.matsim.webvis.files.communication.JsonHelper;
 import org.matsim.webvis.files.communication.Subject;
 import org.matsim.webvis.files.entities.Project;
@@ -45,7 +49,7 @@ public class FileUploadRequestHandler implements Route {
             Project persisted = projectService.addFilesToProject(uploadRequest.getFiles(), project);
             return Answer.ok(persisted);
         } catch (Exception e) {
-            return Answer.internalError(ErrorCode.UNSPECIFIED_ERROR, "Error during file upload. Try again.");
+            return Answer.internalError(Error.UNSPECIFIED_ERROR, "Error during file upload. Try again.");
         }
     }
 

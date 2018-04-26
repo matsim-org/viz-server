@@ -26,9 +26,16 @@ public class Project extends AbstractEntity {
     private Set<FileEntry> files = new HashSet<>();
 
     public void addFileEntries(Collection<FileEntry> entries) {
-        for (FileEntry entry : entries) {
-            files.add(entry);
-            entry.setProject(this);
-        }
+        entries.forEach(this::addFileEntry);
+    }
+
+    private void addFileEntry(FileEntry entry) {
+        files.add(entry);
+        entry.setProject(this);
+    }
+
+    public void removeFileEntry(FileEntry entry) {
+        files.remove(entry);
+        entry.setProject(null);
     }
 }

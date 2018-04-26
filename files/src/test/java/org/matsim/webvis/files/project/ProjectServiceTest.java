@@ -23,6 +23,7 @@ import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+@SuppressWarnings("ConstantConditions")
 public class ProjectServiceTest {
 
     private ProjectService testObject;
@@ -157,9 +158,7 @@ public class ProjectServiceTest {
         final String contentType = "content-type";
         final long size = 1L;
 
-        User user = new User();
-        user = userDAO.persist(user);
-        Project project = testObject.createNewProject("name", user.getId());
+        Project project = persistProjectWithCreator("test");
         List<FileItem> items = new ArrayList<>();
         items.add(TestUtils.mockFileItem(filename, contentType, size));
 
@@ -202,10 +201,6 @@ public class ProjectServiceTest {
     public void getFileStream_inputStream() throws Exception {
 
         Project project = persistProjectWithCreator("test");
-        /*FileEntry entry = new FileEntry();
-        project.getFiles().add(entry);
-        entry.setProject(project);
-        project = projectDAO.persist(project);*/
         project = addFileEntry(project);
         FileEntry entry = project.getFiles().iterator().next();
 
@@ -220,8 +215,8 @@ public class ProjectServiceTest {
 
     @Test(expected = Exception.class)
     public void removeFile_fileNotPartOfProject_exception() throws Exception {
-        Project project = persistProjectWithCreator("test");
 
+        Project project = persistProjectWithCreator("test");
         testObject.removeFileFromProject(project.getId(), "test", project.getCreator());
     }
 
@@ -229,7 +224,6 @@ public class ProjectServiceTest {
     public void removeFile_userNotProjectOwner_exception() throws Exception {
 
         Project project = persistProjectWithCreator("test");
-
         testObject.removeFileFromProject(project.getId(), "test", new User());
     }
 
@@ -247,13 +241,23 @@ public class ProjectServiceTest {
         Project updated = testObject.removeFileFromProject(project.getId(), entry.getId(), project.getCreator());
 
         assertEquals(0, updated.getFiles().size());
+        assertEquals(0, projectDAO.find(updated.getId()).getFiles().size());
         verify(repository).removeFile(any());
     }
 
-    private Project persistProjectWithCreator(String name) throws Exception {
+    private Project persistProjectWithCreator(String name) {
         User user = new User();
-        userDAO.persist(user);
-        return testObject.createNewProject(name, user.getId());
+        try {
+            userDAO.persist(user);
+        } catch (Exception e) {
+            fail("failed to persist user.");
+        }
+        try {
+            return testObject.createNewProject(name, user.getId());
+        } catch (Exception e) {
+            fail("Failed to create project with name: " + name);
+        }
+        return null;
     }
 
     private Project addFileEntry(Project project) {

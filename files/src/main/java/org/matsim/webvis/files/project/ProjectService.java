@@ -3,6 +3,8 @@ package org.matsim.webvis.files.project;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.matsim.webvis.common.service.CodedException;
+import org.matsim.webvis.common.service.Error;
 import org.matsim.webvis.files.entities.FileEntry;
 import org.matsim.webvis.files.entities.Project;
 import org.matsim.webvis.files.entities.User;
@@ -27,14 +29,14 @@ public class ProjectService {
 
     }
 
-    public Project findProjectIfAllowed(String projectId, String userId) throws Exception {
+    public Project findProjectIfAllowed(String projectId, String userId) throws CodedException {
         Project project = projectDAO.find(projectId);
 
         if (project == null) {
-            throw new Exception("Project was not found.");
+            throw new CodedException(Error.RESOURCE_NOT_FOUND, "Project was not found.");
         }
         if (!mayUserAddFiles(project, userId)) {
-            throw new Exception("User is not allowed to add files to this project");
+            throw new CodedException(Error.FORBIDDEN, "User is not allowed to add files to this project");
         }
         return project;
     }
@@ -71,19 +73,22 @@ public class ProjectService {
         return repository.getFileStream(file);
     }
 
-    public Project removeFileFromProject(String projectId, String fileId, User subject) throws Exception {
+    public Project removeFileFromProject(String projectId, String fileId, User subject) throws CodedException {
 
         Project project = findProjectIfAllowed(projectId, subject.getId());
         Optional<FileEntry> optional = project.getFiles().stream().filter(e -> e.getId().equals(fileId)).findFirst();
         if (!optional.isPresent()) {
-            throw new Exception("file id not present");
+            throw new CodedException(Error.RESOURCE_NOT_FOUND, "fileId not present");
         }
 
-        ProjectRepository repository = this.repositoryFactory.getRepository(project);
-        repository.removeFile(optional.get());
-        projectDAO.removeFileEntry(optional.get());
-        project.getFiles().remove(optional.get());
-        return project;
+        try {
+            ProjectRepository repository = this.repositoryFactory.getRepository(project);
+            repository.removeFile(optional.get());
+        } catch (IOException e) {
+            throw new CodedException(Error.UNSPECIFIED_ERROR, "Could not remove file.");
+        }
+        project.removeFileEntry(optional.get());
+        return projectDAO.persist(project);
     }
 
     public void removeProject(Project project) throws IOException {

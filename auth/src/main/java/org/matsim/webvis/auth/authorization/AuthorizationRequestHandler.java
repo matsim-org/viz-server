@@ -3,7 +3,7 @@ package org.matsim.webvis.auth.authorization;
 import org.matsim.webvis.auth.Routes;
 import org.matsim.webvis.auth.entities.User;
 import org.matsim.webvis.auth.token.TokenService;
-import org.matsim.webvis.common.communication.ErrorCode;
+import org.matsim.webvis.common.communication.RequestError;
 import org.matsim.webvis.common.communication.RequestException;
 import spark.Request;
 import spark.Response;
@@ -34,14 +34,14 @@ public class AuthorizationRequestHandler implements Route {
         try {
             authRequest = parse(request);
         } catch (URIException e) {
-            return errorResponse(ErrorCode.INVALID_REQUEST, "redirect_uri missing or malformed");
+            return errorResponse(RequestError.INVALID_REQUEST, "redirect_uri missing or malformed");
         } catch (RequestException e) {
             return redirectIfPossible(e.getErrorCode(), e.getMessage(), request, response);
         }
 
         if (!authService.isValidClientInformation(authRequest)) {
-            return errorResponse(ErrorCode.UNAUTHORIZED_CLIENT,
-                    "relyingParty was not registered or redirect url was not registered");
+            return errorResponse(RequestError.UNAUTHORIZED_CLIENT,
+                                 "relyingParty was not registered or redirect url was not registered");
         }
 
         //authenticate user by cookie or login

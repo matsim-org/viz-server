@@ -1,7 +1,7 @@
 package org.matsim.webvis.files.communication;
 
 import lombok.Getter;
-import org.matsim.webvis.common.communication.ErrorCode;
+import org.matsim.webvis.common.communication.RequestError;
 import org.matsim.webvis.common.communication.RequestException;
 import spark.Request;
 
@@ -17,7 +17,7 @@ class AuthenticatedRequest {
         if (hasAuthorization(request)) {
             this.token = extractToken(request.headers(AUTHORIZATION));
         } else
-            throw new RequestException(ErrorCode.INVALID_REQUEST, "Must specify Authorization header");
+            throw new RequestException(RequestError.INVALID_REQUEST, "Must specify Authorization header");
     }
 
     private static String extractToken(String authorizationHeader) throws RequestException {
@@ -25,7 +25,7 @@ class AuthenticatedRequest {
         if (content.length == 2 && content[0].equals("Bearer")) {
             return content[1];
         } else {
-            throw new RequestException(ErrorCode.INVALID_REQUEST, "Must specify bearer token");
+            throw new RequestException(RequestError.INVALID_REQUEST, "Must specify bearer token");
         }
     }
 
