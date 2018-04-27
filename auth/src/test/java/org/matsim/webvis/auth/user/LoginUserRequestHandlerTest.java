@@ -8,6 +8,7 @@ import org.matsim.webvis.auth.entities.IdToken;
 import org.matsim.webvis.auth.entities.User;
 import org.matsim.webvis.auth.token.TokenService;
 import org.matsim.webvis.auth.util.TestUtils;
+import org.matsim.webvis.common.service.CodedException;
 import spark.Request;
 import spark.Response;
 
@@ -45,7 +46,7 @@ public class LoginUserRequestHandlerTest {
 
         Map<String, String> map = new HashMap<>();
         map.put("password", "1234");
-        Request req = TestUtils.mockRequestWithQueryParams(map);
+        Request req = TestUtils.mockRequestWithQueryParams(map, "");
         Response res = mock(Response.class);
 
         Object response = testObject.handle(req, res);
@@ -59,7 +60,7 @@ public class LoginUserRequestHandlerTest {
     public void handle_noPassword_proptLogin() {
         Map<String, String> map = new HashMap<>();
         map.put("username", "name");
-        Request req = TestUtils.mockRequestWithQueryParams(map);
+        Request req = TestUtils.mockRequestWithQueryParams(map, "");
         Response res = mock(Response.class);
 
         Object response = testObject.handle(req, res);
@@ -72,7 +73,7 @@ public class LoginUserRequestHandlerTest {
     @Test
     public void handle_noUsernameNoPassword_promptLogin() {
         Map<String, String> map = new HashMap<>();
-        Request req = TestUtils.mockRequestWithQueryParams(map);
+        Request req = TestUtils.mockRequestWithQueryParams(map, "");
         Response res = mock(Response.class);
 
         Object response = testObject.handle(req, res);
@@ -87,10 +88,10 @@ public class LoginUserRequestHandlerTest {
         Map<String, String> map = new HashMap<>();
         map.put("username", "name");
         map.put("password", "1234");
-        Request req = TestUtils.mockRequestWithQueryParams(map);
+        Request req = TestUtils.mockRequestWithQueryParams(map, "");
         Response res = mock(Response.class);
         testObject.userService = mock(UserService.class);
-        when(testObject.userService.authenticate(any(), any())).thenThrow(new Exception());
+        when(testObject.userService.authenticate(any(), any())).thenThrow(new CodedException("code", "message"));
 
         Object response = testObject.handle(req, res);
 
@@ -105,7 +106,7 @@ public class LoginUserRequestHandlerTest {
         Map<String, String> map = new HashMap<>();
         map.put("username", "name");
         map.put("password", "1234");
-        Request req = TestUtils.mockRequestWithQueryParams(map);
+        Request req = TestUtils.mockRequestWithQueryParams(map, "");
         Response res = mock(Response.class);
         testObject.userService = mock(UserService.class);
         when(testObject.userService.authenticate(any(), any())).thenReturn(new User());

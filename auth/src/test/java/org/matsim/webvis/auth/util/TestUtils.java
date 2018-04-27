@@ -22,13 +22,25 @@ public class TestUtils {
         return new QueryParamsMap(servletRequest);
     }
 
-    public static Request mockRequestWithQueryParams(Map<String, String> parameterMap) {
+    public static Request mockRequestWithQueryParams(Map<String, String> parameterMap, String contentType) {
 
         Request result = mock(Request.class);
         doAnswer(invocationOnMock -> {
             String key = invocationOnMock.getArgument(0);
             return parameterMap.get(key);
         }).when(result).queryParams(anyString());
+
+        when(result.contentType()).thenReturn(contentType);
+
+        return result;
+    }
+
+    public static Request mockRequestWithQueryParamsMap(Map<String, String[]> parameterMap, String contentType) {
+
+        Request result = mock(Request.class);
+        QueryParamsMap map = mockQueryParamsMap(parameterMap);
+        when(result.queryMap()).thenReturn(map);
+        when(result.contentType()).thenReturn(contentType);
 
         return result;
     }
@@ -49,6 +61,7 @@ public class TestUtils {
         return getResourcePath("empty-test-config.json");
     }
 
+    @SuppressWarnings("ConstantConditions")
     public static String getResourcePath(String resourceFile) throws UnsupportedEncodingException {
         return URLDecoder.decode(TestUtils.class.getClassLoader().getResource(resourceFile).getFile(), "UTF-8");
     }

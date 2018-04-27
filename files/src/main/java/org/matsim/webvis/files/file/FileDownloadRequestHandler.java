@@ -2,10 +2,10 @@ package org.matsim.webvis.files.file;
 
 import org.apache.commons.io.IOUtils;
 import org.matsim.webvis.common.communication.Answer;
+import org.matsim.webvis.common.communication.ContentType;
+import org.matsim.webvis.common.communication.JsonHelper;
 import org.matsim.webvis.common.communication.RequestError;
 import org.matsim.webvis.common.service.Error;
-import org.matsim.webvis.files.communication.ContentType;
-import org.matsim.webvis.files.communication.JsonHelper;
 import org.matsim.webvis.files.communication.Subject;
 import org.matsim.webvis.files.entities.FileEntry;
 import org.matsim.webvis.files.entities.Project;

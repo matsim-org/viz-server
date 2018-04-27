@@ -1,6 +1,5 @@
-package org.matsim.webvis.files.communication;
+package org.matsim.webvis.common.communication;
 
-import org.matsim.webvis.common.communication.Answer;
 import spark.Request;
 import spark.Response;
 import spark.Route;

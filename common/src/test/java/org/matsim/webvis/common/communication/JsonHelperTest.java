@@ -1,8 +1,6 @@
-package org.matsim.webvis.files.communication;
+package org.matsim.webvis.common.communication;
 
 import org.junit.Test;
-import org.matsim.webvis.common.communication.Answer;
-import org.matsim.webvis.common.communication.RequestError;
 import spark.Response;
 
 import static junit.framework.TestCase.assertEquals;

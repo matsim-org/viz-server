@@ -1,12 +1,21 @@
 package org.matsim.webvis.auth.token;
 
 
-import java.util.Map;
+import lombok.Getter;
+import org.matsim.webvis.common.communication.RequestException;
+import org.matsim.webvis.common.communication.RequestWithParams;
+import spark.Request;
 
-public class TokenRequest {
-    public Map<String, String> parameters;
+@Getter
+class TokenRequest extends RequestWithParams {
 
-    TokenRequest(Map<String, String> parameters) {
-        this.parameters = parameters;
+    private String grantType;
+    private String username;
+    private String password;
+
+    TokenRequest(Request request) throws RequestException {
+        grantType = extractRequiredValue(OAuthParameters.GRANT_TYPE, request.queryMap());
+        username = extractRequiredValue(OAuthParameters.USERNAME, request.queryMap());
+        password = extractRequiredValue(OAuthParameters.PASSWORD, request.queryMap());
     }
 }

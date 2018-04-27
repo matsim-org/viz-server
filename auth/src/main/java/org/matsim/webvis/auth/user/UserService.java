@@ -6,6 +6,8 @@ import org.matsim.webvis.auth.config.ConfigUser;
 import org.matsim.webvis.auth.entities.User;
 import org.matsim.webvis.auth.entities.UserCredentials;
 import org.matsim.webvis.auth.helper.SecretHelper;
+import org.matsim.webvis.common.service.CodedException;
+import org.matsim.webvis.common.service.Error;
 
 import javax.persistence.RollbackException;
 
@@ -47,16 +49,16 @@ public class UserService {
         return null;
     }
 
-    public User authenticate(String eMail, char[] password) throws Exception {
+    public User authenticate(String eMail, char[] password) throws CodedException {
 
         UserCredentials credentials = userDAO.findUserCredentials(eMail);
 
-        if (credentials == null) throw new Exception("username was not found.");
+        if (credentials == null) throw new CodedException(Error.FORBIDDEN, "username or password was wrong");
 
         String hashedPassword = SecretHelper.getEncodedSecret(password, credentials.getSalt());
 
         if (!SecretHelper.match(credentials.getPassword(), hashedPassword)) {
-            throw new Exception("password did not match.");
+            throw new CodedException(Error.FORBIDDEN, "username or password was wrong");
         }
         return credentials.getUser();
     }

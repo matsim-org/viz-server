@@ -2,10 +2,14 @@ package org.matsim.webvis.auth.token;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.matsim.webvis.auth.util.TestUtils;
 import org.matsim.webvis.common.communication.RequestException;
+import spark.QueryParamsMap;
 import spark.Request;
 
 import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.fail;
@@ -75,11 +79,14 @@ public class IntrospectionRequestTest {
 
         String clientId = "client";
         String clientSecret = "secret";
-        String token = "some-org.matsim.webvis.auth.token";
+        String token = "some-token";
 
         String basicCredentials = Base64.getEncoder().encodeToString((clientId + ":" + clientSecret).getBytes());
         when(mockReq.headers(any())).thenReturn("Basic " + basicCredentials);
-        when(mockReq.queryParams(any())).thenReturn(token);
+        Map<String, String[]> map = new HashMap<>();
+        map.put("token", new String[]{token});
+        QueryParamsMap params = TestUtils.mockQueryParamsMap(map);
+        when(mockReq.queryMap()).thenReturn(params);
 
         IntrospectionRequest request = new IntrospectionRequest(mockReq);
 

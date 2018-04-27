@@ -1,8 +1,7 @@
-package org.matsim.webvis.files.communication;
+package org.matsim.webvis.common.communication;
 
 import com.google.gson.Gson;
 import org.junit.Test;
-import org.matsim.webvis.common.communication.Answer;
 import spark.Request;
 import spark.Response;
 

@@ -1,10 +1,7 @@
-package org.matsim.webvis.files.communication;
+package org.matsim.webvis.common.communication;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import org.matsim.webvis.common.communication.Answer;
-import org.matsim.webvis.common.communication.EntityAdapterFactory;
-import org.matsim.webvis.common.communication.IterableSerializer;
 import spark.Response;
 
 public class JsonHelper {

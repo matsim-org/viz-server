@@ -9,12 +9,14 @@ import org.matsim.webvis.auth.util.TestUtils;
 import org.matsim.webvis.common.communication.Answer;
 import org.matsim.webvis.common.communication.ErrorResponse;
 import org.matsim.webvis.common.communication.HttpStatus;
-import org.matsim.webvis.common.communication.RequestException;
+import org.matsim.webvis.common.service.CodedException;
 import spark.Request;
 
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 
 import static junit.framework.TestCase.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -34,12 +36,12 @@ public class IntrospectionRequestHandlerTest {
     }
 
     @Test
-    public void process_rpNotValid_answerUnauthorized() throws Exception {
-        when(testObject.rpService.validateRelyingParty(any(), any())).thenThrow(new Exception());
+    public void process_rpNotValid_answerUnauthorized() throws CodedException {
+        when(testObject.rpService.validateRelyingParty(any(), any())).thenThrow(new CodedException("", ""));
 
-        Answer result = testObject.process(createRequest());
+        Answer result = testObject.process(createRequest(), null);
 
-        assertEquals(HttpStatus.UNAUTHORIZED, result.getStatusCode());
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result.getStatusCode());
         assertTrue(result.getResponse() instanceof ErrorResponse);
     }
 
@@ -48,7 +50,7 @@ public class IntrospectionRequestHandlerTest {
         when(testObject.rpService.validateRelyingParty(any(), any())).thenReturn(null);
         when(testObject.tokenService.getToken("token")).thenReturn(null);
 
-        Answer result = testObject.process(createRequest());
+        Answer result = testObject.process(createRequest(), null);
 
         assertEquals(HttpStatus.OK, result.getStatusCode());
         assertTrue(result.getResponse() instanceof IntrospectionResponse);
@@ -65,21 +67,23 @@ public class IntrospectionRequestHandlerTest {
         User user = new User();
         user.setId("id");
         token.setUser(user);
-        when(testObject.tokenService.findAccessToken("token")).thenReturn(token);
+        when(testObject.tokenService.findAccessToken(any())).thenReturn(token);
 
-        Answer result = testObject.process(createRequest());
+        Answer result = testObject.process(createRequest(), null);
 
         assertEquals(HttpStatus.OK, result.getStatusCode());
         assertTrue(result.getResponse() instanceof IntrospectionResponse);
         assertTrue(((IntrospectionResponse) result.getResponse()).isActive());
     }
 
-    private IntrospectionRequest createRequest() throws RequestException {
-        Request mockReq = mock(Request.class);
-        String basicCredentials = Base64.getEncoder().encodeToString(("client:secret").getBytes());
-        when(mockReq.headers(any())).thenReturn("Basic " + basicCredentials);
-        when(mockReq.queryParams(any())).thenReturn("token");
+    private Request createRequest() {
+        Map<String, String[]> map = new HashMap<>();
+        map.put("token", new String[]{"some-token"});
+        Request request = TestUtils.mockRequestWithQueryParamsMap(map, "any-type");
 
-        return new IntrospectionRequest(mockReq);
+        String basicCredentials = Base64.getEncoder().encodeToString(("client:secret").getBytes());
+        when(request.headers(any())).thenReturn("Basic " + basicCredentials);
+
+        return request;
     }
 }
