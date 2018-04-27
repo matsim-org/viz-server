@@ -40,7 +40,7 @@ class ProjectDAO extends DAO {
         QProject project = QProject.project;
         return database.executeQuery(query -> query.selectFrom(project)
                 .where(project.id.eq(projectId)
-                               .and(project.creator.eq(user)))
+                        .and(project.creator.eq(user)))
                 .leftJoin(project.files).fetchJoin()
                 .fetchOne()
         );
@@ -50,7 +50,7 @@ class ProjectDAO extends DAO {
         QProject project = QProject.project;
         return database.executeQuery(query -> query.selectFrom(project)
                 .where(project.creator.authId.eq(user.getAuthId())
-                               .and(project.id.in(projectIds)))
+                        .and(project.id.in(projectIds)))
                 .leftJoin(project.files).fetchJoin()
                 .fetch()
         );
@@ -59,7 +59,7 @@ class ProjectDAO extends DAO {
     List<Project> findAllForUser(User user) {
         QProject project = QProject.project;
         return database.executeQuery(query -> query.selectFrom(project)
-            .where(project.creator.authId.eq(user.getAuthId()))
+                .where(project.creator.authId.eq(user.getAuthId()))
                 .fetch()
         );
     }

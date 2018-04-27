@@ -9,13 +9,13 @@ import org.matsim.webvis.files.entities.Project;
 import org.matsim.webvis.files.project.ProjectService;
 import spark.Request;
 import spark.Response;
-import spark.Route;
 
 
-public class FileUploadRequestHandler implements Route {
+public class FileUploadRequestHandler extends JsonResponseHandler {
 
     ProjectService projectService = new ProjectService();
     RequestFactory requestFactory = new RequestFactory();
+
 
     private Gson gson = new GsonBuilder().
             registerTypeHierarchyAdapter(Iterable.class, new IterableSerializer())

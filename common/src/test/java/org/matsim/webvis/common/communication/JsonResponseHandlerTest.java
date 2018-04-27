@@ -27,6 +27,7 @@ public class JsonResponseHandlerTest {
 
     private class TestableJsonReponseHandler extends JsonResponseHandler {
 
+
         @Override
         protected Answer process(Request request, Response response) {
             return testAnswer;

@@ -1,5 +1,6 @@
 package org.matsim.webvis.common.communication;
 
+import com.google.gson.Gson;
 import spark.Request;
 import spark.Response;
 
@@ -7,8 +8,14 @@ public abstract class JsonRequestHandler<T> extends JsonResponseHandler {
 
     private Class<T> requestClass;
 
-    protected JsonRequestHandler(Class<T> requestClass) {
+    protected JsonRequestHandler(Class<T> requestClass, Gson parser) {
+
+        super(parser);
         this.requestClass = requestClass;
+    }
+
+    protected JsonRequestHandler(Class<T> requestClass) {
+        this(requestClass, null);
     }
 
     protected abstract Answer process(T body, Request rawRequest);
@@ -30,7 +37,7 @@ public abstract class JsonRequestHandler<T> extends JsonResponseHandler {
 
     private T parseJsonBody(String body) throws RequestException {
         try {
-            return JsonHelper.parseJson(body, requestClass);
+            return JsonHelper.parseJson(body, requestClass, getParser());
         } catch (Throwable e) {
             throw new RequestException(RequestError.INVALID_REQUEST, "could not parse json-request");
         }

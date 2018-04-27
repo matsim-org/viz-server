@@ -35,7 +35,7 @@ public class FileDownloadRequestHandler implements Route {
             body = JsonHelper.parseJson(request.body(), FileRequest.class);
         } catch (RuntimeException e) {
             return JsonHelper.createJsonResponse(Answer.badRequest(RequestError.INVALID_REQUEST,
-                                                                   "error while parsing message body"), response);
+                    "error while parsing message body"), response);
         }
         Subject subject = Subject.getSubject(request);
 

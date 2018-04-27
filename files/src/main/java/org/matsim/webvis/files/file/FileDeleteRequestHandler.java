@@ -5,6 +5,7 @@ import org.matsim.webvis.common.communication.Answer;
 import org.matsim.webvis.common.communication.RequestError;
 import org.matsim.webvis.common.service.CodedException;
 import org.matsim.webvis.files.communication.AuthenticatedJsonRequestHandler;
+import org.matsim.webvis.files.communication.GsonFactory;
 import org.matsim.webvis.files.communication.Subject;
 import org.matsim.webvis.files.entities.Project;
 import org.matsim.webvis.files.project.ProjectService;
@@ -14,7 +15,7 @@ public class FileDeleteRequestHandler extends AuthenticatedJsonRequestHandler<Fi
     ProjectService projectService = new ProjectService();
 
     public FileDeleteRequestHandler() {
-        super(FileRequest.class);
+        super(FileRequest.class, GsonFactory.createParserWithExclusionStrategy());
     }
 
     @Override
