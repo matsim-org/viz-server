@@ -167,8 +167,8 @@ public class ProjectServiceTest {
         List<Project> result = testObject.findAllProjectsForUser(user);
 
         assertEquals(2, result.size());
-        assertEquals(firstProject.getName(), result.get(0).getName());
-        assertEquals(secondProject.getName(), result.get(1).getName());
+        assertTrue(result.stream().anyMatch(e -> e.getName().equals(firstProject.getName())));
+        assertTrue(result.stream().anyMatch(e -> e.getName().equals(secondProject.getName())));
     }
 
     @Test
