@@ -9,7 +9,7 @@ public abstract class JsonResponseHandler implements Route {
 
     private Gson parser;
 
-    JsonResponseHandler(Gson parser) {
+    protected JsonResponseHandler(Gson parser) {
         this.parser = parser;
     }
 
