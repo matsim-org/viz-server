@@ -1,9 +1,10 @@
 package org.matsim.webvis.files.file;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import org.matsim.webvis.common.communication.*;
+import org.matsim.webvis.common.communication.Answer;
+import org.matsim.webvis.common.communication.JsonResponseHandler;
+import org.matsim.webvis.common.communication.RequestException;
 import org.matsim.webvis.common.service.Error;
+import org.matsim.webvis.files.communication.GsonFactory;
 import org.matsim.webvis.files.communication.Subject;
 import org.matsim.webvis.files.entities.Project;
 import org.matsim.webvis.files.project.ProjectService;
@@ -16,12 +17,9 @@ public class FileUploadRequestHandler extends JsonResponseHandler {
     ProjectService projectService = new ProjectService();
     RequestFactory requestFactory = new RequestFactory();
 
-
-    private Gson gson = new GsonBuilder().
-            registerTypeHierarchyAdapter(Iterable.class, new IterableSerializer())
-            .registerTypeAdapterFactory(new EntityAdapterFactory())
-            .setExclusionStrategies(new FileEntryExclusionStrategy())
-            .create();
+    public FileUploadRequestHandler() {
+        super(GsonFactory.createParserWithExclusionStrategy());
+    }
 
     protected Answer process(Request request, Response response) {
 
@@ -47,12 +45,6 @@ public class FileUploadRequestHandler extends JsonResponseHandler {
         } catch (Exception e) {
             return Answer.internalError(Error.UNSPECIFIED_ERROR, "Error during file upload. Try again.");
         }
-    }
-
-    @Override
-    public Object handle(Request request, Response response) {
-        Answer answer = process(request, response);
-        return JsonHelper.createJsonResponse(answer, response, gson);
     }
 
     class RequestFactory {
