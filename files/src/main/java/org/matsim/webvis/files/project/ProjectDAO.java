@@ -52,6 +52,7 @@ class ProjectDAO extends DAO {
                 .where(project.creator.authId.eq(user.getAuthId())
                         .and(project.id.in(projectIds)))
                 .leftJoin(project.files).fetchJoin()
+                .distinct()
                 .fetch()
         );
     }
@@ -60,6 +61,7 @@ class ProjectDAO extends DAO {
         QProject project = QProject.project;
         return database.executeQuery(query -> query.selectFrom(project)
                 .where(project.creator.authId.eq(user.getAuthId()))
+                .distinct()
                 .fetch()
         );
     }

@@ -136,6 +136,26 @@ public class ProjectServiceTest {
     }
 
     @Test
+    public void findProjectsForUser_severalProjectsPresent_listOfDistinctProjects() throws Exception {
+
+        Project project1 = persistProjectWithCreator("first");
+        project1 = addFileEntry(project1);
+        project1 = addFileEntry(project1);
+
+        Project project2 = testObject.createNewProject("second", project1.getCreator().getId());
+        project2 = addFileEntry(project2);
+        project2 = addFileEntry(project2);
+
+        List<String> ids = new ArrayList<>();
+        ids.add(project1.getId());
+        ids.add(project2.getId());
+
+        List<Project> result = testObject.findProjectsForUser(ids, project1.getCreator());
+
+        assertEquals(2, result.size());
+    }
+
+    @Test
     public void findAllProjectsForUser_listOfProjects() throws Exception {
 
         User user = new User();
@@ -247,6 +267,7 @@ public class ProjectServiceTest {
 
     private Project persistProjectWithCreator(String name) {
         User user = new User();
+        user.setAuthId("some-auth-id");
         try {
             userDAO.persist(user);
         } catch (Exception e) {
