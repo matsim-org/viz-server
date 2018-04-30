@@ -7,11 +7,6 @@
         <description>
             Persistence Unit for the file server of matsim-webvis
         </description>
-
-        <class>org.matsim.webvis.files.org.matsim.webvis.auth.entities.User</class>
-        <class>org.matsim.webvis.files.org.matsim.webvis.auth.entities.Project</class>
-        <class>org.matsim.webvis.files.org.matsim.webvis.auth.entities.FileEntry</class>
-
         <properties>
             <!-- Using a H2 in memory Database for now -->
 

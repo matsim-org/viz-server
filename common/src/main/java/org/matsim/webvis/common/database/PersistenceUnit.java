@@ -82,6 +82,7 @@ public class PersistenceUnit {
             result = query.apply(queryFactory);
         } catch (Exception e) {
             logger.error(e);
+            e.printStackTrace();
         } finally {
             em.close();
         }

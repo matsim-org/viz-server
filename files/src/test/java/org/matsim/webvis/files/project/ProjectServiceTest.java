@@ -5,16 +5,16 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
+import org.matsim.webvis.common.service.CodedException;
 import org.matsim.webvis.files.config.Configuration;
-import org.matsim.webvis.files.entities.FileEntry;
-import org.matsim.webvis.files.entities.Project;
-import org.matsim.webvis.files.entities.User;
+import org.matsim.webvis.files.entities.*;
 import org.matsim.webvis.files.user.UserDAO;
 import org.matsim.webvis.files.util.TestUtils;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -263,6 +263,29 @@ public class ProjectServiceTest {
         assertEquals(0, updated.getFiles().size());
         assertEquals(0, projectDAO.find(updated.getId()).getFiles().size());
         verify(repository).removeFile(any());
+    }
+
+    @Test
+    public void addVisualization() throws CodedException {
+        Project project = persistProjectWithCreator("test");
+        project = addFileEntry(project);
+        VisualizationInput input = new VisualizationInput();
+        input.setKey("network");
+        input.setFileEntry(project.getFiles().iterator().next());
+
+        Visualization viz = new Visualization();
+        viz.setBackendService(URI.create("http://bla.com"));
+        viz.addInput(input);
+
+        VisualizationParameter parameter = new VisualizationParameter();
+        parameter.setKey("some");
+        parameter.setValue("value");
+        viz.addParameter(parameter);
+        viz.setName("some name");
+
+        Project persisted = testObject.addVisualization(project.getId(), viz, project.getCreator());
+
+        assertEquals(1, persisted.getVisualizations().size());
     }
 
     private Project persistProjectWithCreator(String name) {

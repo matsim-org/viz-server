@@ -30,18 +30,20 @@ class ProjectDAO extends DAO {
     Project find(String projectId) {
 
         QProject project = QProject.project;
+        QFileEntry fileEntry = QFileEntry.fileEntry;
+        QVisualization visualization = QVisualization.visualization;
+
         return database.executeQuery(query -> query.selectFrom(project)
                 .where(project.id.eq(projectId))
-                .leftJoin(project.files).fetchJoin()
+                .leftJoin(project.files, fileEntry).fetchJoin()
+                .leftJoin(project.visualizations, visualization).fetchJoin()
                 .fetchOne());
     }
 
-    Project find(String projectId, User user) {
+    Project findFlat(String projectId) {
         QProject project = QProject.project;
         return database.executeQuery(query -> query.selectFrom(project)
-                .where(project.id.eq(projectId)
-                        .and(project.creator.eq(user)))
-                .leftJoin(project.files).fetchJoin()
+                .where(project.id.eq(projectId))
                 .fetchOne()
         );
     }

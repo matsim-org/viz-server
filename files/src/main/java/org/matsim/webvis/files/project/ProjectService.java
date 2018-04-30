@@ -8,6 +8,7 @@ import org.matsim.webvis.common.service.Error;
 import org.matsim.webvis.files.entities.FileEntry;
 import org.matsim.webvis.files.entities.Project;
 import org.matsim.webvis.files.entities.User;
+import org.matsim.webvis.files.entities.Visualization;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -54,6 +55,10 @@ public class ProjectService {
         return projectDAO.findAllForUser(user);
     }
 
+    private static boolean isCreator(Project project, User user) {
+        return project.getCreator().getId().equals(user.getId());
+    }
+
     public Project addFilesToProject(List<FileItem> items, Project project) throws Exception {
 
         ProjectRepository repository = repositoryFactory.getRepository(project);
@@ -91,6 +96,15 @@ public class ProjectService {
         return projectDAO.persist(project);
     }
 
+    Project findWithRelations(String projectId, User subject) throws CodedException {
+        Project project = projectDAO.find(projectId);
+
+        if (project == null) throw new CodedException(Error.RESOURCE_NOT_FOUND, "project not found");
+        if (!isCreator(project, subject)) throw new CodedException(Error.FORBIDDEN, "User is not allowed");
+
+        return project;
+    }
+
     public void removeProject(Project project) throws IOException {
 
         //delete all associated files
@@ -103,5 +117,13 @@ public class ProjectService {
 
     private boolean mayUserAddFiles(Project project, String userId) {
         return project.getCreator().getId().equals(userId);
+    }
+
+    public Project addVisualization(String projectId, Visualization viz, User subject) throws CodedException {
+
+        Project project = findWithRelations(projectId, subject);
+
+        project.addVisualization(viz);
+        return projectDAO.persist(project);
     }
 }
