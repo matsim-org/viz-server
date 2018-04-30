@@ -1,10 +1,7 @@
-package org.matsim.webvis.files.communication;
+package org.matsim.webvis.common.communication;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import org.matsim.webvis.common.communication.Answer;
-import org.matsim.webvis.common.communication.EntityAdapterFactory;
-import org.matsim.webvis.common.communication.IterableSerializer;
 import spark.Response;
 
 public class JsonHelper {
@@ -14,23 +11,26 @@ public class JsonHelper {
             registerTypeAdapterFactory(new EntityAdapterFactory()).create();
 
     public static <T> T parseJson(String json, Class<T> parseTo) {
-        return parseJson(json, parseTo, gson);
+        return parseJson(json, parseTo, null);
     }
 
-    private static <T> T parseJson(String json, Class<T> parseTo, Gson gson) {
-        T result = gson.fromJson(json, parseTo);
+    static <T> T parseJson(String json, Class<T> parseTo, Gson parser) {
+
+        if (parser == null) parser = gson;
+        T result = parser.fromJson(json, parseTo);
         if (result == null) throw new IllegalArgumentException("no json-body present");
         return result;
     }
 
     public static Object createJsonResponse(Answer answer, Response response) {
-        return createJsonResponse(answer, response, gson);
+        return createJsonResponse(answer, response, null);
     }
 
-    public static Object createJsonResponse(Answer answer, Response response, Gson gson) {
+    public static Object createJsonResponse(Answer answer, Response response, Gson parser) {
+        if (parser == null) parser = gson;
         response.status(answer.getStatusCode());
         response.type(ContentType.APPLICATION_JSON);
-        response.body(gson.toJson(answer.getResponse()));
+        response.body(parser.toJson(answer.getResponse()));
         return response.body();
     }
 }

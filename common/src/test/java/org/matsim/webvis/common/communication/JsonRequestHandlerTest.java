@@ -1,25 +1,22 @@
-package org.matsim.webvis.files.communication;
+package org.matsim.webvis.common.communication;
 
-import org.apache.http.HttpStatus;
 import org.junit.Before;
 import org.junit.Test;
-import org.matsim.webvis.common.communication.Answer;
-import org.matsim.webvis.common.communication.ErrorResponse;
 import spark.Request;
+import spark.Response;
 
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class AuthenticatedJsonRequestHandlerTest {
+public class JsonRequestHandlerTest {
 
-    private TestableAuthenticatedJsonRequestHandler testObject;
+    private TestableJsonRequestHandler testObject;
 
     @Before
     public void setUp() {
-        testObject = new TestableAuthenticatedJsonRequestHandler();
+        testObject = new TestableJsonRequestHandler(TestRequest.class);
     }
 
     @Test
@@ -29,9 +26,9 @@ public class AuthenticatedJsonRequestHandlerTest {
         when(request.body()).thenReturn("invalidJson");
         when(request.contentType()).thenReturn(ContentType.APPLICATION_JSON);
 
-        Answer answer = testObject.process(request, null);
+        Answer answer = testObject.process(request, mock(Response.class));
 
-        assertEquals(HttpStatus.SC_BAD_REQUEST, answer.getStatusCode());
+        assertEquals(HttpStatus.BAD_REQUEST, answer.getStatusCode());
         assertTrue(answer.getResponse() instanceof ErrorResponse);
     }
 
@@ -42,9 +39,9 @@ public class AuthenticatedJsonRequestHandlerTest {
         when(request.body()).thenReturn("{\"someProperty\": \"some-value\"}");
         when(request.contentType()).thenReturn("invalid-content-type");
 
-        Answer answer = testObject.process(request, null);
+        Answer answer = testObject.process(request, mock(Response.class));
 
-        assertEquals(HttpStatus.SC_BAD_REQUEST, answer.getStatusCode());
+        assertEquals(HttpStatus.BAD_REQUEST, answer.getStatusCode());
         assertTrue(answer.getResponse() instanceof ErrorResponse);
     }
 
@@ -54,30 +51,29 @@ public class AuthenticatedJsonRequestHandlerTest {
         Request request = mock(Request.class);
         when(request.body()).thenReturn("{\"someProperty\": \"some-value\"}");
         when(request.contentType()).thenReturn(ContentType.APPLICATION_JSON);
-        when(request.attribute(anyString())).thenReturn(new AuthenticationResult());
 
-        Answer answer = testObject.process(request, null);
+        Answer answer = testObject.process(request, mock(Response.class));
 
-        assertEquals(HttpStatus.SC_OK, answer.getStatusCode());
+        assertEquals(HttpStatus.OK, answer.getStatusCode());
         assertTrue(testObject.processWasCalled);
     }
-
 
     private class TestRequest {
 
         String someProperty = "";
     }
 
-    private class TestableAuthenticatedJsonRequestHandler extends AuthenticatedJsonRequestHandler<TestRequest> {
+    private class TestableJsonRequestHandler extends JsonRequestHandler<TestRequest> {
 
         boolean processWasCalled = false;
 
-        TestableAuthenticatedJsonRequestHandler() {
-            super(TestRequest.class);
+        TestableJsonRequestHandler(Class<TestRequest> requestClass) {
+            super(requestClass);
         }
 
+
         @Override
-        protected Answer process(TestRequest body, Subject subject) {
+        protected Answer process(TestRequest body, Request rawRequest) {
             processWasCalled = true;
             return Answer.ok("some answer");
         }

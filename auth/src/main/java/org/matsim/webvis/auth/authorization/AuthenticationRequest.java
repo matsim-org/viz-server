@@ -3,6 +3,7 @@ package org.matsim.webvis.auth.authorization;
 import lombok.Getter;
 import org.matsim.webvis.common.communication.RequestError;
 import org.matsim.webvis.common.communication.RequestException;
+import org.matsim.webvis.common.communication.RequestWithParams;
 import spark.QueryParamsMap;
 
 import java.net.URI;
@@ -10,7 +11,7 @@ import java.net.URISyntaxException;
 import java.util.Arrays;
 
 @Getter
-public class AuthenticationRequest {
+public class AuthenticationRequest extends RequestWithParams {
 
     public static final String RESPONSE_TYPE = "response_type";
     public static final String REDIRECT_URI = "redirect_uri";
@@ -94,19 +95,6 @@ public class AuthenticationRequest {
             throw new RequestException(RequestError.INVALID_REQUEST, "response types may be: 'code', 'id_token', 'id_token token'.");
 
         return responseTypes;
-    }
-
-    private String extractOptionalValue(String key, QueryParamsMap params) {
-        if (params.hasKey(key)) {
-            return params.get(key).value();
-        }
-        return "";
-    }
-
-    private String extractRequiredValue(String key, QueryParamsMap params) throws RequestException {
-        if (!params.hasKey(key))
-            throw new RequestException(RequestError.INVALID_REQUEST, key + " missing");
-        return params.get(key).value();
     }
 
     public enum Type {AuthCode, AccessAndIdToken, IdToken}

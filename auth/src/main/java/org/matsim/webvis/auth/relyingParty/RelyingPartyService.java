@@ -9,6 +9,8 @@ import org.matsim.webvis.auth.entities.RedirectUri;
 import org.matsim.webvis.auth.entities.RelyingParty;
 import org.matsim.webvis.auth.entities.RelyingPartyCredential;
 import org.matsim.webvis.auth.helper.SecretHelper;
+import org.matsim.webvis.common.service.CodedException;
+import org.matsim.webvis.common.service.Error;
 
 import java.net.URI;
 
@@ -62,12 +64,12 @@ public class RelyingPartyService {
         return persisted;
     }
 
-    public RelyingParty validateRelyingParty(String clientId, String secret) throws Exception {
+    public RelyingParty validateRelyingParty(String clientId, String secret) throws CodedException {
         RelyingPartyCredential credential = relyingPartyDAO.findCredential(clientId);
 
-        if (credential == null) throw new Exception("client not found");
+        if (credential == null) throw new CodedException(Error.FORBIDDEN, "invalid client id or secret");
         if (!SecretHelper.match(credential.getSecret(), secret))
-            throw new Exception("secret did not match");
+            throw new CodedException(Error.FORBIDDEN, "invalid client id or secret");
 
         return credential.getRelyingParty();
     }

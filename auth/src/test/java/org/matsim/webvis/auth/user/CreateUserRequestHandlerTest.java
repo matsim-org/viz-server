@@ -35,7 +35,7 @@ public class CreateUserRequestHandlerTest {
         testObject.userService = service;
         when(service.createUser(any(), any(), any())).thenThrow(new Exception(errorMessage));
 
-        Answer answer = testObject.process(request);
+        Answer answer = testObject.process(request, null);
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, answer.getStatusCode());
         assertTrue(answer.getResponse() instanceof ErrorResponse);
@@ -55,7 +55,7 @@ public class CreateUserRequestHandlerTest {
         testObject.userService = service;
         when(service.createUser(any(), any(), any())).thenReturn(user);
 
-        Answer answer = testObject.process(request);
+        Answer answer = testObject.process(request, null);
 
         assertEquals(HttpStatus.OK, answer.getStatusCode());
         assertEquals(user, answer.getResponse());

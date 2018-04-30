@@ -2,6 +2,7 @@ package org.matsim.webvis.files.project;
 
 import org.matsim.webvis.common.communication.Answer;
 import org.matsim.webvis.files.communication.AuthenticatedJsonRequestHandler;
+import org.matsim.webvis.files.communication.GsonFactory;
 import org.matsim.webvis.files.communication.Subject;
 import org.matsim.webvis.files.entities.Project;
 
@@ -12,7 +13,7 @@ public class ProjectRequestHandler extends AuthenticatedJsonRequestHandler<Proje
     ProjectService projectService = new ProjectService();
 
     public ProjectRequestHandler() {
-        super(ProjectRequest.class);
+        super(ProjectRequest.class, GsonFactory.createParserWithExclusionStrategy());
     }
 
     @Override

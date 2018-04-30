@@ -9,6 +9,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.matsim.webvis.auth.entities.*;
 import org.matsim.webvis.auth.user.UserService;
+import org.matsim.webvis.common.service.CodedException;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -20,7 +21,6 @@ import java.util.UUID;
 public class TokenService {
 
     private static final Logger logger = LogManager.getLogger();
-    private static final String dummySecret = "dummy secret";
     static Algorithm algorithm;
     TokenDAO tokenDAO = new TokenDAO();
     private UserService userService = new UserService();
@@ -30,7 +30,7 @@ public class TokenService {
         algorithm = Algorithm.RSA512(provider.getPublicKey(), provider.getPrivateKey());
     }
 
-    AccessToken grantWithPassword(String username, char[] password) throws Exception {
+    AccessToken grantWithPassword(String username, char[] password) throws CodedException {
         User user = userService.authenticate(username, password);
         Token refreshToken = createRefreshToken(user);
 
