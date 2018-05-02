@@ -63,12 +63,4 @@ class VisualizationService {
         if (type == null) throw new CodedException(Error.RESOURCE_NOT_FOUND, "could not find supplied type");
         return type;
     }
-
-    private void throwIfNotAllowed(String vizId, String projectId, User user) throws CodedException {
-        Project project = projectService.find(projectId, user);
-        if (project.getVisualizations().stream().noneMatch(v -> v.getId().equals(vizId)))
-            throw new CodedException(Error.FORBIDDEN, "wrong project id or user not allowed or visualization not part of project");
-
-    }
-
 }

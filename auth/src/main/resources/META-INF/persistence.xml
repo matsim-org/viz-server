@@ -7,18 +7,6 @@
         <description>
             Persistence Unit for the authorization server of matsim-webvis
         </description>
-
-        <class>org.matsim.webvis.auth.entities.User</class>
-        <class>org.matsim.webvis.auth.entities.UserCredentials</class>
-        <class>org.matsim.webvis.auth.entities.AccessToken</class>
-        <class>org.matsim.webvis.auth.entities.IdToken</class>
-        <class>org.matsim.webvis.auth.entities.RefreshToken</class>
-        <class>org.matsim.webvis.auth.entities.AuthorizationCode</class>
-        <class>org.matsim.webvis.auth.entities.Client</class>
-        <class>org.matsim.webvis.auth.entities.RelyingParty</class>
-        <class>org.matsim.webvis.auth.entities.RelyingPartyCredential</class>
-        <class>org.matsim.webvis.auth.entities.RedirectUri</class>
-
         <properties>
             <!-- Using a H2 in memory Database for now -->
 
