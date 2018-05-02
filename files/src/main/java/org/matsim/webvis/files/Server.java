@@ -5,6 +5,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.matsim.webvis.files.config.CommandLineArgs;
 import org.matsim.webvis.files.config.Configuration;
+import org.matsim.webvis.files.entities.VisualizationType;
+import org.matsim.webvis.files.visualization.VisualizationDAO;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -32,6 +34,7 @@ public class Server {
         }
 
         startSparkServer(commandLineArgs);
+        insertVizTypes();
     }
 
     private static void loadConfigFile(CommandLineArgs args) throws FileNotFoundException {
@@ -77,5 +80,11 @@ public class Server {
         } else {
             logger.error("Exception which caused failure was: ", e);
         }
+    }
+
+    private static void insertVizTypes() {
+        VisualizationDAO dao = new VisualizationDAO();
+        VisualizationType type = new VisualizationType("raw-files", false, null);
+        dao.persistType(type);
     }
 }

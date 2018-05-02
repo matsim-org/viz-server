@@ -6,7 +6,6 @@ import lombok.Setter;
 import org.matsim.webvis.common.database.AbstractEntity;
 
 import javax.persistence.*;
-import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,8 +15,8 @@ import java.util.Map;
 @Entity
 public class Visualization extends AbstractEntity {
 
-    private String name;
-    private URI backendService;
+    @OneToOne(optional = false)
+    private VisualizationType type;
 
     @ManyToOne(optional = false)
     private Project project;
@@ -25,7 +24,7 @@ public class Visualization extends AbstractEntity {
     @OneToMany(mappedBy = "visualization", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private Map<String, VisualizationInput> inputFiles = new HashMap<>();
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private Map<String, VisualizationParameter> parameters = new HashMap<>();
 
     public void addInput(VisualizationInput input) {

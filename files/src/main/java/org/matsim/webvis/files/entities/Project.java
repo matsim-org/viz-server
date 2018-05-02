@@ -32,9 +32,13 @@ public class Project extends AbstractEntity {
         entries.forEach(this::addFileEntry);
     }
 
-    public void addFileEntry(FileEntry entry) {
+    private void addFileEntry(FileEntry entry) {
         files.add(entry);
         entry.setProject(this);
+    }
+
+    public FileEntry getFileEntry(String id) {
+        return files.stream().filter(f -> f.getId().equals(id)).findAny().orElse(null);
     }
 
     public void removeFileEntry(FileEntry entry) {
@@ -45,5 +49,9 @@ public class Project extends AbstractEntity {
     public void addVisualization(Visualization visualization) {
         visualizations.add(visualization);
         visualization.setProject(this);
+    }
+
+    public Visualization getVisualization(String id) {
+        return visualizations.stream().filter(v -> v.getId().equals(id)).findFirst().orElse(null);
     }
 }

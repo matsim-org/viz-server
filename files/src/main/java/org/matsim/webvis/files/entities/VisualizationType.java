@@ -6,21 +6,19 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.matsim.webvis.common.database.AbstractEntity;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.ManyToOne;
+import java.net.URI;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class VisualizationInput extends AbstractEntity {
+public class VisualizationType extends AbstractEntity {
 
+    @Column(unique = true)
     private String key;
-
-    @ManyToOne
-    private FileEntry fileEntry;
-
-    @ManyToOne(optional = false)
-    private Visualization visualization;
+    private boolean requiresProcessing;
+    private URI endpoint;
 }
