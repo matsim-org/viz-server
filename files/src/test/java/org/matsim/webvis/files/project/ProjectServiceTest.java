@@ -8,14 +8,15 @@ import org.junit.Test;
 import org.matsim.webvis.common.service.CodedException;
 import org.matsim.webvis.common.service.Error;
 import org.matsim.webvis.files.config.Configuration;
-import org.matsim.webvis.files.entities.*;
+import org.matsim.webvis.files.entities.FileEntry;
+import org.matsim.webvis.files.entities.Project;
+import org.matsim.webvis.files.entities.User;
 import org.matsim.webvis.files.user.UserDAO;
 import org.matsim.webvis.files.util.TestUtils;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,8 +48,8 @@ public class ProjectServiceTest {
         TestUtils.removeFileTree(Paths.get(Configuration.getInstance().getUploadedFilePath()));
     }
 
-    @Test(expected = Exception.class)
-    public void createNewProject_projectNameExists_exception() {
+    @Test(expected = CodedException.class)
+    public void createNewProject_projectNameExists_exception() throws CodedException {
 
         String name = "name";
         User user = userDAO.persist(new User());
@@ -59,8 +60,8 @@ public class ProjectServiceTest {
         fail("inserting already present project should throw exception");
     }
 
-    @Test(expected = Exception.class)
-    public void createNewProject_userDoesNotExist_exception() {
+    @Test(expected = CodedException.class)
+    public void createNewProject_userDoesNotExist_exception() throws CodedException {
 
         String name = "name";
         User user = new User();
@@ -71,7 +72,7 @@ public class ProjectServiceTest {
     }
 
     @Test
-    public void createNewProject_allGood_newProject() {
+    public void createNewProject_allGood_newProject() throws CodedException {
 
         String name = "name";
         User user = userDAO.persist(new User());
@@ -98,7 +99,7 @@ public class ProjectServiceTest {
     @Test
     public void findFlat_userNotAllowed_exception() {
 
-        Project project = persistProjectWithCreator("project-name");
+        Project project = TestUtils.persistProjectWithCreator("project-name");
         try {
             testObject.findFlat(project.getId(), new User());
         } catch (CodedException e) {
@@ -111,7 +112,7 @@ public class ProjectServiceTest {
     @Test
     public void findFlat_allGood_project() throws CodedException {
 
-        Project project = persistProjectWithCreator("project-name");
+        Project project = TestUtils.persistProjectWithCreator("project-name");
 
         Project result = testObject.findFlat(project.getId(), project.getCreator());
 
@@ -134,7 +135,7 @@ public class ProjectServiceTest {
     @Test
     public void find_userNotAllowed_exception() {
 
-        Project project = persistProjectWithCreator("project-name");
+        Project project = TestUtils.persistProjectWithCreator("project-name");
         try {
             testObject.find(project.getId(), new User());
         } catch (CodedException e) {
@@ -147,7 +148,7 @@ public class ProjectServiceTest {
     @Test
     public void find_allGood_project() throws CodedException {
 
-        Project project = persistProjectWithCreator("project-name");
+        Project project = TestUtils.persistProjectWithCreator("project-name");
 
         Project result = testObject.find(project.getId(), project.getCreator());
 
@@ -162,7 +163,7 @@ public class ProjectServiceTest {
     @Test
     public void find_noProjectForUser_emptyList() {
 
-        Project project = persistProjectWithCreator("project-name");
+        Project project = TestUtils.persistProjectWithCreator("project-name");
         List<String> ids = new ArrayList<>();
         ids.add(project.getId());
         User otherUser = userDAO.persist(new User());
@@ -175,7 +176,7 @@ public class ProjectServiceTest {
     @Test
     public void find_listOfOneProject() {
 
-        Project first = persistProjectWithCreator("first-project");
+        Project first = TestUtils.persistProjectWithCreator("first-project");
         List<String> projectIds = new ArrayList<>();
         projectIds.add(first.getId());
 
@@ -186,9 +187,9 @@ public class ProjectServiceTest {
     }
 
     @Test
-    public void find_severalProjectsPresent_listOfProjects() {
+    public void find_severalProjectsPresent_listOfProjects() throws CodedException {
 
-        Project project1 = persistProjectWithCreator("first");
+        Project project1 = TestUtils.persistProjectWithCreator("first");
         project1 = addFileEntry(project1);
         project1 = addFileEntry(project1);
 
@@ -209,7 +210,7 @@ public class ProjectServiceTest {
     }
 
     @Test
-    public void findAllProjectsForUser_listOfProjects() {
+    public void findAllProjectsForUser_listOfProjects() throws CodedException {
 
         User user = new User();
         user.setAuthId("auth-id");
@@ -231,7 +232,7 @@ public class ProjectServiceTest {
         final String contentType = "content-type";
         final long size = 1L;
 
-        Project project = persistProjectWithCreator("test");
+        Project project = TestUtils.persistProjectWithCreator("test");
         List<FileItem> items = new ArrayList<>();
         items.add(TestUtils.mockFileItem(filename, contentType, size));
 
@@ -273,7 +274,7 @@ public class ProjectServiceTest {
     @Test
     public void getFileStream_inputStream() throws Exception {
 
-        Project project = persistProjectWithCreator("test");
+        Project project = TestUtils.persistProjectWithCreator("test");
         project = addFileEntry(project);
         FileEntry entry = project.getFiles().iterator().next();
 
@@ -289,7 +290,7 @@ public class ProjectServiceTest {
     @Test
     public void removeFile_fileNotPartOfProject_exception() {
 
-        Project project = persistProjectWithCreator("test");
+        Project project = TestUtils.persistProjectWithCreator("test");
         try {
             testObject.removeFileFromProject(project.getId(), "test", project.getCreator());
         } catch (CodedException e) {
@@ -301,7 +302,7 @@ public class ProjectServiceTest {
 
     @Test
     public void removeFile_fileIsRemoved() throws Exception {
-        Project project = persistProjectWithCreator("test");
+        Project project = TestUtils.persistProjectWithCreator("test");
         project = addFileEntry(project);
         FileEntry entry = project.getFiles().iterator().next();
 
@@ -315,45 +316,6 @@ public class ProjectServiceTest {
         assertEquals(0, updated.getFiles().size());
         assertEquals(0, projectDAO.find(updated.getId()).getFiles().size());
         verify(repository).removeFile(any());
-    }
-
-    @Test
-    public void addVisualization() throws CodedException {
-        Project project = persistProjectWithCreator("test");
-        project = addFileEntry(project);
-        VisualizationInput input = new VisualizationInput();
-        input.setKey("network");
-        input.setFileEntry(project.getFiles().iterator().next());
-
-        Visualization viz = new Visualization();
-        viz.setBackendService(URI.create("http://bla.com"));
-        viz.addInput(input);
-
-        VisualizationParameter parameter = new VisualizationParameter();
-        parameter.setKey("some");
-        parameter.setValue("value");
-        viz.addParameter(parameter);
-        viz.setName("some name");
-
-        Project persisted = testObject.addVisualization(project.getId(), viz, project.getCreator());
-
-        assertEquals(1, persisted.getVisualizations().size());
-    }
-
-    private Project persistProjectWithCreator(String name) {
-        User user = new User();
-        user.setAuthId("some-auth-id");
-        try {
-            userDAO.persist(user);
-        } catch (Exception e) {
-            fail("failed to persist user.");
-        }
-        try {
-            return testObject.createNewProject(name, user);
-        } catch (Exception e) {
-            fail("Failed to create project with name: " + name);
-        }
-        return null;
     }
 
     private Project addFileEntry(Project project) {

@@ -5,21 +5,9 @@ import org.matsim.webvis.files.entities.*;
 import javax.persistence.EntityManager;
 import java.util.List;
 
-class ProjectDAO extends DAO {
+public class ProjectDAO extends DAO {
 
-    /*Project persistNewProject(Project project, String userId) throws Exception {
-
-        EntityManager manager = database.getEntityManager();
-        project.setCreator(manager.find(User.class, userId));
-
-        try {
-            return database.persistOne(project, manager);
-        } catch (PersistenceException e) {
-            throw new Exception("could not update project");
-        }
-    }*/
-
-    Project persist(Project project) {
+    public Project persist(Project project) {
         if (project.getId() == null) {
             return database.persistOne(project);
         }
@@ -83,7 +71,7 @@ class ProjectDAO extends DAO {
 
     }
 
-    void removeAllProjects() {
+    public void removeAllProjects() {
 
         EntityManager em = database.getEntityManager();
         List<Project> projects = database.executeQuery(query -> query.selectFrom(QProject.project).fetch(), em);

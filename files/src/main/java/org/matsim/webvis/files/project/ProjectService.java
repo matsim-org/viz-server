@@ -8,7 +8,6 @@ import org.matsim.webvis.common.service.Error;
 import org.matsim.webvis.files.entities.FileEntry;
 import org.matsim.webvis.files.entities.Project;
 import org.matsim.webvis.files.entities.User;
-import org.matsim.webvis.files.entities.Visualization;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,12 +30,16 @@ public class ProjectService {
         return project == null;
     }
 
-    Project createNewProject(String projectName, User creator) {
+    public Project createNewProject(String projectName, User creator) throws CodedException {
 
         Project project = new Project();
         project.setName(projectName);
         project.setCreator(creator);
-        return projectDAO.persist(project);
+        try {
+            return projectDAO.persist(project);
+        } catch (Exception e) {
+            throw new CodedException(Error.RESOURCE_EXISTS, "project already exists");
+        }
     }
 
     Project findFlat(String projectId, User creator) throws CodedException {
@@ -98,13 +101,6 @@ public class ProjectService {
             throw new CodedException(Error.UNSPECIFIED_ERROR, "Could not remove file.");
         }
         project.removeFileEntry(optional.get());
-        return projectDAO.persist(project);
-    }
-
-    Project addVisualization(String projectId, Visualization viz, User subject) throws CodedException {
-
-        Project project = find(projectId, subject);
-        project.addVisualization(viz);
         return projectDAO.persist(project);
     }
 }

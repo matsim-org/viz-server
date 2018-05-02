@@ -6,6 +6,7 @@ import org.matsim.webvis.common.communication.Answer;
 import org.matsim.webvis.common.communication.ErrorResponse;
 import org.matsim.webvis.common.communication.HttpStatus;
 import org.matsim.webvis.common.communication.RequestError;
+import org.matsim.webvis.common.service.CodedException;
 import org.matsim.webvis.common.service.Error;
 import org.matsim.webvis.files.communication.Subject;
 import org.matsim.webvis.files.entities.Project;
@@ -42,11 +43,11 @@ public class CreateProjectRequestHandlerTest {
     }
 
     @Test
-    public void process_createNewProjectThrowsException_answerResourceExists() {
+    public void process_createNewProjectThrowsException_answerResourceExists() throws CodedException {
 
         CreateProjectRequest request = new CreateProjectRequest("name");
         testObject.projectService = mock(ProjectService.class);
-        when(testObject.projectService.createNewProject(any(), any())).thenThrow(new RuntimeException("bla"));
+        when(testObject.projectService.createNewProject(any(), any())).thenThrow(new CodedException("bla", "bla"));
 
         User subject = new User();
         subject.setId("id");
@@ -59,7 +60,7 @@ public class CreateProjectRequestHandlerTest {
     }
 
     @Test
-    public void process_success_project() {
+    public void process_success_project() throws CodedException {
 
         CreateProjectRequest request = new CreateProjectRequest("name");
         testObject.projectService = mock(ProjectService.class);
