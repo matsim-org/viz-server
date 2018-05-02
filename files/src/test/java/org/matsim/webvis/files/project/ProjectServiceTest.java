@@ -6,6 +6,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.matsim.webvis.common.service.CodedException;
+import org.matsim.webvis.common.service.Error;
 import org.matsim.webvis.files.config.Configuration;
 import org.matsim.webvis.files.entities.*;
 import org.matsim.webvis.files.user.UserDAO;
@@ -47,102 +48,151 @@ public class ProjectServiceTest {
     }
 
     @Test(expected = Exception.class)
-    public void createNewProject_projectNameExists_exception() throws Exception {
+    public void createNewProject_projectNameExists_exception() {
 
         String name = "name";
         User user = userDAO.persist(new User());
 
-        testObject.createNewProject(name, user.getId());
-        testObject.createNewProject(name, user.getId());
+        testObject.createNewProject(name, user);
+        testObject.createNewProject(name, user);
 
         fail("inserting already present project should throw exception");
     }
 
     @Test(expected = Exception.class)
-    public void createNewProject_userDoesNotExist_exception() throws Exception {
+    public void createNewProject_userDoesNotExist_exception() {
 
         String name = "name";
-        String userId = "some-id";
+        User user = new User();
 
-        testObject.createNewProject(name, userId);
+        testObject.createNewProject(name, user);
 
         fail("inserting project with invalid creator should throw an exception");
     }
 
     @Test
-    public void createNewProject_allGood_newProject() throws Exception {
+    public void createNewProject_allGood_newProject() {
 
         String name = "name";
         User user = userDAO.persist(new User());
 
-        Project project = testObject.createNewProject(name, user.getId());
+        Project project = testObject.createNewProject(name, user);
 
         assertNotNull(project);
         assertEquals(name, project.getName());
         assertEquals(user.getId(), project.getCreator().getId());
     }
 
-    @Test(expected = Exception.class)
-    public void getProjectIfAllowed_noProject_exception() throws Exception {
+    @Test
+    public void findFlat_noProject_exception() {
 
-        User user = new User();
-        userDAO.persist(user);
-
-        testObject.findProjectIfAllowed("invalid-project-id", user.getId());
-
+        try {
+            testObject.findFlat("some-id", null);
+        } catch (CodedException e) {
+            assertEquals(Error.RESOURCE_NOT_FOUND, e.getErrorCode());
+            return;
+        }
         fail("invalid project id should throw exception");
     }
 
-    @Test(expected = Exception.class)
-    public void getProjectIfAllowed_userNotAuthorized_exception() throws Exception {
+    @Test
+    public void findFlat_userNotAllowed_exception() {
 
-        User user = new User();
-        userDAO.persist(user);
-        Project project = new Project();
-        projectDAO.persistNewProject(project, user.getId());
-
-        testObject.findProjectIfAllowed(project.getId(), "some-other-user");
-
-        fail("Should throw exception if user is not creator of the project");
+        Project project = persistProjectWithCreator("project-name");
+        try {
+            testObject.findFlat(project.getId(), new User());
+        } catch (CodedException e) {
+            assertEquals(Error.FORBIDDEN, e.getErrorCode());
+            return;
+        }
+        fail("invalid user should throw exception");
     }
 
     @Test
-    public void getProjectIfAllowed_project() throws Exception {
+    public void findFlat_allGood_project() throws CodedException {
 
-        User user = new User();
-        user = userDAO.persist(user);
-        Project project = testObject.createNewProject("name", user.getId());
+        Project project = persistProjectWithCreator("project-name");
 
-        Project result = testObject.findProjectIfAllowed(project.getId(), user.getId());
+        Project result = testObject.findFlat(project.getId(), project.getCreator());
 
         assertEquals(project.getId(), result.getId());
-        assertEquals(user.getId(), result.getCreator().getId());
+        assertEquals(project.getCreator().getId(), result.getCreator().getId());
     }
 
     @Test
-    public void findProjectsForUser_listOfProjects() throws Exception {
-        User user = new User();
-        user.setAuthId("auth-id");
-        user = userDAO.persist(user);
-        Project firstProject = testObject.createNewProject("first", user.getId());
-        testObject.createNewProject("second", user.getId());
-        List<String> projectIds = new ArrayList<>();
-        projectIds.add(firstProject.getId());
+    public void find_noProject_exception() {
 
-        List<Project> result = testObject.findProjectsForUser(projectIds, user);
+        try {
+            testObject.find("some-id", null);
+        } catch (CodedException e) {
+            assertEquals(Error.RESOURCE_NOT_FOUND, e.getErrorCode());
+            return;
+        }
+        fail("invalid project id should throw exception");
+    }
+
+    @Test
+    public void find_userNotAllowed_exception() {
+
+        Project project = persistProjectWithCreator("project-name");
+        try {
+            testObject.find(project.getId(), new User());
+        } catch (CodedException e) {
+            assertEquals(Error.FORBIDDEN, e.getErrorCode());
+            return;
+        }
+        fail("invalid user should throw exception");
+    }
+
+    @Test
+    public void find_allGood_project() throws CodedException {
+
+        Project project = persistProjectWithCreator("project-name");
+
+        Project result = testObject.find(project.getId(), project.getCreator());
+
+        assertEquals(project.getId(), result.getId());
+        assertEquals(project.getCreator().getId(), result.getCreator().getId());
+
+        //testing the size of relational collections as proof of loaded object graph
+        assertEquals(0, result.getFiles().size());
+        assertEquals(0, result.getVisualizations().size());
+    }
+
+    @Test
+    public void find_noProjectForUser_emptyList() {
+
+        Project project = persistProjectWithCreator("project-name");
+        List<String> ids = new ArrayList<>();
+        ids.add(project.getId());
+        User otherUser = userDAO.persist(new User());
+
+        List<Project> result = testObject.find(ids, otherUser);
+
+        assertEquals(0, result.size());
+    }
+
+    @Test
+    public void find_listOfOneProject() {
+
+        Project first = persistProjectWithCreator("first-project");
+        List<String> projectIds = new ArrayList<>();
+        projectIds.add(first.getId());
+
+        List<Project> result = testObject.find(projectIds, first.getCreator());
 
         assertEquals(1, result.size());
-        assertEquals(firstProject.getId(), result.get(0).getId());
+        assertEquals(first.getId(), result.get(0).getId());
     }
 
     @Test
-    public void findProjectsForUser_severalProjectsPresent_listOfDistinctProjects() throws Exception {
+    public void find_severalProjectsPresent_listOfProjects() {
 
         Project project1 = persistProjectWithCreator("first");
         project1 = addFileEntry(project1);
         project1 = addFileEntry(project1);
 
-        Project project2 = testObject.createNewProject("second", project1.getCreator().getId());
+        Project project2 = testObject.createNewProject("second", project1.getCreator());
         project2 = addFileEntry(project2);
         project2 = addFileEntry(project2);
 
@@ -150,21 +200,24 @@ public class ProjectServiceTest {
         ids.add(project1.getId());
         ids.add(project2.getId());
 
-        List<Project> result = testObject.findProjectsForUser(ids, project1.getCreator());
+        List<Project> result = testObject.find(ids, project1.getCreator());
 
         assertEquals(2, result.size());
+        Project firstResult = result.get(0);
+        assertEquals(2, firstResult.getFiles().size());
+        assertEquals(0, firstResult.getVisualizations().size());
     }
 
     @Test
-    public void findAllProjectsForUser_listOfProjects() throws Exception {
+    public void findAllProjectsForUser_listOfProjects() {
 
         User user = new User();
         user.setAuthId("auth-id");
         user = userDAO.persist(user);
-        Project firstProject = testObject.createNewProject("first", user.getId());
-        Project secondProject = testObject.createNewProject("second", user.getId());
+        Project firstProject = testObject.createNewProject("first", user);
+        Project secondProject = testObject.createNewProject("second", user);
 
-        List<Project> result = testObject.findAllProjectsForUser(user);
+        List<Project> result = testObject.findAllForUserFlat(user);
 
         assertEquals(2, result.size());
         assertTrue(result.stream().anyMatch(e -> e.getName().equals(firstProject.getName())));
@@ -233,18 +286,17 @@ public class ProjectServiceTest {
         assertNotNull(result);
     }
 
-    @Test(expected = Exception.class)
-    public void removeFile_fileNotPartOfProject_exception() throws Exception {
+    @Test
+    public void removeFile_fileNotPartOfProject_exception() {
 
         Project project = persistProjectWithCreator("test");
-        testObject.removeFileFromProject(project.getId(), "test", project.getCreator());
-    }
-
-    @Test(expected = Exception.class)
-    public void removeFile_userNotProjectOwner_exception() throws Exception {
-
-        Project project = persistProjectWithCreator("test");
-        testObject.removeFileFromProject(project.getId(), "test", new User());
+        try {
+            testObject.removeFileFromProject(project.getId(), "test", project.getCreator());
+        } catch (CodedException e) {
+            assertEquals(Error.RESOURCE_NOT_FOUND, e.getErrorCode());
+            return;
+        }
+        fail("should have thrown exception");
     }
 
     @Test
@@ -297,7 +349,7 @@ public class ProjectServiceTest {
             fail("failed to persist user.");
         }
         try {
-            return testObject.createNewProject(name, user.getId());
+            return testObject.createNewProject(name, user);
         } catch (Exception e) {
             fail("Failed to create project with name: " + name);
         }

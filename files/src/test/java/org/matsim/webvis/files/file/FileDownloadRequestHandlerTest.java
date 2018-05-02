@@ -108,7 +108,7 @@ public class FileDownloadRequestHandlerTest {
         Project project = new Project();
         project.setId(body.getProjectId());
         project.getFiles().add(entry);
-        when(testObject.projectService.findProjectIfAllowed(any(), any())).thenReturn(project);
+        when(testObject.projectService.find(any(), any())).thenReturn(project);
 
         User subject = new User();
         Subject.userService = mock(UserService.class);

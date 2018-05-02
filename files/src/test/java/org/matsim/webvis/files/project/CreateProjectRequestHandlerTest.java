@@ -42,11 +42,11 @@ public class CreateProjectRequestHandlerTest {
     }
 
     @Test
-    public void process_createNewProjectThrowsException_answerResourceExists() throws Exception {
+    public void process_createNewProjectThrowsException_answerResourceExists() {
 
         CreateProjectRequest request = new CreateProjectRequest("name");
         testObject.projectService = mock(ProjectService.class);
-        when(testObject.projectService.createNewProject(any(), any())).thenThrow(new Exception());
+        when(testObject.projectService.createNewProject(any(), any())).thenThrow(new RuntimeException("bla"));
 
         User subject = new User();
         subject.setId("id");
@@ -59,7 +59,7 @@ public class CreateProjectRequestHandlerTest {
     }
 
     @Test
-    public void process_success_project() throws Exception {
+    public void process_success_project() {
 
         CreateProjectRequest request = new CreateProjectRequest("name");
         testObject.projectService = mock(ProjectService.class);

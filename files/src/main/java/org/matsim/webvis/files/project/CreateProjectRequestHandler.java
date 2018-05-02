@@ -25,7 +25,7 @@ public class CreateProjectRequestHandler extends AuthenticatedJsonRequestHandler
 
         Project result;
         try {
-            result = projectService.createNewProject(body.getName(), subject.getUser().getId());
+            result = projectService.createNewProject(body.getName(), subject.getUser());
         } catch (Exception e) {
             return Answer.conflict(Error.RESOURCE_EXISTS, "project exists or user does not exist");
         }

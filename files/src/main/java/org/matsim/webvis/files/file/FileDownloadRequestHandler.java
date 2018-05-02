@@ -41,7 +41,7 @@ public class FileDownloadRequestHandler implements Route {
 
         try {
 
-            Project project = projectService.findProjectIfAllowed(body.getProjectId(), subject.getUser().getId());
+            Project project = projectService.find(body.getProjectId(), subject.getUser());
             @SuppressWarnings("ConstantConditions")
             FileEntry fileEntry = project.getFiles().stream().filter(file -> file.getId().equals(body.getFileId())).findFirst().get();
             response.type(fileEntry.getContentType());

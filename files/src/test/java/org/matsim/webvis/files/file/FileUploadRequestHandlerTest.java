@@ -56,7 +56,7 @@ public class FileUploadRequestHandlerTest {
         when(testObject.requestFactory.createRequest(any())).thenReturn(upload);
 
         testObject.projectService = mock(ProjectService.class);
-        when(testObject.projectService.findProjectIfAllowed(any(), any())).thenThrow(new CodedException("code", "message"));
+        when(testObject.projectService.find(any(), any())).thenThrow(new CodedException("code", "message"));
 
         Answer answer = testObject.process(request, response);
 
@@ -75,7 +75,7 @@ public class FileUploadRequestHandlerTest {
         when(testObject.requestFactory.createRequest(any())).thenReturn(upload);
 
         testObject.projectService = mock(ProjectService.class);
-        when(testObject.projectService.findProjectIfAllowed(any(), any())).thenReturn(new Project());
+        when(testObject.projectService.find(any(), any())).thenReturn(new Project());
         when(testObject.projectService.addFilesToProject(any(), any())).thenThrow(new Exception());
 
         Answer answer = testObject.process(request, response);
@@ -94,7 +94,7 @@ public class FileUploadRequestHandlerTest {
         when(testObject.requestFactory.createRequest(any())).thenReturn(upload);
 
         testObject.projectService = mock(ProjectService.class);
-        when(testObject.projectService.findProjectIfAllowed(any(), any())).thenReturn(new Project());
+        when(testObject.projectService.find(any(), any())).thenReturn(new Project());
         when(testObject.projectService.addFilesToProject(any(), any())).thenReturn(new Project());
 
         Answer answer = testObject.process(request, response);

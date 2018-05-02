@@ -10,6 +10,7 @@ import javax.persistence.Persistence;
 import java.util.List;
 import java.util.function.Function;
 
+@SuppressWarnings("WeakerAccess")
 public class PersistenceUnit {
 
     private static final Logger logger = LogManager.getLogger();
@@ -75,18 +76,23 @@ public class PersistenceUnit {
     }
 
     public <T> T executeQuery(Function<JPAQueryFactory, T> query) {
+
         EntityManager em = getEntityManager();
-        JPAQueryFactory queryFactory = createQuery(em);
-        T result = null;
+        T result;
         try {
-            result = query.apply(queryFactory);
+            result = executeQuery(query, em);
         } catch (Exception e) {
-            logger.error(e);
             e.printStackTrace();
+            throw new RuntimeException(e);
         } finally {
             em.close();
         }
         return result;
+    }
+
+    public <T> T executeQuery(Function<JPAQueryFactory, T> query, EntityManager em) {
+        JPAQueryFactory queryFactory = createQuery(em);
+        return query.apply(queryFactory);
     }
 
     public <T> T executeTransactionalQuery(Function<JPAQueryFactory, T> query) {

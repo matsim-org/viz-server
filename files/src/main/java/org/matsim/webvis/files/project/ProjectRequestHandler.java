@@ -20,10 +20,11 @@ public class ProjectRequestHandler extends AuthenticatedJsonRequestHandler<Proje
     protected Answer process(ProjectRequest body, Subject subject) {
 
         List<Project> result;
+
         if (body.projectIds != null && body.projectIds.size() > 0) {
-            result = projectService.findProjectsForUser(body.projectIds, subject.getUser());
+            result = projectService.find(body.projectIds, subject.getUser());
         } else {
-            result = projectService.findAllProjectsForUser(subject.getUser());
+            result = projectService.findAllForUserFlat(subject.getUser());
         }
         return Answer.ok(result);
 

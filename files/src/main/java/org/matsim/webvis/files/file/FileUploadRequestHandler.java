@@ -31,7 +31,7 @@ public class FileUploadRequestHandler extends JsonResponseHandler {
         try {
             uploadRequest = requestFactory.createRequest(request);
             uploadRequest.parseUpload(request);
-            project = projectService.findProjectIfAllowed(uploadRequest.getProjectId(), subject.getUser().getId());
+            project = projectService.find(uploadRequest.getProjectId(), subject.getUser());
         } catch (RequestException e) {
             return Answer.badRequest(e.getErrorCode(), e.getMessage());
         } catch (Exception e) {

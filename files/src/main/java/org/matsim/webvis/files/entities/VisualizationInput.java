@@ -14,7 +14,7 @@ public class VisualizationInput extends AbstractEntity {
 
     private String key;
 
-    @ManyToOne(optional = false)
+    @ManyToOne
     private FileEntry fileEntry;
 
     @ManyToOne(optional = false)

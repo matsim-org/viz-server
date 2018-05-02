@@ -22,42 +22,47 @@ public class ProjectService {
     ProjectDAO projectDAO = new ProjectDAO();
     RepositoryFactory repositoryFactory = new RepositoryFactory();
 
-    Project createNewProject(String projectName, String userId) throws Exception {
+    private static void validate(Project project, User creator) throws CodedException {
+        if (isNull(project)) throw new CodedException(Error.RESOURCE_NOT_FOUND, "could not find project");
+        if (!isCreator(project, creator)) throw new CodedException(Error.FORBIDDEN, "user is not creator");
+    }
+
+    private static boolean isNull(Project project) {
+        return project == null;
+    }
+
+    Project createNewProject(String projectName, User creator) {
 
         Project project = new Project();
         project.setName(projectName);
-        return projectDAO.persistNewProject(project, userId);
-
+        project.setCreator(creator);
+        return projectDAO.persist(project);
     }
 
-    public Project findProjectIfAllowed(String projectId, String userId) throws CodedException {
-        Project project = projectDAO.find(projectId);
-
-        if (project == null) {
-            throw new CodedException(Error.RESOURCE_NOT_FOUND, "Project was not found.");
-        }
-        if (!mayUserAddFiles(project, userId)) {
-            throw new CodedException(Error.FORBIDDEN, "User is not allowed to add files to this project");
-        }
-        return project;
+    Project findFlat(String projectId, User creator) throws CodedException {
+        Project result = projectDAO.findFlat(projectId);
+        validate(result, creator);
+        return result;
     }
 
-    List<Project> findProjectsForUser(List<String> projectIds, User user) {
-        return projectDAO.findForUser(projectIds, user);
+    public Project find(String projectId, User creator) throws CodedException {
+        Project result = projectDAO.find(projectId);
+        validate(result, creator);
+        return result;
     }
 
-    List<Project> findAllProjectsForUser(User user) {
-        return projectDAO.findAllForUser(user);
-    }
-
-    public List<Project> getAllProjectsForUser(User user) {
-
-        return projectDAO.findAllForUser(user);
+    List<Project> find(List<String> projectIds, User user) {
+        return projectDAO.find(projectIds, user);
     }
 
     private static boolean isCreator(Project project, User user) {
         return project.getCreator().getId().equals(user.getId());
     }
+
+    List<Project> findAllForUserFlat(User user) {
+        return projectDAO.findAllForUserFlat(user);
+    }
+
 
     public Project addFilesToProject(List<FileItem> items, Project project) throws Exception {
 
@@ -78,9 +83,9 @@ public class ProjectService {
         return repository.getFileStream(file);
     }
 
-    public Project removeFileFromProject(String projectId, String fileId, User subject) throws CodedException {
+    public Project removeFileFromProject(String projectId, String fileId, User creator) throws CodedException {
 
-        Project project = findProjectIfAllowed(projectId, subject.getId());
+        Project project = find(projectId, creator);
         Optional<FileEntry> optional = project.getFiles().stream().filter(e -> e.getId().equals(fileId)).findFirst();
         if (!optional.isPresent()) {
             throw new CodedException(Error.RESOURCE_NOT_FOUND, "fileId not present");
@@ -96,33 +101,9 @@ public class ProjectService {
         return projectDAO.persist(project);
     }
 
-    Project findWithRelations(String projectId, User subject) throws CodedException {
-        Project project = projectDAO.find(projectId);
+    Project addVisualization(String projectId, Visualization viz, User subject) throws CodedException {
 
-        if (project == null) throw new CodedException(Error.RESOURCE_NOT_FOUND, "project not found");
-        if (!isCreator(project, subject)) throw new CodedException(Error.FORBIDDEN, "User is not allowed");
-
-        return project;
-    }
-
-    public void removeProject(Project project) throws IOException {
-
-        //delete all associated files
-        DiskProjectRepository repository = new DiskProjectRepository(project);
-        repository.removeAllFiles();
-
-        //delete project from db
-        projectDAO.remove(project);
-    }
-
-    private boolean mayUserAddFiles(Project project, String userId) {
-        return project.getCreator().getId().equals(userId);
-    }
-
-    public Project addVisualization(String projectId, Visualization viz, User subject) throws CodedException {
-
-        Project project = findWithRelations(projectId, subject);
-
+        Project project = find(projectId, subject);
         project.addVisualization(viz);
         return projectDAO.persist(project);
     }
