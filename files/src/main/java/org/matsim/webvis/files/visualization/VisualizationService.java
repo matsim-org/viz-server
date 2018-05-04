@@ -6,8 +6,9 @@ import org.matsim.webvis.files.entities.*;
 import org.matsim.webvis.files.project.ProjectService;
 
 import javax.persistence.PersistenceException;
+import java.util.List;
 
-class VisualizationService {
+public class VisualizationService {
 
     private ProjectService projectService = new ProjectService();
     private VisualizationDAO visualizationDAO = new VisualizationDAO();
@@ -28,9 +29,9 @@ class VisualizationService {
     }
 
     private static void validate(Visualization viz, User user) throws CodedException {
-        if (viz == null) throw new CodedException(Error.RESOURCE_NOT_FOUND, "could not find visualization");
+        if (viz == null) throw new CodedException(Error.RESOURCE_NOT_FOUND, "Could not find visualization");
         if (!viz.getProject().getCreator().getId().equals(user.getId()))
-            throw new CodedException(Error.FORBIDDEN, "user is not allowed to access visualization");
+            throw new CodedException(Error.FORBIDDEN, "User is not allowed to access visualization");
     }
 
     Visualization createVisualizationFromRequest(CreateVisualizationRequest request, User user) throws CodedException {
@@ -39,7 +40,7 @@ class VisualizationService {
         VisualizationType type = findOrThrow(request.getTypeKey());
 
         Visualization viz = new Visualization();
-        viz.setProject(project);
+        project.addVisualization(viz);
         viz.setType(type);
         addInput(viz, project, request);
         addParameters(viz, request);
@@ -47,7 +48,7 @@ class VisualizationService {
         try {
             return visualizationDAO.persist(viz);
         } catch (PersistenceException e) {
-            throw new CodedException(Error.RESOURCE_EXISTS, "visualization already exists");
+            throw new CodedException(Error.RESOURCE_EXISTS, "Visualization already exists");
         }
     }
 
@@ -58,9 +59,18 @@ class VisualizationService {
         return viz;
     }
 
+    public VisualizationType persistType(VisualizationType type) {
+        return visualizationDAO.persistType(type);
+    }
+
+    List<VisualizationType> findAllTypes() {
+        return visualizationDAO.findAllTypes();
+    }
+
     private VisualizationType findOrThrow(String visualizationType) throws CodedException {
         VisualizationType type = visualizationDAO.findType(visualizationType);
-        if (type == null) throw new CodedException(Error.RESOURCE_NOT_FOUND, "could not find supplied type");
+        if (type == null)
+            throw new CodedException(Error.RESOURCE_NOT_FOUND, "Could not find visualization type: " + visualizationType);
         return type;
     }
 }

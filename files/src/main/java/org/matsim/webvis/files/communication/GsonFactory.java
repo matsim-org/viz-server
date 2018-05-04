@@ -4,12 +4,16 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.matsim.webvis.common.communication.EntityAdapterFactory;
 import org.matsim.webvis.common.communication.IterableSerializer;
+import org.matsim.webvis.common.communication.MapSerializer;
 import org.matsim.webvis.files.file.FileEntryExclusionStrategy;
+
+import java.util.Map;
 
 public class GsonFactory {
     public static Gson createParserWithExclusionStrategy() {
         return new GsonBuilder().
                 registerTypeHierarchyAdapter(Iterable.class, new IterableSerializer())
+                .registerTypeAdapter(Map.class, new MapSerializer())
                 .registerTypeAdapterFactory(new EntityAdapterFactory())
                 .setExclusionStrategies(new FileEntryExclusionStrategy())
                 .create();

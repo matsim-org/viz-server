@@ -25,7 +25,7 @@ public class VisualizationServiceTest {
 
     @BeforeClass
     public static void setUpFixture() {
-        VisualizationType type = new VisualizationType(typeKey, false, null);
+        VisualizationType type = new VisualizationType(typeKey, false, null, null, null);
         visualizationDAO.persistType(type);
     }
 

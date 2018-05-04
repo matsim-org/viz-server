@@ -5,6 +5,7 @@ import org.matsim.webvis.common.communication.Answer;
 import org.matsim.webvis.common.communication.RequestError;
 import org.matsim.webvis.common.service.CodedException;
 import org.matsim.webvis.files.communication.AuthenticatedJsonRequestHandler;
+import org.matsim.webvis.files.communication.GsonFactory;
 import org.matsim.webvis.files.communication.Subject;
 import org.matsim.webvis.files.entities.Visualization;
 
@@ -13,7 +14,7 @@ public class VisualizationRequestHandler extends AuthenticatedJsonRequestHandler
     VisualizationService visualizationService = new VisualizationService();
 
     public VisualizationRequestHandler() {
-        super(VisualizationRequest.class);
+        super(VisualizationRequest.class, GsonFactory.createParserWithExclusionStrategy());
     }
 
     @Override

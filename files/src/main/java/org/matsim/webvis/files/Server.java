@@ -6,7 +6,7 @@ import org.apache.logging.log4j.Logger;
 import org.matsim.webvis.files.config.CommandLineArgs;
 import org.matsim.webvis.files.config.Configuration;
 import org.matsim.webvis.files.entities.VisualizationType;
-import org.matsim.webvis.files.visualization.VisualizationDAO;
+import org.matsim.webvis.files.visualization.VisualizationService;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -83,8 +83,11 @@ public class Server {
     }
 
     private static void insertVizTypes() {
-        VisualizationDAO dao = new VisualizationDAO();
-        VisualizationType type = new VisualizationType("raw-files", false, null);
-        dao.persistType(type);
+
+        VisualizationService service = new VisualizationService();
+        for (VisualizationType type : Configuration.getInstance().getVizTypes()) {
+            logger.info("Add viz type: " + type.getKey());
+            service.persistType(type);
+        }
     }
 }
