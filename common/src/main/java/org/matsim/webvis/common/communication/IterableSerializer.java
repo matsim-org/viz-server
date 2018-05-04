@@ -8,13 +8,13 @@ import com.google.gson.JsonSerializer;
 import java.lang.reflect.Type;
 
 /**
- * Entity objects have lazy loading Iterables. If they haven't been initialized during org.matsim.webvis.common.database transaction iterating
+ * Entity objects have lazy loading Iterables. If they haven't been initialized during database transaction iterating
  * such a collection would throw a LazyInitializationException. This serializer catches such exceptions during JSON
  * serialization and returns an empty JSONArray if the collection wasn't initialized during the db transaction
  */
-public class IterableSerializer implements JsonSerializer<Iterable> {
+public class IterableSerializer implements JsonSerializer<Iterable<Object>> {
     @Override
-    public JsonElement serialize(Iterable iterable, Type type, JsonSerializationContext jsonSerializationContext) {
+    public JsonElement serialize(Iterable<Object> iterable, Type type, JsonSerializationContext jsonSerializationContext) {
         JsonArray result = new JsonArray();
 
         try {

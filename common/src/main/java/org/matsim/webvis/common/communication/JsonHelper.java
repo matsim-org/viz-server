@@ -4,10 +4,13 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import spark.Response;
 
+import java.util.Map;
+
 public class JsonHelper {
 
     private static Gson gson = new GsonBuilder().
             registerTypeHierarchyAdapter(Iterable.class, new IterableSerializer()).
+            registerTypeHierarchyAdapter(Map.class, new MapSerializer()).
             registerTypeAdapterFactory(new EntityAdapterFactory()).create();
 
     public static <T> T parseJson(String json, Class<T> parseTo) {
@@ -26,7 +29,7 @@ public class JsonHelper {
         return createJsonResponse(answer, response, null);
     }
 
-    public static Object createJsonResponse(Answer answer, Response response, Gson parser) {
+    static Object createJsonResponse(Answer answer, Response response, Gson parser) {
         if (parser == null) parser = gson;
         response.status(answer.getStatusCode());
         response.type(ContentType.APPLICATION_JSON);
