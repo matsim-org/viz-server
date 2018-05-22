@@ -16,6 +16,7 @@ build:
     only:
       - master
       - develop
+      - feature/#17-server-build   
     script: "mvn install -DskipTests --batch-mode"
     artifacts:
       when: on_success
@@ -24,6 +25,8 @@ build:
         - files/target/*.jar
 deploy:
     stage: deploy
+    dependencies: 
+    - build
     script:
     - which ssh-agent
     - eval $(ssh-agent -s)
@@ -34,6 +37,7 @@ deploy:
     - ls -lhaA
     - ls -lhaA auth/
     - ls -lhaA files/
+    - ls -lhaA files/src/
 #    - scp auth/target/auth-server.jar webvis@cnode00.vsp.tu-berlin.de:/home/webvis/matsim-webvis-auth/
 #    - scp files/target/file-server.jar webvis@cnode00.vsp.tu-berlin.de:/home/webvis/matsim-webvis-files/
 #    - ssh webvis@cnode00.vsp.tu-berlin.de 'sudo service webvis-auth start'
