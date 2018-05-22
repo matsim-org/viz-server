@@ -3,12 +3,11 @@ package org.matsim.webvis.auth.user;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.matsim.webvis.auth.config.Configuration;
 import org.matsim.webvis.auth.entities.IdToken;
 import org.matsim.webvis.auth.entities.User;
 import org.matsim.webvis.auth.token.TokenService;
 import org.matsim.webvis.auth.util.TestUtils;
-import org.matsim.webvis.common.service.CodedException;
+import org.matsim.webvis.common.service.UnauthorizedException;
 import spark.Request;
 import spark.Response;
 
@@ -32,7 +31,8 @@ public class LoginUserRequestHandlerTest {
 
     @BeforeClass
     public static void setUpFixture() throws UnsupportedEncodingException, FileNotFoundException {
-        Configuration.loadConfigFile(TestUtils.getTestConfigPath(), true);
+        TestUtils.loadTestConfig();
+        //Configuration.loadConfigFile(TestUtils.getTestConfigPath(), true);
     }
 
     @Before
@@ -91,7 +91,7 @@ public class LoginUserRequestHandlerTest {
         Request req = TestUtils.mockRequestWithQueryParams(map, "");
         Response res = mock(Response.class);
         testObject.userService = mock(UserService.class);
-        when(testObject.userService.authenticate(any(), any())).thenThrow(new CodedException("code", "message"));
+        when(testObject.userService.authenticate(any(), any())).thenThrow(new UnauthorizedException("message"));
 
         Object response = testObject.handle(req, res);
 
