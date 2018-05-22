@@ -2,6 +2,7 @@ package org.matsim.webvis.files.visualization;
 
 import org.matsim.webvis.common.service.CodedException;
 import org.matsim.webvis.common.service.Error;
+import org.matsim.webvis.common.service.ForbiddenException;
 import org.matsim.webvis.files.entities.*;
 import org.matsim.webvis.files.project.ProjectService;
 
@@ -30,7 +31,7 @@ class VisualizationService {
     private static void validate(Visualization viz, User user) throws CodedException {
         if (viz == null) throw new CodedException(Error.RESOURCE_NOT_FOUND, "could not find visualization");
         if (!viz.getProject().getCreator().getId().equals(user.getId()))
-            throw new CodedException(Error.FORBIDDEN, "user is not allowed to access visualization");
+            throw new ForbiddenException("user is not allowed to access visualization");
     }
 
     Visualization createVisualizationFromRequest(CreateVisualizationRequest request, User user) throws CodedException {

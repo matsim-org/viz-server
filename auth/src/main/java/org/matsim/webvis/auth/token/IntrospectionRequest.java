@@ -1,9 +1,8 @@
 package org.matsim.webvis.auth.token;
 
 import lombok.Getter;
-import org.matsim.webvis.common.communication.RequestError;
-import org.matsim.webvis.common.communication.RequestException;
 import org.matsim.webvis.common.communication.RequestWithParams;
+import org.matsim.webvis.common.service.InvalidInputException;
 import spark.Request;
 
 import java.util.Base64;
@@ -15,15 +14,15 @@ class IntrospectionRequest extends RequestWithParams {
     private String rpSecret;
     private String token;
 
-    IntrospectionRequest(Request request) throws RequestException {
+    IntrospectionRequest(Request request) throws InvalidInputException {
 
         parseCredentials(request.headers("Authorization"));
         token = extractRequiredValue(OAuthParameters.TOKEN, request.queryMap());
     }
 
-    private void parseCredentials(String authorization) throws RequestException {
+    private void parseCredentials(String authorization) throws InvalidInputException {
         if (authorization == null) {
-            throw new RequestException(RequestError.INVALID_REQUEST, "request must contain 'Authorization' header");
+            throw new InvalidInputException("request must contain 'Authorization' header");
         }
         String[] args = authorization.split(" ");
 
@@ -39,7 +38,7 @@ class IntrospectionRequest extends RequestWithParams {
             }
         }
         if (!isValidRequest) {
-            throw new RequestException(RequestError.INVALID_REQUEST, "Invalid Basic Authentication request");
+            throw new InvalidInputException("Invalid Basic Authentication request");
         }
     }
 }

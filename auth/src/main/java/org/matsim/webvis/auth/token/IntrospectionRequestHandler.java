@@ -4,8 +4,8 @@ import org.matsim.webvis.auth.entities.AccessToken;
 import org.matsim.webvis.auth.relyingParty.RelyingPartyService;
 import org.matsim.webvis.common.communication.Answer;
 import org.matsim.webvis.common.communication.JsonResponseHandler;
-import org.matsim.webvis.common.communication.RequestException;
 import org.matsim.webvis.common.service.CodedException;
+import org.matsim.webvis.common.service.InvalidInputException;
 import spark.Request;
 import spark.Response;
 
@@ -26,7 +26,7 @@ public class IntrospectionRequestHandler extends JsonResponseHandler {
             AccessToken token = tokenService.findAccessToken(introspection.getToken());
             return Answer.ok(new IntrospectionResponse(token));
 
-        } catch (RequestException e) {
+        } catch (InvalidInputException e) {
             return Answer.badRequest(e.getErrorCode(), e.getMessage());
         } catch (CodedException e) {
             return Answer.internalError(e.getErrorCode(), e.getMessage());

@@ -3,6 +3,8 @@ package org.matsim.webvis.files;
 import com.beust.jcommander.JCommander;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.matsim.webvis.common.communication.StartSpark;
+import org.matsim.webvis.files.communication.AuthenticationHandler;
 import org.matsim.webvis.files.config.CommandLineArgs;
 import org.matsim.webvis.files.config.Configuration;
 import org.matsim.webvis.files.entities.VisualizationType;
@@ -10,6 +12,7 @@ import org.matsim.webvis.files.visualization.VisualizationDAO;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -53,13 +56,24 @@ public class Server {
     }
 
     private static void startSparkServer(CommandLineArgs args) {
-        port(Configuration.getInstance().getPort());
-        initExceptionHandler(Server::handleInitializationFailure);
+        StartSpark.withPort(Configuration.getInstance().getPort());
+        StartSpark.withInitializationExceptionHandler(Server::handleInitializationFailure);
 
         if (!args.isDebug() || !Configuration.getInstance().getTlsKeyStore().isEmpty()) {
-            secure(Configuration.getInstance().getTlsKeyStore(), Configuration.getInstance().getTlsKeyStorePassword(), null, null);
+            StartSpark.withTLS(Configuration.getInstance().getTlsKeyStore(), Configuration.getInstance().getTlsKeyStorePassword(), null, null);
         }
         try {
+            AuthenticationHandler authHandler = AuthenticationHandler.builder()
+                    .setIntrospectionEndpoint(URI.create(Configuration.getInstance().getIntrospectionEndpoint()))
+                    .setRelyingPartyId(Configuration.getInstance().getRelyingPartyId())
+                    .setRelyingPartySecret(Configuration.getInstance().getRelyingPartySecret())
+                    .setTrustStore(Paths.get(Configuration.getInstance().getTlsTrustStore()))
+                    .setTrustStorePassword(Configuration.getInstance().getTlsTrustStorePassword().toCharArray())
+                    .build();
+
+            StartSpark.withAuthHandler(authHandler);
+            StartSpark.withPermissiveAccessControl();
+            StartSpark.withExceptionMapping();
             Routes.initialize();
         } catch (Exception e) {
             handleInitializationFailure(e);
@@ -80,6 +94,8 @@ public class Server {
         } else {
             logger.error("Exception which caused failure was: ", e);
         }
+        logger.error("Exception wich caused failure was: ", e);
+        System.exit(100);
     }
 
     private static void insertVizTypes() {

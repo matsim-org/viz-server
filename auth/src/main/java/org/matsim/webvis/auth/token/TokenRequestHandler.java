@@ -3,6 +3,7 @@ package org.matsim.webvis.auth.token;
 import org.matsim.webvis.auth.entities.AccessToken;
 import org.matsim.webvis.common.communication.*;
 import org.matsim.webvis.common.service.CodedException;
+import org.matsim.webvis.common.service.InvalidInputException;
 import spark.Request;
 import spark.Response;
 
@@ -22,7 +23,7 @@ public class TokenRequestHandler extends JsonResponseHandler {
         TokenRequest tokenRequest;
         try {
             tokenRequest = new TokenRequest(request);
-        } catch (RequestException e) {
+        } catch (InvalidInputException e) {
             return Answer.badRequest(e.getErrorCode(), e.getMessage());
         }
 

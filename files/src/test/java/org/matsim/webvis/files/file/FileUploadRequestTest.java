@@ -4,7 +4,7 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.junit.Test;
-import org.matsim.webvis.common.communication.RequestException;
+import org.matsim.webvis.common.service.InvalidInputException;
 import org.matsim.webvis.files.util.TestUtils;
 import spark.Request;
 
@@ -17,8 +17,8 @@ import static org.mockito.Mockito.when;
 
 public class FileUploadRequestTest {
 
-    @Test(expected = RequestException.class)
-    public void constructor_noMultipart_exception() throws RequestException {
+    @Test(expected = InvalidInputException.class)
+    public void constructor_noMultipart_exception() throws InvalidInputException {
 
         Request request = TestUtils.mockRequestWithRawRequest("WRONG", "content-type");
 
@@ -26,7 +26,7 @@ public class FileUploadRequestTest {
     }
 
     @Test
-    public void constructor_isMultipart() throws RequestException {
+    public void constructor_isMultipart() throws InvalidInputException {
 
         Request request = TestUtils.mockRequestWithRawRequest("POST", "multipart/form-data");
 
@@ -35,8 +35,8 @@ public class FileUploadRequestTest {
         assertNotNull(upload);
     }
 
-    @Test(expected = RequestException.class)
-    public void parseUpload_noProjectId_exception() throws RequestException, FileUploadException {
+    @Test(expected = InvalidInputException.class)
+    public void parseUpload_noProjectId_exception() throws FileUploadException, InvalidInputException {
         Request request = TestUtils.mockMultipartRequest();
         FileUploadRequest upload = new FileUploadRequest(request);
         upload.upload = mock(ServletFileUpload.class);
@@ -51,8 +51,8 @@ public class FileUploadRequestTest {
         fail("missing projectId should throw exception");
     }
 
-    @Test(expected = RequestException.class)
-    public void parseUpload_notEnoughParts_exception() throws RequestException, FileUploadException {
+    @Test(expected = InvalidInputException.class)
+    public void parseUpload_notEnoughParts_exception() throws FileUploadException, InvalidInputException {
         Request request = TestUtils.mockMultipartRequest();
         FileUploadRequest upload = new FileUploadRequest(request);
         upload.upload = mock(ServletFileUpload.class);
@@ -66,8 +66,8 @@ public class FileUploadRequestTest {
         fail("to few arguments should throw exception");
     }
 
-    @Test(expected = RequestException.class)
-    public void parseUpload_noFile_exception() throws RequestException, FileUploadException {
+    @Test(expected = InvalidInputException.class)
+    public void parseUpload_noFile_exception() throws FileUploadException, InvalidInputException {
         Request request = TestUtils.mockMultipartRequest();
         FileUploadRequest upload = new FileUploadRequest(request);
         upload.upload = mock(ServletFileUpload.class);
@@ -83,7 +83,7 @@ public class FileUploadRequestTest {
     }
 
     @Test
-    public void parseUpload_projectIdAndFile_fileItems() throws RequestException, FileUploadException {
+    public void parseUpload_projectIdAndFile_fileItems() throws FileUploadException, InvalidInputException {
 
         Request request = TestUtils.mockMultipartRequest();
         FileUploadRequest upload = new FileUploadRequest(request);

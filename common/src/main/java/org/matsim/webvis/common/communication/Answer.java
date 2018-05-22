@@ -28,6 +28,10 @@ public class Answer<T> {
         return Answer.error(HttpStatus.FORBIDDEN, Error.FORBIDDEN, message);
     }
 
+    public static Answer notFound() {
+        return Answer.error(HttpStatus.NOT_FOUND, Error.RESOURCE_NOT_FOUND, "No resource with requested URL");
+    }
+
     public static Answer unauthorized(String errorCode, String message) {
         return Answer.error(HttpStatus.UNAUTHORIZED, errorCode, message);
     }

@@ -17,8 +17,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.matsim.webvis.common.communication.ErrorResponse;
 import org.matsim.webvis.common.communication.RequestError;
-import org.matsim.webvis.common.communication.RequestException;
 import org.matsim.webvis.common.service.Error;
+import org.matsim.webvis.common.service.InvalidInputException;
 import spark.Filter;
 import spark.Request;
 import spark.Response;
@@ -83,7 +83,7 @@ public class AuthenticationHandler implements Filter {
         try {
             AuthenticatedRequest authenticatedRequest = new AuthenticatedRequest(request);
             authResponse = introspectToken(authenticatedRequest.getToken());
-        } catch (RequestException e) {
+        } catch (InvalidInputException e) {
             haltWithUnauthorizedError(e.getErrorCode(), e.getMessage(), response);
             return;
         } catch (RuntimeException e) {

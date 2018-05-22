@@ -2,7 +2,7 @@ package org.matsim.webvis.auth.authorization;
 
 import org.junit.Test;
 import org.matsim.webvis.auth.util.TestUtils;
-import org.matsim.webvis.common.communication.RequestException;
+import org.matsim.webvis.common.service.InvalidInputException;
 import spark.QueryParamsMap;
 
 import java.util.Map;
@@ -13,7 +13,7 @@ import static org.junit.Assert.fail;
 public class AuthenticationRequestTest {
 
     @Test(expected = URIException.class)
-    public void constructor_noRedirectUri_URIException() throws URIException, RequestException {
+    public void constructor_noRedirectUri_URIException() throws URIException, InvalidInputException {
 
         Map<String, String[]> map = AuthorizationTestUtils.createDefaultParameterMap();
         map.remove(AuthenticationRequest.REDIRECT_URI);
@@ -24,7 +24,7 @@ public class AuthenticationRequestTest {
     }
 
     @Test(expected = URIException.class)
-    public void constructor_invalidRedirectUri_URIException() throws URIException, RequestException {
+    public void constructor_invalidRedirectUri_URIException() throws URIException, InvalidInputException {
 
         QueryParamsMap params = AuthorizationTestUtils.mockQueryParams(AuthenticationRequest.REDIRECT_URI, "invalid uri");
         new AuthenticationRequest(params);
@@ -32,57 +32,57 @@ public class AuthenticationRequestTest {
         fail("invalid redirect_uri should throw uriexception");
     }
 
-    @Test(expected = RequestException.class)
-    public void constructor_noSope_RequestException() throws URIException, RequestException {
+    @Test(expected = InvalidInputException.class)
+    public void constructor_noSope_InvalidInputException() throws URIException, InvalidInputException {
 
         Map<String, String[]> map = AuthorizationTestUtils.createDefaultParameterMap();
         map.remove(AuthenticationRequest.SCOPE);
 
         new AuthenticationRequest(TestUtils.mockQueryParamsMap(map));
 
-        fail("missing scope should throw RequestException");
+        fail("missing scope should throw InvalidInputException");
     }
 
-    @Test(expected = RequestException.class)
-    public void constructor_noOpenIdInScope_RequestException() throws URIException, RequestException {
+    @Test(expected = InvalidInputException.class)
+    public void constructor_noOpenIdInScope_InvalidInputException() throws URIException, InvalidInputException {
 
         QueryParamsMap params = AuthorizationTestUtils.mockQueryParams(AuthenticationRequest.SCOPE, "some-scope");
         new AuthenticationRequest(params);
 
-        fail("scope with no openid should throw RequestException");
+        fail("scope with no openid should throw InvalidInputException");
     }
 
-    @Test(expected = RequestException.class)
-    public void constructor_noResponseType_RequestException() throws URIException, RequestException {
+    @Test(expected = InvalidInputException.class)
+    public void constructor_noResponseType_InvalidInputException() throws URIException, InvalidInputException {
 
         Map<String, String[]> map = AuthorizationTestUtils.createDefaultParameterMap();
         map.remove(AuthenticationRequest.RESPONSE_TYPE);
 
         new AuthenticationRequest(TestUtils.mockQueryParamsMap(map));
 
-        fail("missing response_type should throw RequestException");
+        fail("missing response_type should throw InvalidInputException");
     }
 
-    @Test(expected = RequestException.class)
-    public void constructor_invalidResponseType_RequestException() throws URIException, RequestException {
+    @Test(expected = InvalidInputException.class)
+    public void constructor_invalidResponseType_InvalidInputException() throws URIException, InvalidInputException {
 
         QueryParamsMap params = AuthorizationTestUtils.mockQueryParams(AuthenticationRequest.RESPONSE_TYPE, "invalid response type");
         new AuthenticationRequest(params);
 
-        fail("invalid response type throw RequestException");
+        fail("invalid response type throw InvalidInputException");
     }
 
-    @Test(expected = RequestException.class)
-    public void constructor_partiallyInvalidResponseType_RequestException() throws URIException, RequestException {
+    @Test(expected = InvalidInputException.class)
+    public void constructor_partiallyInvalidResponseType_InvalidInputException() throws URIException, InvalidInputException {
 
         QueryParamsMap params = AuthorizationTestUtils.mockQueryParams(AuthenticationRequest.RESPONSE_TYPE, "id_token invalid_response_type");
         new AuthenticationRequest(params);
 
-        fail("partially invalid response type throw RequestException");
+        fail("partially invalid response type throw InvalidInputException");
     }
 
     @Test
-    public void constructor_responseTypeIdToken_Object() throws URIException, RequestException {
+    public void constructor_responseTypeIdToken_Object() throws URIException, InvalidInputException {
 
         Map<String, String[]> map = AuthorizationTestUtils.createDefaultParameterMap();
         map.put(AuthenticationRequest.RESPONSE_TYPE, new String[]{"id_token"});
@@ -96,8 +96,8 @@ public class AuthenticationRequestTest {
         assertEquals(params.get(AuthenticationRequest.RESPONSE_TYPE).value(), request.getResponseType()[0]);
     }
 
-    @Test(expected = RequestException.class)
-    public void constructor_responseTypeIdTokenNoNonce_RequestException() throws URIException, RequestException {
+    @Test(expected = InvalidInputException.class)
+    public void constructor_responseTypeIdTokenNoNonce_InvalidInputException() throws URIException, InvalidInputException {
 
         Map<String, String[]> map = AuthorizationTestUtils.createDefaultParameterMap();
         map.put(AuthenticationRequest.RESPONSE_TYPE, new String[]{"id_token"});
@@ -105,11 +105,11 @@ public class AuthenticationRequestTest {
 
         new AuthenticationRequest(params);
 
-        fail("missing nonce for response_type 'id_token' should throw RequestException");
+        fail("missing nonce for response_type 'id_token' should throw InvalidInputException");
     }
 
     @Test
-    public void constructor_responseTypeIdTokenToken_Object() throws URIException, RequestException {
+    public void constructor_responseTypeIdTokenToken_Object() throws URIException, InvalidInputException {
 
         Map<String, String[]> map = AuthorizationTestUtils.createDefaultParameterMap();
         map.put(AuthenticationRequest.RESPONSE_TYPE, new String[]{"id_token token"});
@@ -124,8 +124,8 @@ public class AuthenticationRequestTest {
         assertEquals("token", request.getResponseType()[1]);
     }
 
-    @Test(expected = RequestException.class)
-    public void constructor_responseTypeIdTokenTokenNoNonce_RequestException() throws URIException, RequestException {
+    @Test(expected = InvalidInputException.class)
+    public void constructor_responseTypeIdTokenTokenNoNonce_InvalidInputException() throws URIException, InvalidInputException {
 
         Map<String, String[]> map = AuthorizationTestUtils.createDefaultParameterMap();
         map.put(AuthenticationRequest.RESPONSE_TYPE, new String[]{"id_token org.matsim.webvis.auth.token"});
@@ -133,22 +133,22 @@ public class AuthenticationRequestTest {
 
         new AuthenticationRequest(params);
 
-        fail("missing nonce for response_type 'id_token' should throw RequestException");
+        fail("missing nonce for response_type 'id_token' should throw InvalidInputException");
     }
 
-    @Test(expected = RequestException.class)
-    public void constructor_noClientId_RequestException() throws URIException, RequestException {
+    @Test(expected = InvalidInputException.class)
+    public void constructor_noClientId_InvalidInputException() throws URIException, InvalidInputException {
 
         Map<String, String[]> map = AuthorizationTestUtils.createDefaultParameterMap();
         map.remove(AuthenticationRequest.CLIENT_ID);
 
         new AuthenticationRequest(TestUtils.mockQueryParamsMap(map));
 
-        fail("missing client_id should throw RequestException");
+        fail("missing client_id should throw InvalidInputException");
     }
 
     @Test
-    public void constructor_requiredParameters_object() throws URIException, RequestException {
+    public void constructor_requiredParameters_object() throws URIException, InvalidInputException {
 
         QueryParamsMap params = AuthorizationTestUtils.mockQueryParams("", "");
 
@@ -166,7 +166,7 @@ public class AuthenticationRequestTest {
     }
 
     @Test
-    public void constructor_statePresent_object() throws URIException, RequestException {
+    public void constructor_statePresent_object() throws URIException, InvalidInputException {
 
         final String state = "some-state-value";
         Map<String, String[]> map = AuthorizationTestUtils.createDefaultParameterMap();

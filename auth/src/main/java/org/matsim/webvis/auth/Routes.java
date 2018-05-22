@@ -25,30 +25,13 @@ public class Routes {
 
     static void initialize() throws Exception {
 
-        // this allows cross origin requests for all sites
-        before("/*", (request, response) -> {
-
-            String origin = request.headers("Origin");
-            response.header("Access-Control-Allow-Origin", (origin != null) ? origin : "*");
-            response.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-            response.header("Access-Control-Allow-Credentials", "true");
-            response.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-            response.header("Origin", origin);
-        });
-        options("/*", (request, response) -> "OK");
         put(USER, new CreateUserRequestHandler());
         post(TOKEN, new TokenRequestHandler());
         post(INTROSPECT, new IntrospectionRequestHandler());
         post(AUTHORIZE, new AuthorizationRequestHandler());
         get(AUTHORIZE, new AuthorizationRequestHandler());
-        get(LOGIN_FORM, (request, response) -> render(new HashMap<>(), "login.mustache"));
+        get(LOGIN_FORM, (request, response) -> LoginPrompt.renderLogin());
         post(LOGIN, new LoginUserRequestHandler());
         get(LOGIN, ((request, response) -> LoginPrompt.renderLogin()));
-
-        post("/", (req, res) -> "{ error: 'not found', request: " + req.url() + " }");
-    }
-
-    private static String render(Map<String, Object> model, String path) {
-        return new MustacheTemplateEngine().render(new ModelAndView(model, path));
     }
 }

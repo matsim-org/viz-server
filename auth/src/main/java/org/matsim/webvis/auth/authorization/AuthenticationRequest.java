@@ -1,9 +1,8 @@
 package org.matsim.webvis.auth.authorization;
 
 import lombok.Getter;
-import org.matsim.webvis.common.communication.RequestError;
-import org.matsim.webvis.common.communication.RequestException;
 import org.matsim.webvis.common.communication.RequestWithParams;
+import org.matsim.webvis.common.service.InvalidInputException;
 import spark.QueryParamsMap;
 
 import java.net.URI;
@@ -20,7 +19,7 @@ public class AuthenticationRequest extends RequestWithParams {
     public static final String STATE = "state";
     public static final String NONCE = "nonce";
 
-    AuthenticationRequest(QueryParamsMap params) throws RequestException, URIException {
+    AuthenticationRequest(QueryParamsMap params) throws URIException, InvalidInputException {
 
         initializeRequiredParameters(params);
         initializeOptionalParameters(params);
@@ -44,7 +43,7 @@ public class AuthenticationRequest extends RequestWithParams {
     private String loginHint = "";
     private String arcValues = "";
 
-    private void initializeRequiredParameters(QueryParamsMap params) throws RequestException, URIException {
+    private void initializeRequiredParameters(QueryParamsMap params) throws URIException, InvalidInputException {
 
         this.scopes = initScope(params);
         this.redirectUri = initRedirectURI(params);
@@ -61,11 +60,11 @@ public class AuthenticationRequest extends RequestWithParams {
         state = extractOptionalValue(STATE, params);
     }
 
-    private String[] initScope(QueryParamsMap params) throws RequestException {
+    private String[] initScope(QueryParamsMap params) throws InvalidInputException {
         String[] scopes = extractRequiredValue(SCOPE, params).split(" ");
         boolean openid = Arrays.stream(scopes).anyMatch(scope -> scope.equals("openid"));
 
-        if (!openid) throw new RequestException(RequestError.INVALID_REQUEST, "scope must contain 'openid'");
+        if (!openid) throw new InvalidInputException("scope must contain 'openid'");
         return scopes;
     }
 
@@ -79,7 +78,7 @@ public class AuthenticationRequest extends RequestWithParams {
         throw new URIException();
     }
 
-    private String[] initResponseType(QueryParamsMap params) throws RequestException {
+    private String[] initResponseType(QueryParamsMap params) throws InvalidInputException {
         String[] responseTypes = extractRequiredValue(RESPONSE_TYPE, params).split(" ");
 
         if (responseTypes.length == 1 && responseTypes[0].equals("code")) {
@@ -92,7 +91,7 @@ public class AuthenticationRequest extends RequestWithParams {
                 responseTypes[1].equals("token"))
             this.type = Type.AccessAndIdToken;
         else
-            throw new RequestException(RequestError.INVALID_REQUEST, "response types may be: 'code', 'id_token', 'id_token token'.");
+            throw new InvalidInputException("response types may be: 'code', 'id_token', 'id_token token'.");
 
         return responseTypes;
     }

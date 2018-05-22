@@ -9,6 +9,8 @@ import org.matsim.webvis.auth.util.TestUtils;
 import org.matsim.webvis.common.communication.*;
 import org.matsim.webvis.common.service.CodedException;
 import org.matsim.webvis.common.service.Error;
+import org.matsim.webvis.common.service.ForbiddenException;
+import org.matsim.webvis.common.service.UnauthorizedException;
 import spark.Request;
 import spark.Response;
 
@@ -115,7 +117,7 @@ public class TokenRequestHandlerTest {
 
         TokenService mockService = mock(TokenService.class);
         testObject.tokenService = mockService;
-        when(mockService.grantWithPassword(any(), any())).thenThrow(new CodedException("code", "message"));
+        when(mockService.grantWithPassword(any(), any())).thenThrow(new UnauthorizedException("message"));
 
         Map<String, String[]> parameters = new HashMap<>();
         parameters.put("grant_type", new String[]{"password"});

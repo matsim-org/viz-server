@@ -2,8 +2,8 @@ package org.matsim.webvis.files.file;
 
 import org.matsim.webvis.common.communication.Answer;
 import org.matsim.webvis.common.communication.JsonResponseHandler;
-import org.matsim.webvis.common.communication.RequestException;
 import org.matsim.webvis.common.service.Error;
+import org.matsim.webvis.common.service.InvalidInputException;
 import org.matsim.webvis.files.communication.GsonFactory;
 import org.matsim.webvis.files.communication.Subject;
 import org.matsim.webvis.files.entities.Project;
@@ -32,7 +32,7 @@ public class FileUploadRequestHandler extends JsonResponseHandler {
             uploadRequest = requestFactory.createRequest(request);
             uploadRequest.parseUpload(request);
             project = projectService.find(uploadRequest.getProjectId(), subject.getUser());
-        } catch (RequestException e) {
+        } catch (InvalidInputException e) {
             return Answer.badRequest(e.getErrorCode(), e.getMessage());
         } catch (Exception e) {
             return Answer.forbidden(e.getMessage());
@@ -48,7 +48,7 @@ public class FileUploadRequestHandler extends JsonResponseHandler {
     }
 
     class RequestFactory {
-        FileUploadRequest createRequest(Request request) throws RequestException {
+        FileUploadRequest createRequest(Request request) throws InvalidInputException {
             return new FileUploadRequest(request);
         }
     }

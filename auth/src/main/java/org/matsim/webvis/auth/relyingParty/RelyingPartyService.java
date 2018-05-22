@@ -11,6 +11,8 @@ import org.matsim.webvis.auth.entities.RelyingPartyCredential;
 import org.matsim.webvis.auth.helper.SecretHelper;
 import org.matsim.webvis.common.service.CodedException;
 import org.matsim.webvis.common.service.Error;
+import org.matsim.webvis.common.service.ForbiddenException;
+import org.matsim.webvis.common.service.UnauthorizedException;
 
 import java.net.URI;
 
@@ -64,12 +66,11 @@ public class RelyingPartyService {
         return persisted;
     }
 
-    public RelyingParty validateRelyingParty(String clientId, String secret) throws CodedException {
+    public RelyingParty validateRelyingParty(String clientId, String secret) throws UnauthorizedException {
         RelyingPartyCredential credential = relyingPartyDAO.findCredential(clientId);
 
-        if (credential == null) throw new CodedException(Error.FORBIDDEN, "invalid client id or secret");
-        if (!SecretHelper.match(credential.getSecret(), secret))
-            throw new CodedException(Error.FORBIDDEN, "invalid client id or secret");
+        if (credential == null || !SecretHelper.match(credential.getSecret(), secret))
+            throw new UnauthorizedException("invalid client id or secret");
 
         return credential.getRelyingParty();
     }

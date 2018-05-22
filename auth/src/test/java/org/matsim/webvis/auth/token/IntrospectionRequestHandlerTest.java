@@ -10,6 +10,8 @@ import org.matsim.webvis.common.communication.Answer;
 import org.matsim.webvis.common.communication.ErrorResponse;
 import org.matsim.webvis.common.communication.HttpStatus;
 import org.matsim.webvis.common.service.CodedException;
+import org.matsim.webvis.common.service.ForbiddenException;
+import org.matsim.webvis.common.service.UnauthorizedException;
 import spark.Request;
 
 import java.time.Duration;
@@ -37,7 +39,7 @@ public class IntrospectionRequestHandlerTest {
 
     @Test
     public void process_rpNotValid_answerUnauthorized() throws CodedException {
-        when(testObject.rpService.validateRelyingParty(any(), any())).thenThrow(new CodedException("", ""));
+        when(testObject.rpService.validateRelyingParty(any(), any())).thenThrow(new UnauthorizedException(""));
 
         Answer result = testObject.process(createRequest(), null);
 

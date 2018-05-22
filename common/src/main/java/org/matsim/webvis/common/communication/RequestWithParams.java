@@ -1,5 +1,6 @@
 package org.matsim.webvis.common.communication;
 
+import org.matsim.webvis.common.service.InvalidInputException;
 import spark.QueryParamsMap;
 
 public abstract class RequestWithParams {
@@ -11,9 +12,9 @@ public abstract class RequestWithParams {
         return "";
     }
 
-    protected String extractRequiredValue(String key, QueryParamsMap params) throws RequestException {
+    protected String extractRequiredValue(String key, QueryParamsMap params) throws InvalidInputException {
         if (!params.hasKey(key))
-            throw new RequestException(RequestError.INVALID_REQUEST, key + " missing");
+            throw new InvalidInputException(key + " missing");
         return params.get(key).value();
     }
 }

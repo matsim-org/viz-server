@@ -1,8 +1,7 @@
 package org.matsim.webvis.files.communication;
 
 import lombok.Getter;
-import org.matsim.webvis.common.communication.RequestError;
-import org.matsim.webvis.common.communication.RequestException;
+import org.matsim.webvis.common.service.InvalidInputException;
 import spark.Request;
 
 @Getter
@@ -12,20 +11,20 @@ class AuthenticatedRequest {
 
     private String token;
 
-    AuthenticatedRequest(Request request) throws RequestException {
+    AuthenticatedRequest(Request request) throws InvalidInputException {
 
         if (hasAuthorization(request)) {
             this.token = extractToken(request.headers(AUTHORIZATION));
         } else
-            throw new RequestException(RequestError.INVALID_REQUEST, "Must specify Authorization header");
+            throw new InvalidInputException("Must specify Authorization header");
     }
 
-    private static String extractToken(String authorizationHeader) throws RequestException {
+    private static String extractToken(String authorizationHeader) throws InvalidInputException {
         String[] content = authorizationHeader.split(" ");
         if (content.length == 2 && content[0].equals("Bearer")) {
             return content[1];
         } else {
-            throw new RequestException(RequestError.INVALID_REQUEST, "Must specify bearer token");
+            throw new InvalidInputException("Must specify bearer token");
         }
     }
 

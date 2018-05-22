@@ -3,7 +3,7 @@ package org.matsim.webvis.auth.token;
 import org.junit.Before;
 import org.junit.Test;
 import org.matsim.webvis.auth.util.TestUtils;
-import org.matsim.webvis.common.communication.RequestException;
+import org.matsim.webvis.common.service.InvalidInputException;
 import spark.QueryParamsMap;
 import spark.Request;
 
@@ -26,44 +26,44 @@ public class IntrospectionRequestTest {
         mockReq = mock(Request.class);
     }
 
-    @Test(expected = RequestException.class)
-    public void creation_noAuthorizationHeader_exception() throws RequestException {
+    @Test(expected = InvalidInputException.class)
+    public void creation_noAuthorizationHeader_exception() throws InvalidInputException {
         when(mockReq.headers(any())).thenReturn(null);
 
         new IntrospectionRequest(mockReq);
 
-        fail("no Authorization header should throw requestexception");
+        fail("no Authorization header should throw InvalidInputException");
     }
 
-    @Test(expected = RequestException.class)
-    public void creation_noBasicAuthorization_exception() throws RequestException {
+    @Test(expected = InvalidInputException.class)
+    public void creation_noBasicAuthorization_exception() throws InvalidInputException {
         when(mockReq.headers("Authorization")).thenReturn("too many parameters");
 
         new IntrospectionRequest(mockReq);
 
-        fail("invalid basic auth should throw requestexception");
+        fail("invalid basic auth should throw InvalidInputException");
     }
 
-    @Test(expected = RequestException.class)
-    public void creation_invalidBasicAuthorizationFormat_exception() throws RequestException {
+    @Test(expected = InvalidInputException.class)
+    public void creation_invalidBasicAuthorizationFormat_exception() throws InvalidInputException {
         when(mockReq.headers("Authorization")).thenReturn("Bla some");
 
         new IntrospectionRequest(mockReq);
 
-        fail("invalid basic auth should throw requestexception");
+        fail("invalid basic auth should throw InvalidInputException");
     }
 
-    @Test(expected = RequestException.class)
-    public void creation_invalidCredentialsFormat_exception() throws RequestException {
+    @Test(expected = InvalidInputException.class)
+    public void creation_invalidCredentialsFormat_exception() throws InvalidInputException {
         when(mockReq.headers("Authorization")).thenReturn("Basic invalidCredentials");
 
         new IntrospectionRequest(mockReq);
 
-        fail("invalid basic auth should throw requestexception");
+        fail("invalid basic auth should throw InvalidInputException");
     }
 
-    @Test(expected = RequestException.class)
-    public void creation_noTokenParameter_exception() throws RequestException {
+    @Test(expected = InvalidInputException.class)
+    public void creation_noTokenParameter_exception() throws InvalidInputException {
 
         String basicCredentials = Base64.getEncoder().encodeToString("client:secret".getBytes());
         when(mockReq.headers(any())).thenReturn(basicCredentials);
@@ -71,11 +71,11 @@ public class IntrospectionRequestTest {
 
         new IntrospectionRequest(mockReq);
 
-        fail("invalid basic auth should throw requestexception");
+        fail("invalid basic auth should throw InvalidInputException");
     }
 
     @Test
-    public void creation_allgood() throws RequestException {
+    public void creation_allgood() throws InvalidInputException {
 
         String clientId = "client";
         String clientSecret = "secret";

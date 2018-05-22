@@ -8,6 +8,7 @@ import org.matsim.webvis.auth.entities.UserCredentials;
 import org.matsim.webvis.auth.helper.SecretHelper;
 import org.matsim.webvis.common.service.CodedException;
 import org.matsim.webvis.common.service.Error;
+import org.matsim.webvis.common.service.UnauthorizedException;
 
 import javax.persistence.RollbackException;
 
@@ -49,16 +50,16 @@ public class UserService {
         return null;
     }
 
-    public User authenticate(String eMail, char[] password) throws CodedException {
+    public User authenticate(String eMail, char[] password) throws UnauthorizedException {
 
         UserCredentials credentials = userDAO.findUserCredentials(eMail);
 
-        if (credentials == null) throw new CodedException(Error.FORBIDDEN, "username or password was wrong");
+        if (credentials == null) throw new UnauthorizedException("username or password was wrong");
 
         String hashedPassword = SecretHelper.getEncodedSecret(password, credentials.getSalt());
 
         if (!SecretHelper.match(credentials.getPassword(), hashedPassword)) {
-            throw new CodedException(Error.FORBIDDEN, "username or password was wrong");
+            throw new UnauthorizedException("username or password was wrong");
         }
         return credentials.getUser();
     }

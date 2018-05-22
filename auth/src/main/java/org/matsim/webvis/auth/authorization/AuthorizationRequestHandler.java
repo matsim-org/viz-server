@@ -4,7 +4,7 @@ import org.matsim.webvis.auth.Routes;
 import org.matsim.webvis.auth.entities.User;
 import org.matsim.webvis.auth.token.TokenService;
 import org.matsim.webvis.common.communication.RequestError;
-import org.matsim.webvis.common.communication.RequestException;
+import org.matsim.webvis.common.service.InvalidInputException;
 import spark.Request;
 import spark.Response;
 import spark.Route;
@@ -35,7 +35,7 @@ public class AuthorizationRequestHandler implements Route {
             authRequest = parse(request);
         } catch (URIException e) {
             return errorResponse(RequestError.INVALID_REQUEST, "redirect_uri missing or malformed");
-        } catch (RequestException e) {
+        } catch (InvalidInputException e) {
             return redirectIfPossible(e.getErrorCode(), e.getMessage(), request, response);
         }
 
@@ -65,11 +65,11 @@ public class AuthorizationRequestHandler implements Route {
         return "OK";
     }
 
-    private AuthenticationRequest parse(Request request) throws RequestException, URIException {
+    private AuthenticationRequest parse(Request request) throws URIException, InvalidInputException {
 
         try {
             return new AuthenticationRequest(request.queryMap());
-        } catch (RequestException e) {
+        } catch (InvalidInputException e) {
             Session session = request.session();
             if (session != null && loginSession.containsKey(session.id()))
                 return loginSession.get(session.id());

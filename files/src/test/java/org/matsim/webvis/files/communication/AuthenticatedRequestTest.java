@@ -1,7 +1,7 @@
 package org.matsim.webvis.files.communication;
 
 import org.junit.Test;
-import org.matsim.webvis.common.communication.RequestException;
+import org.matsim.webvis.common.service.InvalidInputException;
 import spark.Request;
 
 import static junit.framework.TestCase.assertEquals;
@@ -11,8 +11,8 @@ import static org.mockito.Mockito.when;
 
 public class AuthenticatedRequestTest {
 
-    @Test(expected = RequestException.class)
-    public void constructor_noAuthorizationHeader_requestException() throws RequestException {
+    @Test(expected = InvalidInputException.class)
+    public void constructor_noAuthorizationHeader_InvalidInputException() throws InvalidInputException {
 
         Request request = mock(Request.class);
         when(request.headers(AuthenticatedRequest.AUTHORIZATION)).thenReturn(null);
@@ -22,8 +22,8 @@ public class AuthenticatedRequestTest {
         fail("No authorization header should throw exception");
     }
 
-    @Test(expected = RequestException.class)
-    public void constructor_noBearer_requestException() throws RequestException {
+    @Test(expected = InvalidInputException.class)
+    public void constructor_noBearer_InvalidInputException() throws InvalidInputException {
 
         final String header = "not a bearer";
 
@@ -36,7 +36,7 @@ public class AuthenticatedRequestTest {
     }
 
     @Test
-    public void constructor_correctHeader_tokenIsSet() throws RequestException {
+    public void constructor_correctHeader_tokenIsSet() throws InvalidInputException {
 
         final String token = "some-token";
         final String header = "Bearer " + token;

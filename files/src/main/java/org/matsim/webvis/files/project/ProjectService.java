@@ -5,6 +5,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.matsim.webvis.common.service.CodedException;
 import org.matsim.webvis.common.service.Error;
+import org.matsim.webvis.common.service.ForbiddenException;
 import org.matsim.webvis.files.entities.FileEntry;
 import org.matsim.webvis.files.entities.Project;
 import org.matsim.webvis.files.entities.User;
@@ -23,7 +24,7 @@ public class ProjectService {
 
     private static void validate(Project project, User creator) throws CodedException {
         if (isNull(project)) throw new CodedException(Error.RESOURCE_NOT_FOUND, "could not find project");
-        if (!isCreator(project, creator)) throw new CodedException(Error.FORBIDDEN, "user is not creator");
+        if (!isCreator(project, creator)) throw new ForbiddenException("user is not creator");
     }
 
     private static boolean isNull(Project project) {

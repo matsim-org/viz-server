@@ -8,6 +8,7 @@ import org.matsim.webvis.auth.entities.RelyingParty;
 import org.matsim.webvis.auth.entities.User;
 import org.matsim.webvis.auth.relyingParty.RelyingPartyService;
 import org.matsim.webvis.auth.user.UserService;
+import org.matsim.webvis.common.communication.StartSpark;
 
 import static spark.Spark.*;
 
@@ -55,12 +56,15 @@ public class Server {
 
     private static void startSparkServer(CommandlineArgs ca) {
 
-        port(Configuration.getInstance().getPort());
-        initExceptionHandler(Server::handleInitializationFailure);
+        StartSpark.withPort(Configuration.getInstance().getPort());
+        StartSpark.withInitializationExceptionHandler(Server::handleInitializationFailure);
 
         if (!ca.isDebug() || !Configuration.getInstance().getTlsKeyStore().isEmpty()) {
-            secure(Configuration.getInstance().getTlsKeyStore(), Configuration.getInstance().getTlsKeyStorePassword(), null, null);
+            StartSpark.withTLS(Configuration.getInstance().getTlsKeyStore(), Configuration.getInstance().getTlsKeyStorePassword(), null, null);
         }
+
+        StartSpark.withPermissiveAccessControl();
+        StartSpark.withExceptionMapping();
 
         try {
             Routes.initialize();
