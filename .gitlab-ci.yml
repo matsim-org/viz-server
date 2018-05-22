@@ -16,19 +16,17 @@ build:
     only:
       - master
       - develop
-      - feature/#17-server-build   
     script: "mvn install -DskipTests --batch-mode"
     artifacts:
       when: on_success
       paths:
-        - auth/target/*.jar
-        - files/target/*.jar
+        - auth/target/auth-*-jar-with-dependencies.jar
+        - files/target/files-*-jar-with-dependencies.jar
 deploy:
     stage: deploy
     only:
         - master
         - develop
-        - feature/#17-server-build
     dependencies: 
         - build  
     script:
