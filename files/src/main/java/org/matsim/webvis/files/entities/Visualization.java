@@ -15,7 +15,7 @@ import java.util.Map;
 @Entity
 public class Visualization extends AbstractEntity {
 
-    @OneToOne(optional = false)
+    @ManyToOne(optional = false)
     private VisualizationType type;
 
     @ManyToOne(optional = false)

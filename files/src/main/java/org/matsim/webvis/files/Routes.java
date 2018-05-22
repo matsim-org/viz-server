@@ -9,6 +9,7 @@ import org.matsim.webvis.files.project.CreateProjectRequestHandler;
 import org.matsim.webvis.files.project.ProjectRequestHandler;
 import org.matsim.webvis.files.visualization.CreateVisualizationRequestHandler;
 import org.matsim.webvis.files.visualization.VisualizationRequestHandler;
+import org.matsim.webvis.files.visualization.VisualizationTypeRequestHandler;
 import org.matsim.webvis.files.visualization.VisualizationsRequestHandler;
 
 import java.net.URI;
@@ -21,6 +22,7 @@ class Routes {
     private final static String FILE = "file/";
     private final static String FILE_UPLOAD = FILE + "upload/";
     private final static String PROJECT = "project/";
+    private final static String VISUALIZATION_TYPE = "visualization-type/";
     private final static String VISUALIZATION = PROJECT + "visualization/";
     private final static String VISUALIZATIONS = PROJECT + "visualizations/";
 
@@ -33,6 +35,7 @@ class Routes {
         delete(FILE, new FileDeleteRequestHandler());
         put(VISUALIZATION, new CreateVisualizationRequestHandler());
         post(VISUALIZATION, new VisualizationRequestHandler());
+        post(VISUALIZATION_TYPE, new VisualizationTypeRequestHandler());
         post(VISUALIZATIONS, new VisualizationsRequestHandler());
 
     }

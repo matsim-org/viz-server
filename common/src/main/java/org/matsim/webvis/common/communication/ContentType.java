@@ -7,10 +7,10 @@ public class ContentType {
     public static final String FORM_URL_ENCODED = "application/x-www-form-urlencoded";
 
     public static boolean isJson(String contentType) {
-        return contentType.equals(APPLICATION_JSON);
+        return APPLICATION_JSON.equals(contentType);
     }
 
     public static boolean isFormUrlEncoded(String contentType) {
-        return contentType.equals(FORM_URL_ENCODED);
+        return FORM_URL_ENCODED.equals(contentType);
     }
 }

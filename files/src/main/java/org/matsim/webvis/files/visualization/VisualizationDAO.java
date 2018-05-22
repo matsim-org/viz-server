@@ -2,6 +2,8 @@ package org.matsim.webvis.files.visualization;
 
 import org.matsim.webvis.files.entities.*;
 
+import java.util.List;
+
 public class VisualizationDAO extends DAO {
 
     Visualization persist(Visualization viz) {
@@ -11,7 +13,7 @@ public class VisualizationDAO extends DAO {
         return database.updateOne(viz);
     }
 
-    public VisualizationType persistType(VisualizationType type) {
+    VisualizationType persistType(VisualizationType type) {
         if (type.getId() == null)
             return database.persistOne(type);
         return database.updateOne(type);
@@ -31,6 +33,17 @@ public class VisualizationDAO extends DAO {
         return database.executeQuery(query -> query.selectFrom(type)
                 .where(type.key.eq(key))
                 .fetchOne());
+    }
+
+    List<VisualizationType> findAllTypes() {
+        QVisualizationType type = QVisualizationType.visualizationType;
+
+        return database.executeQuery(query -> query.selectFrom(type)
+                .leftJoin(type.requiredFileKeys).fetchJoin()
+                .leftJoin(type.requiredParamKeys).fetchJoin()
+                .distinct()
+                .fetch()
+        );
     }
 
     void removeType(String key) {

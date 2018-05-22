@@ -2,9 +2,12 @@ package org.matsim.webvis.files.config;
 
 import com.google.gson.Gson;
 import lombok.Getter;
+import org.matsim.webvis.files.entities.VisualizationType;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 public class Configuration {
@@ -22,6 +25,8 @@ public class Configuration {
     private String tlsKeyStorePassword = "nopassword";
     private String relyingPartyId = "relyingPartyId";
     private String relyingPartySecret = "secret";
+
+    private List<VisualizationType> vizTypes = new ArrayList<>();
 
     private Configuration() {
     }

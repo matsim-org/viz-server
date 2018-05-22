@@ -16,6 +16,10 @@ public class Answer<T> {
         return new Answer<>(HttpStatus.OK, response);
     }
 
+    public static Answer notFound() {
+        return error(HttpStatus.NOT_FOUND, RequestError.NOT_FOUND, "url not found");
+    }
+
     public static Answer invalidRequest(String message) {
         return badRequest(RequestError.INVALID_REQUEST, message);
     }
@@ -47,7 +51,6 @@ public class Answer<T> {
     public static Answer internalError(String errorCode, String message) {
         return error(HttpStatus.INTERNAL_SERVER_ERROR, errorCode, message);
     }
-
 
     private static Answer error(int code, String errorCode, String message) {
         return new Answer<>(code, new ErrorResponse(errorCode, message));
