@@ -25,7 +25,7 @@ build:
 deploy:
     stage: deploy
     script:
-    - apt-get update && apt-get install -y ssh-agent
+    - which ssh-agent
     - eval $(ssh-agent -s)
     - ssh-add <(echo "$SSH_PRIVATE_KEY")
     - '[[ -f /.dockerenv ]] && mkdir -p ~/.ssh && echo "$KNOWN_HOST" > ~/.ssh/known_hosts'
