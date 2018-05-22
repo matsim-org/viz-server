@@ -31,7 +31,8 @@ deploy:
     - '[[ -f /.dockerenv ]] && mkdir -p ~/.ssh && echo "$KNOWN_HOST" > ~/.ssh/known_hosts'
     - ssh webvis@cnode00.vsp.tu-berlin.de 'sudo service webvis-files stop'
     - ssh webvis@cnode00.vsp.tu-berlin.de 'sudo service webvis-auth stop'
-    - scp auth/target/auth-server.jar webvis@cnode00.vsp.tu-berlin.de:/home/webvis/matsim-webvis-auth/
-    - scp files/target/file-server.jar webvis@cnode00.vsp.tu-berlin.de:/home/webvis/matsim-webvis-files/
-    - ssh webvis@cnode00.vsp.tu-berlin.de 'sudo service webvis-auth start'
-    - ssh webvis@cnode00.vsp.tu-berlin.de 'sudo service webvis-files start'
+    - ls -lhaA
+#    - scp auth/target/auth-server.jar webvis@cnode00.vsp.tu-berlin.de:/home/webvis/matsim-webvis-auth/
+#    - scp files/target/file-server.jar webvis@cnode00.vsp.tu-berlin.de:/home/webvis/matsim-webvis-files/
+#    - ssh webvis@cnode00.vsp.tu-berlin.de 'sudo service webvis-auth start'
+#    - ssh webvis@cnode00.vsp.tu-berlin.de 'sudo service webvis-files start'
