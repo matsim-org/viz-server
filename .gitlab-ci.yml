@@ -32,6 +32,8 @@ deploy:
     - ssh webvis@cnode00.vsp.tu-berlin.de 'sudo service webvis-files stop'
     - ssh webvis@cnode00.vsp.tu-berlin.de 'sudo service webvis-auth stop'
     - ls -lhaA
+    - ls -lhaA auth/
+    - ls -lhaA files/
 #    - scp auth/target/auth-server.jar webvis@cnode00.vsp.tu-berlin.de:/home/webvis/matsim-webvis-auth/
 #    - scp files/target/file-server.jar webvis@cnode00.vsp.tu-berlin.de:/home/webvis/matsim-webvis-files/
 #    - ssh webvis@cnode00.vsp.tu-berlin.de 'sudo service webvis-auth start'
