@@ -17,8 +17,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static spark.Spark.*;
-
 public class Server {
 
     private static Logger logger = LogManager.getLogger();

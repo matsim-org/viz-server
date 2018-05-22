@@ -2,6 +2,7 @@ package org.matsim.webvis.common.communication;
 
 import org.matsim.webvis.common.service.Error;
 
+@SuppressWarnings("WeakerAccess")
 public class Answer<T> {
 
     private int statusCode;
@@ -30,10 +31,6 @@ public class Answer<T> {
 
     public static Answer forbidden(String message) {
         return Answer.error(HttpStatus.FORBIDDEN, Error.FORBIDDEN, message);
-    }
-
-    public static Answer notFound() {
-        return Answer.error(HttpStatus.NOT_FOUND, Error.RESOURCE_NOT_FOUND, "No resource with requested URL");
     }
 
     public static Answer unauthorized(String errorCode, String message) {
