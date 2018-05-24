@@ -15,4 +15,12 @@ public abstract class AbstractEntity {
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "org.matsim.webvis.common.database.UUIDGenerator")
     private String id;
+
+    public boolean equalId(AbstractEntity entity) {
+        if (entity == this) return true;
+
+        return entity != null &&
+                entity.getId() != null &&
+                entity.getId().equals(this.id);
+    }
 }

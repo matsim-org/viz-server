@@ -1,5 +1,6 @@
 package org.matsim.webvis.common.database;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.HibernateException;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.id.IdentifierGenerator;
@@ -11,17 +12,9 @@ public class UUIDGenerator implements IdentifierGenerator {
     @Override
     public Serializable generate(SharedSessionContractImplementor session, Object o) throws HibernateException {
 
-        String result;
-        if (o instanceof AbstractEntity) {
-            AbstractEntity entity = (AbstractEntity) o;
-            if (entity.getId() == null || entity.getId().isEmpty()) {
-                result = UUID.randomUUID().toString();
-            } else {
-                result = entity.getId();
-            }
-        } else {
-            result = UUID.randomUUID().toString();
+        if (o instanceof AbstractEntity && StringUtils.isNotBlank(((AbstractEntity) o).getId())) {
+            return ((AbstractEntity) o).getId();
         }
-        return result;
+        return UUID.randomUUID().toString();
     }
 }

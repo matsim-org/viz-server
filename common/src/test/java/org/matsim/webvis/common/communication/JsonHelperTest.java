@@ -1,6 +1,7 @@
 package org.matsim.webvis.common.communication;
 
 import org.junit.Test;
+import org.matsim.webvis.common.service.InvalidInputException;
 import spark.Response;
 
 import static junit.framework.TestCase.assertEquals;
@@ -10,12 +11,12 @@ import static org.mockito.Mockito.verify;
 
 public class JsonHelperTest {
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = InvalidInputException.class)
     public void parseJson_noJson_exception() {
         JsonHelper.parseJson(null, JsonHelper.class);
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test(expected = InvalidInputException.class)
     public void parseJson_illegalJson_exception() {
 
         JsonHelper.parseJson("{'not':json", Object.class);

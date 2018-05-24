@@ -3,7 +3,6 @@ package org.matsim.webvis.files.entities;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-import org.matsim.webvis.common.database.AbstractEntity;
 
 import javax.persistence.*;
 import java.util.HashMap;
@@ -13,7 +12,7 @@ import java.util.Map;
 @Setter
 @EqualsAndHashCode(callSuper = true, exclude = {"inputFiles", "parameters"})
 @Entity
-public class Visualization extends AbstractEntity {
+public class Visualization extends Resource {
 
     @ManyToOne(optional = false)
     private VisualizationType type;

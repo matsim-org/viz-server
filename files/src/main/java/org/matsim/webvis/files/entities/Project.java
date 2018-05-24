@@ -3,7 +3,6 @@ package org.matsim.webvis.files.entities;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-import org.matsim.webvis.common.database.AbstractEntity;
 
 import javax.persistence.*;
 import java.util.Collection;
@@ -15,7 +14,7 @@ import java.util.Set;
 @EqualsAndHashCode(callSuper = true, exclude = {"files", "visualizations"})
 @Entity
 @Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"creator_id", "name"})})
-public class Project extends AbstractEntity {
+public class Project extends Resource {
 
     private String name;
 
@@ -32,9 +31,10 @@ public class Project extends AbstractEntity {
         entries.forEach(this::addFileEntry);
     }
 
-    private void addFileEntry(FileEntry entry) {
+    public void addFileEntry(FileEntry entry) {
         files.add(entry);
         entry.setProject(this);
+        copyAndAddPermissionsToAddedResource(entry);
     }
 
     public FileEntry getFileEntry(String id) {
@@ -49,9 +49,15 @@ public class Project extends AbstractEntity {
     public void addVisualization(Visualization visualization) {
         visualizations.add(visualization);
         visualization.setProject(this);
+        copyAndAddPermissionsToAddedResource(visualization);
     }
 
     public Visualization getVisualization(String id) {
         return visualizations.stream().filter(v -> v.getId().equals(id)).findFirst().orElse(null);
+    }
+
+    private void copyAndAddPermissionsToAddedResource(Resource resource) {
+        for (Permission permission : this.getPermissions())
+            resource.addPermission(new Permission(resource, permission.getAgent(), permission.getType()));
     }
 }

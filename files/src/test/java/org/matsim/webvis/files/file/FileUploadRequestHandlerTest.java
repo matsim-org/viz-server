@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.matsim.webvis.common.communication.Answer;
 import org.matsim.webvis.common.communication.ErrorResponse;
 import org.matsim.webvis.common.service.CodedException;
+import org.matsim.webvis.common.service.InvalidInputException;
 import org.matsim.webvis.files.communication.Subject;
 import org.matsim.webvis.files.entities.Project;
 import org.matsim.webvis.files.entities.User;
@@ -15,8 +16,7 @@ import org.matsim.webvis.files.util.TestUtils;
 import spark.Request;
 import spark.Response;
 
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertTrue;
+import static junit.framework.TestCase.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -33,20 +33,19 @@ public class FileUploadRequestHandlerTest {
         when(Subject.userService.findByIdentityProviderId(any())).thenReturn(new User());
     }
 
-    @Test
-    public void process_fileUploadFails_badRequest() {
+    @Test(expected = InvalidInputException.class)
+    public void process_invalidRequest_invalidInputException() {
 
         Request request = TestUtils.mockRequestWithRawRequest("Wrong", "request");
         Response response = mock(Response.class);
 
-        Answer answer = testObject.process(request, response);
+        testObject.process(request, response);
 
-        assertEquals(HttpStatus.SC_BAD_REQUEST, answer.getStatusCode());
-        assertTrue(answer.getResponse() instanceof ErrorResponse);
+        fail("invalid input should raise exception");
     }
 
-    @Test
-    public void process_projectNotFound_forbidden() throws Exception {
+    @Test(expected = CodedException.class)
+    public void process_projectNotFound_codedException() {
 
         Request request = TestUtils.mockMultipartRequest();
         Response response = mock(Response.class);
@@ -64,8 +63,8 @@ public class FileUploadRequestHandlerTest {
         assertTrue(answer.getResponse() instanceof ErrorResponse);
     }
 
-    @Test
-    public void process_addFilesToProjectFails_internalError() throws Exception {
+    @Test(expected = CodedException.class)
+    public void process_addFilesToProjectFails_internalError() {
 
         Request request = TestUtils.mockMultipartRequest();
         Response response = mock(Response.class);
@@ -76,7 +75,7 @@ public class FileUploadRequestHandlerTest {
 
         testObject.projectService = mock(ProjectService.class);
         when(testObject.projectService.find(any(), any())).thenReturn(new Project());
-        when(testObject.projectService.addFilesToProject(any(), any())).thenThrow(new Exception());
+        when(testObject.projectService.addFilesToProject(any(), any(), any())).thenThrow(new CodedException("bla", "bla"));
 
         Answer answer = testObject.process(request, response);
 
@@ -85,7 +84,7 @@ public class FileUploadRequestHandlerTest {
     }
 
     @Test
-    public void process_filesAreAdded_ok() throws Exception {
+    public void process_filesAreAdded_ok() {
         Request request = TestUtils.mockMultipartRequest();
         Response response = mock(Response.class);
 
@@ -95,7 +94,7 @@ public class FileUploadRequestHandlerTest {
 
         testObject.projectService = mock(ProjectService.class);
         when(testObject.projectService.find(any(), any())).thenReturn(new Project());
-        when(testObject.projectService.addFilesToProject(any(), any())).thenReturn(new Project());
+        when(testObject.projectService.addFilesToProject(any(), any(), any())).thenReturn(new Project());
 
         Answer answer = testObject.process(request, response);
 

@@ -4,6 +4,8 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.matsim.webvis.common.service.CodedException;
+import org.matsim.webvis.common.service.Error;
 import org.matsim.webvis.files.config.Configuration;
 import org.matsim.webvis.files.entities.FileEntry;
 import org.matsim.webvis.files.entities.Project;
@@ -11,6 +13,7 @@ import org.matsim.webvis.files.entities.Project;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -25,13 +28,13 @@ public class DiskProjectRepository implements ProjectRepository {
     private Project project;
     private Path projectDirectory;
 
-    DiskProjectRepository(Project project) throws IOException {
+    DiskProjectRepository(Project project) {
 
         this.project = project;
         this.projectDirectory = getProjectDirectory();
     }
 
-    public List<FileEntry> addFiles(Collection<FileItem> items) throws Exception {
+    public List<FileEntry> addFiles(Collection<FileItem> items) {
 
         List<FileEntry> writtenFiles = new ArrayList<>();
         for (FileItem item : items) {
@@ -41,11 +44,16 @@ public class DiskProjectRepository implements ProjectRepository {
         return writtenFiles;
     }
 
-    public FileEntry addFile(FileItem item) throws Exception {
+    public FileEntry addFile(FileItem item) {
 
         String diskFileName = UUID.randomUUID().toString() + "." + FilenameUtils.getExtension(item.getName());
         Path file = projectDirectory.resolve(diskFileName);
-        item.write(file.toFile());
+        try {
+            item.write(file.toFile());
+        } catch (Exception e) {
+            logger.error("Error while writing file.", e);
+            throw new CodedException(Error.UNSPECIFIED_ERROR, "Error while writing file");
+        }
 
         FileEntry entry = new FileEntry();
         entry.setUserFileName(item.getName());
@@ -55,16 +63,21 @@ public class DiskProjectRepository implements ProjectRepository {
         return entry;
     }
 
-    public InputStream getFileStream(FileEntry entry) throws IOException {
-        Path filePath = getProjectDirectory().resolve(entry.getPersistedFileName());
-        return Files.newInputStream(filePath);
+    public InputStream getFileStream(FileEntry entry) {
+        try {
+            Path filePath = getProjectDirectory().resolve(entry.getPersistedFileName());
+            return Files.newInputStream(filePath);
+        } catch (IOException | InvalidPathException e) {
+            logger.error("could not get file stream.", e);
+            throw new CodedException(Error.UNSPECIFIED_ERROR, "could not get file stream");
+        }
     }
 
-    public void removeFile(FileEntry entry) throws IOException {
+    public void removeFile(FileEntry entry) {
         removeFile(entry, getProjectDirectory());
     }
 
-    public void removeFiles(Collection<FileEntry> entries) throws IOException {
+    public void removeFiles(Collection<FileEntry> entries) {
 
         Path directory = getProjectDirectory();
         for (FileEntry entry : entries) {
@@ -72,18 +85,28 @@ public class DiskProjectRepository implements ProjectRepository {
         }
     }
 
-    void removeAllFiles() throws IOException {
+    void removeAllFiles() {
 
         removeFiles(new ArrayList<>(project.getFiles()));
     }
 
-    private void removeFile(FileEntry entry, Path directory) throws IOException {
-        Path file = directory.resolve(entry.getPersistedFileName());
-        Files.delete(file);
+    private void removeFile(FileEntry entry, Path directory) {
+        try {
+            Path file = directory.resolve(entry.getPersistedFileName());
+            Files.delete(file);
+        } catch (IOException | InvalidPathException e) {
+            logger.error("Error while removing file", e);
+            throw new CodedException(Error.UNSPECIFIED_ERROR, "could not remove file.");
+        }
     }
 
-    Path getProjectDirectory() throws IOException {
-        Path directory = Paths.get(Configuration.getInstance().getUploadedFilePath(), project.getCreator().getId(), project.getId());
-        return Files.createDirectories(directory);
+    Path getProjectDirectory() {
+        try {
+            Path directory = Paths.get(Configuration.getInstance().getUploadedFilePath(), project.getCreator().getId(), project.getId());
+            return Files.createDirectories(directory);
+        } catch (IOException e) {
+            logger.error("Error while creating project directory.", e);
+            throw new CodedException(Error.UNSPECIFIED_ERROR, "Could not open directory");
+        }
     }
 }

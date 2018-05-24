@@ -5,10 +5,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.matsim.webvis.common.communication.Answer;
 import org.matsim.webvis.common.service.CodedException;
+import org.matsim.webvis.common.service.InvalidInputException;
 import org.matsim.webvis.files.entities.User;
 import org.matsim.webvis.files.entities.Visualization;
 import org.matsim.webvis.files.util.TestUtils;
 
+import static junit.framework.TestCase.fail;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -24,25 +26,25 @@ public class VisualizationRequestHandlerTest {
         testObject = new VisualizationRequestHandler();
     }
 
-    @Test
+    @Test(expected = InvalidInputException.class)
     public void process_vizIdMissing_badRequest() {
         VisualizationRequest request = new VisualizationRequest("");
 
-        Answer answer = testObject.process(request, TestUtils.createSubject(new User()));
+        testObject.process(request, TestUtils.createSubject(new User()));
 
-        assertEquals(HttpStatus.SC_BAD_REQUEST, answer.getStatusCode());
+        fail("invalid input should yield exception");
     }
 
-    @Test
+    @Test(expected = CodedException.class)
     public void process_serviceThrowsException_badRequest() throws CodedException {
 
         VisualizationRequest request = new VisualizationRequest("id");
         testObject.visualizationService = mock(VisualizationService.class);
         when(testObject.visualizationService.find(anyString(), any())).thenThrow(new CodedException("bla", "bla"));
 
-        Answer answer = testObject.process(request, TestUtils.createSubject(new User()));
+        testObject.process(request, TestUtils.createSubject(new User()));
 
-        assertEquals(HttpStatus.SC_BAD_REQUEST, answer.getStatusCode());
+        fail("exception in service should be passed upstream");
     }
 
     @Test

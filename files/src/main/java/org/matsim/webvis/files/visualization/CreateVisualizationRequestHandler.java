@@ -2,8 +2,7 @@ package org.matsim.webvis.files.visualization;
 
 import org.apache.commons.lang3.StringUtils;
 import org.matsim.webvis.common.communication.Answer;
-import org.matsim.webvis.common.communication.RequestError;
-import org.matsim.webvis.common.service.CodedException;
+import org.matsim.webvis.common.service.InvalidInputException;
 import org.matsim.webvis.files.communication.AuthenticatedJsonRequestHandler;
 import org.matsim.webvis.files.communication.GsonFactory;
 import org.matsim.webvis.files.communication.Subject;
@@ -20,15 +19,11 @@ public class CreateVisualizationRequestHandler extends AuthenticatedJsonRequestH
     @Override
     protected Answer process(CreateVisualizationRequest body, Subject subject) {
 
-        if (!isValidRequest(body)) {
-            return Answer.badRequest(RequestError.INVALID_REQUEST, "some parameters were not set");
-        }
-        try {
-            Visualization visualization = visualizationService.createVisualizationFromRequest(body, subject.getUser());
-            return Answer.ok(visualization);
-        } catch (CodedException e) {
-            return Answer.badRequest(e.getErrorCode(), e.getMessage());
-        }
+        if (!isValidRequest(body))
+            throw new InvalidInputException("some parameters were not set");
+
+        Visualization visualization = visualizationService.createVisualizationFromRequest(body, subject.getUser());
+        return Answer.ok(visualization);
     }
 
     private boolean isValidRequest(CreateVisualizationRequest body) {

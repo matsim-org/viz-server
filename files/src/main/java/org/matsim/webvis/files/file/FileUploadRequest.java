@@ -27,7 +27,7 @@ class FileUploadRequest {
     private String projectId;
     private List<FileItem> files = new ArrayList<>();
 
-    FileUploadRequest(Request request) throws InvalidInputException {
+    FileUploadRequest(Request request) {
 
         if (!ServletFileUpload.isMultipartContent(request.raw())) {
             throw new InvalidInputException("must be a multipart request");
@@ -35,7 +35,7 @@ class FileUploadRequest {
         upload = createUpload();
     }
 
-    void parseUpload(Request request) throws InvalidInputException {
+    void parseUpload(Request request) {
         try {
             List<FileItem> fileItems = upload.parseRequest(request.raw());
             parseMetadata(fileItems);
@@ -66,7 +66,7 @@ class FileUploadRequest {
         projectId = findFormField(items, "projectId").getString();
     }
 
-    private FileItem findFormField(List<FileItem> items, String fieldName) throws InvalidInputException {
+    private FileItem findFormField(List<FileItem> items, String fieldName) {
         Optional<FileItem> optional = items.stream()
                 .filter(item -> item.isFormField() && item.getFieldName().equals(fieldName))
                 .findFirst();
@@ -78,7 +78,7 @@ class FileUploadRequest {
         }
     }
 
-    private void parseFiles(List<FileItem> items) throws InvalidInputException {
+    private void parseFiles(List<FileItem> items) {
         files = items.stream().filter(item -> !item.isFormField()).collect(Collectors.toList());
         if (files.size() < 1) {
             throw new InvalidInputException("file upload must contain at least one file");

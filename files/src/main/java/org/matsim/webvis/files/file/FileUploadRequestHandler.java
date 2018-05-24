@@ -2,7 +2,6 @@ package org.matsim.webvis.files.file;
 
 import org.matsim.webvis.common.communication.Answer;
 import org.matsim.webvis.common.communication.JsonResponseHandler;
-import org.matsim.webvis.common.service.Error;
 import org.matsim.webvis.common.service.InvalidInputException;
 import org.matsim.webvis.files.communication.GsonFactory;
 import org.matsim.webvis.files.communication.Subject;
@@ -26,25 +25,13 @@ public class FileUploadRequestHandler extends JsonResponseHandler {
         Subject subject = Subject.getSubject(request);
 
         // Parsing and uploading of the request
-        FileUploadRequest uploadRequest;
-        Project project;
-        try {
-            uploadRequest = requestFactory.createRequest(request);
-            uploadRequest.parseUpload(request);
-            project = projectService.find(uploadRequest.getProjectId(), subject.getUser());
-        } catch (InvalidInputException e) {
-            return Answer.badRequest(e.getErrorCode(), e.getMessage());
-        } catch (Exception e) {
-            return Answer.forbidden(e.getMessage());
-        }
+        FileUploadRequest uploadRequest = requestFactory.createRequest(request);
+        uploadRequest.parseUpload(request);
+        Project project = projectService.find(uploadRequest.getProjectId(), subject.getUser());
 
         // Processing of the uploaded content
-        try {
-            Project persisted = projectService.addFilesToProject(uploadRequest.getFiles(), project);
-            return Answer.ok(persisted);
-        } catch (Exception e) {
-            return Answer.internalError(Error.UNSPECIFIED_ERROR, "Error during file upload. Try again.");
-        }
+        Project persisted = projectService.addFilesToProject(uploadRequest.getFiles(), project, subject.getUser());
+        return Answer.ok(persisted);
     }
 
     class RequestFactory {

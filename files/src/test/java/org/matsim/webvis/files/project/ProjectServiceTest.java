@@ -6,11 +6,10 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.matsim.webvis.common.service.CodedException;
-import org.matsim.webvis.common.service.Error;
+import org.matsim.webvis.common.service.ForbiddenException;
 import org.matsim.webvis.files.config.Configuration;
-import org.matsim.webvis.files.entities.FileEntry;
-import org.matsim.webvis.files.entities.Project;
-import org.matsim.webvis.files.entities.User;
+import org.matsim.webvis.files.entities.*;
+import org.matsim.webvis.files.permission.PermissionService;
 import org.matsim.webvis.files.user.UserDAO;
 import org.matsim.webvis.files.util.TestUtils;
 
@@ -20,6 +19,7 @@ import java.io.InputStream;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -49,7 +49,7 @@ public class ProjectServiceTest {
     }
 
     @Test(expected = CodedException.class)
-    public void createNewProject_projectNameExists_exception() throws CodedException {
+    public void createNewProject_projectNameExists_exception() {
 
         String name = "name";
         User user = userDAO.persist(new User());
@@ -61,7 +61,7 @@ public class ProjectServiceTest {
     }
 
     @Test(expected = CodedException.class)
-    public void createNewProject_userDoesNotExist_exception() throws CodedException {
+    public void createNewProject_userDoesNotExist_exception() {
 
         String name = "name";
         User user = new User();
@@ -72,7 +72,7 @@ public class ProjectServiceTest {
     }
 
     @Test
-    public void createNewProject_allGood_newProject() throws CodedException {
+    public void createNewProject_allGood_newProject() {
 
         String name = "name";
         User user = userDAO.persist(new User());
@@ -82,35 +82,35 @@ public class ProjectServiceTest {
         assertNotNull(project);
         assertEquals(name, project.getName());
         assertEquals(user.getId(), project.getCreator().getId());
+
+        Optional<Permission> optional = project.getPermissions().stream().filter(p -> p.getAgent().equalId(user)).findFirst();
+        assertTrue(optional.isPresent());
+        assertTrue(user.equalId(optional.get().getAgent()));
     }
 
-    @Test
+    @Test(expected = ForbiddenException.class)
     public void findFlat_noProject_exception() {
 
-        try {
-            testObject.findFlat("some-id", null);
-        } catch (CodedException e) {
-            assertEquals(Error.RESOURCE_NOT_FOUND, e.getErrorCode());
-            return;
-        }
+        User user = TestUtils.persistUser("id");
+
+        testObject.findFlat("some-id", user);
+
         fail("invalid project id should throw exception");
     }
 
-    @Test
+    @Test(expected = ForbiddenException.class)
     public void findFlat_userNotAllowed_exception() {
 
-        Project project = TestUtils.persistProjectWithCreator("project-name");
-        try {
-            testObject.findFlat(project.getId(), new User());
-        } catch (CodedException e) {
-            assertEquals(Error.FORBIDDEN, e.getErrorCode());
-            return;
-        }
+        Project project = TestUtils.persistProjectWithCreator("project-name", "id");
+        User user = TestUtils.persistUser("other-id");
+
+        testObject.findFlat(project.getId(), user);
+
         fail("invalid user should throw exception");
     }
 
     @Test
-    public void findFlat_allGood_project() throws CodedException {
+    public void findFlat_allGood_project() {
 
         Project project = TestUtils.persistProjectWithCreator("project-name");
 
@@ -120,35 +120,33 @@ public class ProjectServiceTest {
         assertEquals(project.getCreator().getId(), result.getCreator().getId());
     }
 
-    @Test
+    @Test(expected = ForbiddenException.class)
     public void find_noProject_exception() {
 
-        try {
-            testObject.find("some-id", null);
-        } catch (CodedException e) {
-            assertEquals(Error.RESOURCE_NOT_FOUND, e.getErrorCode());
-            return;
-        }
+        User user = TestUtils.persistUser("some-auth-id");
+
+        testObject.find("some-id", user);
+
         fail("invalid project id should throw exception");
     }
 
-    @Test
+    @Test(expected = ForbiddenException.class)
     public void find_userNotAllowed_exception() {
 
         Project project = TestUtils.persistProjectWithCreator("project-name");
-        try {
-            testObject.find(project.getId(), new User());
-        } catch (CodedException e) {
-            assertEquals(Error.FORBIDDEN, e.getErrorCode());
-            return;
-        }
+        User otherUser = TestUtils.persistUser("other-user");
+
+        testObject.find(project.getId(), otherUser);
+
         fail("invalid user should throw exception");
     }
 
     @Test
-    public void find_allGood_project() throws CodedException {
+    public void find_allGood_project() {
 
-        Project project = TestUtils.persistProjectWithCreator("project-name");
+        Project project = TestUtils.persistProjectWithCreator("project-name", "auth-id");
+        //make sure there is more than one project
+        TestUtils.persistProjectWithCreator("other-project", "other-auth-id");
 
         Project result = testObject.find(project.getId(), project.getCreator());
 
@@ -161,56 +159,7 @@ public class ProjectServiceTest {
     }
 
     @Test
-    public void find_noProjectForUser_emptyList() {
-
-        Project project = TestUtils.persistProjectWithCreator("project-name");
-        List<String> ids = new ArrayList<>();
-        ids.add(project.getId());
-        User otherUser = userDAO.persist(new User());
-
-        List<Project> result = testObject.find(ids, otherUser);
-
-        assertEquals(0, result.size());
-    }
-
-    @Test
-    public void find_listOfOneProject() {
-
-        Project first = TestUtils.persistProjectWithCreator("first-project");
-        List<String> projectIds = new ArrayList<>();
-        projectIds.add(first.getId());
-
-        List<Project> result = testObject.find(projectIds, first.getCreator());
-
-        assertEquals(1, result.size());
-        assertEquals(first.getId(), result.get(0).getId());
-    }
-
-    @Test
-    public void find_severalProjectsPresent_listOfProjects() throws CodedException {
-
-        Project project1 = TestUtils.persistProjectWithCreator("first");
-        project1 = addFileEntry(project1);
-        project1 = addFileEntry(project1);
-
-        Project project2 = testObject.createNewProject("second", project1.getCreator());
-        project2 = addFileEntry(project2);
-        project2 = addFileEntry(project2);
-
-        List<String> ids = new ArrayList<>();
-        ids.add(project1.getId());
-        ids.add(project2.getId());
-
-        List<Project> result = testObject.find(ids, project1.getCreator());
-
-        assertEquals(2, result.size());
-        Project firstResult = result.get(0);
-        assertEquals(2, firstResult.getFiles().size());
-        assertEquals(0, firstResult.getVisualizations().size());
-    }
-
-    @Test
-    public void findAllProjectsForUser_listOfProjects() throws CodedException {
+    public void findAllProjectsForUser_listOfProjects() {
 
         User user = new User();
         user.setAuthId("auth-id");
@@ -218,15 +167,19 @@ public class ProjectServiceTest {
         Project firstProject = testObject.createNewProject("first", user);
         Project secondProject = testObject.createNewProject("second", user);
 
+        Project otherProject = TestUtils.persistProjectWithCreator("other-project");
+
         List<Project> result = testObject.findAllForUserFlat(user);
 
         assertEquals(2, result.size());
         assertTrue(result.stream().anyMatch(e -> e.getName().equals(firstProject.getName())));
         assertTrue(result.stream().anyMatch(e -> e.getName().equals(secondProject.getName())));
+
+        assertTrue(result.stream().noneMatch(e -> e.getName().equals(otherProject.getName())));
     }
 
     @Test
-    public void addFilesToProject() throws Exception {
+    public void addFilesToProject() {
 
         final String filename = "filename";
         final String contentType = "content-type";
@@ -236,14 +189,25 @@ public class ProjectServiceTest {
         List<FileItem> items = new ArrayList<>();
         items.add(TestUtils.mockFileItem(filename, contentType, size));
 
-        Project result = testObject.addFilesToProject(items, project);
+        Project result = testObject.addFilesToProject(items, project, project.getCreator());
 
         assertEquals(project.getId(), result.getId());
         assertEquals(1, project.getFiles().size());
     }
 
+    @Test(expected = ForbiddenException.class)
+    public void addFilesToProject_noPermission_forbiddenException() {
+
+        User user = TestUtils.persistUser("some-id");
+        Project project = TestUtils.persistProjectWithCreator("project", "auth-id");
+
+        testObject.addFilesToProject(null, project, user);
+
+        fail("user without permission should raise forbidden exception");
+    }
+
     @Test
-    public void addFilesToProject_errorWhilePersisting_cleanupFiles() throws Exception {
+    public void addFilesToProject_errorWhilePersisting_cleanupFiles() {
 
         final String filename = "filename";
         final String contentType = "content-type";
@@ -260,11 +224,14 @@ public class ProjectServiceTest {
         testObject.projectDAO = mock(ProjectDAO.class);
         when(testObject.projectDAO.persist(any())).thenThrow(new RuntimeException());
 
+        testObject.permissionService = mock(PermissionService.class);
+        when(testObject.permissionService.findWritePermission(any(), anyString())).thenReturn(new Permission());
+
         List<FileItem> items = new ArrayList<>();
         items.add(TestUtils.mockFileItem(filename, contentType, size));
 
         try {
-            testObject.addFilesToProject(items, new Project());
+            testObject.addFilesToProject(items, new Project(), new Agent());
             fail("exception while persisting project should raise exception and delete written files");
         } catch (Exception e) {
             verify(repository).removeFiles(any());
@@ -272,7 +239,7 @@ public class ProjectServiceTest {
     }
 
     @Test
-    public void getFileStream_inputStream() throws Exception {
+    public void getFileStream_inputStream() {
 
         Project project = TestUtils.persistProjectWithCreator("test");
         project = addFileEntry(project);
@@ -283,25 +250,22 @@ public class ProjectServiceTest {
         when(repository.getFileStream(any())).thenReturn(mock(FileInputStream.class));
         when(testObject.repositoryFactory.getRepository(any())).thenReturn(repository);
 
-        InputStream result = testObject.getFileStream(project, entry);
+        InputStream result = testObject.getFileStream(project, entry, project.getCreator());
         assertNotNull(result);
     }
 
-    @Test
+    @Test(expected = ForbiddenException.class)
     public void removeFile_fileNotPartOfProject_exception() {
 
         Project project = TestUtils.persistProjectWithCreator("test");
-        try {
-            testObject.removeFileFromProject(project.getId(), "test", project.getCreator());
-        } catch (CodedException e) {
-            assertEquals(Error.RESOURCE_NOT_FOUND, e.getErrorCode());
-            return;
-        }
+
+        testObject.removeFileFromProject(project.getId(), "test", project.getCreator());
+
         fail("should have thrown exception");
     }
 
     @Test
-    public void removeFile_fileIsRemoved() throws Exception {
+    public void removeFile_fileIsRemoved() {
         Project project = TestUtils.persistProjectWithCreator("test");
         project = addFileEntry(project);
         FileEntry entry = project.getFiles().iterator().next();
@@ -320,8 +284,7 @@ public class ProjectServiceTest {
 
     private Project addFileEntry(Project project) {
         FileEntry entry = new FileEntry();
-        project.getFiles().add(entry);
-        entry.setProject(project);
+        project.addFileEntry(entry);
         return projectDAO.persist(project);
     }
 }

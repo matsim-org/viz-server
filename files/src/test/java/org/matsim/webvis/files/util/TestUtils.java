@@ -33,20 +33,30 @@ public class TestUtils {
     private static ProjectDAO projectDAO = new ProjectDAO();
     private static ProjectService projectService = new ProjectService();
 
-    public static Project persistProjectWithCreator(String name) {
+    public static Project persistProjectWithCreator(String projectName, String creatorsAuthId) {
         User user = new User();
-        user.setAuthId("some-auth-id");
+        user.setAuthId(creatorsAuthId);
         try {
             userDAO.persist(user);
         } catch (Exception e) {
-            fail("failed to persist user.");
+            fail("failed to persist user with auth id: " + creatorsAuthId);
         }
         try {
-            return projectService.createNewProject(name, user);
+            return projectService.createNewProject(projectName, user);
         } catch (Exception e) {
-            fail("Failed to create project with name: " + name);
+            fail("Failed to create project with name: " + projectName);
         }
         return null;
+    }
+
+    public static Project persistProjectWithCreator(String projectName) {
+        return persistProjectWithCreator(projectName, "some-auth-id");
+    }
+
+    public static User persistUser(String authId) {
+        User user = new User();
+        user.setAuthId(authId);
+        return userDAO.persist(user);
     }
 
     public static Project addFileEntry(Project project) {

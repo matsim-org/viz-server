@@ -5,6 +5,9 @@ import org.apache.http.HttpStatus;
 import org.junit.Before;
 import org.junit.Test;
 import org.matsim.webvis.common.communication.ContentType;
+import org.matsim.webvis.common.service.CodedException;
+import org.matsim.webvis.common.service.Error;
+import org.matsim.webvis.common.service.InvalidInputException;
 import org.matsim.webvis.files.communication.AuthenticationResult;
 import org.matsim.webvis.files.communication.Subject;
 import org.matsim.webvis.files.entities.FileEntry;
@@ -20,8 +23,7 @@ import javax.servlet.WriteListener;
 import javax.servlet.http.HttpServletResponse;
 import java.io.InputStream;
 
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertTrue;
+import static junit.framework.TestCase.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -34,7 +36,7 @@ public class FileDownloadRequestHandlerTest {
         testObject = new FileDownloadRequestHandler();
     }
 
-    @Test
+    @Test(expected = InvalidInputException.class)
     public void handle_wrongContentType_invalidRequest() {
         Request req = mock(Request.class);
         when(req.contentType()).thenReturn("something-wrong");
@@ -43,10 +45,10 @@ public class FileDownloadRequestHandlerTest {
 
         testObject.handle(req, res);
 
-        verify(res).status(HttpStatus.SC_BAD_REQUEST);
+        fail("invalid input should yield invalid input exception.");
     }
 
-    @Test
+    @Test(expected = InvalidInputException.class)
     public void handle_parsingError_invalidRequest() {
         Request req = mock(Request.class);
         when(req.contentType()).thenReturn(ContentType.APPLICATION_JSON);
@@ -56,14 +58,16 @@ public class FileDownloadRequestHandlerTest {
 
         testObject.handle(req, res);
 
-        verify(res).status(HttpStatus.SC_BAD_REQUEST);
+        fail("invalid input should yield invalid input exception.");
     }
 
     @Test
-    public void handle_errorWhileCreatingInputStream_internalError() throws Exception {
+    public void handle_fileNotFound_codedException() {
 
+        Project project = new Project();
         testObject.projectService = mock(ProjectService.class);
-        when(testObject.projectService.getFileStream(any(), any())).thenThrow(new Exception("e"));
+        when(testObject.projectService.getFileStream(any(), any(), any())).thenThrow(new CodedException("e", "error"));
+        when(testObject.projectService.find(any(), any())).thenReturn(project);
 
         Request req = mock(Request.class);
         when(req.contentType()).thenReturn(ContentType.APPLICATION_JSON);
@@ -71,6 +75,40 @@ public class FileDownloadRequestHandlerTest {
         FileRequest body = new FileRequest("id", "pid");
         when(req.body()).thenReturn(new Gson().toJson(body));
         when(req.attribute(any())).thenReturn(new AuthenticationResult());
+
+        User subject = new User();
+        Subject.userService = mock(UserService.class);
+        when(Subject.userService.findByIdentityProviderId(any())).thenReturn(subject);
+
+        Response res = mock(Response.class);
+
+        try {
+            testObject.handle(req, res);
+            fail("file not found should yield exception");
+        } catch (CodedException e) {
+            assertEquals(Error.RESOURCE_NOT_FOUND, e.getErrorCode());
+        }
+    }
+
+    @Test(expected = CodedException.class)
+    public void handle_errorWhileCreatingInputStream_internalError() {
+
+        testObject.projectService = mock(ProjectService.class);
+        when(testObject.projectService.getFileStream(any(), any(), any())).thenThrow(new CodedException("e", "error"));
+
+        Request req = mock(Request.class);
+        when(req.contentType()).thenReturn(ContentType.APPLICATION_JSON);
+
+        FileRequest body = new FileRequest("id", "pid");
+        when(req.body()).thenReturn(new Gson().toJson(body));
+        when(req.attribute(any())).thenReturn(new AuthenticationResult());
+
+        FileEntry entry = new FileEntry();
+        entry.setId(body.getFileId());
+        Project project = new Project();
+        project.setId(body.getProjectId());
+        project.getFiles().add(entry);
+        when(testObject.projectService.find(any(), any())).thenReturn(project);
 
         User subject = new User();
         Subject.userService = mock(UserService.class);
@@ -93,8 +131,7 @@ public class FileDownloadRequestHandlerTest {
             }
         };
         testObject.projectService = mock(ProjectService.class);
-        when(testObject.projectService.getFileStream(any(), any())).thenReturn(inStream);
-
+        when(testObject.projectService.getFileStream(any(), any(), any())).thenReturn(inStream);
 
         Request req = mock(Request.class);
         when(req.contentType()).thenReturn(ContentType.APPLICATION_JSON);
@@ -136,7 +173,7 @@ public class FileDownloadRequestHandlerTest {
 
         Object result = testObject.handle(req, res);
 
-        assertTrue(result instanceof String);
-        assertEquals("OK", (String) result);
+        assertTrue(result instanceof Integer);
+        assertEquals(HttpStatus.SC_OK, (int) result);
     }
 }

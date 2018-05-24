@@ -4,18 +4,19 @@ import org.apache.http.HttpStatus;
 import org.junit.Before;
 import org.junit.Test;
 import org.matsim.webvis.common.communication.Answer;
-import org.matsim.webvis.common.database.AbstractEntity;
+import org.matsim.webvis.common.service.ForbiddenException;
 import org.matsim.webvis.files.communication.Subject;
 import org.matsim.webvis.files.entities.Project;
 import org.matsim.webvis.files.entities.User;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -30,24 +31,22 @@ public class ProjectRequestHandlerTest {
     }
 
     @Test
-    public void projectIdsSupplied_AnswerOk() {
+    public void projectIdSupplied_AnswerOk() throws ForbiddenException {
 
-        List<Project> projects = new ArrayList<>();
-        projects.add(createProject("first"));
-        projects.add(createProject("second"));
-        when(testObject.projectService.find(anyList(), any())).thenReturn(projects);
-        ProjectRequest body = new ProjectRequest();
-        body.projectIds = projects.stream().map(AbstractEntity::getId).collect(Collectors.toList());
+        Project project = createProject("first");
+        when(testObject.projectService.find(anyString(), any())).thenReturn(project);
+        ProjectRequest body = new ProjectRequest(project.getId());
         Subject subject = new Subject(null, new User());
 
         Answer answer = testObject.process(body, subject);
 
-        assertEquals(answer.getResponse(), projects);
+        assertTrue(answer.getResponse() instanceof Collection);
+        assertEquals(1, ((Collection) answer.getResponse()).size());
         assertEquals(HttpStatus.SC_OK, answer.getStatusCode());
     }
 
     @Test
-    public void noProjectIds_AnswerOk_allProjects() {
+    public void noProjectId_AnswerOk_allProjects() {
 
         List<Project> projects = new ArrayList<>();
         projects.add(createProject("first"));

@@ -3,6 +3,7 @@ package org.matsim.webvis.files.visualization;
 import org.junit.*;
 import org.matsim.webvis.common.service.CodedException;
 import org.matsim.webvis.common.service.Error;
+import org.matsim.webvis.common.service.ForbiddenException;
 import org.matsim.webvis.files.entities.Project;
 import org.matsim.webvis.files.entities.User;
 import org.matsim.webvis.files.entities.Visualization;
@@ -109,7 +110,7 @@ public class VisualizationServiceTest {
         assertEquals(viz.getType().getKey(), result.getType().getKey());
     }
 
-    @Test
+    @Test(expected = ForbiddenException.class)
     public void find_userNotAllowed_exception() {
         Project project = TestUtils.persistProjectWithCreator("bla");
 
@@ -119,20 +120,19 @@ public class VisualizationServiceTest {
         project = projectDAO.persist(project);
         viz = project.getVisualizations().iterator().next();
 
-        try {
-            testObject.find(viz.getId(), new User());
-            fail("forbidden user should cause exception");
-        } catch (CodedException e) {
-            assertEquals(Error.FORBIDDEN, e.getErrorCode());
-        }
+        User otherUser = TestUtils.persistUser("other-id");
+
+        testObject.find(viz.getId(), otherUser);
+        fail("forbidden user should cause exception");
     }
 
-    @Test
+    @Test(expected = ForbiddenException.class)
     public void find_idNotPresent_exception() {
-        try {
-            testObject.find("someid", new User());
-        } catch (CodedException e) {
-            assertEquals(Error.RESOURCE_NOT_FOUND, e.getErrorCode());
-        }
+
+        User user = TestUtils.persistUser("some-id");
+
+        testObject.find("someid", user);
+
+        fail("should throw forbidden exception");
     }
 }

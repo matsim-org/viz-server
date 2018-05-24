@@ -2,6 +2,8 @@ package org.matsim.webvis.common.communication;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
+import org.matsim.webvis.common.service.InvalidInputException;
 import spark.Response;
 
 import java.util.Map;
@@ -20,12 +22,16 @@ public class JsonHelper {
     static <T> T parseJson(String json, Class<T> parseTo, Gson parser) {
 
         if (parser == null) parser = gson;
-        T result = parser.fromJson(json, parseTo);
-        if (result == null) throw new IllegalArgumentException("no json-body present");
-        return result;
+        try {
+            T result = parser.fromJson(json, parseTo);
+            if (result == null) throw new InvalidInputException("no json-body present");
+            return result;
+        } catch (JsonSyntaxException e) {
+            throw new InvalidInputException("invalid JSON syntax.");
+        }
     }
 
-    public static Object createJsonResponse(Answer answer, Response response) {
+    static Object createJsonResponse(Answer answer, Response response) {
         return createJsonResponse(answer, response, null);
     }
 

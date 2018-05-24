@@ -3,7 +3,6 @@ package org.matsim.webvis.files.entities;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-import org.matsim.webvis.common.database.AbstractEntity;
 
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
@@ -17,7 +16,7 @@ import javax.persistence.UniqueConstraint;
 @Table(uniqueConstraints =
         {@UniqueConstraint(columnNames = {"project_id", "userFileName"}),
                 @UniqueConstraint(columnNames = {"project_id", "persistedFileName"})})
-public class FileEntry extends AbstractEntity {
+public class FileEntry extends Resource {
 
     private String userFileName;
     private String persistedFileName;

@@ -1,11 +1,12 @@
 package org.matsim.webvis.files.file;
 
 import org.apache.commons.io.IOUtils;
-import org.matsim.webvis.common.communication.Answer;
 import org.matsim.webvis.common.communication.ContentType;
+import org.matsim.webvis.common.communication.HttpStatus;
 import org.matsim.webvis.common.communication.JsonHelper;
-import org.matsim.webvis.common.communication.RequestError;
+import org.matsim.webvis.common.service.CodedException;
 import org.matsim.webvis.common.service.Error;
+import org.matsim.webvis.common.service.InvalidInputException;
 import org.matsim.webvis.files.communication.Subject;
 import org.matsim.webvis.files.entities.FileEntry;
 import org.matsim.webvis.files.entities.Project;
@@ -25,41 +26,26 @@ public class FileDownloadRequestHandler implements Route {
     @Override
     public Object handle(Request request, Response response) {
 
-        if (!ContentType.isJson(request.contentType())) {
-            return JsonHelper.createJsonResponse(
-                    Answer.badRequest(RequestError.INVALID_REQUEST, "only content-type: 'application/json' allowed"),
-                    response);
-        }
-        FileRequest body;
-        try {
-            body = JsonHelper.parseJson(request.body(), FileRequest.class);
-        } catch (RuntimeException e) {
-            return JsonHelper.createJsonResponse(Answer.badRequest(RequestError.INVALID_REQUEST,
-                    "error while parsing message body"), response);
-        }
+        if (!ContentType.isJson(request.contentType()))
+            throw new InvalidInputException("only content-type: 'application/json' allowed");
+
+        FileRequest body = JsonHelper.parseJson(request.body(), FileRequest.class);
         Subject subject = Subject.getSubject(request);
+        Project project = projectService.find(body.getProjectId(), subject.getUser());
 
-        try {
+        FileEntry fileEntry = project.getFiles().stream().filter(file -> file.getId().equals(body.getFileId())).findFirst()
+                .orElseThrow(() -> new CodedException(Error.RESOURCE_NOT_FOUND, "file not found."));
+        response.type(fileEntry.getContentType());
 
-            Project project = projectService.find(body.getProjectId(), subject.getUser());
-            @SuppressWarnings("ConstantConditions")
-            FileEntry fileEntry = project.getFiles().stream().filter(file -> file.getId().equals(body.getFileId())).findFirst().get();
-            response.type(fileEntry.getContentType());
-
-            try (InputStream inStream = projectService.getFileStream(project, fileEntry);
-                 OutputStream outStream = response.raw().getOutputStream()
-            ) {
-                IOUtils.copy(inStream, outStream);
-                outStream.flush();
-            } catch (IOException e) {
-                return JsonHelper.createJsonResponse(
-                        Answer.internalError(Error.UNSPECIFIED_ERROR, "something went wrong"),
-                        response);
-            }
-        } catch (Exception e) {
-            return JsonHelper.createJsonResponse(
-                    Answer.badRequest(RequestError.INVALID_REQUEST, e.getMessage()), response);
+        try (InputStream inStream = projectService.getFileStream(project, fileEntry, subject.getUser());
+             OutputStream outStream = response.raw().getOutputStream()
+        ) {
+            IOUtils.copy(inStream, outStream);
+            outStream.flush();
+        } catch (IOException e) {
+            throw new CodedException(Error.UNSPECIFIED_ERROR, "sorry, something went wrong.");
         }
-        return "OK";
+
+        return HttpStatus.OK;
     }
 }

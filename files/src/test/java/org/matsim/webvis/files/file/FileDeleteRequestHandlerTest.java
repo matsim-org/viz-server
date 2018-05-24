@@ -11,6 +11,7 @@ import org.matsim.webvis.files.entities.User;
 import org.matsim.webvis.files.project.ProjectService;
 import org.matsim.webvis.files.util.TestUtils;
 
+import static junit.framework.TestCase.fail;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -48,7 +49,7 @@ public class FileDeleteRequestHandlerTest {
         assertEquals(HttpStatus.SC_BAD_REQUEST, answer.getStatusCode());
     }
 
-    @Test
+    @Test(expected = CodedException.class)
     public void process_removeInServiceThrowsException_internalError() throws CodedException {
 
         FileRequest request = new FileRequest("id", "id");
@@ -57,7 +58,7 @@ public class FileDeleteRequestHandlerTest {
 
         Answer answer = testObject.process(request, subject);
 
-        assertEquals(HttpStatus.SC_INTERNAL_SERVER_ERROR, answer.getStatusCode());
+        fail("failing service call should result in exception");
     }
 
     @Test

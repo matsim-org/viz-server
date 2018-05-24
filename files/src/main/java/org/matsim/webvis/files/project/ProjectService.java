@@ -5,12 +5,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.matsim.webvis.common.service.CodedException;
 import org.matsim.webvis.common.service.Error;
-import org.matsim.webvis.common.service.ForbiddenException;
-import org.matsim.webvis.files.entities.FileEntry;
-import org.matsim.webvis.files.entities.Project;
-import org.matsim.webvis.files.entities.User;
+import org.matsim.webvis.files.entities.*;
+import org.matsim.webvis.files.permission.PermissionService;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Optional;
@@ -21,21 +18,15 @@ public class ProjectService {
 
     ProjectDAO projectDAO = new ProjectDAO();
     RepositoryFactory repositoryFactory = new RepositoryFactory();
+    PermissionService permissionService = new PermissionService();
 
-    private static void validate(Project project, User creator) throws CodedException {
-        if (isNull(project)) throw new CodedException(Error.RESOURCE_NOT_FOUND, "could not find project");
-        if (!isCreator(project, creator)) throw new ForbiddenException("user is not creator");
-    }
-
-    private static boolean isNull(Project project) {
-        return project == null;
-    }
-
-    public Project createNewProject(String projectName, User creator) throws CodedException {
+    public Project createNewProject(String projectName, User creator) {
 
         Project project = new Project();
         project.setName(projectName);
         project.setCreator(creator);
+        Permission permission = PermissionService.createUserPermission(project, creator, Permission.Type.Delete);
+        project.addPermission(permission);
         try {
             return projectDAO.persist(project);
         } catch (Exception e) {
@@ -43,24 +34,16 @@ public class ProjectService {
         }
     }
 
-    Project findFlat(String projectId, User creator) throws CodedException {
-        Project result = projectDAO.findFlat(projectId);
-        validate(result, creator);
-        return result;
+    Project findFlat(String projectId, User creator) {
+
+        permissionService.findReadPermission(creator, projectId);
+        return projectDAO.findFlat(projectId);
     }
 
-    public Project find(String projectId, User creator) throws CodedException {
-        Project result = projectDAO.find(projectId);
-        validate(result, creator);
-        return result;
-    }
+    public Project find(String projectId, User creator) {
 
-    List<Project> find(List<String> projectIds, User user) {
-        return projectDAO.find(projectIds, user);
-    }
-
-    private static boolean isCreator(Project project, User user) {
-        return project.getCreator().getId().equals(user.getId());
+        permissionService.findReadPermission(creator, projectId);
+        return projectDAO.find(projectId);
     }
 
     List<Project> findAllForUserFlat(User user) {
@@ -68,7 +51,9 @@ public class ProjectService {
     }
 
 
-    public Project addFilesToProject(List<FileItem> items, Project project) throws Exception {
+    public Project addFilesToProject(List<FileItem> items, Project project, Agent agent) {
+
+        permissionService.findWritePermission(agent, project.getId());
 
         ProjectRepository repository = repositoryFactory.getRepository(project);
         List<FileEntry> entries = repository.addFiles(items);
@@ -78,16 +63,21 @@ public class ProjectService {
             return projectDAO.persist(project);
         } catch (Exception e) {
             repository.removeFiles(entries);
-            throw new Exception("Error while persisting project", e);
+            throw new CodedException(Error.UNSPECIFIED_ERROR, "Error while persisting project");
         }
     }
 
-    public InputStream getFileStream(Project project, FileEntry file) throws Exception {
+    public InputStream getFileStream(Project project, FileEntry file, Agent agent) {
+
+        permissionService.findReadPermission(agent, file.getId());
+
         ProjectRepository repository = repositoryFactory.getRepository(project);
         return repository.getFileStream(file);
     }
 
-    public Project removeFileFromProject(String projectId, String fileId, User creator) throws CodedException {
+    public Project removeFileFromProject(String projectId, String fileId, User creator) {
+
+        permissionService.findDeletePermission(creator, fileId);
 
         Project project = find(projectId, creator);
         Optional<FileEntry> optional = project.getFiles().stream().filter(e -> e.getId().equals(fileId)).findFirst();
@@ -95,12 +85,8 @@ public class ProjectService {
             throw new CodedException(Error.RESOURCE_NOT_FOUND, "fileId not present");
         }
 
-        try {
-            ProjectRepository repository = this.repositoryFactory.getRepository(project);
-            repository.removeFile(optional.get());
-        } catch (IOException e) {
-            throw new CodedException(Error.UNSPECIFIED_ERROR, "Could not remove file.");
-        }
+        ProjectRepository repository = this.repositoryFactory.getRepository(project);
+        repository.removeFile(optional.get());
         project.removeFileEntry(optional.get());
         return projectDAO.persist(project);
     }

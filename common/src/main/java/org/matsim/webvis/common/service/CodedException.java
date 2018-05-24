@@ -5,7 +5,7 @@ import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class CodedException extends Exception {
+public class CodedException extends RuntimeException {
 
     private final String errorCode;
 

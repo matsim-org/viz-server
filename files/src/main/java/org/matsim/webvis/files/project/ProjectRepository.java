@@ -3,20 +3,19 @@ package org.matsim.webvis.files.project;
 import org.apache.commons.fileupload.FileItem;
 import org.matsim.webvis.files.entities.FileEntry;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
 
 public interface ProjectRepository {
 
-    List<FileEntry> addFiles(Collection<FileItem> items) throws Exception;
+    List<FileEntry> addFiles(Collection<FileItem> items);
 
-    FileEntry addFile(FileItem item) throws Exception;
+    FileEntry addFile(FileItem item);
 
-    InputStream getFileStream(FileEntry fileEntry) throws IOException;
+    InputStream getFileStream(FileEntry fileEntry);
 
-    void removeFiles(Collection<FileEntry> entries) throws IOException;
+    void removeFiles(Collection<FileEntry> entries);
 
-    void removeFile(FileEntry entry) throws IOException;
+    void removeFile(FileEntry entry);
 }

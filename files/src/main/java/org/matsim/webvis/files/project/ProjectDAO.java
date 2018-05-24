@@ -24,6 +24,7 @@ public class ProjectDAO extends DAO {
                 .where(project.id.eq(projectId))
                 .leftJoin(project.files, fileEntry).fetchJoin()
                 .leftJoin(project.visualizations, visualization).fetchJoin()
+                .leftJoin(project.permissions).fetchJoin()
                 .fetchOne());
     }
 
@@ -50,10 +51,13 @@ public class ProjectDAO extends DAO {
         );
     }
 
-    List<Project> findAllForUserFlat(User user) {
+    List<Project> findAllForUserFlat(Agent agent) {
+
         QProject project = QProject.project;
+        QPermission permission = QPermission.permission;
+
         return database.executeQuery(query -> query.selectFrom(project)
-                .where(project.creator.eq(user))
+                .innerJoin(project.permissions, permission).on(permission.agent.eq(agent))
                 .distinct()
                 .fetch()
         );
