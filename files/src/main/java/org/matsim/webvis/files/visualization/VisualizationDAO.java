@@ -27,6 +27,19 @@ public class VisualizationDAO extends DAO {
                 .fetchOne());
     }
 
+    List<Visualization> findAllByTypeIfHasPermission(String key, Agent agent) {
+
+        QVisualization visualization = QVisualization.visualization;
+        QPermission permission = QPermission.permission;
+
+        return database.executeQuery(query -> query.selectFrom(visualization)
+                .where(visualization.type.key.eq(key))
+                .innerJoin(visualization.permissions, permission).on(permission.agent.eq(agent))
+                .distinct()
+                .fetch()
+        );
+    }
+
     VisualizationType findType(String key) {
         QVisualizationType type = QVisualizationType.visualizationType;
 
@@ -34,6 +47,7 @@ public class VisualizationDAO extends DAO {
                 .where(type.key.eq(key))
                 .fetchOne());
     }
+
 
     List<VisualizationType> findAllTypes() {
         QVisualizationType type = QVisualizationType.visualizationType;

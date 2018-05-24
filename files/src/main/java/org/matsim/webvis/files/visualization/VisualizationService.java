@@ -16,22 +16,6 @@ public class VisualizationService {
     private VisualizationDAO visualizationDAO = new VisualizationDAO();
     private PermissionService permissionService = new PermissionService();
 
-    private static void addInput(Visualization viz, Project project, CreateVisualizationRequest request) {
-
-        request.getInputFiles().forEach((key, value) -> {
-            FileEntry file = project.getFileEntry(value);
-            VisualizationInput input = new VisualizationInput(key, file, viz);
-            viz.addInput(input);
-        });
-    }
-
-    private static void addParameters(Visualization viz, CreateVisualizationRequest request) {
-        request.getInputParameters().forEach((key, value) -> {
-            VisualizationParameter parameter = new VisualizationParameter(key, value);
-            viz.addParameter(parameter);
-        });
-    }
-
     public VisualizationType persistType(VisualizationType type) {
         return visualizationDAO.persistType(type);
     }
@@ -80,5 +64,25 @@ public class VisualizationService {
         Visualization viz = visualizationDAO.find(vizId);
         validate(viz, user);
         return viz;
+    }
+
+    private static void addInput(Visualization viz, Project project, CreateVisualizationRequest request) {
+
+        request.getInputFiles().forEach((key, value) -> {
+            FileEntry file = project.getFileEntry(value);
+            VisualizationInput input = new VisualizationInput(key, file, viz);
+            viz.addInput(input);
+        });
+    }
+
+    private static void addParameters(Visualization viz, CreateVisualizationRequest request) {
+        request.getInputParameters().forEach((key, value) -> {
+            VisualizationParameter parameter = new VisualizationParameter(key, value);
+            viz.addParameter(parameter);
+        });
+    }
+
+    List<Visualization> findByType(String vizType, Agent agent) {
+        return visualizationDAO.findAllByTypeIfHasPermission(vizType, agent);
     }
 }

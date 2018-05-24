@@ -12,6 +12,7 @@ import org.matsim.webvis.files.project.ProjectDAO;
 import org.matsim.webvis.files.util.TestUtils;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static junit.framework.TestCase.*;
@@ -134,5 +135,49 @@ public class VisualizationServiceTest {
         testObject.find("someid", user);
 
         fail("should throw forbidden exception");
+    }
+
+    @Test
+    public void findByType_noSuchType_emtpyList() {
+
+        User user = TestUtils.persistUser("id");
+        String type = "some-type";
+
+        List<Visualization> result = testObject.findByType(type, user);
+
+        assertEquals(0, result.size());
+    }
+
+    @Test
+    public void findByType_agentDoesNotHavePermissionForViz_emtpyList() {
+
+        VisualizationType type = new VisualizationType();
+        type.setKey("key");
+        testObject.persistType(type);
+
+        User user = TestUtils.persistUser("id");
+
+        List<Visualization> result = testObject.findByType(type.getKey(), user);
+
+        assertEquals(0, result.size());
+    }
+
+    @Test
+    public void findByType_allGood_listOfVisualizations() {
+
+        VisualizationType type = new VisualizationType();
+        type.setKey("key");
+        type = testObject.persistType(type);
+
+        Project project = TestUtils.persistProjectWithCreator("project");
+
+        CreateVisualizationRequest create = new CreateVisualizationRequest(project.getId(), type.getKey(), new HashMap<>(), new HashMap<>());
+        Visualization viz = testObject.createVisualizationFromRequest(create, project.getCreator());
+
+        List<Visualization> result = testObject.findByType(type.getKey(), project.getCreator());
+
+        assertEquals(1, result.size());
+        Visualization resultViz = result.get(0);
+        assertEquals(viz, resultViz);
     }
 }
