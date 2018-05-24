@@ -30,6 +30,11 @@ public class StartSpark {
         options("/*", (request, response) -> "OK");
     }
 
+    /**
+     * if cors headers are required 'withPermissiveAccessControl' must be called first
+     *
+     * @param authHandler
+     */
     public static void withAuthHandler(Filter authHandler) {
         before(((request, response) -> {
             if (!request.requestMethod().equals("OPTIONS"))
