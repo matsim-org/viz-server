@@ -5,16 +5,15 @@ import org.junit.Test;
 import org.matsim.webvis.common.communication.Answer;
 import org.matsim.webvis.common.communication.ErrorResponse;
 import org.matsim.webvis.common.communication.HttpStatus;
-import org.matsim.webvis.common.communication.RequestError;
 import org.matsim.webvis.common.service.CodedException;
 import org.matsim.webvis.common.service.Error;
+import org.matsim.webvis.common.service.InvalidInputException;
 import org.matsim.webvis.files.communication.Subject;
 import org.matsim.webvis.files.entities.Project;
 import org.matsim.webvis.files.entities.User;
 import org.matsim.webvis.files.user.UserService;
 
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertTrue;
+import static junit.framework.TestCase.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -30,20 +29,18 @@ public class CreateProjectRequestHandlerTest {
         testObject = new CreateProjectRequestHandler();
     }
 
-    @Test
-    public void process_noProjectName_answerBadRequest() {
+    @Test(expected = InvalidInputException.class)
+    public void process_noProjectName_invalidInputException() {
 
         CreateProjectRequest request = new CreateProjectRequest("");
 
-        Answer answer = testObject.process(request, null);
+        testObject.process(request, null);
 
-        assertEquals(HttpStatus.BAD_REQUEST, answer.getStatusCode());
-        assertTrue(answer.getResponse() instanceof ErrorResponse);
-        assertEquals(RequestError.INVALID_REQUEST, ((ErrorResponse) answer.getResponse()).getError());
+        fail("invalid input should cause exception");
     }
 
     @Test
-    public void process_createNewProjectThrowsException_answerResourceExists() throws CodedException {
+    public void process_createNewProjectThrowsException_answerConflict() throws CodedException {
 
         CreateProjectRequest request = new CreateProjectRequest("name");
         testObject.projectService = mock(ProjectService.class);

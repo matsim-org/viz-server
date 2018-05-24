@@ -165,16 +165,12 @@ public class VisualizationServiceTest {
     @Test
     public void findByType_allGood_listOfVisualizations() {
 
-        VisualizationType type = new VisualizationType();
-        type.setKey("key");
-        type = testObject.persistType(type);
-
         Project project = TestUtils.persistProjectWithCreator("project");
 
-        CreateVisualizationRequest create = new CreateVisualizationRequest(project.getId(), type.getKey(), new HashMap<>(), new HashMap<>());
+        CreateVisualizationRequest create = new CreateVisualizationRequest(project.getId(), typeKey, new HashMap<>(), new HashMap<>());
         Visualization viz = testObject.createVisualizationFromRequest(create, project.getCreator());
 
-        List<Visualization> result = testObject.findByType(type.getKey(), project.getCreator());
+        List<Visualization> result = testObject.findByType(typeKey, project.getCreator());
 
         assertEquals(1, result.size());
         Visualization resultViz = result.get(0);
