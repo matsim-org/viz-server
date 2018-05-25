@@ -1,150 +1,201 @@
 package org.matsim.webvis.auth.token;
 
 import com.auth0.jwt.JWT;
-import org.junit.*;
-import org.matsim.webvis.auth.entities.*;
-import org.matsim.webvis.auth.relyingParty.RelyingPartyDAO;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.matsim.webvis.auth.config.ConfigRelyingParty;
+import org.matsim.webvis.auth.entities.RelyingParty;
+import org.matsim.webvis.auth.entities.Token;
+import org.matsim.webvis.auth.entities.User;
 import org.matsim.webvis.auth.relyingParty.RelyingPartyService;
-import org.matsim.webvis.auth.user.UserService;
 import org.matsim.webvis.auth.util.TestUtils;
+import org.matsim.webvis.common.service.UnauthorizedException;
 
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Date;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 public class TokenServiceTest {
 
-    private static String username = "mail";
-    private static char[] userpassword = "somepassword".toCharArray();
-    private static User user;
     private static TokenDAO tokenDAO = new TokenDAO();
+    private static RelyingPartyService rpService = new RelyingPartyService();
     private TokenService testObject;
 
     @BeforeClass
     public static void setUpFixture() throws Exception {
         TestUtils.loadTestConfig();
-        UserService service = new UserService();
-        user = service.createUser(username, userpassword, userpassword);
-    }
-
-    @AfterClass
-    public static void tearDownFixture() {
-        UserService service = new UserService();
-        service.deleteUser(user);
-        new RelyingPartyDAO().removeAllRelyingParties();
     }
 
     @Before
-    public void setUp() throws Exception {
-        testObject = new TokenService();
+    public void setUp() {
+        testObject = TokenService.Instance;
         testObject.tokenDAO = spy(new TokenDAO());
     }
 
     @After
     public void tearDown() {
-        tokenDAO.removeAllTokensForUser(user);
+        tokenDAO.removeAllTokens();
+        TestUtils.removeAllRelyingParties();
+        TestUtils.removeAllUser();
     }
 
     @Test
-    public void grantWithPassword_allRight_accessToken() throws Exception {
+    public void grantWithPassword_allRight_accessToken() {
 
-        Token token = testObject.grantWithPassword(username, userpassword);
+        final String password = "longpassword";
+        final String name = "name";
+        User user = TestUtils.persistUser(name, password);
 
-        assertEquals(user.getId(), token.getUser().getId());
-        assertEquals("Bearer", token.getTokenType());
+        Token token = testObject.grantWithPassword(name, password.toCharArray());
+
+        assertEquals(user.getId(), token.getSubjectId());
         assertTrue(token.getExpiresAt().toEpochMilli() > 0);
-        assertFalse(token.getToken().isEmpty());
-        assertFalse(((AccessToken) token).getRefreshToken().isEmpty());
+        assertFalse(token.getTokenValue().isEmpty());
     }
 
-    @Test(expected = Exception.class)
-    public void grantWithPassword_authenticationFails_Exception() throws Exception {
+    @Test(expected = UnauthorizedException.class)
+    public void grantWithPassword_authenticationFails_Exception() {
 
-        testObject.grantWithPassword(username, "wrong password".toCharArray());
+        final String password = "longpassword";
+        final String name = "name";
+        TestUtils.persistUser(name, password);
+        testObject.grantWithPassword(name, "wrong password".toCharArray());
 
         fail("grantWithPassword should have thrown exception if password is wrong");
     }
 
+    @Test(expected = UnauthorizedException.class)
+    public void grantWithClientCredentials_authenticationFails_unauthorizedException() {
+
+        final String id = "rpId";
+        final String secret = "secret";
+        RelyingParty party = rpService.createRelyingParty(new ConfigRelyingParty(id, "name", secret));
+        ClientCredentialsGrantRequest request = new ClientCredentialsGrantRequest(TestUtils.mockTokenRequest(id, "wrong-secret"));
+
+        testObject.grantWithClientCredentials(request);
+
+        fail("authentication failure should cause exception");
+    }
+
     @Test
-    public void grantAccess_withoutRefreshtoken_accessToken() throws Exception {
+    public void grantWithClientCredential_allGood_Token() {
+
+        final String id = "rpId";
+        final String secret = "secret";
+        RelyingParty party = rpService.createRelyingParty(new ConfigRelyingParty(id, "name", secret));
+        ClientCredentialsGrantRequest request = new ClientCredentialsGrantRequest(TestUtils.mockTokenRequest(id, secret));
+
+        Token token = testObject.grantWithClientCredentials(request);
+
+        assertEquals(party.getId(), token.getSubjectId());
+    }
+
+    @Test
+    public void grantAccess_allGood_accessToken() {
+
+        User user = TestUtils.persistUser("mail", "longpassword");
 
         Token token = testObject.grantAccess(user);
 
-        User validated = testObject.validateIdToken(token.getToken());
-        assertEquals(user.getId(), validated.getId());
-        verify(testObject.tokenDAO).persist(eq(token));
+        assertEquals(user.getId(), token.getSubjectId());
+        verify(testObject.tokenDAO, atLeastOnce()).persist(eq(token));
     }
 
     @Test
-    public void createIdToken_withNonce_idToken() throws Exception {
+    public void createIdToken_withNonce_idToken() {
 
-        IdToken token = testObject.createIdToken(user, "somenonce");
+        User user = TestUtils.persistUser("mail", "longpassword");
 
-        verify(testObject.tokenDAO).persist(eq(token));
-        User validated = testObject.validateIdToken(token.getToken());
-        assertEquals(user.getId(), validated.getId());
+        Token token = testObject.createIdToken(user, "somenonce");
+
+        assertEquals(user.getId(), token.getSubjectId());
+        verify(testObject.tokenDAO, atLeastOnce()).persist(eq(token));
     }
 
     @Test
-    public void createIdToken_withoutNonce_idToken() throws Exception {
+    public void createIdToken_withoutNonce_idToken() {
 
-        IdToken token = testObject.createIdToken(user);
+        User user = TestUtils.persistUser("mail", "longpassword");
 
-        verify(testObject.tokenDAO).persist(eq(token));
-        User validated = testObject.validateIdToken(token.getToken());
-        assertEquals(user.getId(), validated.getId());
+        Token token = testObject.createIdToken(user);
+
+        assertEquals(user.getId(), token.getSubjectId());
+        verify(testObject.tokenDAO, atLeastOnce()).persist(eq(token));
     }
 
     @Test(expected = RuntimeException.class)
-    public void validateToken_invalidToken_runtimeException() throws Exception {
+    public void validateToken_invalidToken_runtimeException() {
 
         final String token = "invalid-token";
 
-        testObject.validateIdToken(token);
+        testObject.validateToken(token);
 
-        fail("invalid token should cause a runtime exception (e.g. JWTVerificationException");
+        fail("invalid JWT token should throw exception");
     }
 
-    @Test(expected = Exception.class)
-    public void validateToken_userNotPresent_runtimeException() throws Exception {
+    @Test(expected = RuntimeException.class)
+    public void validateToken_tokenExpired_runtimeException() {
 
-        String token = JWT.create().withSubject("10000").sign(TokenService.algorithm);
+        User user = TestUtils.persistUser("some", "longpassword");
+        String token = JWT.create()
+                .withSubject(user.getId())
+                .withExpiresAt(Date.from(Instant.now().minus(Duration.ofHours(1))))
+                .sign(TokenService.Instance.algorithm);
 
-        testObject.validateIdToken(token);
+        testObject.validateToken(token);
 
-        fail("invalid user id in token should throw exception e.g. NumberFormatException");
+        fail("expired token should cause exception");
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void validateToken_noTokenIdInToken_runtimeException() {
+
+        User user = TestUtils.persistUser("some", "longpassword");
+        String token = JWT.create()
+                .withSubject(user.getId())
+                .withExpiresAt(Date.from(Instant.now().plus(Duration.ofHours(1))))
+                .sign(TokenService.Instance.algorithm);
+
+        testObject.validateToken(token);
+
+        fail("invalid token should cause exception");
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void validateToken_validTokenButNotInDatabase_runtimeException() {
+
+        User user = TestUtils.persistUser("some", "longpassword");
+        String token = JWT.create()
+                .withSubject(user.getId())
+                .withExpiresAt(Date.from(Instant.now().plus(Duration.ofHours(1))))
+                .withJWTId("invalidJWTId")
+                .sign(TokenService.Instance.algorithm);
+
+        testObject.validateToken(token);
+
+        fail("invalid token should cause exception");
     }
 
     @Test
-    public void validateToken_validTokenUserPresent_user() throws Exception {
+    public void validateToken_validTokenAndFound_Token() {
 
-        String token = JWT.create().withSubject(user.getId()).sign(TokenService.algorithm);
+        User user = TestUtils.persistUser("some", "longpassword");
+        Token token = testObject.grantAccess(user);
 
-        User validated = testObject.validateIdToken(token);
+        Token result = testObject.validateToken(token.getTokenValue());
 
-        assertEquals(user.getId(), validated.getId());
-    }
-
-    @Test
-    public void createAuthorizationCode_allRight_Token() {
-
-        List<URI> uris = new ArrayList<>();
-        uris.add(URI.create("http://callback.uri"));
-        Client client = new RelyingPartyService().createClient("some name", uris);
-
-        AuthorizationCode token = testObject.createAuthorizationCode(user, client.getId());
-
-        verify(testObject.tokenDAO).persist(token, client.getId());
-        assertEquals(client.getId(), token.getClient().getId());
+        assertEquals(token.getTokenValue(), result.getTokenValue());
     }
 
     @Test
     public void findToken_noToken_null() {
 
-        Token result = testObject.getToken("some token");
+        Token result = testObject.findToken("some token");
 
         assertNull(result);
     }
@@ -152,28 +203,12 @@ public class TokenServiceTest {
     @Test
     public void findToken_hasToken_token() {
 
+        User user = TestUtils.persistUser("some", "longpassword");
         Token token = testObject.createIdToken(user);
 
-        Token found = testObject.getToken(token.getToken());
+        Token found = testObject.findToken(token.getTokenValue());
 
         assertNotNull(found);
         assertEquals(token.getId(), token.getId());
-    }
-
-    @Test
-    public void findAccessToken_noToken_null() {
-        AccessToken result = testObject.findAccessToken("some-token-value");
-
-        assertNull(result);
-    }
-
-    @Test
-    public void findAccessToken_hasToken_accessToken() {
-        AccessToken token = testObject.grantAccess(user);
-
-        AccessToken found = testObject.findAccessToken(token.getToken());
-
-        assertNotNull(found);
-        assertEquals(token.getId(), found.getId());
     }
 }

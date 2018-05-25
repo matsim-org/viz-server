@@ -1,6 +1,12 @@
 package org.matsim.webvis.auth.util;
 
 import org.matsim.webvis.auth.config.Configuration;
+import org.matsim.webvis.auth.entities.User;
+import org.matsim.webvis.auth.helper.BasicAuthentication;
+import org.matsim.webvis.auth.relyingParty.RelyingPartyDAO;
+import org.matsim.webvis.auth.token.TokenRequest;
+import org.matsim.webvis.auth.user.UserDAO;
+import org.matsim.webvis.auth.user.UserService;
 import spark.QueryParamsMap;
 import spark.Request;
 
@@ -8,12 +14,18 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.Base64;
 import java.util.Map;
 
+import static junit.framework.TestCase.fail;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 public class TestUtils {
+
+    private static UserService userService = new UserService();
+    private static UserDAO userDAO = new UserDAO();
+    private static RelyingPartyDAO relyingPartyDAO = new RelyingPartyDAO();
 
     public static QueryParamsMap mockQueryParamsMap(Map<String, String[]> parameterMap) {
         HttpServletRequest servletRequest = mock(HttpServletRequest.class);
@@ -45,6 +57,16 @@ public class TestUtils {
         return result;
     }
 
+    public static TokenRequest mockTokenRequest(String clientPrincipal, String clientCredential) {
+
+        String auth = encodeBasicAuth(clientPrincipal, clientCredential);
+        BasicAuthentication basicAuth = new BasicAuthentication(auth);
+        TokenRequest request = mock(TokenRequest.class);
+        when(request.getBasicAuth()).thenReturn(basicAuth);
+        when(request.getGrantType()).thenReturn("some-grant-type");
+        return request;
+    }
+
     public static void loadTestConfig() throws UnsupportedEncodingException, FileNotFoundException {
         Configuration.loadTestConfig(getTestConfigPath());
     }
@@ -64,5 +86,26 @@ public class TestUtils {
     @SuppressWarnings("ConstantConditions")
     public static String getResourcePath(String resourceFile) throws UnsupportedEncodingException {
         return URLDecoder.decode(TestUtils.class.getClassLoader().getResource(resourceFile).getFile(), "UTF-8");
+    }
+
+    public static String encodeBasicAuth(String principal, String credential) {
+        return "Basic " + Base64.getEncoder().encodeToString((principal + ":" + credential).getBytes());
+    }
+
+    public static User persistUser(String eMail, String password) {
+        try {
+            return userService.createUser(eMail, password.toCharArray(), password.toCharArray());
+        } catch (Exception e) {
+            fail("Could not persist test user: " + eMail);
+            return null;
+        }
+    }
+
+    public static void removeAllUser() {
+        userDAO.removeAllUsers();
+    }
+
+    public static void removeAllRelyingParties() {
+        relyingPartyDAO.removeAllRelyingParties();
     }
 }

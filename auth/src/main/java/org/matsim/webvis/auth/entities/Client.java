@@ -20,8 +20,5 @@ public class Client extends RelyingParty {
     @OneToMany(mappedBy = "client", cascade = {CascadeType.ALL}, fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<RedirectUri> redirectUris = new HashSet<>();
 
-    @OneToMany(mappedBy = "client", cascade = {CascadeType.ALL}, fetch = FetchType.LAZY, orphanRemoval = true)
-    private Set<AuthorizationCode> authorizationCodes = new HashSet<>();
-
     enum ClientType {Confidential, Public}
 }

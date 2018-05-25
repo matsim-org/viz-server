@@ -4,6 +4,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.matsim.webvis.auth.Routes;
+import org.matsim.webvis.auth.entities.Token;
 import org.matsim.webvis.auth.entities.User;
 import org.matsim.webvis.auth.token.TokenService;
 import org.matsim.webvis.auth.util.TestUtils;
@@ -32,7 +33,7 @@ public class AuthorizationRequestHandlerTest {
     }
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         testObject = new AuthorizationRequestHandler();
         testObject.authService = mock(AuthorizationService.class);
         when(testObject.authService.isValidClientInformation(any())).thenReturn(true);
@@ -73,10 +74,10 @@ public class AuthorizationRequestHandlerTest {
     }
 
     @Test
-    public void handle_userIsNotLoggedIn_loginPrompt() throws Exception {
+    public void handle_userIsNotLoggedIn_loginPrompt() {
 
         Request req = AuthorizationTestUtils.mockRequestWithParams();
-        when(testObject.tokenService.validateIdToken(any())).thenThrow(new RuntimeException("message"));
+        when(testObject.tokenService.validateToken(any())).thenThrow(new RuntimeException("message"));
         Response res = mock(Response.class);
 
         Object result = testObject.handle(req, res);
@@ -85,10 +86,10 @@ public class AuthorizationRequestHandlerTest {
     }
 
     @Test
-    public void handle_unknownUser_loginPrompt() throws Exception {
+    public void handle_unknownUser_loginPrompt() {
 
         Request req = AuthorizationTestUtils.mockRequestWithParams();
-        when(testObject.tokenService.validateIdToken(any())).thenThrow(new Exception("user error"));
+        when(testObject.tokenService.validateToken(any())).thenThrow(new Exception("user error"));
         Response res = mock(Response.class);
 
         Object result = testObject.handle(req, res);
@@ -97,11 +98,11 @@ public class AuthorizationRequestHandlerTest {
     }
 
     @Test
-    public void handle_success_redirectWithParams() throws Exception {
+    public void handle_success_redirectWithParams() {
 
         User user = new User();
         URI uri = URI.create("http://resulting.uri");
-        when(testObject.tokenService.validateIdToken(any())).thenReturn(user);
+        when(testObject.tokenService.validateToken(any())).thenReturn(new Token());
         when(testObject.authService.generateResponse(any(), any())).thenReturn(uri);
 
         Request req = AuthorizationTestUtils.mockRequestWithParams();

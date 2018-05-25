@@ -2,20 +2,31 @@ package org.matsim.webvis.auth.token;
 
 
 import lombok.Getter;
+import org.matsim.webvis.auth.helper.BasicAuthentication;
 import org.matsim.webvis.common.communication.RequestWithParams;
-import org.matsim.webvis.common.service.InvalidInputException;
 import spark.Request;
 
-@Getter
-class TokenRequest extends RequestWithParams {
+public class TokenRequest extends RequestWithParams {
 
+    private Request request;
+
+    @Getter
     private String grantType;
-    private String username;
-    private String password;
+    @Getter
+    private BasicAuthentication basicAuth;
 
-    TokenRequest(Request request) throws InvalidInputException {
+
+    TokenRequest(Request request) {
+        basicAuth = new BasicAuthentication(request.headers(BasicAuthentication.HEADER_AUTHORIZATION));
         grantType = extractRequiredValue(OAuthParameters.GRANT_TYPE, request.queryMap());
-        username = extractRequiredValue(OAuthParameters.USERNAME, request.queryMap());
-        password = extractRequiredValue(OAuthParameters.PASSWORD, request.queryMap());
+        this.request = request;
+    }
+
+    public String getRequiredValue(String key) {
+        return extractRequiredValue(key, request.queryMap());
+    }
+
+    public String getOptionalValue(String key) {
+        return extractOptionalValue(key, request.queryMap());
     }
 }

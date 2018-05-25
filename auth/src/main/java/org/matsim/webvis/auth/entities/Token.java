@@ -4,23 +4,24 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.matsim.webvis.common.database.AbstractEntity;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import java.time.Instant;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @EqualsAndHashCode(callSuper = true)
 @Data
-public abstract class Token extends AbstractEntity {
-
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "TOKEN_USER_FK"))
-    User user;
+public class Token extends AbstractEntity {
 
     @Column(length = 10000)
-    String token;
-    String tokenType;
-    boolean consumed;
+    String tokenValue;
+
+    @Column(nullable = false)
+    String subjectId;
+
     Instant createdAt = Instant.now();
     Instant expiresAt;
 

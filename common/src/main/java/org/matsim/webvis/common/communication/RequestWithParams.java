@@ -12,7 +12,7 @@ public abstract class RequestWithParams {
         return "";
     }
 
-    protected String extractRequiredValue(String key, QueryParamsMap params) throws InvalidInputException {
+    protected String extractRequiredValue(String key, QueryParamsMap params) {
         if (!params.hasKey(key))
             throw new InvalidInputException(key + " missing");
         return params.get(key).value();

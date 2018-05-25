@@ -60,6 +60,10 @@ public class StartSpark {
                 JsonHelper.createJsonResponse(Answer.invalidRequest(e.getMessage()), response)
         );
 
+        exception(InternalException.class, (e, request, response) ->
+                JsonHelper.createJsonResponse(Answer.internalError(e.getErrorCode(), e.getMessage()), response)
+        );
+
         exception(CodedException.class, (e, request, response) ->
                 JsonHelper.createJsonResponse(Answer.internalError(e.getErrorCode(), e.getMessage()), response)
         );

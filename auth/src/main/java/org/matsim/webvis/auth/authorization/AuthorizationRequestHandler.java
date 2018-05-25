@@ -1,8 +1,10 @@
 package org.matsim.webvis.auth.authorization;
 
 import org.matsim.webvis.auth.Routes;
+import org.matsim.webvis.auth.entities.Token;
 import org.matsim.webvis.auth.entities.User;
 import org.matsim.webvis.auth.token.TokenService;
+import org.matsim.webvis.auth.user.UserService;
 import org.matsim.webvis.common.communication.RequestError;
 import org.matsim.webvis.common.service.InvalidInputException;
 import spark.Request;
@@ -18,11 +20,9 @@ public class AuthorizationRequestHandler implements Route {
 
     private static Map<String, AuthenticationRequest> loginSession = new ConcurrentHashMap<>();
 
-    TokenService tokenService = new TokenService();
-    AuthorizationService authService = new AuthorizationService();
-
-    public AuthorizationRequestHandler() throws Exception {
-    }
+    TokenService tokenService = TokenService.Instance;
+    AuthorizationService authService = AuthorizationService.Instance;
+    UserService userService = new UserService();
 
     @SuppressWarnings("SuspiciousMethodCalls")
     @Override
@@ -47,8 +47,9 @@ public class AuthorizationRequestHandler implements Route {
         //authenticate user by cookie or login
         User user;
         try {
-            String token = request.cookie("id_token");
-            user = tokenService.validateIdToken(token);
+            String encodedToken = request.cookie("id_token");
+            Token token = tokenService.validateToken(encodedToken);
+            user = userService.findUser(token.getSubjectId());
         } catch (Exception e) {
             request.session(true);
             loginSession.put(request.session().id(), authRequest);

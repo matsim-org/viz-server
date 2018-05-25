@@ -7,8 +7,10 @@ import org.matsim.webvis.auth.config.Configuration;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
-import java.security.*;
+import java.security.Key;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.PublicKey;
 import java.security.cert.Certificate;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
@@ -21,69 +23,56 @@ class TokenSigningKeyProvider {
     private RSAPublicKey publicKey;
     private RSAPrivateKey privateKey;
 
-    TokenSigningKeyProvider() throws Exception {
+    TokenSigningKeyProvider() {
         this(Configuration.getInstance().getTokenSigningKeyStore());
     }
 
     //for unit testing
-    TokenSigningKeyProvider(String keyStorePath) throws Exception {
-        try {
+    TokenSigningKeyProvider(String keyStorePath) {
             KeyStore store = loadKeyStore(keyStorePath);
             publicKey = loadPublicKey(store);
             privateKey = loadPrivateKey(store);
-        } catch (Exception e) {
-            logger.error("Failed to load signing keys from keystore.", e);
-            if (Configuration.getInstance().isDebug()) {
-                generateDebugKeys();
-            } else {
-                throw new Exception(e);
-            }
-        }
+
     }
 
-    private KeyStore loadKeyStore(String keyStorePath) throws Exception {
+    private KeyStore loadKeyStore(String keyStorePath) {
 
         File keyStoreFile = new File(keyStorePath);
         try (FileInputStream stream = new FileInputStream(keyStoreFile)) {
             KeyStore store = KeyStore.getInstance(KeyStore.getDefaultType());
             store.load(stream, Configuration.getInstance().getTokenSigningKeyStorePassword().toCharArray());
             return store;
-        } catch (IOException e) {
-            throw new Exception(e);
+        } catch (Exception e) {
+            logger.error("Failed to load keystore!", e);
+            throw new RuntimeException(e);
         }
     }
 
-    private RSAPublicKey loadPublicKey(KeyStore store) throws Exception {
+    private RSAPublicKey loadPublicKey(KeyStore store) {
 
-        Certificate cert = store.getCertificate(Configuration.getInstance().getTokenSigningKeyAlias());
-        PublicKey publicKey = cert.getPublicKey();
-
-        if (publicKey.getAlgorithm().equals("RSA")) {
+        try {
+            Certificate cert = store.getCertificate(Configuration.getInstance().getTokenSigningKeyAlias());
+            PublicKey publicKey = cert.getPublicKey();
             return (RSAPublicKey) publicKey;
-        } else {
-            throw new Exception("Public signing key is not an RSA key.");
+
+        } catch (KeyStoreException e) {
+            logger.error("Failed to load public token signing key.");
+            throw new RuntimeException(e);
+        } catch (ClassCastException e) {
+            logger.error("public signing key was not an RSA key.");
+            throw new RuntimeException(e);
         }
     }
 
-    private RSAPrivateKey loadPrivateKey(KeyStore store) throws Exception {
-
+    private RSAPrivateKey loadPrivateKey(KeyStore store) {
+        try {
         Key key = store.getKey(Configuration.getInstance().getTokenSigningKeyAlias(),
                 Configuration.getInstance().getTokenSigningKeyStorePassword().toCharArray());
-        try {
             return (RSAPrivateKey) key;
         } catch (ClassCastException e) {
-            throw new Exception("Private signing key is not an RSA key.");
-        }
-    }
-
-    private void generateDebugKeys() {
-        try {
-            KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
-            generator.initialize(1024);
-            KeyPair pair = generator.generateKeyPair();
-            privateKey = (RSAPrivateKey) pair.getPrivate();
-            publicKey = (RSAPublicKey) pair.getPublic();
+            throw new RuntimeException("Private signing key is not an RSA key.");
         } catch (Exception e) {
+            logger.error("failed to load private token signing key", e);
             throw new RuntimeException(e);
         }
     }

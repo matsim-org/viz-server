@@ -17,14 +17,14 @@ class IntrospectionResponse {
     private String aud;
     private String iss;
 
-    IntrospectionResponse(Token token) {
-        if (token == null) {
-            active = false;
-            return;
+    protected IntrospectionResponse(Token token, boolean active) {
+
+        this.active = active;
+        if (token != null) {
+            iat = token.getCreatedAt().toEpochMilli();
+            exp = token.getExpiresAt().toEpochMilli();
+            token_type = "Bearer";
+            sub = token.getSubjectId();
         }
-        iat = token.getCreatedAt().toEpochMilli();
-        exp = token.getExpiresAt().toEpochMilli();
-        token_type = token.getTokenType();
-        sub = token.getUser().getId();
     }
 }

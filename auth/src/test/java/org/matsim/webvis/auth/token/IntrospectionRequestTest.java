@@ -90,8 +90,8 @@ public class IntrospectionRequestTest {
 
         IntrospectionRequest request = new IntrospectionRequest(mockReq);
 
-        assertEquals(clientId, request.getRpId());
-        assertEquals(clientSecret, request.getRpSecret());
+        assertEquals(clientId, request.getAuthentication().getPrincipal());
+        assertEquals(clientSecret, request.getAuthentication().getCredential());
         assertEquals(token, request.getToken());
     }
 }

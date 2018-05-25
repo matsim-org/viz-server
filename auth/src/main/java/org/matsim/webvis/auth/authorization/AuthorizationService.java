@@ -14,12 +14,15 @@ import java.net.URLEncoder;
 
 class AuthorizationService {
 
+    public static AuthorizationService Instance = new AuthorizationService();
+    TokenService tokenService = TokenService.Instance;
+
     private static Logger logger = LogManager.getLogger();
 
     RelyingPartyService relyingPartyService = new RelyingPartyService();
-    TokenService tokenService = new TokenService();
 
-    AuthorizationService() throws Exception {
+    private AuthorizationService() {
+
     }
 
     boolean isValidClientInformation(AuthenticationRequest request) {
@@ -41,29 +44,7 @@ class AuthorizationService {
 
     URI generateResponse(AuthenticationRequest request, User user) {
 
-        URI result;
-
-        if (request.getType().equals(AuthenticationRequest.Type.AuthCode)) {
-            result = generateAuthResponse(request, user);
-        } else {
-            result = generateAccessResponse(request, user);
-        }
-
-        return result;
-    }
-
-    private URI generateAuthResponse(AuthenticationRequest request, User user) {
-
-        Token code = tokenService.createAuthorizationCode(user, request.getClientId());
-        logger.info("Issued token to user: " + user.getEMail());
-
-        String query = "?code=" + code.getToken();
-
-        if (!request.getState().isEmpty()) {
-            query += "&state=" + urlEncode(request.getState());
-        }
-
-        return URI.create(request.getRedirectUri().toString() + query);
+        return generateAccessResponse(request, user);
     }
 
     private URI generateAccessResponse(AuthenticationRequest request, User user) {
@@ -71,13 +52,13 @@ class AuthorizationService {
         String fragment = "#token_type=bearer";
 
         Token idToken = tokenService.createIdToken(user, request.getNonce());
-        fragment += "&id_token=" + idToken.getToken();
+        fragment += "&id_token=" + idToken.getTokenValue();
 
         logger.info("Issued token to user: " + user.getEMail());
 
         if (request.getType().equals(AuthenticationRequest.Type.AccessAndIdToken)) {
             Token accessToken = tokenService.grantAccess(user);
-            fragment += "&access_token=" + accessToken.getToken();
+            fragment += "&access_token=" + accessToken.getTokenValue();
         }
         if (!request.getState().isEmpty()) {
             fragment += "&state=" + urlEncode(request.getState());

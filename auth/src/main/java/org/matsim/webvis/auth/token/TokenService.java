@@ -5,10 +5,16 @@ import com.auth0.jwt.JWTCreator;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.matsim.webvis.auth.entities.*;
+import org.matsim.webvis.auth.entities.RelyingParty;
+import org.matsim.webvis.auth.entities.Token;
+import org.matsim.webvis.auth.entities.User;
+import org.matsim.webvis.auth.helper.BasicAuthentication;
+import org.matsim.webvis.auth.relyingParty.RelyingPartyService;
 import org.matsim.webvis.auth.user.UserService;
+import org.matsim.webvis.common.database.AbstractEntity;
 import org.matsim.webvis.common.service.CodedException;
 
 import java.time.Duration;
@@ -16,110 +22,98 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 public class TokenService {
 
+    public static TokenService Instance = new TokenService();
+
     private static final Logger logger = LogManager.getLogger();
-    static Algorithm algorithm;
+    Algorithm algorithm;
     TokenDAO tokenDAO = new TokenDAO();
     private UserService userService = new UserService();
+    private RelyingPartyService relyingPartyService = new RelyingPartyService();
 
-    public TokenService() throws Exception {
+    private TokenService() {
         TokenSigningKeyProvider provider = new TokenSigningKeyProvider();
         algorithm = Algorithm.RSA512(provider.getPublicKey(), provider.getPrivateKey());
     }
 
-    AccessToken grantWithPassword(String username, char[] password) throws CodedException {
+    Token grantWithPassword(String username, char[] password) throws CodedException {
         User user = userService.authenticate(username, password);
-        Token refreshToken = createRefreshToken(user);
-
-        return createAccessToken(user, (RefreshToken) refreshToken);
+        return createAccessToken(user);
     }
 
-    public AccessToken grantAccess(User user) {
-        return createAccessToken(user, null);
+    Token grantWithClientCredentials(ClientCredentialsGrantRequest request) {
+
+        BasicAuthentication auth = request.getTokenRequest().getBasicAuth();
+        RelyingParty relyingParty = relyingPartyService.validateRelyingParty(auth.getPrincipal(), auth.getCredential());
+        return createAccessToken(relyingParty);
     }
 
-    public IdToken createIdToken(User user) {
+    public Token grantAccess(User user) {
+        return createAccessToken(user);
+    }
+
+    public Token createIdToken(User user) {
         return createIdToken(user, "");
     }
 
-    public IdToken createIdToken(User user, String nonce) {
+    public Token createIdToken(User user, String nonce) {
 
         if (nonce.isEmpty()) {
-            return createSignedToken(user, new IdToken());
+            return createSignedToken(user.getId());
         } else {
             Map<String, String> claims = new HashMap<>();
             claims.put("nonce", nonce);
-            return createSignedToken(user, new IdToken(), claims);
+            return createSignedToken(user.getId(), claims);
         }
     }
 
-    public User validateIdToken(String token) throws Exception {
+    public Token validateToken(String encodedToken) {
 
         JWTVerifier verifier = JWT.require(algorithm).build();
-        DecodedJWT decodedToken = verifier.verify(token);
+        DecodedJWT decodedToken = verifier.verify(encodedToken);
 
-        User user = userService.findUser(decodedToken.getSubject());
+        if (StringUtils.isBlank(decodedToken.getId()) || decodedToken.getExpiresAt().before(Date.from(Instant.now())))
+            throw new RuntimeException("token expired");
 
-        if (user == null) throw new Exception("user doesn't exist");
-        return user;
+        Token token = tokenDAO.find(decodedToken.getId());
+        if (token == null)
+            throw new RuntimeException("token invalid.");
+        return token;
     }
 
-    public Token getToken(String token) {
-        return tokenDAO.find(token);
+    public Token findToken(String token) {
+        return tokenDAO.findByTokenValue(token);
     }
 
-    AccessToken findAccessToken(String tokenValue) {
-        return tokenDAO.findAccessToken(tokenValue);
+    private Token createAccessToken(AbstractEntity subject) {
+        return createSignedToken(subject.getId());
     }
 
-    public AuthorizationCode createAuthorizationCode(User user, String clientId) {
-
-        AuthorizationCode code = new AuthorizationCode();
-        code.setUser(user);
-
-        String token = UUID.randomUUID().toString();
-        code.setToken(token);
-        return tokenDAO.persist(code, clientId);
+    private Token createSignedToken(String subjectId) {
+        return createSignedToken(subjectId, null);
     }
 
-    private AccessToken createAccessToken(User user, RefreshToken refreshToken) {
+    private Token createSignedToken(String subjectId, Map<String, String> claims) {
 
-        AccessToken token = new AccessToken();
-
-        if (refreshToken != null) {
-            token.setRefreshToken(refreshToken.getToken());
-        }
-
-        return createSignedToken(user, token);
-    }
-
-    private RefreshToken createRefreshToken(User user) {
-
-        return createSignedToken(user, new RefreshToken());
-    }
-
-    private <T extends Token> T createSignedToken(User user, T token) {
-        return createSignedToken(user, token, null);
-    }
-
-    private <T extends Token> T createSignedToken(User user, T token, Map<String, String> claims) {
-        token.setUser(user);
+        Token token = new Token();
+        token.setSubjectId(subjectId);
         token.setExpiresAt(Instant.now().plus(Duration.ofHours(24)));
+        token = tokenDAO.persist(token);
 
-        JWTCreator.Builder jwt = JWT.create().withSubject(user.getId())
+        JWTCreator.Builder jwt = JWT.create().withSubject(subjectId)
                 .withIssuer("http://this.should/be/a/proper/domain")
                 .withIssuedAt(Date.from(token.getCreatedAt()))
-                .withExpiresAt(Date.from(token.getExpiresAt()));
+                .withExpiresAt(Date.from(token.getExpiresAt()))
+                .withJWTId(token.getId());
 
         if (claims != null) {
             claims.forEach(jwt::withClaim);
         }
 
         String tokenValue = jwt.sign(algorithm);
-        token.setToken(tokenValue);
+        token.setTokenValue(tokenValue);
         return tokenDAO.persist(token);
     }
 }

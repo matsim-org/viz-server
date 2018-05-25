@@ -1,45 +1,35 @@
 package org.matsim.webvis.auth.token;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import org.matsim.webvis.auth.entities.*;
+import org.matsim.webvis.auth.entities.DAO;
+import org.matsim.webvis.auth.entities.QToken;
+import org.matsim.webvis.auth.entities.Token;
+import org.matsim.webvis.auth.entities.User;
 
 import javax.persistence.EntityManager;
 import java.util.List;
 
 class TokenDAO extends DAO {
 
-
-    <T extends Token> T persist(T token) {
-        return database.persistOne(token);
+    Token persist(Token token) {
+        if (token.getId() == null)
+            return database.persistOne(token);
+        return database.updateOne(token);
     }
 
-    AuthorizationCode persist(AuthorizationCode token, String clientId) {
-
-        EntityManager em = database.getEntityManager();
-        em.getTransaction().begin();
-        token.setClient(em.getReference(Client.class, clientId));
-        em.persist(token);
-        em.getTransaction().commit();
-        em.close();
-        return token;
-    }
-
-    Token find(String tokenValue) {
-
-        QToken token = QToken.token1;
+    Token find(String tokenId) {
+        QToken token = QToken.token;
         return database.executeQuery(query -> query.selectFrom(token)
-                .where(token.token.eq(tokenValue)).fetchOne());
+                .where(token.id.eq(tokenId))
+                .fetchOne()
+        );
     }
 
-    AccessToken findAccessToken(String tokenValue) {
-        QAccessToken accessToken = QAccessToken.accessToken;
-        return database.executeQuery(query -> query.selectFrom(accessToken)
-                .where(accessToken.token.eq(tokenValue)).fetchOne());
-    }
+    Token findByTokenValue(String tokenValue) {
 
-    public List<Token> findAll() {
-        QToken token = QToken.token1;
-        return database.executeQuery(query -> query.selectFrom(token).fetch());
+        QToken token = QToken.token;
+        return database.executeQuery(query -> query.selectFrom(token)
+                .where(token.tokenValue.eq(tokenValue)).fetchOne());
     }
 
     void removeAllTokensForUser(User user) {
@@ -47,12 +37,17 @@ class TokenDAO extends DAO {
         em.getTransaction().begin();
         JPAQueryFactory query = database.createQuery(em);
 
-        QToken token = QToken.token1;
-        List<Token> tokens = query.selectFrom(token).where(token.user.eq(user)).fetch();
+        QToken token = QToken.token;
+        List<Token> tokens = query.selectFrom(token).where(token.subjectId.eq(user.getId())).fetch();
         for (Token t : tokens) {
             em.remove(t);
         }
         em.getTransaction().commit();
         em.close();
+    }
+
+    void removeAllTokens() {
+        QToken token = QToken.token;
+        database.executeTransactionalQuery(query -> query.delete(token).execute());
     }
 }

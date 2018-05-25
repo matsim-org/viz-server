@@ -1,7 +1,9 @@
 package org.matsim.webvis.auth.token;
 
-import org.matsim.webvis.auth.entities.AccessToken;
+import lombok.Getter;
+import org.matsim.webvis.auth.entities.Token;
 
+@Getter
 class AccessTokenResponse {
     private String access_token;
     private String token_type;
@@ -9,10 +11,9 @@ class AccessTokenResponse {
     private String refresh_token;
     private String scope;
 
-    AccessTokenResponse(AccessToken token) {
-        this.access_token = token.getToken();
-        this.token_type = token.getTokenType();
+    AccessTokenResponse(Token token) {
+        this.access_token = token.getTokenValue();
+        this.token_type = "Bearer";
         this.expires_in = token.getExpiresAt().getEpochSecond();
-        this.refresh_token = token.getRefreshToken();
     }
 }

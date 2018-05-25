@@ -1,18 +1,7 @@
 package org.matsim.webvis.auth.token;
 
-import org.junit.Test;
-import org.matsim.webvis.auth.entities.IdToken;
-import org.matsim.webvis.auth.entities.Token;
-import org.matsim.webvis.auth.entities.User;
-
-import java.time.Duration;
-import java.time.Instant;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-
 public class IntrospectionResponseTest {
-
+/*
     @Test
     public void creation_tokenIsNull_activeFalse() {
 
@@ -42,4 +31,5 @@ public class IntrospectionResponseTest {
         assertEquals(token.getTokenType(), response.getToken_type());
         assertEquals(token.getUser().getId(), response.getSub());
     }
+    */
 }

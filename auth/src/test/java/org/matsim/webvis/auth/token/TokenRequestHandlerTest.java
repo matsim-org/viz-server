@@ -3,28 +3,20 @@ package org.matsim.webvis.auth.token;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.matsim.webvis.auth.entities.AccessToken;
-import org.matsim.webvis.auth.entities.User;
 import org.matsim.webvis.auth.util.TestUtils;
 import org.matsim.webvis.common.communication.*;
-import org.matsim.webvis.common.service.CodedException;
-import org.matsim.webvis.common.service.Error;
-import org.matsim.webvis.common.service.ForbiddenException;
-import org.matsim.webvis.common.service.UnauthorizedException;
 import spark.Request;
 import spark.Response;
 
 import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
-import java.time.Duration;
-import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 public class TokenRequestHandlerTest {
 
@@ -36,7 +28,7 @@ public class TokenRequestHandlerTest {
     }
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         testObject = new TokenRequestHandler();
     }
 
@@ -112,8 +104,8 @@ public class TokenRequestHandlerTest {
         assertEquals(RequestError.INVALID_REQUEST, response.getError());
     }
 
-    @Test
-    public void tokenServiceThrowException_forbidden() throws Exception {
+   /* @Test
+    public void tokenServiceThrowException_forbidden() {
 
         TokenService mockService = mock(TokenService.class);
         testObject.tokenService = mockService;
@@ -133,7 +125,7 @@ public class TokenRequestHandlerTest {
     }
 
     @Test
-    public void allParametersSupplied_ok() throws Exception {
+    public void allParametersSupplied_ok() {
         AccessToken testToken = new AccessToken();
         testToken.setRefreshToken("refreshToken");
         testToken.setUser(new User());
@@ -155,5 +147,5 @@ public class TokenRequestHandlerTest {
 
         assertEquals(HttpStatus.OK, answer.getStatusCode());
         assertTrue(answer.getResponse() instanceof AccessTokenResponse);
-    }
+    }*/
 }
