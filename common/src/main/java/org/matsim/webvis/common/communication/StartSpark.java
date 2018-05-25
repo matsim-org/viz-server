@@ -20,7 +20,7 @@ public class StartSpark {
 
     public static void withPermissiveAccessControl() {
 
-        before(((request, response) -> {
+        afterAfter(((request, response) -> {
             String origin = request.headers("Origin");
             response.header("Access-Control-Allow-Origin", (origin != null) ? origin : "*");
             response.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
@@ -30,11 +30,6 @@ public class StartSpark {
         options("/*", (request, response) -> "OK");
     }
 
-    /**
-     * if cors headers are required 'withPermissiveAccessControl' must be called first
-     *
-     * @param authHandler
-     */
     public static void withAuthHandler(Filter authHandler) {
         before(((request, response) -> {
             if (!request.requestMethod().equals("OPTIONS"))
