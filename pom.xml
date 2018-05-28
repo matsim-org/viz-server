@@ -13,6 +13,7 @@
         <module>common</module>
         <module>auth</module>
         <module>files</module>
+        <module>animated</module>
     </modules>
 
     <build>

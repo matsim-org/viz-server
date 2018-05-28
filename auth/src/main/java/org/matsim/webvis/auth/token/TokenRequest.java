@@ -2,7 +2,8 @@ package org.matsim.webvis.auth.token;
 
 
 import lombok.Getter;
-import org.matsim.webvis.auth.helper.BasicAuthentication;
+import org.matsim.webvis.common.auth.BasicAuthentication;
+import org.matsim.webvis.common.auth.PrincipalCredentialToken;
 import org.matsim.webvis.common.communication.ContentType;
 import org.matsim.webvis.common.communication.RequestWithParams;
 import org.matsim.webvis.common.service.InvalidInputException;
@@ -15,7 +16,7 @@ public class TokenRequest extends RequestWithParams {
     @Getter
     private String grantType;
     @Getter
-    private BasicAuthentication basicAuth;
+    private PrincipalCredentialToken basicAuth;
 
 
     TokenRequest(Request request) {
@@ -23,7 +24,7 @@ public class TokenRequest extends RequestWithParams {
         if (!ContentType.isFormUrlEncoded(request.contentType())) {
             throw new InvalidInputException("only content type '" + ContentType.FORM_URL_ENCODED + "' allowed");
         }
-        basicAuth = new BasicAuthentication(request.headers(BasicAuthentication.HEADER_AUTHORIZATION));
+        basicAuth = BasicAuthentication.decodeAuthorizationHeader(request.headers(BasicAuthentication.HEADER_AUTHORIZATION));
         grantType = extractRequiredValue(OAuthParameters.GRANT_TYPE, request.queryMap());
         this.request = request;
     }
