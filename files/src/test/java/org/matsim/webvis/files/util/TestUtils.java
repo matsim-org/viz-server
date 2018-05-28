@@ -1,7 +1,8 @@
 package org.matsim.webvis.files.util;
 
 import org.apache.commons.fileupload.FileItem;
-import org.matsim.webvis.files.communication.AuthenticationResult;
+import org.matsim.webvis.common.auth.AuthenticationResult;
+import org.matsim.webvis.common.auth.AuthenticationStore;
 import org.matsim.webvis.files.communication.Subject;
 import org.matsim.webvis.files.config.Configuration;
 import org.matsim.webvis.files.entities.FileEntry;
@@ -108,12 +109,12 @@ public class TestUtils {
 
         Request result = mock(Request.class);
         when(result.raw()).thenReturn(raw);
-        when(result.attribute(Subject.SUBJECT_ATTRIBUTE)).thenReturn(new AuthenticationResult());
+        when(result.attribute(AuthenticationStore.SUBJECT_ATTRIBUTE)).thenReturn(new AuthenticationResult());
         return result;
     }
 
     public static Subject createSubject(User user) {
-        return new Subject(null, user);
+        return new Subject(user, null);
     }
 
     /**

@@ -1,4 +1,4 @@
-package org.matsim.webvis.files.communication;
+package org.matsim.webvis.common.auth;
 
 import com.google.gson.Gson;
 import lombok.Setter;
@@ -15,10 +15,8 @@ import org.apache.http.ssl.SSLContexts;
 import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.matsim.webvis.common.communication.ErrorResponse;
-import org.matsim.webvis.common.communication.RequestError;
-import org.matsim.webvis.common.service.Error;
-import org.matsim.webvis.common.service.InvalidInputException;
+import org.matsim.webvis.common.service.InternalException;
+import org.matsim.webvis.common.service.UnauthorizedException;
 import spark.Filter;
 import spark.Request;
 import spark.Response;
@@ -33,9 +31,6 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
-import java.util.Base64;
-
-import static spark.Spark.halt;
 
 public class AuthenticationHandler implements Filter {
 
@@ -79,23 +74,12 @@ public class AuthenticationHandler implements Filter {
     @Override
     public void handle(Request request, Response response) {
 
-        AuthenticationResult authResponse;
-        try {
-            AuthenticatedRequest authenticatedRequest = new AuthenticatedRequest(request);
-            authResponse = introspectToken(authenticatedRequest.getToken());
-        } catch (InvalidInputException e) {
-            haltWithUnauthorizedError(e.getErrorCode(), e.getMessage(), response);
-            return;
-        } catch (RuntimeException e) {
-            haltWithInternalError(Error.UNSPECIFIED_ERROR, e.getMessage(), response);
-            return;
-        }
-
-        if (authResponse.isActive()) {
-            Subject.setAuthenticationAsAttribute(request, authResponse);
-        } else {
-            haltWithUnauthorizedError(RequestError.INVALID_TOKEN, "Token is invalid", response);
-        }
+        AuthenticatedRequest authenticatedRequest = new AuthenticatedRequest(request);
+        AuthenticationResult result = introspectToken(authenticatedRequest.getToken());
+        if (result.isActive())
+            AuthenticationStore.setAuthenticationAttribute(request, result);
+        else
+            throw new UnauthorizedException("Token is invalid");
     }
 
     private AuthenticationResult introspectToken(String token) {
@@ -104,7 +88,7 @@ public class AuthenticationHandler implements Filter {
         try (CloseableHttpClient client = createHttpClient()) {
             return makeIntrospectionRequest(client, post);
         } catch (IOException e) {
-            throw new RuntimeException("Could not connect to auth server.");
+            throw new InternalException("Could not connect to auth server.");
         }
     }
 
@@ -114,7 +98,7 @@ public class AuthenticationHandler implements Filter {
                 String message = EntityUtils.toString(response.getEntity());
                 return gson.fromJson(message, AuthenticationResult.class);
             } else {
-                throw new RuntimeException("Could not authenticate at auth server");
+                throw new InternalException("Could not authenticate at auth server");
             }
         }
     }
@@ -125,13 +109,12 @@ public class AuthenticationHandler implements Filter {
         try {
             reqURI = new URIBuilder(introspectionEndpoint).setParameter("token", token).build();
         } catch (URISyntaxException e) {
-            throw new RuntimeException("Could not create URI.");
+            throw new InternalException("Could not create URI.");
         }
         HttpPost post = new HttpPost(reqURI);
-        final String basicAuthentication = "Basic " +
-                Base64.getEncoder().encodeToString((relyingPartyId + ":" + relyingPartySecret).getBytes());
-
-        post.addHeader("Authorization", basicAuthentication);
+        final String basicAuthentication = BasicAuthentication.encodeToAuthorizationHeader(
+                new PrincipalCredentialToken(relyingPartyId, relyingPartySecret));
+        post.addHeader(BasicAuthentication.HEADER_AUTHORIZATION, basicAuthentication);
         return post;
     }
 
@@ -141,22 +124,6 @@ public class AuthenticationHandler implements Filter {
 
     private boolean isStatusOk(HttpResponse response) {
         return response.getStatusLine().getStatusCode() == HttpStatus.SC_OK;
-    }
-
-    private void haltWithInternalError(String errorCode, String message, Response response) {
-        haltWithError(errorCode, message, response, HttpStatus.SC_INTERNAL_SERVER_ERROR);
-    }
-
-    private void haltWithUnauthorizedError(String errorCode, String message, Response response) {
-        haltWithError(errorCode, message, response, HttpStatus.SC_UNAUTHORIZED);
-    }
-
-    private void haltWithError(String errorCode, String message, Response response, int status) {
-        response.type("application/json");
-        response.header("WWW-Authenticate", "Bearer");
-        ErrorResponse error = new ErrorResponse(errorCode, message);
-        //noinspection ThrowableNotThrown
-        halt(status, gson.toJson(error));
     }
 
     @Setter

@@ -1,7 +1,8 @@
-package org.matsim.webvis.files.communication;
+package org.matsim.webvis.common.auth;
 
 import org.junit.Test;
 import org.matsim.webvis.common.service.InvalidInputException;
+import org.matsim.webvis.common.service.UnauthorizedException;
 import spark.Request;
 
 import static junit.framework.TestCase.assertEquals;
@@ -11,24 +12,24 @@ import static org.mockito.Mockito.when;
 
 public class AuthenticatedRequestTest {
 
-    @Test(expected = InvalidInputException.class)
+    @Test(expected = UnauthorizedException.class)
     public void constructor_noAuthorizationHeader_InvalidInputException() throws InvalidInputException {
 
         Request request = mock(Request.class);
-        when(request.headers(AuthenticatedRequest.AUTHORIZATION)).thenReturn(null);
+        when(request.headers(BasicAuthentication.HEADER_AUTHORIZATION)).thenReturn(null);
 
         new AuthenticatedRequest(request);
 
         fail("No authorization header should throw exception");
     }
 
-    @Test(expected = InvalidInputException.class)
+    @Test(expected = UnauthorizedException.class)
     public void constructor_noBearer_InvalidInputException() throws InvalidInputException {
 
         final String header = "not a bearer";
 
         Request request = mock(Request.class);
-        when(request.headers(AuthenticatedRequest.AUTHORIZATION)).thenReturn(header);
+        when(request.headers(BasicAuthentication.HEADER_AUTHORIZATION)).thenReturn(header);
 
         new AuthenticatedRequest(request);
 
@@ -42,7 +43,7 @@ public class AuthenticatedRequestTest {
         final String header = "Bearer " + token;
 
         Request request = mock(Request.class);
-        when(request.headers(AuthenticatedRequest.AUTHORIZATION)).thenReturn(header);
+        when(request.headers(BasicAuthentication.HEADER_AUTHORIZATION)).thenReturn(header);
 
         AuthenticatedRequest authenticatedRequest = new AuthenticatedRequest(request);
 

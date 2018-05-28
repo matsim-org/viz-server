@@ -1,5 +1,7 @@
 package org.matsim.webvis.files.file;
 
+import org.matsim.webvis.common.auth.AuthenticationResult;
+import org.matsim.webvis.common.auth.AuthenticationStore;
 import org.matsim.webvis.common.communication.Answer;
 import org.matsim.webvis.common.communication.JsonResponseHandler;
 import org.matsim.webvis.common.service.InvalidInputException;
@@ -22,7 +24,8 @@ public class FileUploadRequestHandler extends JsonResponseHandler {
 
     protected Answer process(Request request, Response response) {
 
-        Subject subject = Subject.getSubject(request);
+        AuthenticationResult authResult = AuthenticationStore.getAuthenticationResult(request);
+        Subject subject = Subject.createSubject(authResult);
 
         // Parsing and uploading of the request
         FileUploadRequest uploadRequest = requestFactory.createRequest(request);

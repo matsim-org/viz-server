@@ -1,4 +1,4 @@
-package org.matsim.webvis.files.communication;
+package org.matsim.webvis.common.auth;
 
 import org.apache.http.HttpStatus;
 import org.apache.http.StatusLine;
@@ -7,7 +7,8 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.junit.Before;
 import org.junit.Test;
-import spark.HaltException;
+import org.matsim.webvis.common.service.InternalException;
+import org.matsim.webvis.common.service.UnauthorizedException;
 import spark.Request;
 import spark.Response;
 
@@ -16,7 +17,6 @@ import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -33,26 +33,20 @@ public class AuthenticationHandlerTest {
         testObject = new TestableAuthenticationHandler();
     }
 
-    @Test
-    public void handle_noAuthorization_halt() {
+    @Test(expected = UnauthorizedException.class)
+    public void handle_noAuthentication_unauthorizedException() {
 
         Request request = mock(Request.class);
         when(request.headers(anyString())).thenReturn(null);
-
         Response response = mock(Response.class);
 
-        try {
-            testObject.handle(request, response);
-            fail("Halt exception expected for invalid Bearer token");
-        } catch (HaltException e) {
-            verify(response).type("application/json");
-            verify(response).header("WWW-Authenticate", "Bearer");
-            assertEquals(HttpStatus.SC_UNAUTHORIZED, e.statusCode());
-        }
+        testObject.handle(request, response);
+
+        fail("Halt exception expected for invalid Bearer token");
     }
 
-    @Test
-    public void handle_authenticationAtAuthServerFailed_halt() throws IOException {
+    @Test(expected = InternalException.class)
+    public void handle_authenticationAtAuthServerFailed_internalException() throws IOException {
 
         StatusLine mockedStatusLine = mock(StatusLine.class);
         when(mockedStatusLine.getStatusCode()).thenReturn(HttpStatus.SC_UNAUTHORIZED);
@@ -65,16 +59,13 @@ public class AuthenticationHandlerTest {
         when(request.headers("Authorization")).thenReturn("Bearer some-token");
         Response response = mock(Response.class);
 
-        try {
-            testObject.handle(request, response);
-            fail("Halt exception expected if introspection call to auth-server doesn't succeed.");
-        } catch (HaltException e) {
-            assertEquals(HttpStatus.SC_INTERNAL_SERVER_ERROR, e.statusCode());
-        }
+        testObject.handle(request, response);
+
+        fail("Halt exception expected if introspection call to auth-server doesn't succeed.");
     }
 
-    @Test
-    public void handle_introspectionIsNotActive_haltUnauthorized() throws IOException {
+    @Test(expected = UnauthorizedException.class)
+    public void handle_introspectionIsNotActive_unauthorizedException() throws IOException {
 
         StatusLine mockedStatusLine = mock(StatusLine.class);
         when(mockedStatusLine.getStatusCode()).thenReturn(HttpStatus.SC_OK);
@@ -88,12 +79,9 @@ public class AuthenticationHandlerTest {
         when(request.headers("Authorization")).thenReturn("Bearer some-token");
         Response response = mock(Response.class);
 
-        try {
-            testObject.handle(request, response);
-            fail("inactive token should result in a halt exception");
-        } catch (HaltException e) {
-            assertEquals(HttpStatus.SC_UNAUTHORIZED, e.statusCode());
-        }
+        testObject.handle(request, response);
+
+        fail("inactive token should result in a halt exception");
     }
 
     @Test
