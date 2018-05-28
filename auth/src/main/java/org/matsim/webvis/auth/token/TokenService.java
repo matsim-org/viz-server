@@ -30,8 +30,8 @@ public class TokenService {
     private static final Logger logger = LogManager.getLogger();
     Algorithm algorithm;
     TokenDAO tokenDAO = new TokenDAO();
-    private UserService userService = new UserService();
-    private RelyingPartyService relyingPartyService = new RelyingPartyService();
+    private UserService userService = UserService.Instance;
+    private RelyingPartyService relyingPartyService = RelyingPartyService.Instance;
 
     private TokenService() {
         TokenSigningKeyProvider provider = new TokenSigningKeyProvider();

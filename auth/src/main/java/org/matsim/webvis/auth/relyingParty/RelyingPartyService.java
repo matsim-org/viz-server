@@ -15,8 +15,12 @@ import java.net.URI;
 
 public class RelyingPartyService {
 
-    private static Logger logger = LogManager.getLogger();
+    public static final RelyingPartyService Instance = new RelyingPartyService();
 
+    private RelyingPartyService() {
+    }
+
+    private static Logger logger = LogManager.getLogger();
     private RelyingPartyDAO relyingPartyDAO = new RelyingPartyDAO();
 
     Client createClient(String name, Iterable<URI> redirectUris) {

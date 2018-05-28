@@ -23,7 +23,7 @@ import static org.mockito.Mockito.*;
 public class TokenServiceTest {
 
     private static TokenDAO tokenDAO = new TokenDAO();
-    private static RelyingPartyService rpService = new RelyingPartyService();
+    private static RelyingPartyService rpService = RelyingPartyService.Instance;
     private TokenService testObject;
 
     @BeforeClass

@@ -19,7 +19,7 @@ public class UserServiceTest {
 
     @Before
     public void setUp() {
-        testObject = new UserService();
+        testObject = UserService.Instance;
     }
 
     @After

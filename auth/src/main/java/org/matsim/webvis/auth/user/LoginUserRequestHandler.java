@@ -10,7 +10,7 @@ import spark.Route;
 
 public class LoginUserRequestHandler implements Route {
 
-    UserService userService = new UserService();
+    UserService userService = UserService.Instance;
     TokenService tokenService = TokenService.Instance;
 
     @Override

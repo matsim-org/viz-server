@@ -10,8 +10,6 @@ import org.matsim.webvis.auth.relyingParty.RelyingPartyService;
 import org.matsim.webvis.auth.user.UserService;
 import org.matsim.webvis.common.communication.StartSpark;
 
-import static spark.Spark.*;
-
 public class Server {
     private static final Logger logger = LogManager.getLogger(Server.class);
 
@@ -35,13 +33,13 @@ public class Server {
         if (!ca.getConfigFile().isEmpty())
             Configuration.loadConfigFile(ca.getConfigFile(), ca.isDebug());
 
-        UserService userService = new UserService();
+        UserService userService = UserService.Instance;
         for (ConfigUser user : Configuration.getInstance().getUsers()) {
             User created = userService.createUser(user);
             logger.info("Created User: " + created.getEMail());
         }
 
-        RelyingPartyService relyingPartyService = new RelyingPartyService();
+        RelyingPartyService relyingPartyService = RelyingPartyService.Instance;
         for (ConfigClient client : Configuration.getInstance().getClients()) {
             RelyingParty created = relyingPartyService.createClient(client);
             logger.info("Created client: " + created.getName());

@@ -23,7 +23,7 @@ import static org.mockito.Mockito.*;
 @SuppressWarnings("WeakerAccess")
 public class TestUtils {
 
-    private static UserService userService = new UserService();
+    private static UserService userService = UserService.Instance;
     private static UserDAO userDAO = new UserDAO();
     private static RelyingPartyDAO relyingPartyDAO = new RelyingPartyDAO();
 

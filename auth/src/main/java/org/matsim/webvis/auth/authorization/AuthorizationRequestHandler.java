@@ -22,7 +22,7 @@ public class AuthorizationRequestHandler implements Route {
 
     TokenService tokenService = TokenService.Instance;
     AuthorizationService authService = AuthorizationService.Instance;
-    UserService userService = new UserService();
+    UserService userService = UserService.Instance;
 
     @SuppressWarnings("SuspiciousMethodCalls")
     @Override

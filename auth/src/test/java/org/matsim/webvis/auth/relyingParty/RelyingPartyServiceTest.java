@@ -23,7 +23,7 @@ public class RelyingPartyServiceTest {
 
     @Before
     public void setUp() {
-        testObject = new RelyingPartyService();
+        testObject = RelyingPartyService.Instance;
     }
 
     @After

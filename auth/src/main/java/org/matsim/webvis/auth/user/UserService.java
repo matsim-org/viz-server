@@ -12,6 +12,12 @@ import org.matsim.webvis.common.service.UnauthorizedException;
 import javax.persistence.RollbackException;
 
 public class UserService {
+
+    public static final UserService Instance = new UserService();
+
+    private UserService() {
+    }
+
     private static final Logger logger = LogManager.getLogger(UserService.class);
     private static final int minPasswordLength = 10;
 

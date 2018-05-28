@@ -14,12 +14,12 @@ import java.net.URLEncoder;
 
 class AuthorizationService {
 
-    public static AuthorizationService Instance = new AuthorizationService();
+    static final AuthorizationService Instance = new AuthorizationService();
     TokenService tokenService = TokenService.Instance;
 
     private static Logger logger = LogManager.getLogger();
 
-    RelyingPartyService relyingPartyService = new RelyingPartyService();
+    RelyingPartyService relyingPartyService = RelyingPartyService.Instance;
 
     private AuthorizationService() {
 

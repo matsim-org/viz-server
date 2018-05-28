@@ -9,7 +9,7 @@ import spark.Response;
 
 public class IntrospectionRequestHandler extends JsonResponseHandler {
 
-    RelyingPartyService rpService = new RelyingPartyService();
+    RelyingPartyService rpService = RelyingPartyService.Instance;
     TokenService tokenService = TokenService.Instance;
 
     @Override
