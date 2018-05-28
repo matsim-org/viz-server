@@ -74,7 +74,7 @@ public class RelyingPartyServiceTest {
         String name = "name";
         String id = "id";
         String secret = "secret";
-        ConfigRelyingParty configRelyingParty = new ConfigRelyingParty(name, id, secret);
+        ConfigRelyingParty configRelyingParty = new ConfigRelyingParty(id, name, secret);
 
         RelyingParty relyingParty = testObject.createRelyingParty(configRelyingParty);
 
@@ -106,7 +106,7 @@ public class RelyingPartyServiceTest {
     }
 
     @Test(expected = Exception.class)
-    public void validateRelyingParty_noClient_exception() throws Exception {
+    public void validateRelyingParty_noClient_exception() {
 
         testObject.validateRelyingParty("invalid", "password");
 
@@ -114,7 +114,7 @@ public class RelyingPartyServiceTest {
     }
 
     @Test(expected = Exception.class)
-    public void validateRelyingParty_secretsDontMatch_exception() throws Exception {
+    public void validateRelyingParty_secretsDontMatch_exception() {
 
         RelyingParty party = new RelyingParty();
         RelyingPartyCredential credential = new RelyingPartyCredential();
@@ -128,7 +128,7 @@ public class RelyingPartyServiceTest {
     }
 
     @Test
-    public void validateRelyingParty_allGood_relyingParty() throws Exception {
+    public void validateRelyingParty_allGood_relyingParty() {
         RelyingParty party = new RelyingParty();
         party.setName("name");
         RelyingPartyCredential credential = new RelyingPartyCredential();

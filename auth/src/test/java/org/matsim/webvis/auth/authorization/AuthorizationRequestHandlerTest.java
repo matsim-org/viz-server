@@ -7,6 +7,7 @@ import org.matsim.webvis.auth.Routes;
 import org.matsim.webvis.auth.entities.Token;
 import org.matsim.webvis.auth.entities.User;
 import org.matsim.webvis.auth.token.TokenService;
+import org.matsim.webvis.auth.user.UserService;
 import org.matsim.webvis.auth.util.TestUtils;
 import org.matsim.webvis.common.communication.RequestError;
 import spark.Request;
@@ -21,6 +22,7 @@ import static junit.framework.TestCase.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.*;
 
 public class AuthorizationRequestHandlerTest {
@@ -38,6 +40,7 @@ public class AuthorizationRequestHandlerTest {
         testObject.authService = mock(AuthorizationService.class);
         when(testObject.authService.isValidClientInformation(any())).thenReturn(true);
         testObject.tokenService = mock(TokenService.class);
+        testObject.userService = mock(UserService.class);
     }
 
     @Test
@@ -56,8 +59,7 @@ public class AuthorizationRequestHandlerTest {
         Response res = mock(Response.class);
         final String expectedQuery = "error=invalid_request";
 
-        Object result = testObject.handle(req, res);
-
+        testObject.handle(req, res);
 
         verify(res).redirect(contains(expectedQuery), eq(302));
     }
@@ -80,7 +82,7 @@ public class AuthorizationRequestHandlerTest {
         when(testObject.tokenService.validateToken(any())).thenThrow(new RuntimeException("message"));
         Response res = mock(Response.class);
 
-        Object result = testObject.handle(req, res);
+        testObject.handle(req, res);
 
         verify(res).redirect(Routes.LOGIN, 302);
     }
@@ -89,10 +91,10 @@ public class AuthorizationRequestHandlerTest {
     public void handle_unknownUser_loginPrompt() {
 
         Request req = AuthorizationTestUtils.mockRequestWithParams();
-        when(testObject.tokenService.validateToken(any())).thenThrow(new Exception("user error"));
+        when(testObject.tokenService.validateToken(any())).thenThrow(new RuntimeException("invalid"));
         Response res = mock(Response.class);
 
-        Object result = testObject.handle(req, res);
+        testObject.handle(req, res);
 
         verify(res).redirect(Routes.LOGIN, 302);
     }
@@ -100,9 +102,11 @@ public class AuthorizationRequestHandlerTest {
     @Test
     public void handle_success_redirectWithParams() {
 
-        User user = new User();
         URI uri = URI.create("http://resulting.uri");
-        when(testObject.tokenService.validateToken(any())).thenReturn(new Token());
+        Token token = new Token();
+        token.setSubjectId("some-id");
+        when(testObject.tokenService.validateToken(any())).thenReturn(token);
+        when(testObject.userService.findUser(anyString())).thenReturn(new User());
         when(testObject.authService.generateResponse(any(), any())).thenReturn(uri);
 
         Request req = AuthorizationTestUtils.mockRequestWithParams();

@@ -20,7 +20,7 @@ public class TokenRequestTest {
     public void constructor_noGrantType_invalidInputException() {
 
         final String basicAuth = TestUtils.encodeBasicAuth("name", "secret");
-        Request request = TestUtils.mockRequestWithQueryParamsMap(new HashMap<>(), ContentType.APPLICATION_JSON);
+        Request request = TestUtils.mockRequestWithQueryParamsMap(new HashMap<>(), ContentType.FORM_URL_ENCODED);
         when(request.headers(BasicAuthentication.HEADER_AUTHORIZATION)).thenReturn(basicAuth);
 
         new TokenRequest(request);
@@ -33,7 +33,7 @@ public class TokenRequestTest {
 
         Map<String, String[]> map = new HashMap<>();
         map.put(OAuthParameters.GRANT_TYPE, new String[]{OAuthParameters.GRANT_TYPE_PASSWORD});
-        Request request = TestUtils.mockRequestWithQueryParamsMap(map, ContentType.APPLICATION_JSON);
+        Request request = TestUtils.mockRequestWithQueryParamsMap(map, ContentType.FORM_URL_ENCODED);
         when(request.headers(BasicAuthentication.HEADER_AUTHORIZATION)).thenReturn("");
 
         new TokenRequest(request);
@@ -41,12 +41,25 @@ public class TokenRequestTest {
         fail("missing auth should cause exception");
     }
 
+    @Test(expected = InvalidInputException.class)
+    public void constructor_invalidContentType_invalidInputException() {
+        Map<String, String[]> map = new HashMap<>();
+        map.put(OAuthParameters.GRANT_TYPE, new String[]{OAuthParameters.GRANT_TYPE_PASSWORD});
+        Request request = TestUtils.mockRequestWithQueryParamsMap(map, ContentType.APPLICATION_JSON);
+        final String basicAuth = TestUtils.encodeBasicAuth("name", "secret");
+        when(request.headers(BasicAuthentication.HEADER_AUTHORIZATION)).thenReturn(basicAuth);
+
+        new TokenRequest(request);
+
+        fail("invalid content type should cause exception");
+    }
+
     @Test
     public void constructor_allParametersSupplied_instance() {
 
         Map<String, String[]> map = new HashMap<>();
         map.put(OAuthParameters.GRANT_TYPE, new String[]{OAuthParameters.GRANT_TYPE_PASSWORD});
-        Request request = TestUtils.mockRequestWithQueryParamsMap(map, ContentType.APPLICATION_JSON);
+        Request request = TestUtils.mockRequestWithQueryParamsMap(map, ContentType.FORM_URL_ENCODED);
         final String principal = "name";
         final String credential = "secret";
         final String basicAuth = TestUtils.encodeBasicAuth(principal, credential);

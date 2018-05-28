@@ -3,6 +3,7 @@ package org.matsim.webvis.auth.user;
 import org.matsim.webvis.auth.entities.Token;
 import org.matsim.webvis.auth.entities.User;
 import org.matsim.webvis.auth.token.TokenService;
+import org.matsim.webvis.common.service.UnauthorizedException;
 import spark.Request;
 import spark.Response;
 import spark.Route;
@@ -26,8 +27,7 @@ public class LoginUserRequestHandler implements Route {
         User user;
         try {
             user = userService.authenticate(username, password.toCharArray());
-        } catch (Exception e) {
-            //if user was not authenticated display login page with error message
+        } catch (UnauthorizedException e) {
             return LoginPrompt.renderLoginWithError();
         }
 

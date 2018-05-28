@@ -58,7 +58,7 @@ public class PasswordGrantRequestTest {
         map.put(OAuthParameters.GRANT_TYPE, new String[]{OAuthParameters.GRANT_TYPE_PASSWORD});
         map.put(OAuthParameters.USERNAME, new String[]{username});
         map.put(OAuthParameters.PASSWORD, new String[]{password});
-        Request request = TestUtils.mockRequestWithQueryParamsMap(map, ContentType.APPLICATION_JSON);
+        Request request = TestUtils.mockRequestWithQueryParamsMap(map, ContentType.FORM_URL_ENCODED);
         when(request.headers(BasicAuthentication.HEADER_AUTHORIZATION)).thenReturn(basicAuth);
         TokenRequest tokenRequest = new TokenRequest(request);
 

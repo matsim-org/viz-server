@@ -6,8 +6,7 @@ import org.matsim.webvis.auth.config.ConfigUser;
 import org.matsim.webvis.auth.entities.User;
 import org.matsim.webvis.auth.entities.UserCredentials;
 import org.matsim.webvis.auth.helper.SecretHelper;
-import org.matsim.webvis.common.service.CodedException;
-import org.matsim.webvis.common.service.Error;
+import org.matsim.webvis.common.service.InvalidInputException;
 import org.matsim.webvis.common.service.UnauthorizedException;
 
 import javax.persistence.RollbackException;
@@ -18,21 +17,21 @@ public class UserService {
 
     private UserDAO userDAO = new UserDAO();
 
-    public User createUser(ConfigUser user) throws Exception {
+    public User createUser(ConfigUser user) {
         return createUser(user.getUsername(), user.getId(), user.getPassword().toCharArray(), user.getPassword().toCharArray());
     }
 
-    public User createUser(String eMail, char[] password, char[] passwordRepeated) throws Exception {
+    public User createUser(String eMail, char[] password, char[] passwordRepeated) {
 
         return createUser(eMail, null, password, passwordRepeated);
     }
 
-    private User createUser(String eMail, String id, char[] password, char[] passwordRepeated) throws Exception {
+    private User createUser(String eMail, String id, char[] password, char[] passwordRepeated) {
         if (!isValidPassword(password)) {
-            throw new Exception("password is not valid");
+            throw new InvalidInputException("password is too short");
         }
         if (!doPasswordsMatch(password, passwordRepeated)) {
-            throw new Exception("passwords dont't match");
+            throw new InvalidInputException("passwords don't match");
         }
         UserCredentials credentials = createUserCredentials(password);
         User user = new User();
@@ -43,14 +42,18 @@ public class UserService {
             logger.info("creating user with eMail: " + user.getEMail());
             return userDAO.persistCredentials(credentials).getUser();
         } catch (RollbackException e) {
-            throw new Exception("user already exists");
+            throw new InvalidInputException("user already exists");
         } catch (Exception e) {
             logger.error(e);
         }
         return null;
     }
 
-    public User authenticate(String eMail, char[] password) throws UnauthorizedException {
+    public User findUser(String id) {
+        return userDAO.findUser(id);
+    }
+
+    public User authenticate(String eMail, char[] password) {
 
         UserCredentials credentials = userDAO.findUserCredentials(eMail);
 
@@ -91,9 +94,5 @@ public class UserService {
         credentials.setPassword(hashedPassword);
         credentials.setSalt(salt);
         return credentials;
-    }
-
-    public User findUser(String id) {
-        return userDAO.findUser(id);
     }
 }

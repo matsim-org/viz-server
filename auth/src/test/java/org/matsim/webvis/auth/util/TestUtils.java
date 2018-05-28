@@ -17,10 +17,10 @@ import java.net.URLDecoder;
 import java.util.Base64;
 import java.util.Map;
 
-import static junit.framework.TestCase.fail;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
+@SuppressWarnings("WeakerAccess")
 public class TestUtils {
 
     private static UserService userService = new UserService();
@@ -55,6 +55,13 @@ public class TestUtils {
         when(result.contentType()).thenReturn(contentType);
 
         return result;
+    }
+
+    public static Request mockRequestWithQueryParamsMapAndBasicAuth
+            (Map<String, String[]> parameterMap, String contentType, String principal, String credential) {
+        Request request = mockRequestWithQueryParamsMap(parameterMap, contentType);
+        when(request.headers("Authorization")).thenReturn(encodeBasicAuth(principal, credential));
+        return request;
     }
 
     public static TokenRequest mockTokenRequest(String clientPrincipal, String clientCredential) {
@@ -93,12 +100,7 @@ public class TestUtils {
     }
 
     public static User persistUser(String eMail, String password) {
-        try {
-            return userService.createUser(eMail, password.toCharArray(), password.toCharArray());
-        } catch (Exception e) {
-            fail("Could not persist test user: " + eMail);
-            return null;
-        }
+        return userService.createUser(eMail, password.toCharArray(), password.toCharArray());
     }
 
     public static void removeAllUser() {

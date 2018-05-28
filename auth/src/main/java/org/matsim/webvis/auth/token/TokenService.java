@@ -25,7 +25,7 @@ import java.util.Map;
 
 public class TokenService {
 
-    public static TokenService Instance = new TokenService();
+    public static final TokenService Instance = new TokenService();
 
     private static final Logger logger = LogManager.getLogger();
     Algorithm algorithm;
@@ -83,7 +83,7 @@ public class TokenService {
         return token;
     }
 
-    public Token findToken(String token) {
+    Token findToken(String token) {
         return tokenDAO.findByTokenValue(token);
     }
 

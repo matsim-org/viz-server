@@ -8,6 +8,9 @@ import spark.Response;
 
 public class TokenRequestHandler extends JsonResponseHandler {
 
+    PasswordGrant passwordGrant = new PasswordGrant();
+    ClientCredentialsGrant clientCredentialsGrant = new ClientCredentialsGrant();
+
     @Override
     protected Answer process(Request request, Response response) {
 
@@ -15,9 +18,9 @@ public class TokenRequestHandler extends JsonResponseHandler {
 
         switch (tokenRequest.getGrantType()) {
             case OAuthParameters.GRANT_TYPE_PASSWORD:
-                return new PasswordGrant().processRequest(tokenRequest);
+                return passwordGrant.processRequest(tokenRequest);
             case OAuthParameters.GRANT_TYPE_CLIENT_CREDENTIALS:
-                return new ClientCredentialsGrant().processRequest(tokenRequest);
+                return clientCredentialsGrant.processRequest(tokenRequest);
             default:
                 throw new InternalException("unsupported grant type");
         }

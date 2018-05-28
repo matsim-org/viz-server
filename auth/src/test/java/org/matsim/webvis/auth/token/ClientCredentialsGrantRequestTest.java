@@ -19,7 +19,7 @@ public class ClientCredentialsGrantRequestTest {
         final String basicAuth = TestUtils.encodeBasicAuth("name", "secret");
         Map<String, String[]> map = new HashMap<>();
         map.put(OAuthParameters.GRANT_TYPE, new String[]{OAuthParameters.GRANT_TYPE_CLIENT_CREDENTIALS});
-        Request request = TestUtils.mockRequestWithQueryParamsMap(map, ContentType.APPLICATION_JSON);
+        Request request = TestUtils.mockRequestWithQueryParamsMap(map, ContentType.FORM_URL_ENCODED);
         when(request.headers(BasicAuthentication.HEADER_AUTHORIZATION)).thenReturn(basicAuth);
         TokenRequest tokenRequest = new TokenRequest(request);
 

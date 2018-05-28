@@ -3,20 +3,28 @@ package org.matsim.webvis.auth.token;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.matsim.webvis.auth.entities.Token;
+import org.matsim.webvis.auth.helper.BasicAuthentication;
 import org.matsim.webvis.auth.util.TestUtils;
-import org.matsim.webvis.common.communication.*;
+import org.matsim.webvis.common.communication.Answer;
+import org.matsim.webvis.common.communication.ContentType;
+import org.matsim.webvis.common.communication.HttpStatus;
+import org.matsim.webvis.common.service.InternalException;
+import org.matsim.webvis.common.service.InvalidInputException;
 import spark.Request;
-import spark.Response;
 
 import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class TokenRequestHandlerTest {
 
@@ -32,120 +40,70 @@ public class TokenRequestHandlerTest {
         testObject = new TokenRequestHandler();
     }
 
-    //Test handling of url-parameter
+    @Test(expected = InvalidInputException.class)
+    public void process_invalidParameters_invalidInputException() {
 
-    @Test
-    public void wrongQueryParams_serverError() {
+        Request request = TestUtils.mockRequestWithQueryParamsMap(new HashMap<>(),
+                ContentType.FORM_URL_ENCODED);
 
-        Request request = TestUtils.mockRequestWithQueryParamsMap(new HashMap<>(), ContentType.FORM_URL_ENCODED);
-        Response response = mock(Response.class);
+        testObject.process(request, null);
 
-        testObject.handle(request, response);
+        fail("invalid request should cause exception");
+    }
 
-        verify(response).status(HttpStatus.BAD_REQUEST);
-        verify(response).body(any());
+    @Test(expected = InternalException.class)
+    public void process_unsupportedGrantType_internalException() {
+
+        Map<String, String[]> map = new HashMap<>();
+        map.put("grant_type", new String[]{"unsupported"});
+        Request request = TestUtils.mockRequestWithQueryParamsMap(map, ContentType.FORM_URL_ENCODED);
+        when(request.headers(BasicAuthentication.HEADER_AUTHORIZATION)).thenReturn(TestUtils.encodeBasicAuth("principal", "credential"));
+
+        testObject.process(request, null);
+
+        fail("unsupported grant_type should cause exception");
     }
 
     @Test
-    public void wrongContentType_badRequest() {
-        Request request = TestUtils.mockRequestWithQueryParamsMap(new HashMap<>(), "invalid content type");
-        Response response = mock(Response.class);
+    public void process_passwordGrant_tokenResponse() {
 
-        testObject.handle(request, response);
+        Map<String, String[]> map = new HashMap<>();
+        map.put("grant_type", new String[]{"password"});
+        map.put("username", new String[]{"username"});
+        map.put("password", new String[]{"user-password"});
+        Request request = TestUtils.mockRequestWithQueryParamsMap(map, ContentType.FORM_URL_ENCODED);
+        when(request.headers(BasicAuthentication.HEADER_AUTHORIZATION)).thenReturn(TestUtils.encodeBasicAuth("principal", "credential"));
 
-        verify(response).status(HttpStatus.BAD_REQUEST);
-        verify(response).body(any());
-    }
-
-    //Test token handling
-    @Test
-    public void unknownGrantType_internalError() {
-
-        Map<String, String[]> parameters = new HashMap<>();
-        parameters.put("grant_type", new String[]{"invalid-grant type"});
-        parameters.put("username", new String[]{"someusername"});
-        parameters.put("password", new String[]{"password"});
-        Request request = TestUtils.mockRequestWithQueryParamsMap(parameters, ContentType.FORM_URL_ENCODED);
-
-        Answer answer = testObject.process(request, null);
-
-        assertEquals(HttpStatus.BAD_REQUEST, answer.getStatusCode());
-        ErrorResponse response = (ErrorResponse) answer.getResponse();
-        assertEquals(RequestError.UNSUPPORTED_GRANT_TYPE, response.getError());
-    }
-
-    @Test
-    public void noUsernameSupplied_badRequest() {
-
-        Map<String, String[]> parameters = new HashMap<>();
-        parameters.put("grant_type", new String[]{"password"});
-        parameters.put("password", new String[]{"password"});
-        Request request = TestUtils.mockRequestWithQueryParamsMap(parameters, ContentType.FORM_URL_ENCODED);
-
-        Answer answer = testObject.process(request, null);
-
-        assertEquals(HttpStatus.BAD_REQUEST, answer.getStatusCode());
-        ErrorResponse response = (ErrorResponse) answer.getResponse();
-        assertEquals(RequestError.INVALID_REQUEST, response.getError());
-    }
-
-    @Test
-    public void noPasswordSupplied_badRequest() {
-
-        Map<String, String[]> parameters = new HashMap<>();
-        parameters.put("grant_type", new String[]{"password"});
-        parameters.put("username", new String[]{"someusername"});
-        Request request = TestUtils.mockRequestWithQueryParamsMap(parameters, ContentType.FORM_URL_ENCODED);
-
-        Answer answer = testObject.process(request, null);
-
-        assertEquals(HttpStatus.BAD_REQUEST, answer.getStatusCode());
-        ErrorResponse response = (ErrorResponse) answer.getResponse();
-        assertEquals(RequestError.INVALID_REQUEST, response.getError());
-    }
-
-   /* @Test
-    public void tokenServiceThrowException_forbidden() {
-
-        TokenService mockService = mock(TokenService.class);
-        testObject.tokenService = mockService;
-        when(mockService.grantWithPassword(any(), any())).thenThrow(new UnauthorizedException("message"));
-
-        Map<String, String[]> parameters = new HashMap<>();
-        parameters.put("grant_type", new String[]{"password"});
-        parameters.put("username", new String[]{"someusername"});
-        parameters.put("password", new String[]{"somepassword"});
-        Request request = TestUtils.mockRequestWithQueryParamsMap(parameters, ContentType.FORM_URL_ENCODED);
-
-        Answer answer = testObject.process(request, null);
-
-        assertEquals(HttpStatus.FORBIDDEN, answer.getStatusCode());
-        ErrorResponse response = (ErrorResponse) answer.getResponse();
-        assertEquals(Error.FORBIDDEN, response.getError());
-    }
-
-    @Test
-    public void allParametersSupplied_ok() {
-        AccessToken testToken = new AccessToken();
-        testToken.setRefreshToken("refreshToken");
-        testToken.setUser(new User());
-        testToken.setToken("token");
-        testToken.setId("id");
-        testToken.setExpiresAt(Instant.now().plus(Duration.ofHours(1)));
-
-        TokenService mockService = mock(TokenService.class);
-        testObject.tokenService = mockService;
-        when(mockService.grantWithPassword(any(), any())).thenReturn(testToken);
-
-        Map<String, String[]> parameters = new HashMap<>();
-        parameters.put("grant_type", new String[]{"password"});
-        parameters.put("username", new String[]{"someusername"});
-        parameters.put("password", new String[]{"somepassword"});
-        Request request = TestUtils.mockRequestWithQueryParamsMap(parameters, ContentType.FORM_URL_ENCODED);
+        testObject.passwordGrant.tokenService = mock(TokenService.class);
+        when(testObject.passwordGrant.tokenService.grantWithPassword(anyString(), any())).thenReturn(getDummyToken());
 
         Answer answer = testObject.process(request, null);
 
         assertEquals(HttpStatus.OK, answer.getStatusCode());
         assertTrue(answer.getResponse() instanceof AccessTokenResponse);
-    }*/
+    }
+
+    @Test
+    public void process_clientCredentialsGrant_tokenResponse() {
+
+        Map<String, String[]> map = new HashMap<>();
+        map.put("grant_type", new String[]{"client_credentials"});
+        Request request = TestUtils.mockRequestWithQueryParamsMap(map, ContentType.FORM_URL_ENCODED);
+        when(request.headers(BasicAuthentication.HEADER_AUTHORIZATION)).thenReturn(TestUtils.encodeBasicAuth("principal", "credential"));
+
+        testObject.clientCredentialsGrant.tokenService = mock(TokenService.class);
+        when(testObject.clientCredentialsGrant.tokenService.grantWithClientCredentials(any())).thenReturn(getDummyToken());
+
+        Answer answer = testObject.process(request, null);
+
+        assertEquals(HttpStatus.OK, answer.getStatusCode());
+        assertTrue(answer.getResponse() instanceof AccessTokenResponse);
+    }
+
+    private Token getDummyToken() {
+        Token token = new Token();
+        token.setTokenValue("some-value");
+        token.setExpiresAt(Instant.now().plus(Duration.ofHours(1)));
+        return token;
+    }
 }

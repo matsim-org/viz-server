@@ -5,8 +5,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.matsim.webvis.auth.config.ConfigUser;
 import org.matsim.webvis.auth.entities.User;
+import org.matsim.webvis.auth.util.TestUtils;
+import org.matsim.webvis.common.service.InvalidInputException;
+import org.matsim.webvis.common.service.UnauthorizedException;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class UserServiceTest {
 
@@ -23,8 +27,8 @@ public class UserServiceTest {
         userDAO.removeAllUsers();
     }
 
-    @Test(expected = Exception.class)
-    public void createUser_passwordsDontMatchInLength_Exception() throws Exception {
+    @Test(expected = InvalidInputException.class)
+    public void createUser_passwordsDontMatchInLength_Exception() {
         final char[] password = "longpassword".toCharArray();
         final char[] passwordRepeated = "passwordRepeated".toCharArray();
         final String mail = "mail";
@@ -34,8 +38,8 @@ public class UserServiceTest {
         fail("should throw exception when passwords don't match");
     }
 
-    @Test(expected = Exception.class)
-    public void createUser_passwordsDontMatch_Exception() throws Exception {
+    @Test(expected = InvalidInputException.class)
+    public void createUser_passwordsDontMatch_Exception() {
         final char[] password = "longpassword".toCharArray();
         final char[] passwordRepeated = "longpasswort".toCharArray();
         final String mail = "mail";
@@ -45,8 +49,8 @@ public class UserServiceTest {
         fail("should throw exception when passwords don't match");
     }
 
-    @Test(expected = Exception.class)
-    public void createUser_passwordsTooShort_Exception() throws Exception {
+    @Test(expected = InvalidInputException.class)
+    public void createUser_passwordsTooShort_Exception() {
         final char[] password = "short".toCharArray();
         final String mail = "mail";
 
@@ -56,7 +60,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void createUser_userIsCreated_user() throws Exception {
+    public void createUser_userIsCreated_user() {
         final char[] password = "longpassword".toCharArray();
         final String mail = "mail";
 
@@ -65,20 +69,19 @@ public class UserServiceTest {
         assertEquals(mail, first.getEMail());
     }
 
-    @Test(expected = Exception.class)
-    public void createUser_userExists_exception() throws Exception {
+    @Test(expected = InvalidInputException.class)
+    public void createUser_userExists_exception() {
         final char[] password = "longpassword".toCharArray();
         final String mail = "mail";
 
-        User first = testObject.createUser(mail, password, password);
-        User second = testObject.createUser(mail, password, password);
+        testObject.createUser(mail, password, password);
+        testObject.createUser(mail, password, password);
 
-        assertEquals(mail, first.getEMail());
-        assertNull(second);
+        fail("existing user email should cause exception");
     }
 
     @Test
-    public void createUser_twoUniqueUsers() throws Exception {
+    public void createUser_twoUniqueUsers() {
         final char[] password = "longpassword".toCharArray();
         final String mail = "mail";
         final String mail2 = "mail2";
@@ -91,7 +94,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void createUser_configUser_allFine() throws Exception {
+    public void createUser_configUser_allFine() {
 
         ConfigUser configUser = new ConfigUser("name", "id", "longpassword");
 
@@ -101,30 +104,30 @@ public class UserServiceTest {
         assertEquals(configUser.getUsername(), result.getEMail());
     }
 
-    @Test(expected = Exception.class)
-    public void authenticate_noUsername_Exception() throws Exception {
+    @Test(expected = UnauthorizedException.class)
+    public void authenticate_noUsername_Exception() {
 
         final String mail = "mail";
         final char[] password = "password".toCharArray();
 
         testObject.authenticate(mail, password);
 
-        fail("authenticate should have thrown exception if org.matsim.webvis.auth.user is not persisted");
+        fail("authenticate should have thrown exception if user is not persisted");
     }
 
-    @Test(expected = Exception.class)
-    public void authenticate_wrongPassword_Exception() throws Exception {
+    @Test(expected = UnauthorizedException.class)
+    public void authenticate_wrongPassword_Exception() {
         final String mail = "mail";
         final char[] password = "longpassword".toCharArray();
         testObject.createUser(mail, password, password);
 
         testObject.authenticate(mail, "wrongpassword".toCharArray());
 
-        fail("authenticate should have thrown excepton if password is wrong");
+        fail("authenticate should have thrown exception if password is wrong");
     }
 
     @Test
-    public void authenticate_correct_user() throws Exception {
+    public void authenticate_correct_user() {
 
         final String mail = "mail";
         final char[] password = "longpassword".toCharArray();
@@ -133,5 +136,15 @@ public class UserServiceTest {
         User authenticated = testObject.authenticate(mail, password);
 
         assertEquals(user.getEMail(), authenticated.getEMail());
+    }
+
+    @Test
+    public void find_userIsFound() {
+
+        User user = TestUtils.persistUser("mail", "longpassword");
+
+        User found = testObject.findUser(user.getId());
+
+        assertEquals(user.getEMail(), found.getEMail());
     }
 }

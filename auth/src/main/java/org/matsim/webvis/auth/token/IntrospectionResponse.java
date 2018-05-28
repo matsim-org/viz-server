@@ -4,9 +4,9 @@ import lombok.Getter;
 import org.matsim.webvis.auth.entities.Token;
 
 @Getter
-class IntrospectionResponse {
+abstract class IntrospectionResponse {
 
-    private boolean active = true;
+    private boolean active;
     private String scope;
     private String client_id;
     private String username;
@@ -17,7 +17,7 @@ class IntrospectionResponse {
     private String aud;
     private String iss;
 
-    protected IntrospectionResponse(Token token, boolean active) {
+    IntrospectionResponse(Token token, boolean active) {
 
         this.active = active;
         if (token != null) {

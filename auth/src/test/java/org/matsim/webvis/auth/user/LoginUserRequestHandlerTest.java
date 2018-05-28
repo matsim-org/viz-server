@@ -3,6 +3,9 @@ package org.matsim.webvis.auth.user;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.matsim.webvis.auth.entities.Token;
+import org.matsim.webvis.auth.entities.User;
+import org.matsim.webvis.auth.token.TokenService;
 import org.matsim.webvis.auth.util.TestUtils;
 import org.matsim.webvis.common.service.UnauthorizedException;
 import spark.Request;
@@ -13,11 +16,13 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.*;
 
 public class LoginUserRequestHandlerTest {
@@ -52,7 +57,7 @@ public class LoginUserRequestHandlerTest {
     }
 
     @Test
-    public void handle_noPassword_proptLogin() {
+    public void handle_noPassword_promptLogin() {
         Map<String, String> map = new HashMap<>();
         map.put("username", "name");
         Request req = TestUtils.mockRequestWithQueryParams(map, "");
@@ -98,7 +103,7 @@ public class LoginUserRequestHandlerTest {
     @Test
     public void handle_successfulAuthentication_setIdCookieAndRedirect() {
 
-       /* Map<String, String> map = new HashMap<>();
+        Map<String, String> map = new HashMap<>();
         map.put("username", "name");
         map.put("password", "1234");
         Request req = TestUtils.mockRequestWithQueryParams(map, "");
@@ -107,8 +112,8 @@ public class LoginUserRequestHandlerTest {
         when(testObject.userService.authenticate(any(), any())).thenReturn(new User());
         testObject.tokenService = mock(TokenService.class);
 
-        IdToken token = new IdToken();
-        token.setToken("some-org.matsim.webvis.auth.token");
+        Token token = new Token();
+        token.setTokenValue("some-token");
         when(testObject.tokenService.createIdToken(any())).thenReturn(token);
 
         Object response = testObject.handle(req, res);
@@ -116,8 +121,6 @@ public class LoginUserRequestHandlerTest {
         assertTrue(response instanceof String);
         assertEquals("OK", response);
         verify(res).redirect(eq("/authorize/"), eq(302));
-        verify(res).cookie(anyString(), eq("id_token"), eq(token.getToken()), anyInt(), anyBoolean(), anyBoolean());
-        */
+        verify(res).cookie(anyString(), eq("id_token"), eq(token.getTokenValue()), anyInt(), anyBoolean(), anyBoolean());
     }
-
 }

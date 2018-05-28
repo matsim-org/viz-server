@@ -9,9 +9,6 @@ import org.matsim.webvis.auth.entities.RedirectUri;
 import org.matsim.webvis.auth.entities.RelyingParty;
 import org.matsim.webvis.auth.entities.RelyingPartyCredential;
 import org.matsim.webvis.auth.helper.SecretHelper;
-import org.matsim.webvis.common.service.CodedException;
-import org.matsim.webvis.common.service.Error;
-import org.matsim.webvis.common.service.ForbiddenException;
 import org.matsim.webvis.common.service.UnauthorizedException;
 
 import java.net.URI;
@@ -22,7 +19,7 @@ public class RelyingPartyService {
 
     private RelyingPartyDAO relyingPartyDAO = new RelyingPartyDAO();
 
-    public Client createClient(String name, Iterable<URI> redirectUris) {
+    Client createClient(String name, Iterable<URI> redirectUris) {
         return createClient(name, null, redirectUris);
     }
 
@@ -66,7 +63,7 @@ public class RelyingPartyService {
         return persisted;
     }
 
-    public RelyingParty validateRelyingParty(String clientId, String secret) throws UnauthorizedException {
+    public RelyingParty validateRelyingParty(String clientId, String secret) {
         RelyingPartyCredential credential = relyingPartyDAO.findCredential(clientId);
 
         if (credential == null || !SecretHelper.match(credential.getSecret(), secret))
