@@ -12,9 +12,9 @@ import java.io.IOException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-public class MatsimDataProviderTest {
+public class SimulationDataTest {
 
-    private static MatsimDataProvider testObject;
+    private static SimulationData testObject;
 
     @BeforeClass
     public static void setUp() {

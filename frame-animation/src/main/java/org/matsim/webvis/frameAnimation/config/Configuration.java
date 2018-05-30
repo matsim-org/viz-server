@@ -1,4 +1,4 @@
-package org.matsim.webvis.animation.config;
+package org.matsim.webvis.frameAnimation.config;
 
 import com.google.gson.Gson;
 import lombok.Getter;
@@ -14,6 +14,7 @@ public class Configuration {
 
     private int port = 3002;
     private URI introspectionEndpoint;
+    private URI fileServer;
 
     private String tlsKeyStore = "";
     private String tlsKeyStorePassword = "";

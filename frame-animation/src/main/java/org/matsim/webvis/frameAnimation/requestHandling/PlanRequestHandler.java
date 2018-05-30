@@ -6,11 +6,11 @@ import org.matsim.webvis.frameAnimation.contracts.PlanRequest;
 import org.matsim.webvis.frameAnimation.contracts.geoJSON.Feature;
 import org.matsim.webvis.frameAnimation.contracts.geoJSON.FeatureCollection;
 import org.matsim.webvis.frameAnimation.contracts.geoJSON.FeatureSerializer;
-import org.matsim.webvis.frameAnimation.data.MatsimDataProvider;
+import org.matsim.webvis.frameAnimation.data.SimulationData;
 
 public class PlanRequestHandler extends AbstractPostRequestHandler<PlanRequest>{
 
-    public PlanRequestHandler(MatsimDataProvider data) {
+    public PlanRequestHandler(SimulationData data) {
         super(PlanRequest.class, data);
     }
 

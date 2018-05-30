@@ -3,11 +3,11 @@ package org.matsim.webvis.frameAnimation.requestHandling;
 import com.google.gson.Gson;
 import org.matsim.webvis.frameAnimation.contracts.ConfigurationResponse;
 import org.matsim.webvis.frameAnimation.contracts.RectContract;
-import org.matsim.webvis.frameAnimation.data.MatsimDataProvider;
+import org.matsim.webvis.frameAnimation.data.SimulationData;
 
 public class ConfigurationRequestHandler extends AbstractPostRequestHandler<Object> {
 
-    public ConfigurationRequestHandler(MatsimDataProvider data) {
+    public ConfigurationRequestHandler(SimulationData data) {
         super(Object.class, data);
     }
 

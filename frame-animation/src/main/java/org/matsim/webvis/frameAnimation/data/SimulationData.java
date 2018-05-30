@@ -7,14 +7,14 @@ import org.matsim.webvis.frameAnimation.contracts.geoJSON.FeatureCollection;
 
 import java.io.IOException;
 
-public class MatsimDataProvider {
+public class SimulationData {
 
     private double snapshotPeriod;
     private NetworkData networkData;
     private SnapshotData simulationData;
     private PopulationData populationData;
 
-    public MatsimDataProvider(String networkFilePath, String eventsFilePath, String populationFilePath, double snapshotPeriod) {
+    public SimulationData(String networkFilePath, String eventsFilePath, String populationFilePath, double snapshotPeriod) {
 
         this.snapshotPeriod = snapshotPeriod;
 

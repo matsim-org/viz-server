@@ -3,17 +3,17 @@ package org.matsim.webvis.frameAnimation.requestHandling;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import org.matsim.webvis.frameAnimation.constants.Params;
-import org.matsim.webvis.frameAnimation.data.MatsimDataProvider;
+import org.matsim.webvis.frameAnimation.data.SimulationData;
 import spark.Request;
 import spark.Response;
 import spark.Route;
 
 public abstract class AbstractPostRequestHandler<T> implements Route {
 
-    protected MatsimDataProvider dataProvider;
+    SimulationData dataProvider;
     private Class<T> classInfo;
 
-    protected AbstractPostRequestHandler(Class<T> classInfo, MatsimDataProvider dataProvider) {
+    AbstractPostRequestHandler(Class<T> classInfo, SimulationData dataProvider) {
 
         this.classInfo = classInfo;
         this.dataProvider = dataProvider;
@@ -51,7 +51,7 @@ public abstract class AbstractPostRequestHandler<T> implements Route {
         return answer.getCode();
     }
 
-    protected Answer processBody(String body) {
+    Answer processBody(String body) {
         T contractClass;
         try {
             contractClass = new Gson().fromJson(body, classInfo);

@@ -3,13 +3,13 @@ package org.matsim.webvis.frameAnimation.requestHandling;
 import org.matsim.core.utils.collections.QuadTree;
 import org.matsim.webvis.frameAnimation.constants.Params;
 import org.matsim.webvis.frameAnimation.contracts.SnapshotRequest;
-import org.matsim.webvis.frameAnimation.data.MatsimDataProvider;
+import org.matsim.webvis.frameAnimation.data.SimulationData;
 
 import java.io.IOException;
 
 public class SnapshotRequestHandler extends AbstractPostRequestHandler<SnapshotRequest> {
 
-    public SnapshotRequestHandler(MatsimDataProvider data) {
+    public SnapshotRequestHandler(SimulationData data) {
         super(SnapshotRequest.class, data);
     }
 

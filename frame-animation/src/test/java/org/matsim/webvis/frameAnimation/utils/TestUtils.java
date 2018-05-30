@@ -8,7 +8,7 @@ import org.matsim.core.network.NetworkUtils;
 import org.matsim.vis.snapshotwriters.AgentSnapshotInfo;
 import org.matsim.vis.snapshotwriters.AgentSnapshotInfoFactory;
 import org.matsim.vis.snapshotwriters.SnapshotLinkWidthCalculator;
-import org.matsim.webvis.frameAnimation.data.MatsimDataProvider;
+import org.matsim.webvis.frameAnimation.data.SimulationData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +18,7 @@ public class TestUtils {
     public static final String EVENTS_FILE = "src/test/data/test-events-100.xml.gz";
     public static final String POPULATION_FILE = "src/test/data/test-plans-100.xml";
 
-    private static MatsimDataProvider dataProvider = new MatsimDataProvider(NETWORK_FILE, EVENTS_FILE, POPULATION_FILE, 3);
+    private static SimulationData dataProvider = new SimulationData(NETWORK_FILE, EVENTS_FILE, POPULATION_FILE, 3);
 
     public static Network loadTestNetwork() {
         Network network = NetworkUtils.createNetwork();
@@ -46,7 +46,7 @@ public class TestUtils {
         return factory.createAgentSnapshotInfo(id, easting, northing, 0, 0);
     }
 
-    public static MatsimDataProvider getDataProvider() {
+    public static SimulationData getDataProvider() {
         return dataProvider;
     }
 }

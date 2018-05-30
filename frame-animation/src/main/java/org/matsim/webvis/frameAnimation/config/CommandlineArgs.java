@@ -1,4 +1,4 @@
-package org.matsim.webvis.animation.config;
+package org.matsim.webvis.frameAnimation.config;
 
 import com.beust.jcommander.Parameter;
 import lombok.Getter;
