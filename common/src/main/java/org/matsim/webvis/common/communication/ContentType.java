@@ -11,6 +11,6 @@ public class ContentType {
     }
 
     public static boolean isFormUrlEncoded(String contentType) {
-        return FORM_URL_ENCODED.equals(contentType);
+        return FORM_URL_ENCODED.contains(FORM_URL_ENCODED);
     }
 }

@@ -13,4 +13,9 @@ public class CodedException extends RuntimeException {
         super(message);
         this.errorCode = errorCode;
     }
+
+    @Override
+    public String toString() {
+        return errorCode + ": " + getMessage();
+    }
 }
