@@ -15,14 +15,6 @@
     <packaging>jar</packaging>
 
     <build>
-        <!--<extensions>
-            <extension>
-                <groupId>kr.motd.maven</groupId>
-                <artifactId>os-maven-plugin</artifactId>
-                <version>1.4.0.Final</version>
-            </extension>
-        </extensions>
--->
         <plugins>
             <plugin>
                 <groupId>com.mysema.maven</groupId>
@@ -38,13 +30,12 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>Server</mainClass>
+                            <mainClass>org.matsim.webvis.frameAnimation.Server</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
             </plugin>
         </plugins>
-
     </build>
 
     <repositories>

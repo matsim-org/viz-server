@@ -13,7 +13,6 @@
         <module>common</module>
         <module>auth</module>
         <module>files</module>
-        <module>animation</module>
         <module>frame-animation</module>
     </modules>
 

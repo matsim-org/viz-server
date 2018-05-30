@@ -9,7 +9,7 @@ public class BasicAuthentication {
 
     public static final String HEADER_AUTHORIZATION = "Authorization";
 
-    static String encodeToAuthorizationHeader(PrincipalCredentialToken token) {
+    public static String encodeToAuthorizationHeader(PrincipalCredentialToken token) {
         return "Basic " + Base64.getEncoder().encodeToString((token.getPrincipal() + ":" + token.getCredential()).getBytes());
     }
 

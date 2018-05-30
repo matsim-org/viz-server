@@ -53,7 +53,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>org.matsim.webvis.Server</mainClass>
+                            <mainClass>org.matsim.webvis.files.Server</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
