@@ -8,6 +8,9 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.matsim.webvis.common.auth.ClientAuthentication;
 import org.matsim.webvis.common.service.CodedException;
 import org.matsim.webvis.common.service.InternalException;
 
@@ -15,10 +18,27 @@ import java.io.IOException;
 
 public class HttpRequest {
 
+    private static final Logger logger = LogManager.getLogger();
     private static Gson gson = new Gson();
+
+    public static <T> T authenticatedWithJsonResponse(HttpUriRequest request, HttpClientFactory clientFactory, Class<T> responseType, ClientAuthentication authentication) {
+
+        request.addHeader("Authorization", "Bearer " + authentication.getAccessToken());
+        try {
+            return withJsonResponse(request, clientFactory, responseType);
+        } catch (CodedException e) {
+            if (e.getErrorCode().equals("unauthorized")) {
+                authentication.requestAccessToken();
+                request.setHeader("Authorization", "Bearer " + authentication.getAccessToken());
+                return withJsonResponse(request, clientFactory, responseType);
+            } else
+                throw e;
+        }
+    }
 
     public static <T> T withJsonResponse(HttpUriRequest request, HttpClientFactory clientFactory, Class<T> responseType) {
         try (CloseableHttpClient client = clientFactory.createClient()) {
+            logger.info("Making request to: " + request.getURI().toString());
             try (CloseableHttpResponse response = client.execute(request)) {
                 if (!isStatusOk(response))
                     tryThrowWithErrorMessage(response);

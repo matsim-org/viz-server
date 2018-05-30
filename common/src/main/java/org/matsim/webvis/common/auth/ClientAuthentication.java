@@ -50,8 +50,9 @@ public class ClientAuthentication {
             accessToken = response.getAccess_token();
             scope = response.getScope();
             this.state = AuthState.Authenticated;
+            logger.info("received access_token! " + accessToken);
         } catch (RuntimeException e) {
-            logger.error(e);
+            logger.error("Error while requesting authentication ", e);
             this.state = AuthState.Failed;
         }
     }

@@ -5,8 +5,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.matsim.webvis.common.auth.AuthenticationHandler;
 import org.matsim.webvis.common.communication.StartSpark;
+import org.matsim.webvis.frameAnimation.communication.Authentication;
 import org.matsim.webvis.frameAnimation.config.CommandlineArgs;
 import org.matsim.webvis.frameAnimation.config.Configuration;
+import org.matsim.webvis.frameAnimation.data.FileAPI;
 import org.matsim.webvis.frameAnimation.data.SimulationData;
 
 import java.io.FileNotFoundException;
@@ -33,8 +35,9 @@ public class Server {
         JCommander.newBuilder().addObject(ca).build().parse(args);
 
         loadConfigFile(ca);
-        initializeData();
+        //initializeData();
         startSparkServer();
+        initializeAuth();
     }
 
     private static void loadConfigFile(CommandlineArgs args) {
@@ -72,6 +75,11 @@ public class Server {
         logger.info("\n\nStarted animation Server on Port: " + Configuration.getInstance().getPort() + "\n");
     }
 
+    private static void initializeAuth() {
+        Authentication.Instance.requestAccessToken();
+        FileAPI.fetchVisualizations();
+    }
+
     private static void handleInitializationFailure(Exception e) {
 
         String tlsKeyStore = Configuration.getInstance().getTlsKeyStore();
@@ -87,8 +95,6 @@ public class Server {
         logger.error("Exception wich caused failure was: ", e);
         System.exit(100);
     }
-
-
 
     private static void initializeData() {
 

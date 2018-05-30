@@ -17,8 +17,8 @@ public class Answer<T> {
         return new Answer<>(HttpStatus.OK, response);
     }
 
-    public static Answer notFound() {
-        return error(HttpStatus.NOT_FOUND, RequestError.NOT_FOUND, "url not found");
+    public static Answer notFound(String message) {
+        return error(HttpStatus.NOT_FOUND, RequestError.NOT_FOUND, message);
     }
 
     public static Answer invalidRequest(String message) {

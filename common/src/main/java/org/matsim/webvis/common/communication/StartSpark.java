@@ -42,7 +42,7 @@ public class StartSpark {
     }
 
     public static void withExceptionMapping() {
-        notFound((request, response) -> JsonHelper.createJsonResponse(Answer.notFound(), response));
+        notFound((request, response) -> JsonHelper.createJsonResponse(Answer.notFound(request.uri() + " not found"), response));
 
         internalServerError(((request, response) ->
                 JsonHelper.createJsonResponse(Answer.internalError(Error.UNSPECIFIED_ERROR, "internal error."), response)

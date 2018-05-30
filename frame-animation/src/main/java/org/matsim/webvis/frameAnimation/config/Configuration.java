@@ -14,6 +14,7 @@ public class Configuration {
 
     private int port = 3002;
     private URI introspectionEndpoint;
+    private URI tokenEndpoint;
     private URI fileServer;
 
     private String tlsKeyStore = "";
