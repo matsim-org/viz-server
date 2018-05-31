@@ -11,7 +11,7 @@ import org.matsim.webvis.common.service.InvalidInputException;
 import org.matsim.webvis.files.communication.Subject;
 import org.matsim.webvis.files.entities.Project;
 import org.matsim.webvis.files.entities.User;
-import org.matsim.webvis.files.user.UserService;
+import org.matsim.webvis.files.agent.AgentService;
 
 import static junit.framework.TestCase.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -24,8 +24,8 @@ public class CreateProjectRequestHandlerTest {
 
     @Before
     public void setUp() {
-        Subject.userService = mock(UserService.class);
-        when(Subject.userService.findByIdentityProviderId(any())).thenReturn(new User());
+        Subject.agentService = mock(AgentService.class);
+        when(Subject.agentService.findByIdentityProviderId(any())).thenReturn(new User());
         testObject = new CreateProjectRequestHandler();
     }
 

@@ -14,7 +14,7 @@ import org.matsim.webvis.files.entities.FileEntry;
 import org.matsim.webvis.files.entities.Project;
 import org.matsim.webvis.files.entities.User;
 import org.matsim.webvis.files.project.ProjectService;
-import org.matsim.webvis.files.user.UserService;
+import org.matsim.webvis.files.agent.AgentService;
 import spark.Request;
 import spark.Response;
 
@@ -77,8 +77,8 @@ public class FileDownloadRequestHandlerTest {
         when(req.attribute(any())).thenReturn(new AuthenticationResult());
 
         User subject = new User();
-        Subject.userService = mock(UserService.class);
-        when(Subject.userService.findByIdentityProviderId(any())).thenReturn(subject);
+        Subject.agentService = mock(AgentService.class);
+        when(Subject.agentService.findByIdentityProviderId(any())).thenReturn(subject);
 
         Response res = mock(Response.class);
 
@@ -111,8 +111,8 @@ public class FileDownloadRequestHandlerTest {
         when(testObject.projectService.find(any(), any())).thenReturn(project);
 
         User subject = new User();
-        Subject.userService = mock(UserService.class);
-        when(Subject.userService.findByIdentityProviderId(any())).thenReturn(subject);
+        Subject.agentService = mock(AgentService.class);
+        when(Subject.agentService.findByIdentityProviderId(any())).thenReturn(subject);
 
         Response res = mock(Response.class);
 
@@ -148,8 +148,8 @@ public class FileDownloadRequestHandlerTest {
         when(testObject.projectService.find(any(), any())).thenReturn(project);
 
         User subject = new User();
-        Subject.userService = mock(UserService.class);
-        when(Subject.userService.findByIdentityProviderId(any())).thenReturn(subject);
+        Subject.agentService = mock(AgentService.class);
+        when(Subject.agentService.findByIdentityProviderId(any())).thenReturn(subject);
 
         HttpServletResponse rawResponse = mock(HttpServletResponse.class);
         when(rawResponse.getOutputStream()).thenReturn(new ServletOutputStream() {

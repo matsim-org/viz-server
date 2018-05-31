@@ -1,18 +1,10 @@
-package org.matsim.webvis.files.user;
+package org.matsim.webvis.files.agent;
 
 import org.matsim.webvis.files.entities.DAO;
 import org.matsim.webvis.files.entities.QUser;
 import org.matsim.webvis.files.entities.User;
 
-public class UserDAO extends DAO {
-
-    public User persist(User user) {
-
-        if (user.getId() == null) {
-            return database.persistOne(user);
-        }
-        return database.updateOne(user);
-    }
+public class UserDAO extends AgentDAO {
 
     public User update(User user) {
         return database.updateOne(user);

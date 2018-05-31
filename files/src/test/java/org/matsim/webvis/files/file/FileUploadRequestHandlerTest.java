@@ -11,7 +11,7 @@ import org.matsim.webvis.files.communication.Subject;
 import org.matsim.webvis.files.entities.Project;
 import org.matsim.webvis.files.entities.User;
 import org.matsim.webvis.files.project.ProjectService;
-import org.matsim.webvis.files.user.UserService;
+import org.matsim.webvis.files.agent.AgentService;
 import org.matsim.webvis.files.util.TestUtils;
 import spark.Request;
 import spark.Response;
@@ -29,8 +29,8 @@ public class FileUploadRequestHandlerTest {
     public void setUp() {
 
         testObject = new FileUploadRequestHandler();
-        Subject.userService = mock(UserService.class);
-        when(Subject.userService.findByIdentityProviderId(any())).thenReturn(new User());
+        Subject.agentService = mock(AgentService.class);
+        when(Subject.agentService.findByIdentityProviderId(any())).thenReturn(new User());
     }
 
     @Test(expected = InvalidInputException.class)

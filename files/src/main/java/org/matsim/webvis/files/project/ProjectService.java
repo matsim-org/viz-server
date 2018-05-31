@@ -40,13 +40,13 @@ public class ProjectService {
         return projectDAO.findFlat(projectId);
     }
 
-    public Project find(String projectId, User creator) {
+    public Project find(String projectId, Agent creator) {
 
         permissionService.findReadPermission(creator, projectId);
         return projectDAO.find(projectId);
     }
 
-    List<Project> findAllForUserFlat(User user) {
+    List<Project> findAllForUserFlat(Agent user) {
         return projectDAO.findAllForUserFlat(user);
     }
 

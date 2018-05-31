@@ -10,7 +10,7 @@ import org.matsim.webvis.common.service.ForbiddenException;
 import org.matsim.webvis.files.config.Configuration;
 import org.matsim.webvis.files.entities.*;
 import org.matsim.webvis.files.permission.PermissionService;
-import org.matsim.webvis.files.user.UserDAO;
+import org.matsim.webvis.files.agent.UserDAO;
 import org.matsim.webvis.files.util.TestUtils;
 
 import java.io.FileInputStream;
@@ -231,7 +231,7 @@ public class ProjectServiceTest {
         items.add(TestUtils.mockFileItem(filename, contentType, size));
 
         try {
-            testObject.addFilesToProject(items, new Project(), new Agent());
+            testObject.addFilesToProject(items, new Project(), new User());
             fail("exception while persisting project should raise exception and delete written files");
         } catch (Exception e) {
             verify(repository).removeFiles(any());

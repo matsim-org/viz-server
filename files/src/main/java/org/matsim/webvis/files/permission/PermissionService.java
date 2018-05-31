@@ -19,11 +19,11 @@ public class PermissionService {
     }
 
     public static Permission createServicePermission(Resource resource) {
-        return new Permission(resource, null, Permission.Type.Read);
+        return new Permission(resource, SpecialAgents.Instance.getServiceAgent(), Permission.Type.Read);
     }
 
     public static Permission createPublicPermission(Resource resource) {
-        return new Permission(resource, null, Permission.Type.Read);
+        return new Permission(resource, SpecialAgents.Instance.getPublicUser(), Permission.Type.Read);
     }
 
     public Permission find(Agent agent, String resourceId) {

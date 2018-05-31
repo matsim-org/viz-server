@@ -6,7 +6,7 @@ import org.junit.Test;
 import org.matsim.webvis.common.auth.AuthenticationResult;
 import org.matsim.webvis.common.communication.Answer;
 import org.matsim.webvis.files.entities.User;
-import org.matsim.webvis.files.user.UserService;
+import org.matsim.webvis.files.agent.AgentService;
 import spark.Request;
 
 import static junit.framework.TestCase.assertEquals;
@@ -28,8 +28,8 @@ public class AuthenticatedJsonRequestHandlerTest {
     public void process_userFound_takeThatUser() {
 
         User user = new User();
-        Subject.userService = mock(UserService.class);
-        when(Subject.userService.findByIdentityProviderId(any())).thenReturn(user);
+        Subject.agentService = mock(AgentService.class);
+        when(Subject.agentService.findByIdentityProviderId(any())).thenReturn(user);
 
         Request request = mock(Request.class);
         when(request.attribute("subject")).thenReturn(new AuthenticationResult());

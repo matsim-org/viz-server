@@ -7,6 +7,7 @@ import org.matsim.webvis.files.communication.AuthenticatedJsonRequestHandler;
 import org.matsim.webvis.files.communication.GsonFactory;
 import org.matsim.webvis.files.communication.Subject;
 import org.matsim.webvis.files.entities.Project;
+import org.matsim.webvis.files.entities.User;
 import org.matsim.webvis.files.project.ProjectService;
 
 public class FileDeleteRequestHandler extends AuthenticatedJsonRequestHandler<FileRequest> {
@@ -23,7 +24,7 @@ public class FileDeleteRequestHandler extends AuthenticatedJsonRequestHandler<Fi
         if (!isValid(body)) {
             return Answer.badRequest(RequestError.INVALID_REQUEST, "fileId and projectId must be provided");
         }
-        Project project = projectService.removeFileFromProject(body.getProjectId(), body.getFileId(), subject.getUser());
+        Project project = projectService.removeFileFromProject(body.getProjectId(), body.getFileId(), (User)subject.getUser());
         return Answer.ok(project);
     }
 

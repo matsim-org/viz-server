@@ -4,13 +4,13 @@ import lombok.Getter;
 import lombok.Setter;
 import org.matsim.webvis.common.database.AbstractEntity;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
+import javax.persistence.*;
 
 @Getter
 @Setter
 @Entity
-public class Agent extends AbstractEntity {
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+public abstract class Agent extends AbstractEntity {
 
     @Column(unique = true)
     private String authId;

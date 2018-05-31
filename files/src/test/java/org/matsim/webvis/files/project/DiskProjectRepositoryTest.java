@@ -6,7 +6,7 @@ import org.matsim.webvis.files.config.Configuration;
 import org.matsim.webvis.files.entities.FileEntry;
 import org.matsim.webvis.files.entities.Project;
 import org.matsim.webvis.files.entities.User;
-import org.matsim.webvis.files.user.UserDAO;
+import org.matsim.webvis.files.agent.UserDAO;
 import org.matsim.webvis.files.util.TestUtils;
 import spark.utils.IOUtils;
 

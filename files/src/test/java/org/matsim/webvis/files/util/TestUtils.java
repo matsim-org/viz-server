@@ -10,7 +10,7 @@ import org.matsim.webvis.files.entities.Project;
 import org.matsim.webvis.files.entities.User;
 import org.matsim.webvis.files.project.ProjectDAO;
 import org.matsim.webvis.files.project.ProjectService;
-import org.matsim.webvis.files.user.UserDAO;
+import org.matsim.webvis.files.agent.UserDAO;
 import spark.Request;
 
 import javax.servlet.http.HttpServletRequest;
