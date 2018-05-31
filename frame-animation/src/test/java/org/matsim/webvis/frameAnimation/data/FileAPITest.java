@@ -8,6 +8,6 @@ public class FileAPITest {
     @Test
     public void test() {
 
-       Visualization viz = FileAPI.fetchVisualizations();
+       //Visualization viz = FileAPI.fetchVisualizations();
     }
 }
