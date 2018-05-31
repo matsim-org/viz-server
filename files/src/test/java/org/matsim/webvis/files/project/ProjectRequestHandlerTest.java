@@ -36,7 +36,7 @@ public class ProjectRequestHandlerTest {
         Project project = createProject("first");
         when(testObject.projectService.find(anyString(), any())).thenReturn(project);
         ProjectRequest body = new ProjectRequest(project.getId());
-        Subject subject = new Subject(null, new User());
+        Subject subject = new Subject(new User(), null);
 
         Answer answer = testObject.process(body, subject);
 
@@ -53,7 +53,7 @@ public class ProjectRequestHandlerTest {
         projects.add(createProject("second"));
         when(testObject.projectService.findAllForUserFlat(any())).thenReturn(projects);
         ProjectRequest body = new ProjectRequest();
-        Subject subject = new Subject(null, new User());
+        Subject subject = new Subject(new User(), null);
 
         Answer answer = testObject.process(body, subject);
 

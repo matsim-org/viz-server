@@ -1,8 +1,8 @@
 package org.matsim.webvis.auth.token;
 
 import org.junit.Test;
-import org.matsim.webvis.auth.helper.BasicAuthentication;
 import org.matsim.webvis.auth.util.TestUtils;
+import org.matsim.webvis.common.auth.BasicAuthentication;
 import org.matsim.webvis.common.communication.ContentType;
 import spark.Request;
 

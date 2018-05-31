@@ -11,9 +11,9 @@ import org.apache.logging.log4j.Logger;
 import org.matsim.webvis.auth.entities.RelyingParty;
 import org.matsim.webvis.auth.entities.Token;
 import org.matsim.webvis.auth.entities.User;
-import org.matsim.webvis.auth.helper.BasicAuthentication;
 import org.matsim.webvis.auth.relyingParty.RelyingPartyService;
 import org.matsim.webvis.auth.user.UserService;
+import org.matsim.webvis.common.auth.PrincipalCredentialToken;
 import org.matsim.webvis.common.database.AbstractEntity;
 import org.matsim.webvis.common.service.CodedException;
 
@@ -45,7 +45,7 @@ public class TokenService {
 
     Token grantWithClientCredentials(ClientCredentialsGrantRequest request) {
 
-        BasicAuthentication auth = request.getTokenRequest().getBasicAuth();
+        PrincipalCredentialToken auth = request.getTokenRequest().getBasicAuth();
         RelyingParty relyingParty = relyingPartyService.validateRelyingParty(auth.getPrincipal(), auth.getCredential());
         return createAccessToken(relyingParty);
     }

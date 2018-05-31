@@ -49,7 +49,7 @@ public class CreateProjectRequestHandlerTest {
         User subject = new User();
         subject.setId("id");
 
-        Answer answer = testObject.process(request, new Subject(null, subject));
+        Answer answer = testObject.process(request, new Subject(subject, null));
 
         assertEquals(HttpStatus.CONFLICT, answer.getStatusCode());
         assertTrue(answer.getResponse() instanceof ErrorResponse);
@@ -67,7 +67,7 @@ public class CreateProjectRequestHandlerTest {
         User subject = new User();
         subject.setId("id");
 
-        Answer answer = testObject.process(request, new Subject(null, subject));
+        Answer answer = testObject.process(request, new Subject(subject, null));
 
         assertEquals(HttpStatus.OK, answer.getStatusCode());
         assertTrue(answer.getResponse() instanceof Project);

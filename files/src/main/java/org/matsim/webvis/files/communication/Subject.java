@@ -1,42 +1,30 @@
 package org.matsim.webvis.files.communication;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.matsim.webvis.common.auth.AuthenticationResult;
 import org.matsim.webvis.files.entities.User;
 import org.matsim.webvis.files.user.UserService;
-import spark.Request;
 
 @Getter
+@AllArgsConstructor
 public class Subject {
 
-    public static final String SUBJECT_ATTRIBUTE = "subject";
-
-    //this property is public for unit testing
-    public static UserService userService = new UserService();
-
     private User user;
-    private AuthenticationResult authentication;
+    //this is public for unit testing
+    public static UserService userService = new UserService();
+    private AuthenticationResult authenticationResult;
 
-    public Subject(AuthenticationResult authentication, User user) {
-        this.user = user;
-        this.authentication = authentication;
+    public static Subject createSubject(AuthenticationResult authResult) {
+        User user = findOrCreateUser(authResult.getSub());
+        return new Subject(user, authResult);
     }
 
-    public static Subject getSubject(Request request) {
+    private static User findOrCreateUser(String authId) {
 
-        AuthenticationResult authentication = request.attribute(SUBJECT_ATTRIBUTE);
-
-        if (authentication == null) {
-            throw new RuntimeException("Attribute 'subject' was not set. 'setAuthenticationAsAttribute' must be called first");
-        }
-
-        User user = userService.findByIdentityProviderId(authentication.getSub());
+        User user = userService.findByIdentityProviderId(authId);
         if (user == null)
-            user = userService.createUser(authentication.getSub());
-
-        return new Subject(authentication, user);
-    }
-
-    public static void setAuthenticationAsAttribute(Request request, AuthenticationResult authentication) {
-        request.attribute(SUBJECT_ATTRIBUTE, authentication);
+            user = userService.createUser(authId);
+        return user;
     }
 }

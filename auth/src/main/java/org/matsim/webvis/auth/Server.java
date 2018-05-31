@@ -48,7 +48,6 @@ public class Server {
         for (ConfigRelyingParty party : Configuration.getInstance().getProtectedResources()) {
             RelyingParty created = relyingPartyService.createRelyingParty(party);
             logger.info("Created relying party: " + created.getName());
-
         }
     }
 

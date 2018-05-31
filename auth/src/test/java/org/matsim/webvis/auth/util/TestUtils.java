@@ -2,11 +2,11 @@ package org.matsim.webvis.auth.util;
 
 import org.matsim.webvis.auth.config.Configuration;
 import org.matsim.webvis.auth.entities.User;
-import org.matsim.webvis.auth.helper.BasicAuthentication;
 import org.matsim.webvis.auth.relyingParty.RelyingPartyDAO;
 import org.matsim.webvis.auth.token.TokenRequest;
 import org.matsim.webvis.auth.user.UserDAO;
 import org.matsim.webvis.auth.user.UserService;
+import org.matsim.webvis.common.auth.PrincipalCredentialToken;
 import spark.QueryParamsMap;
 import spark.Request;
 
@@ -66,10 +66,8 @@ public class TestUtils {
 
     public static TokenRequest mockTokenRequest(String clientPrincipal, String clientCredential) {
 
-        String auth = encodeBasicAuth(clientPrincipal, clientCredential);
-        BasicAuthentication basicAuth = new BasicAuthentication(auth);
         TokenRequest request = mock(TokenRequest.class);
-        when(request.getBasicAuth()).thenReturn(basicAuth);
+        when(request.getBasicAuth()).thenReturn(new PrincipalCredentialToken(clientPrincipal, clientCredential));
         when(request.getGrantType()).thenReturn("some-grant-type");
         return request;
     }

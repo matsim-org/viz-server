@@ -1,4 +1,4 @@
-package org.matsim.webvis.files.communication;
+package org.matsim.webvis.common.auth;
 
 import lombok.Getter;
 

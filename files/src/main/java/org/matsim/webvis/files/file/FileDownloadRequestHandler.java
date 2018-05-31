@@ -1,6 +1,8 @@
 package org.matsim.webvis.files.file;
 
 import org.apache.commons.io.IOUtils;
+import org.matsim.webvis.common.auth.AuthenticationResult;
+import org.matsim.webvis.common.auth.AuthenticationStore;
 import org.matsim.webvis.common.communication.ContentType;
 import org.matsim.webvis.common.communication.HttpStatus;
 import org.matsim.webvis.common.communication.JsonHelper;
@@ -30,7 +32,8 @@ public class FileDownloadRequestHandler implements Route {
             throw new InvalidInputException("only content-type: 'application/json' allowed");
 
         FileRequest body = JsonHelper.parseJson(request.body(), FileRequest.class);
-        Subject subject = Subject.getSubject(request);
+        AuthenticationResult authResult = AuthenticationStore.getAuthenticationResult(request);
+        Subject subject = Subject.createSubject(authResult);
         Project project = projectService.find(body.getProjectId(), subject.getUser());
 
         FileEntry fileEntry = project.getFiles().stream().filter(file -> file.getId().equals(body.getFileId())).findFirst()
