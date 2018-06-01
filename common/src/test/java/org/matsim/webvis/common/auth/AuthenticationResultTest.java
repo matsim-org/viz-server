@@ -10,38 +10,38 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-public class AuthenticationStoreTest {
+public class AuthenticationResultTest {
 
     @Test
-    public void setAttribute() {
+    public void intoAttribute() {
 
         Request request = mock(Request.class);
         AuthenticationResult authentication = new AuthenticationResult();
 
-        AuthenticationStore.setAuthenticationAttribute(request, authentication);
+        AuthenticationResult.intoRequestAttribute(request, authentication);
 
         verify(request).attribute(anyString(), eq(authentication));
     }
 
     @Test(expected = InternalException.class)
-    public void getAuthenticationResult_noAttributeSet_internalException() {
+    public void fromAttribute_noAttributeSet_internalException() {
 
         Request request = mock(Request.class);
         when(request.attribute(anyString())).thenReturn(null);
 
-        AuthenticationStore.getAuthenticationResult(request);
+        AuthenticationResult.fromRequestAttribute(request);
 
         fail("Exception should be thrown if no attribute with key 'subject' was set");
     }
 
     @Test
-    public void getAuthenticationResult_resultPresent_authResult() {
+    public void fromAttribute_resultPresent_authResult() {
 
         AuthenticationResult authentication = new AuthenticationResult();
         Request request = mock(Request.class);
         when(request.attribute(anyString())).thenReturn(authentication);
 
-        AuthenticationResult result = AuthenticationStore.getAuthenticationResult(request);
+        AuthenticationResult result = AuthenticationResult.fromRequestAttribute(request);
 
         assertEquals(authentication, result);
     }

@@ -77,7 +77,7 @@ public class AuthenticationHandler implements Filter {
         AuthenticatedRequest authenticatedRequest = new AuthenticatedRequest(request);
         AuthenticationResult result = introspectToken(authenticatedRequest.getToken());
         if (result.isActive())
-            AuthenticationStore.setAuthenticationAttribute(request, result);
+            AuthenticationResult.intoRequestAttribute(request, result);
         else
             throw new UnauthorizedException("Token is invalid");
     }

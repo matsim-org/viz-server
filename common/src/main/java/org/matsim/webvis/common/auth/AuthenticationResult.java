@@ -1,6 +1,8 @@
 package org.matsim.webvis.common.auth;
 
 import lombok.Getter;
+import org.matsim.webvis.common.service.InternalException;
+import spark.Request;
 
 @Getter
 public class AuthenticationResult {
@@ -15,4 +17,20 @@ public class AuthenticationResult {
     private String sub;
     private String aud;
     private String iss;
+
+    public static final String SUBJECT_ATTRIBUTE = "subject";
+
+    public static AuthenticationResult fromRequestAttribute(Request request) {
+
+        AuthenticationResult authentication = request.attribute(SUBJECT_ATTRIBUTE);
+
+        if (authentication == null) {
+            throw new InternalException("Attribute 'subject' was not set. 'setAuthenticationAsAttribute' must be called first");
+        }
+        return authentication;
+    }
+
+    static void intoRequestAttribute(Request request, AuthenticationResult authenticationResult) {
+        request.attribute(SUBJECT_ATTRIBUTE, authenticationResult);
+    }
 }
