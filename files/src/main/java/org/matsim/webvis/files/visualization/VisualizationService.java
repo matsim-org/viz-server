@@ -1,21 +1,23 @@
 package org.matsim.webvis.files.visualization;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.webvis.common.service.CodedException;
 import org.matsim.webvis.common.service.Error;
-import org.matsim.webvis.common.service.ForbiddenException;
 import org.matsim.webvis.files.entities.*;
 import org.matsim.webvis.files.permission.PermissionService;
 import org.matsim.webvis.files.project.ProjectService;
 
 import javax.persistence.PersistenceException;
-import java.security.Permissions;
 import java.util.List;
 
 public class VisualizationService {
 
+    private static final Logger logger = LogManager.getLogger();
+
     private ProjectService projectService = new ProjectService();
     private VisualizationDAO visualizationDAO = new VisualizationDAO();
-    private PermissionService permissionService = new PermissionService();
+    private PermissionService permissionService = PermissionService.Instance;
 
     public VisualizationType persistType(VisualizationType type) {
         return visualizationDAO.persistType(type);
@@ -40,20 +42,21 @@ public class VisualizationService {
 
         permissionService.findWritePermission(user, request.getProjectId());
 
-        Project project = projectService.find(request.getProjectId(), user);
         VisualizationType type = findOrThrow(request.getTypeKey());
-
+        Project project = projectService.findWithFullChildGraph(request.getProjectId(), user);
 
         Visualization viz = new Visualization();
         project.addVisualization(viz);
         viz.setType(type);
-        viz.addPermission(PermissionService.createServicePermission(viz));
+        viz.addPermission(permissionService.createServicePermission(viz));
+        viz.addPermission(permissionService.createUserPermission(viz, user, Permission.Type.Delete));
         addInput(viz, project, request);
         addParameters(viz, request);
 
         try {
             return visualizationDAO.persist(viz);
         } catch (PersistenceException e) {
+            logger.error("Could not perist", e);
             throw new CodedException(Error.RESOURCE_EXISTS, "Visualization already exists");
         }
     }
@@ -67,11 +70,11 @@ public class VisualizationService {
         return viz;
     }
 
-    private static void addInput(Visualization viz, Project project, CreateVisualizationRequest request) {
+    private void addInput(Visualization viz, Project project, CreateVisualizationRequest request) {
 
         request.getInputFiles().forEach((key, value) -> {
             FileEntry file = project.getFileEntry(value);
-            file.addPermission(PermissionService.createServicePermission(file));
+            file.addPermission(permissionService.createServicePermission(file));
             VisualizationInput input = new VisualizationInput(key, file, viz);
             viz.addInput(input);
         });

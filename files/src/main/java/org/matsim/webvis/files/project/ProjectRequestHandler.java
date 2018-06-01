@@ -4,8 +4,8 @@ import org.matsim.webvis.common.communication.Answer;
 import org.matsim.webvis.common.service.CodedException;
 import org.matsim.webvis.files.communication.AuthenticatedJsonRequestHandler;
 import org.matsim.webvis.files.communication.GsonFactory;
-import org.matsim.webvis.files.communication.Subject;
 import org.matsim.webvis.files.entities.Project;
+import org.matsim.webvis.files.permission.Subject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,9 +25,9 @@ public class ProjectRequestHandler extends AuthenticatedJsonRequestHandler<Proje
 
         if (body.getProjectId() != null) {
             result = new ArrayList<>();
-            result.add(projectService.find(body.getProjectId(), subject.getUser()));
+            result.add(projectService.find(body.getProjectId(), subject.getAgent()));
         } else {
-            result = projectService.findAllForUserFlat(subject.getUser());
+            result = projectService.findAllForUserFlat(subject.getAgent());
         }
         return Answer.ok(result);
     }

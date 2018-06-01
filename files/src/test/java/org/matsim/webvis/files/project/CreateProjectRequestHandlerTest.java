@@ -1,5 +1,6 @@
 package org.matsim.webvis.files.project;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.matsim.webvis.common.communication.Answer;
@@ -8,10 +9,10 @@ import org.matsim.webvis.common.communication.HttpStatus;
 import org.matsim.webvis.common.service.CodedException;
 import org.matsim.webvis.common.service.Error;
 import org.matsim.webvis.common.service.InvalidInputException;
-import org.matsim.webvis.files.communication.Subject;
 import org.matsim.webvis.files.entities.Project;
 import org.matsim.webvis.files.entities.User;
-import org.matsim.webvis.files.agent.AgentService;
+import org.matsim.webvis.files.permission.Subject;
+import org.matsim.webvis.files.util.TestUtils;
 
 import static junit.framework.TestCase.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -24,9 +25,13 @@ public class CreateProjectRequestHandlerTest {
 
     @Before
     public void setUp() {
-        Subject.agentService = mock(AgentService.class);
-        when(Subject.agentService.findByIdentityProviderId(any())).thenReturn(new User());
         testObject = new CreateProjectRequestHandler();
+        TestUtils.persistUser("some-auth-id");
+    }
+
+    @After
+    public void tearDown() {
+        TestUtils.removeAllEntities();
     }
 
     @Test(expected = InvalidInputException.class)

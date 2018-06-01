@@ -5,9 +5,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.matsim.webvis.common.communication.Answer;
 import org.matsim.webvis.common.service.CodedException;
-import org.matsim.webvis.files.communication.Subject;
 import org.matsim.webvis.files.entities.Project;
 import org.matsim.webvis.files.entities.User;
+import org.matsim.webvis.files.permission.Subject;
 import org.matsim.webvis.files.project.ProjectService;
 import org.matsim.webvis.files.util.TestUtils;
 

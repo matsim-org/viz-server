@@ -18,14 +18,14 @@ public class ProjectService {
 
     ProjectDAO projectDAO = new ProjectDAO();
     RepositoryFactory repositoryFactory = new RepositoryFactory();
-    PermissionService permissionService = new PermissionService();
+    PermissionService permissionService = PermissionService.Instance;
 
     public Project createNewProject(String projectName, User creator) {
 
         Project project = new Project();
         project.setName(projectName);
         project.setCreator(creator);
-        Permission permission = PermissionService.createUserPermission(project, creator, Permission.Type.Delete);
+        Permission permission = permissionService.createUserPermission(project, creator, Permission.Type.Delete);
         project.addPermission(permission);
         try {
             return projectDAO.persist(project);
@@ -44,6 +44,11 @@ public class ProjectService {
 
         permissionService.findReadPermission(creator, projectId);
         return projectDAO.find(projectId);
+    }
+
+    public Project findWithFullChildGraph(String projectId, Agent agent) {
+        permissionService.findReadPermission(agent, projectId);
+        return projectDAO.findWithFullGraph(projectId);
     }
 
     List<Project> findAllForUserFlat(Agent user) {

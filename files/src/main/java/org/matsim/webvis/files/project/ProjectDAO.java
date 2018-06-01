@@ -63,6 +63,23 @@ public class ProjectDAO extends DAO {
         );
     }
 
+    Project findWithFullGraph(String projectId) {
+
+        QProject project = QProject.project;
+        QFileEntry fileEntry = QFileEntry.fileEntry;
+        QVisualization visualization = QVisualization.visualization;
+        QPermission permission = QPermission.permission;
+
+        return database.executeQuery(query -> query.selectFrom(project)
+                .where(project.id.eq(projectId))
+                .leftJoin(project.files, fileEntry).fetchJoin()
+                .leftJoin(fileEntry.permissions, permission).fetchJoin()
+                .leftJoin(project.visualizations, visualization).fetchJoin()
+                .leftJoin(visualization.permissions, permission).fetchJoin()
+                .leftJoin(project.permissions).fetchJoin()
+                .fetchOne());
+    }
+
     void remove(Project project) {
 
         //all child entities must be removed first. We do it this way until it becomes too many child relations

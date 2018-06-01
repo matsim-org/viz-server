@@ -5,14 +5,14 @@ import org.matsim.webvis.common.communication.Answer;
 import org.matsim.webvis.common.service.InvalidInputException;
 import org.matsim.webvis.files.communication.AuthenticatedJsonRequestHandler;
 import org.matsim.webvis.files.communication.GsonFactory;
-import org.matsim.webvis.files.communication.Subject;
 import org.matsim.webvis.files.entities.Visualization;
+import org.matsim.webvis.files.permission.Subject;
 
 import java.util.List;
 
 public class VisualizationsRequestHandler extends AuthenticatedJsonRequestHandler<VisualizationsRequest> {
 
-    VisualizationService visualizationService = new VisualizationService();
+    private VisualizationService visualizationService = new VisualizationService();
 
     public VisualizationsRequestHandler() {
         super(VisualizationsRequest.class, GsonFactory.createParserWithExclusionStrategy());
@@ -23,7 +23,7 @@ public class VisualizationsRequestHandler extends AuthenticatedJsonRequestHandle
 
         if (!isValidRequest(body)) throw new InvalidInputException("parameter visualizationType is missing");
 
-        List<Visualization> result = visualizationService.findByType(body.getVisualizationType(), subject.getUser());
+        List<Visualization> result = visualizationService.findByType(body.getVisualizationType(), subject.getAgent());
         return Answer.ok(result);
     }
 

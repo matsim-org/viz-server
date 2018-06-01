@@ -4,10 +4,9 @@ import org.junit.*;
 import org.matsim.webvis.common.service.CodedException;
 import org.matsim.webvis.common.service.Error;
 import org.matsim.webvis.common.service.ForbiddenException;
-import org.matsim.webvis.files.entities.Project;
-import org.matsim.webvis.files.entities.User;
-import org.matsim.webvis.files.entities.Visualization;
-import org.matsim.webvis.files.entities.VisualizationType;
+import org.matsim.webvis.files.agent.AgentService;
+import org.matsim.webvis.files.entities.*;
+import org.matsim.webvis.files.permission.PermissionService;
 import org.matsim.webvis.files.project.ProjectDAO;
 import org.matsim.webvis.files.util.TestUtils;
 
@@ -93,6 +92,14 @@ public class VisualizationServiceTest {
         assertEquals(1, viz.getInputFiles().size());
         assertEquals(1, viz.getParameters().size());
         assertEquals(request.getTypeKey(), viz.getType().getKey());
+        Project finalProject = project;
+        assertTrue(viz.getPermissions().stream().anyMatch(p -> p.getAgent().equalId(finalProject.getCreator())));
+
+        for (VisualizationInput vizInput : viz.getInputFiles().values()) {
+
+            Permission perm = PermissionService.Instance.findReadPermission(AgentService.Instance.getServiceAgent(),
+                    vizInput.getFileEntry().getId());
+        }
     }
 
     @Test

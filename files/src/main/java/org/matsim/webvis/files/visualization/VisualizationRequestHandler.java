@@ -5,8 +5,8 @@ import org.matsim.webvis.common.communication.Answer;
 import org.matsim.webvis.common.service.InvalidInputException;
 import org.matsim.webvis.files.communication.AuthenticatedJsonRequestHandler;
 import org.matsim.webvis.files.communication.GsonFactory;
-import org.matsim.webvis.files.communication.Subject;
 import org.matsim.webvis.files.entities.Visualization;
+import org.matsim.webvis.files.permission.Subject;
 
 public class VisualizationRequestHandler extends AuthenticatedJsonRequestHandler<VisualizationRequest> {
 
@@ -21,7 +21,7 @@ public class VisualizationRequestHandler extends AuthenticatedJsonRequestHandler
 
         if (!isValidRequest(body)) throw new InvalidInputException("parameter 'visualizationId' is missing");
 
-        Visualization viz = visualizationService.find(body.getVisualizationId(), subject.getUser());
+        Visualization viz = visualizationService.find(body.getVisualizationId(), subject.getAgent());
         return Answer.ok(viz);
     }
 

@@ -1,14 +1,9 @@
 package org.matsim.webvis.files.agent;
 
-import org.matsim.webvis.files.entities.DAO;
 import org.matsim.webvis.files.entities.QUser;
 import org.matsim.webvis.files.entities.User;
 
 public class UserDAO extends AgentDAO {
-
-    public User update(User user) {
-        return database.updateOne(user);
-    }
 
     User findByIdentityProviderId(String id) {
 

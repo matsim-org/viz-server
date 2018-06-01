@@ -1,6 +1,7 @@
 package org.matsim.webvis.files.permission;
 
 import org.matsim.webvis.common.service.ForbiddenException;
+import org.matsim.webvis.files.agent.AgentService;
 import org.matsim.webvis.files.entities.Agent;
 import org.matsim.webvis.files.entities.Permission;
 import org.matsim.webvis.files.entities.Resource;
@@ -9,21 +10,24 @@ import java.util.List;
 
 public class PermissionService {
 
+    public static final PermissionService Instance = new PermissionService();
+
+    private PermissionService() {
+    }
+
     private PermissionDAO permissionDAO = new PermissionDAO();
 
-    public static Permission createUserPermission(Resource resource, Agent user, Permission.Type type) {
+    public Permission createUserPermission(Resource resource, Agent user, Permission.Type type) {
 
-        //TODO: this should get in here otherwise but is good for now
-        String scope = "user";
         return new Permission(resource, user, type);
     }
 
-    public static Permission createServicePermission(Resource resource) {
-        return new Permission(resource, SpecialAgents.Instance.getServiceAgent(), Permission.Type.Read);
+    public Permission createServicePermission(Resource resource) {
+        return new Permission(resource, AgentService.Instance.getServiceAgent(), Permission.Type.Read);
     }
 
-    public static Permission createPublicPermission(Resource resource) {
-        return new Permission(resource, SpecialAgents.Instance.getPublicUser(), Permission.Type.Read);
+    Permission createPublicPermission(Resource resource) {
+        return new Permission(resource, AgentService.Instance.getPublicAgent(), Permission.Type.Read);
     }
 
     public Permission find(Agent agent, String resourceId) {

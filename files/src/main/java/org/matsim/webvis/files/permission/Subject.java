@@ -1,21 +1,21 @@
-package org.matsim.webvis.files.communication;
+package org.matsim.webvis.files.permission;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.matsim.webvis.common.auth.AuthenticationResult;
+import org.matsim.webvis.files.agent.AgentService;
 import org.matsim.webvis.files.entities.Agent;
 import org.matsim.webvis.files.entities.User;
-import org.matsim.webvis.files.agent.AgentService;
 
 @Getter
 @AllArgsConstructor
 public class Subject {
 
-    private static final String USER = "user";
-    private static final String PUBLIC_USER = "public-user";
-    private static final String SERVICE = "service";
+    public static final String USER = "user";
+    public static final String PUBLIC_USER = "public-agent";
+    public static final String SERVICE = "service-agent";
 
-    private Agent user;
+    private Agent agent;
     //this is public for unit testing
     public static AgentService agentService = AgentService.Instance;
     private AuthenticationResult authenticationResult;
@@ -28,7 +28,7 @@ public class Subject {
             case SERVICE:
                 return new Subject(agentService.getServiceAgent(), authResult);
             default:
-                return new Subject(agentService.getPublicUser(), authResult);
+                return new Subject(agentService.getPublicAgent(), authResult);
         }
     }
 

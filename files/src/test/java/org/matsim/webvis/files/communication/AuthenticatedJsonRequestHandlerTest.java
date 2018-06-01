@@ -1,19 +1,18 @@
 package org.matsim.webvis.files.communication;
 
 import com.google.gson.Gson;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.matsim.webvis.common.auth.AuthenticationResult;
 import org.matsim.webvis.common.communication.Answer;
+import org.matsim.webvis.common.communication.ContentType;
 import org.matsim.webvis.files.entities.User;
-import org.matsim.webvis.files.agent.AgentService;
+import org.matsim.webvis.files.permission.Subject;
+import org.matsim.webvis.files.util.TestUtils;
 import spark.Request;
 
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class AuthenticatedJsonRequestHandlerTest {
 
@@ -24,20 +23,22 @@ public class AuthenticatedJsonRequestHandlerTest {
         testObject = new TestableHandler();
     }
 
+    @After
+    public void tearDown() {
+        TestUtils.removeAllEntities();
+    }
+
     @Test
     public void process_userFound_takeThatUser() {
 
-        User user = new User();
-        Subject.agentService = mock(AgentService.class);
-        when(Subject.agentService.findByIdentityProviderId(any())).thenReturn(user);
+        User user = TestUtils.persistUser("auth-id");
 
-        Request request = mock(Request.class);
-        when(request.attribute("subject")).thenReturn(new AuthenticationResult());
+        Request request = TestUtils.mockRequest(ContentType.APPLICATION_JSON, "user", user.getAuthId());
 
-        Answer answer = testObject.process(new TestableRequest(), request);
+        testObject.process(new TestableRequest(), request);
 
         assertTrue(testObject.wasProcessedCalled);
-        assertEquals(user, testObject.subject.getUser());
+        assertEquals(user, testObject.subject.getAgent());
     }
 
 

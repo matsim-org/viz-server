@@ -7,9 +7,9 @@ import org.matsim.webvis.common.service.Error;
 import org.matsim.webvis.common.service.InvalidInputException;
 import org.matsim.webvis.files.communication.AuthenticatedJsonRequestHandler;
 import org.matsim.webvis.files.communication.GsonFactory;
-import org.matsim.webvis.files.communication.Subject;
 import org.matsim.webvis.files.entities.Project;
 import org.matsim.webvis.files.entities.User;
+import org.matsim.webvis.files.permission.Subject;
 
 public class CreateProjectRequestHandler extends AuthenticatedJsonRequestHandler<CreateProjectRequest> {
 
@@ -26,7 +26,7 @@ public class CreateProjectRequestHandler extends AuthenticatedJsonRequestHandler
 
         Project result;
         try {
-            result = projectService.createNewProject(body.getName(), (User)subject.getUser());
+            result = projectService.createNewProject(body.getName(), (User) subject.getAgent());
         } catch (CodedException e) {
             return Answer.conflict(Error.RESOURCE_EXISTS, "project exists or user does not exist");
         }

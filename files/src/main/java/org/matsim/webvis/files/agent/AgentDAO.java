@@ -12,12 +12,12 @@ public class AgentDAO extends DAO {
         return database.updateOne(agent);
     }
 
-    public ServiceAgent findOrCreateServiceAgent() {
+    ServiceAgent findOrCreateServiceAgent() {
         return findOrCreateAgent(new ServiceAgent(), QServiceAgent.serviceAgent);
     }
 
-    public PublicUser findOrCreatePublicUser() {
-        return findOrCreateAgent(new PublicUser(), QPublicUser.publicUser);
+    PublicAgent findOrCreatePublicAgent() {
+        return findOrCreateAgent(new PublicAgent(), QPublicAgent.publicAgent);
     }
 
     private <T extends Agent> T findOrCreateAgent(T emptyInstance, EntityPathBase<T> entityPath) {
@@ -25,5 +25,11 @@ public class AgentDAO extends DAO {
         if (agent == null)
             agent = persist(emptyInstance);
         return agent;
+    }
+
+    void removeAllAgents() {
+        database.executeTransactionalQuery(query ->
+                query.delete(QAgent.agent).execute()
+        );
     }
 }

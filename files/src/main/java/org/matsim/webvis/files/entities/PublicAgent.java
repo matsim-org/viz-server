@@ -8,5 +8,5 @@ import javax.persistence.Entity;
 @Getter
 @Setter
 @Entity
-public class PublicUser extends Agent {
+public class PublicAgent extends Agent {
 }

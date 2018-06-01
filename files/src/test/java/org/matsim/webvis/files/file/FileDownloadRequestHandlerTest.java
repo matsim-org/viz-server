@@ -2,6 +2,7 @@ package org.matsim.webvis.files.file;
 
 import com.google.gson.Gson;
 import org.apache.http.HttpStatus;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.matsim.webvis.common.auth.AuthenticationResult;
@@ -9,12 +10,11 @@ import org.matsim.webvis.common.communication.ContentType;
 import org.matsim.webvis.common.service.CodedException;
 import org.matsim.webvis.common.service.Error;
 import org.matsim.webvis.common.service.InvalidInputException;
-import org.matsim.webvis.files.communication.Subject;
 import org.matsim.webvis.files.entities.FileEntry;
 import org.matsim.webvis.files.entities.Project;
 import org.matsim.webvis.files.entities.User;
 import org.matsim.webvis.files.project.ProjectService;
-import org.matsim.webvis.files.agent.AgentService;
+import org.matsim.webvis.files.util.TestUtils;
 import spark.Request;
 import spark.Response;
 
@@ -34,6 +34,11 @@ public class FileDownloadRequestHandlerTest {
     @Before
     public void setUp() {
         testObject = new FileDownloadRequestHandler();
+    }
+
+    @After
+    public void tearDown() {
+        TestUtils.removeAllEntities();
     }
 
     @Test(expected = InvalidInputException.class)
@@ -69,16 +74,13 @@ public class FileDownloadRequestHandlerTest {
         when(testObject.projectService.getFileStream(any(), any(), any())).thenThrow(new CodedException("e", "error"));
         when(testObject.projectService.find(any(), any())).thenReturn(project);
 
-        Request req = mock(Request.class);
-        when(req.contentType()).thenReturn(ContentType.APPLICATION_JSON);
+        User user = TestUtils.persistUser("id");
+        Request req = TestUtils.mockRequestWithRawRequest("POST", ContentType.APPLICATION_JSON);
+        AuthenticationResult authResult = TestUtils.mockAuthResult("user", user.getAuthId());
+        when(req.attribute(anyString())).thenReturn(authResult);
 
         FileRequest body = new FileRequest("id", "pid");
         when(req.body()).thenReturn(new Gson().toJson(body));
-        when(req.attribute(any())).thenReturn(new AuthenticationResult());
-
-        User subject = new User();
-        Subject.agentService = mock(AgentService.class);
-        when(Subject.agentService.findByIdentityProviderId(any())).thenReturn(subject);
 
         Response res = mock(Response.class);
 
@@ -96,12 +98,13 @@ public class FileDownloadRequestHandlerTest {
         testObject.projectService = mock(ProjectService.class);
         when(testObject.projectService.getFileStream(any(), any(), any())).thenThrow(new CodedException("e", "error"));
 
-        Request req = mock(Request.class);
-        when(req.contentType()).thenReturn(ContentType.APPLICATION_JSON);
+        User user = TestUtils.persistUser("id");
+        Request req = TestUtils.mockRequestWithRawRequest("POST", ContentType.APPLICATION_JSON);
+        AuthenticationResult authResult = TestUtils.mockAuthResult("user", user.getAuthId());
+        when(req.attribute(anyString())).thenReturn(authResult);
 
         FileRequest body = new FileRequest("id", "pid");
         when(req.body()).thenReturn(new Gson().toJson(body));
-        when(req.attribute(any())).thenReturn(new AuthenticationResult());
 
         FileEntry entry = new FileEntry();
         entry.setId(body.getFileId());
@@ -109,10 +112,6 @@ public class FileDownloadRequestHandlerTest {
         project.setId(body.getProjectId());
         project.getFiles().add(entry);
         when(testObject.projectService.find(any(), any())).thenReturn(project);
-
-        User subject = new User();
-        Subject.agentService = mock(AgentService.class);
-        when(Subject.agentService.findByIdentityProviderId(any())).thenReturn(subject);
 
         Response res = mock(Response.class);
 
@@ -133,12 +132,13 @@ public class FileDownloadRequestHandlerTest {
         testObject.projectService = mock(ProjectService.class);
         when(testObject.projectService.getFileStream(any(), any(), any())).thenReturn(inStream);
 
-        Request req = mock(Request.class);
-        when(req.contentType()).thenReturn(ContentType.APPLICATION_JSON);
+        User user = TestUtils.persistUser("id");
+        Request req = TestUtils.mockRequestWithRawRequest("POST", ContentType.APPLICATION_JSON);
+        AuthenticationResult authResult = TestUtils.mockAuthResult("user", user.getAuthId());
+        when(req.attribute(anyString())).thenReturn(authResult);
 
         FileRequest body = new FileRequest("id", "pId");
         when(req.body()).thenReturn(new Gson().toJson(body));
-        when(req.attribute(any())).thenReturn(new AuthenticationResult());
 
         FileEntry entry = new FileEntry();
         entry.setId(body.getFileId());
@@ -146,10 +146,6 @@ public class FileDownloadRequestHandlerTest {
         project.setId(body.getProjectId());
         project.getFiles().add(entry);
         when(testObject.projectService.find(any(), any())).thenReturn(project);
-
-        User subject = new User();
-        Subject.agentService = mock(AgentService.class);
-        when(Subject.agentService.findByIdentityProviderId(any())).thenReturn(subject);
 
         HttpServletResponse rawResponse = mock(HttpServletResponse.class);
         when(rawResponse.getOutputStream()).thenReturn(new ServletOutputStream() {
