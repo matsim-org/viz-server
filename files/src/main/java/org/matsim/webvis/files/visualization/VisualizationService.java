@@ -9,6 +9,7 @@ import org.matsim.webvis.files.permission.PermissionService;
 import org.matsim.webvis.files.project.ProjectService;
 
 import javax.persistence.PersistenceException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class VisualizationService {
@@ -50,7 +51,7 @@ public class VisualizationService {
         viz.setType(type);
         viz.addPermission(permissionService.createServicePermission(viz));
         viz.addPermission(permissionService.createUserPermission(viz, user, Permission.Type.Delete));
-        addInput(viz, project, request);
+        addInputFilesAndPersistPermissions(viz, project, request);
         addParameters(viz, request);
 
         try {
@@ -70,14 +71,21 @@ public class VisualizationService {
         return viz;
     }
 
-    private void addInput(Visualization viz, Project project, CreateVisualizationRequest request) {
+    private void addInputFilesAndPersistPermissions(Visualization viz, Project project, CreateVisualizationRequest request) {
 
+        List<Permission> addedPermissions = new ArrayList<>();
         request.getInputFiles().forEach((key, value) -> {
             FileEntry file = project.getFileEntry(value);
-            file.addPermission(permissionService.createServicePermission(file));
+            Permission permission = permissionService.createServicePermission(file);
+            file.addPermission(permission);
+            addedPermissions.add(permission);
             VisualizationInput input = new VisualizationInput(key, file, viz);
             viz.addInput(input);
         });
+
+        //the permissions for input files must be persisted here, since they can't be persisted by hibernate's cascade
+        //mechanism
+        permissionService.persist(addedPermissions);
     }
 
     private static void addParameters(Visualization viz, CreateVisualizationRequest request) {

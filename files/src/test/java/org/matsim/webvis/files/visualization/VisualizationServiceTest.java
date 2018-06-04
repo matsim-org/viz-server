@@ -99,6 +99,7 @@ public class VisualizationServiceTest {
 
             Permission perm = PermissionService.Instance.findReadPermission(AgentService.Instance.getServiceAgent(),
                     vizInput.getFileEntry().getId());
+            assertEquals(Permission.Type.Read, perm.getType());
         }
     }
 

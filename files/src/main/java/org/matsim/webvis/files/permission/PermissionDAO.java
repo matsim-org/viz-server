@@ -9,6 +9,10 @@ import java.util.List;
 
 class PermissionDAO extends DAO {
 
+    List<Permission> persist(List<Permission> permissions) {
+        return database.persistMany(permissions);
+    }
+
     Permission find(Agent agent, String resourceId) {
 
         QPermission permission = QPermission.permission;

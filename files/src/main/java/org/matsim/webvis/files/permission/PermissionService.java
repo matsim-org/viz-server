@@ -30,6 +30,10 @@ public class PermissionService {
         return new Permission(resource, AgentService.Instance.getPublicAgent(), Permission.Type.Read);
     }
 
+    public List<Permission> persist(List<Permission> permissions) {
+        return permissionDAO.persist(permissions);
+    }
+
     public Permission find(Agent agent, String resourceId) {
         return permissionDAO.find(agent, resourceId);
     }

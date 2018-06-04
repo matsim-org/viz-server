@@ -40,6 +40,16 @@ public class PersistenceUnit {
         return entity;
     }
 
+    public <T> List<T> persistMany(List<T> entities) {
+        EntityManager em = getEntityManager();
+        em.getTransaction().begin();
+        for (T entity : entities)
+            em.persist(entity);
+        em.getTransaction().commit();
+        em.close();
+        return entities;
+    }
+
     public <T> T updateOne(T entity) {
         return updateOne(entity, getEntityManager());
     }
