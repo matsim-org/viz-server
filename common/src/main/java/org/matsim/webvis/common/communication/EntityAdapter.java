@@ -10,7 +10,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Some org.matsim.webvis.auth.entities have bi-directional relations which can not be represented in JSON. Hence, if an object has been
+ * Some entities have bi-directional relations which can not be represented in JSON. Hence, if an object has been
  * serialized in the object graph already the ID is serialized as a placeholder.
  */
 public class EntityAdapter extends TypeAdapter<AbstractEntity> {

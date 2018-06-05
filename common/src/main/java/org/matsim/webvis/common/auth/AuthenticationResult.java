@@ -1,7 +1,7 @@
 package org.matsim.webvis.common.auth;
 
 import lombok.Getter;
-import org.matsim.webvis.common.service.InternalException;
+import org.matsim.webvis.common.errorHandling.InternalException;
 import spark.Request;
 
 @Getter

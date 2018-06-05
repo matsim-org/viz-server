@@ -8,9 +8,9 @@ import org.matsim.webvis.auth.relyingParty.RelyingPartyService;
 import org.matsim.webvis.auth.util.TestUtils;
 import org.matsim.webvis.common.communication.Answer;
 import org.matsim.webvis.common.communication.HttpStatus;
-import org.matsim.webvis.common.service.CodedException;
-import org.matsim.webvis.common.service.InvalidInputException;
-import org.matsim.webvis.common.service.UnauthorizedException;
+import org.matsim.webvis.common.errorHandling.CodedException;
+import org.matsim.webvis.common.errorHandling.InvalidInputException;
+import org.matsim.webvis.common.errorHandling.UnauthorizedException;
 import spark.Request;
 
 import java.io.FileNotFoundException;

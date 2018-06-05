@@ -1,4 +1,4 @@
-package org.matsim.webvis.common.service;
+package org.matsim.webvis.common.errorHandling;
 
 public class InternalException extends CodedException {
 

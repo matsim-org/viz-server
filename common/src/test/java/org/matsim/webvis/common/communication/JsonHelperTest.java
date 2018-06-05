@@ -1,7 +1,8 @@
 package org.matsim.webvis.common.communication;
 
 import org.junit.Test;
-import org.matsim.webvis.common.service.InvalidInputException;
+import org.matsim.webvis.common.errorHandling.Error;
+import org.matsim.webvis.common.errorHandling.InvalidInputException;
 import spark.Response;
 
 import static junit.framework.TestCase.assertEquals;
@@ -34,7 +35,7 @@ public class JsonHelperTest {
 
     @Test
     public void createJsonResponse() {
-        final String errorCode = RequestError.INVALID_REQUEST;
+        final String errorCode = Error.INVALID_REQUEST;
         final String message = "message";
         final Answer answer = Answer.badRequest(errorCode, message);
         Response response = mock(Response.class);

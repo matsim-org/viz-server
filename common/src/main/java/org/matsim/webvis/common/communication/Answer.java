@@ -1,6 +1,6 @@
 package org.matsim.webvis.common.communication;
 
-import org.matsim.webvis.common.service.Error;
+import org.matsim.webvis.common.errorHandling.Error;
 
 @SuppressWarnings("WeakerAccess")
 public class Answer<T> {
@@ -18,15 +18,15 @@ public class Answer<T> {
     }
 
     public static Answer notFound(String message) {
-        return error(HttpStatus.NOT_FOUND, RequestError.NOT_FOUND, message);
+        return error(HttpStatus.NOT_FOUND, Error.NOT_FOUND, message);
     }
 
     public static Answer invalidRequest(String message) {
-        return badRequest(RequestError.INVALID_REQUEST, message);
+        return badRequest(Error.INVALID_REQUEST, message);
     }
 
     public static Answer unsupportedGrantType(String message) {
-        return Answer.badRequest(RequestError.UNSUPPORTED_GRANT_TYPE, message);
+        return Answer.badRequest(Error.UNSUPPORTED_GRANT_TYPE, message);
     }
 
     public static Answer forbidden(String message) {

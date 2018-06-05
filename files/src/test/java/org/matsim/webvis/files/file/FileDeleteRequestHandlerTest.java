@@ -4,7 +4,7 @@ import org.apache.http.HttpStatus;
 import org.junit.Before;
 import org.junit.Test;
 import org.matsim.webvis.common.communication.Answer;
-import org.matsim.webvis.common.service.CodedException;
+import org.matsim.webvis.common.errorHandling.CodedException;
 import org.matsim.webvis.files.entities.Project;
 import org.matsim.webvis.files.entities.User;
 import org.matsim.webvis.files.permission.Subject;

@@ -1,8 +1,8 @@
 package org.matsim.webvis.common.auth;
 
 import org.junit.Test;
-import org.matsim.webvis.common.service.InvalidInputException;
-import org.matsim.webvis.common.service.UnauthorizedException;
+import org.matsim.webvis.common.errorHandling.InvalidInputException;
+import org.matsim.webvis.common.errorHandling.UnauthorizedException;
 import spark.Request;
 
 import static junit.framework.TestCase.assertEquals;

@@ -7,7 +7,7 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.matsim.webvis.common.service.InvalidInputException;
+import org.matsim.webvis.common.errorHandling.InvalidInputException;
 import org.matsim.webvis.files.config.Configuration;
 import spark.Request;
 

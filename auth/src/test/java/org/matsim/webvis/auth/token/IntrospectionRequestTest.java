@@ -3,7 +3,7 @@ package org.matsim.webvis.auth.token;
 import org.junit.Before;
 import org.junit.Test;
 import org.matsim.webvis.auth.util.TestUtils;
-import org.matsim.webvis.common.service.InvalidInputException;
+import org.matsim.webvis.common.errorHandling.InvalidInputException;
 import spark.QueryParamsMap;
 import spark.Request;
 

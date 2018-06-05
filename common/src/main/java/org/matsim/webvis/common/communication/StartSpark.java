@@ -1,7 +1,7 @@
 package org.matsim.webvis.common.communication;
 
-import org.matsim.webvis.common.service.*;
-import org.matsim.webvis.common.service.Error;
+import org.matsim.webvis.common.errorHandling.*;
+import org.matsim.webvis.common.errorHandling.Error;
 import spark.Filter;
 
 import java.util.function.Consumer;

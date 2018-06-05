@@ -9,7 +9,7 @@ import org.matsim.webvis.auth.entities.User;
 import org.matsim.webvis.auth.token.TokenService;
 import org.matsim.webvis.auth.user.UserService;
 import org.matsim.webvis.auth.util.TestUtils;
-import org.matsim.webvis.common.communication.RequestError;
+import org.matsim.webvis.common.errorHandling.Error;
 import spark.Request;
 import spark.Response;
 
@@ -49,7 +49,7 @@ public class AuthorizationRequestHandlerTest {
         Request req = AuthorizationTestUtils.mockRequestWithParams(AuthenticationRequest.REDIRECT_URI, "invalid uri");
         Object result = testObject.handle(req, null);
 
-        assertErrorResponse(result, RequestError.INVALID_REQUEST);
+        assertErrorResponse(result, Error.INVALID_REQUEST);
     }
 
     @Test
@@ -72,7 +72,7 @@ public class AuthorizationRequestHandlerTest {
 
         Object result = testObject.handle(req, null);
 
-        assertErrorResponse(result, RequestError.UNAUTHORIZED_CLIENT);
+        assertErrorResponse(result, Error.UNAUTHORIZED_CLIENT);
     }
 
     @Test

@@ -3,8 +3,8 @@ package org.matsim.webvis.files.project;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.matsim.webvis.common.service.CodedException;
-import org.matsim.webvis.common.service.Error;
+import org.matsim.webvis.common.errorHandling.CodedException;
+import org.matsim.webvis.common.errorHandling.Error;
 import org.matsim.webvis.files.entities.*;
 import org.matsim.webvis.files.permission.PermissionService;
 

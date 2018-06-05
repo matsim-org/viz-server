@@ -2,7 +2,7 @@ package org.matsim.webvis.auth.token;
 
 import org.matsim.webvis.common.communication.Answer;
 import org.matsim.webvis.common.communication.JsonResponseHandler;
-import org.matsim.webvis.common.service.InternalException;
+import org.matsim.webvis.common.errorHandling.InternalException;
 import spark.Request;
 import spark.Response;
 

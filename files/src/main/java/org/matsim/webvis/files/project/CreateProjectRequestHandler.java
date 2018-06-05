@@ -2,9 +2,9 @@ package org.matsim.webvis.files.project;
 
 import org.apache.commons.lang3.StringUtils;
 import org.matsim.webvis.common.communication.Answer;
-import org.matsim.webvis.common.service.CodedException;
-import org.matsim.webvis.common.service.Error;
-import org.matsim.webvis.common.service.InvalidInputException;
+import org.matsim.webvis.common.errorHandling.CodedException;
+import org.matsim.webvis.common.errorHandling.Error;
+import org.matsim.webvis.common.errorHandling.InvalidInputException;
 import org.matsim.webvis.files.communication.AuthenticatedJsonRequestHandler;
 import org.matsim.webvis.files.communication.GsonFactory;
 import org.matsim.webvis.files.entities.Project;

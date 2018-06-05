@@ -1,7 +1,7 @@
 package org.matsim.webvis.files.project;
 
 import org.matsim.webvis.common.communication.Answer;
-import org.matsim.webvis.common.service.CodedException;
+import org.matsim.webvis.common.errorHandling.CodedException;
 import org.matsim.webvis.files.communication.AuthenticatedJsonRequestHandler;
 import org.matsim.webvis.files.communication.GsonFactory;
 import org.matsim.webvis.files.entities.Project;

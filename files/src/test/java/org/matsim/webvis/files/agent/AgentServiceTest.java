@@ -2,8 +2,8 @@ package org.matsim.webvis.files.agent;
 
 import org.junit.After;
 import org.junit.Test;
-import org.matsim.webvis.common.service.CodedException;
-import org.matsim.webvis.common.service.Error;
+import org.matsim.webvis.common.errorHandling.CodedException;
+import org.matsim.webvis.common.errorHandling.Error;
 import org.matsim.webvis.files.entities.User;
 import org.matsim.webvis.files.util.TestUtils;
 

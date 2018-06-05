@@ -15,7 +15,7 @@ import org.matsim.webvis.auth.relyingParty.RelyingPartyService;
 import org.matsim.webvis.auth.user.UserService;
 import org.matsim.webvis.common.auth.PrincipalCredentialToken;
 import org.matsim.webvis.common.database.AbstractEntity;
-import org.matsim.webvis.common.service.CodedException;
+import org.matsim.webvis.common.errorHandling.CodedException;
 
 import java.time.Duration;
 import java.time.Instant;

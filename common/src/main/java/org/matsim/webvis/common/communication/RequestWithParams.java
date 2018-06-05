@@ -1,6 +1,6 @@
 package org.matsim.webvis.common.communication;
 
-import org.matsim.webvis.common.service.InvalidInputException;
+import org.matsim.webvis.common.errorHandling.InvalidInputException;
 import spark.QueryParamsMap;
 
 public abstract class RequestWithParams {

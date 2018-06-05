@@ -6,9 +6,9 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.util.EntityUtils;
-import org.matsim.webvis.common.service.CodedException;
-import org.matsim.webvis.common.service.InternalException;
-import org.matsim.webvis.common.service.UnauthorizedException;
+import org.matsim.webvis.common.errorHandling.CodedException;
+import org.matsim.webvis.common.errorHandling.InternalException;
+import org.matsim.webvis.common.errorHandling.UnauthorizedException;
 
 import java.io.IOException;
 

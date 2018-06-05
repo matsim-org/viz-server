@@ -11,7 +11,7 @@ import org.matsim.webvis.auth.entities.Token;
 import org.matsim.webvis.auth.entities.User;
 import org.matsim.webvis.auth.relyingParty.RelyingPartyService;
 import org.matsim.webvis.auth.util.TestUtils;
-import org.matsim.webvis.common.service.UnauthorizedException;
+import org.matsim.webvis.common.errorHandling.UnauthorizedException;
 
 import java.time.Duration;
 import java.time.Instant;

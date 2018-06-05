@@ -14,9 +14,9 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.matsim.webvis.common.service.CodedException;
-import org.matsim.webvis.common.service.InternalException;
-import org.matsim.webvis.common.service.UnauthorizedException;
+import org.matsim.webvis.common.errorHandling.CodedException;
+import org.matsim.webvis.common.errorHandling.InternalException;
+import org.matsim.webvis.common.errorHandling.UnauthorizedException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,6 +46,7 @@ public class Http {
         return new RequestExecutor(new HttpPost(uri), () -> clientFactory.createClient());
     }
 
+    @SuppressWarnings("WeakerAccess")
     public static class RequestExecutor {
 
         private HttpUriRequest request;

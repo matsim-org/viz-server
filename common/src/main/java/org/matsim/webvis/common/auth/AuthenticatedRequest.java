@@ -2,7 +2,7 @@ package org.matsim.webvis.common.auth;
 
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
-import org.matsim.webvis.common.service.UnauthorizedException;
+import org.matsim.webvis.common.errorHandling.UnauthorizedException;
 import spark.Request;
 
 @Getter

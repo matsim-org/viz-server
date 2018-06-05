@@ -1,4 +1,4 @@
-package org.matsim.webvis.common.service;
+package org.matsim.webvis.common.errorHandling;
 
 public class ForbiddenException extends CodedException {
     public ForbiddenException(String message) {

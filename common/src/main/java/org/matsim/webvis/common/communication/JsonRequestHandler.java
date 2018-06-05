@@ -1,7 +1,8 @@
 package org.matsim.webvis.common.communication;
 
 import com.google.gson.Gson;
-import org.matsim.webvis.common.service.InvalidInputException;
+import org.matsim.webvis.common.errorHandling.Error;
+import org.matsim.webvis.common.errorHandling.InvalidInputException;
 import spark.Request;
 import spark.Response;
 
@@ -15,7 +16,7 @@ public abstract class JsonRequestHandler<T> extends JsonResponseHandler {
         this.requestClass = requestClass;
     }
 
-    protected JsonRequestHandler(Class<T> requestClass) {
+    JsonRequestHandler(Class<T> requestClass) {
         this(requestClass, null);
     }
 
@@ -27,7 +28,7 @@ public abstract class JsonRequestHandler<T> extends JsonResponseHandler {
         T body;
         try {
             if (!ContentType.isJson(request.contentType())) {
-                return Answer.badRequest(RequestError.INVALID_REQUEST, "only content-type: 'application/json' allowed");
+                return Answer.badRequest(Error.INVALID_REQUEST, "only content-type: 'application/json' allowed");
             } else
                 body = parseJsonBody(request.body());
         } catch (InvalidInputException e) {

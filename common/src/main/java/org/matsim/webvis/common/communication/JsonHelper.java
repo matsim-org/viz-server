@@ -3,7 +3,7 @@ package org.matsim.webvis.common.communication;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
-import org.matsim.webvis.common.service.InvalidInputException;
+import org.matsim.webvis.common.errorHandling.InvalidInputException;
 import spark.Response;
 
 import java.util.Map;

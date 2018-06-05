@@ -7,8 +7,8 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.junit.Before;
 import org.junit.Test;
-import org.matsim.webvis.common.service.InternalException;
-import org.matsim.webvis.common.service.UnauthorizedException;
+import org.matsim.webvis.common.errorHandling.InternalException;
+import org.matsim.webvis.common.errorHandling.UnauthorizedException;
 import spark.Request;
 import spark.Response;
 

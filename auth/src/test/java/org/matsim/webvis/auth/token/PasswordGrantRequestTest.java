@@ -4,7 +4,7 @@ import org.junit.Test;
 import org.matsim.webvis.auth.util.TestUtils;
 import org.matsim.webvis.common.auth.BasicAuthentication;
 import org.matsim.webvis.common.communication.ContentType;
-import org.matsim.webvis.common.service.InvalidInputException;
+import org.matsim.webvis.common.errorHandling.InvalidInputException;
 import spark.Request;
 
 import java.util.HashMap;

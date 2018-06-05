@@ -10,7 +10,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.junit.Test;
-import org.matsim.webvis.common.service.InternalException;
+import org.matsim.webvis.common.errorHandling.InternalException;
 import org.matsim.webvis.common.util.TestUtils;
 
 import java.io.BufferedReader;

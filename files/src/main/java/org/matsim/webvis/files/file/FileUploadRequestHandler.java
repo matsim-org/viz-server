@@ -3,7 +3,7 @@ package org.matsim.webvis.files.file;
 import org.matsim.webvis.common.auth.AuthenticationResult;
 import org.matsim.webvis.common.communication.Answer;
 import org.matsim.webvis.common.communication.JsonResponseHandler;
-import org.matsim.webvis.common.service.InvalidInputException;
+import org.matsim.webvis.common.errorHandling.InvalidInputException;
 import org.matsim.webvis.files.communication.GsonFactory;
 import org.matsim.webvis.files.entities.Project;
 import org.matsim.webvis.files.permission.Subject;

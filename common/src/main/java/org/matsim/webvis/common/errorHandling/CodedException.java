@@ -1,4 +1,4 @@
-package org.matsim.webvis.common.service;
+package org.matsim.webvis.common.errorHandling;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;

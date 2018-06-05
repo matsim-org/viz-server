@@ -2,7 +2,7 @@ package org.matsim.webvis.common.auth;
 
 import org.junit.Test;
 import org.matsim.webvis.common.communication.HttpCredential;
-import org.matsim.webvis.common.service.InvalidInputException;
+import org.matsim.webvis.common.errorHandling.InvalidInputException;
 import org.matsim.webvis.common.util.TestUtils;
 
 import static junit.framework.TestCase.assertEquals;

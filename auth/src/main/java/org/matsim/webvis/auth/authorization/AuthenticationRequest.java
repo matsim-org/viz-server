@@ -2,7 +2,7 @@ package org.matsim.webvis.auth.authorization;
 
 import lombok.Getter;
 import org.matsim.webvis.common.communication.RequestWithParams;
-import org.matsim.webvis.common.service.InvalidInputException;
+import org.matsim.webvis.common.errorHandling.InvalidInputException;
 import spark.QueryParamsMap;
 
 import java.net.URI;

@@ -6,8 +6,8 @@ import org.matsim.webvis.auth.config.ConfigUser;
 import org.matsim.webvis.auth.entities.User;
 import org.matsim.webvis.auth.entities.UserCredentials;
 import org.matsim.webvis.auth.helper.SecretHelper;
-import org.matsim.webvis.common.service.InvalidInputException;
-import org.matsim.webvis.common.service.UnauthorizedException;
+import org.matsim.webvis.common.errorHandling.InvalidInputException;
+import org.matsim.webvis.common.errorHandling.UnauthorizedException;
 
 import javax.persistence.RollbackException;
 

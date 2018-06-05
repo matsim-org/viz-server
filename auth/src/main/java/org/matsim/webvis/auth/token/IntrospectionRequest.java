@@ -4,7 +4,7 @@ import lombok.Getter;
 import org.matsim.webvis.common.auth.BasicAuthentication;
 import org.matsim.webvis.common.auth.PrincipalCredentialToken;
 import org.matsim.webvis.common.communication.RequestWithParams;
-import org.matsim.webvis.common.service.InvalidInputException;
+import org.matsim.webvis.common.errorHandling.InvalidInputException;
 import spark.Request;
 
 @Getter

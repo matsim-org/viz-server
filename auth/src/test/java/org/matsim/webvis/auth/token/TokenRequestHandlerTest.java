@@ -9,8 +9,8 @@ import org.matsim.webvis.common.auth.BasicAuthentication;
 import org.matsim.webvis.common.communication.Answer;
 import org.matsim.webvis.common.communication.ContentType;
 import org.matsim.webvis.common.communication.HttpStatus;
-import org.matsim.webvis.common.service.InternalException;
-import org.matsim.webvis.common.service.InvalidInputException;
+import org.matsim.webvis.common.errorHandling.InternalException;
+import org.matsim.webvis.common.errorHandling.InvalidInputException;
 import spark.Request;
 
 import java.io.FileNotFoundException;
