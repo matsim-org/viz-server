@@ -1,6 +1,6 @@
 package org.matsim.webvis.common.communication;
 
-public interface Credential {
+public interface HttpCredential {
 
     String headerValue();
 }

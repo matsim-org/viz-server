@@ -1,6 +1,7 @@
 package org.matsim.webvis.common.auth;
 
 import org.junit.Test;
+import org.matsim.webvis.common.communication.HttpCredential;
 import org.matsim.webvis.common.service.InvalidInputException;
 import org.matsim.webvis.common.util.TestUtils;
 
@@ -64,5 +65,18 @@ public class BasicAuthenticationTest {
         String result = BasicAuthentication.encodeToAuthorizationHeader(new PrincipalCredentialToken(principal, credential));
 
         assertEquals(encoded, result);
+    }
+
+    @Test
+    public void encodeToCredential_encodedCredential() {
+
+        final String principal = "principal";
+        final String credential = "credential";
+        final String encoded = TestUtils.encodeBasicAuth(principal, credential);
+
+        HttpCredential result = BasicAuthentication.encodeToCredential(new PrincipalCredentialToken(principal, credential));
+
+        assertEquals(encoded, result.headerValue());
+
     }
 }

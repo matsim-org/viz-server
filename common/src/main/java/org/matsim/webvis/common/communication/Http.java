@@ -56,7 +56,7 @@ public class Http {
             this.client = client;
         }
 
-        public RequestExecutor withCredential(Credential credential) {
+        public RequestExecutor withCredential(HttpCredential credential) {
             request.setHeader(AUTHORIZATION, credential.headerValue());
             return this;
         }
@@ -93,7 +93,7 @@ public class Http {
                 logger.info("making request to: " + request.getURI().toString());
                 return client.execute(request, handler);
             } catch (IOException e) {
-                throw new InternalException("Could not create http client");
+                throw new InternalException("Request to: " + request.getURI().toString() + " failed.");
             }
         }
 

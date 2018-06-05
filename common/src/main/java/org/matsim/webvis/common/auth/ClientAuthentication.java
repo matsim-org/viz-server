@@ -5,19 +5,20 @@ import lombok.RequiredArgsConstructor;
 import org.apache.http.Consts;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.matsim.webvis.common.communication.HttpClientFactory;
-import org.matsim.webvis.common.communication.HttpRequest;
+import org.matsim.webvis.common.communication.Http;
+import org.matsim.webvis.common.communication.HttpCredential;
 
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
 @RequiredArgsConstructor
-public class ClientAuthentication {
+public class ClientAuthentication implements HttpCredential {
+
+    private final Http http;
 
     public enum AuthState {NotAuthenticated, Requesting, Failed, Authenticated}
 
@@ -33,20 +34,24 @@ public class ClientAuthentication {
     private final URI tokenEndpoint;
     private final String principal;
     private final String credential;
-    private final HttpClientFactory httpClientFactory;
+
+    @Override
+    public String headerValue() {
+        return accessToken;
+    }
 
     public void requestAccessToken() {
 
         state = AuthState.Requesting;
-        HttpPost post = new HttpPost(tokenEndpoint);
-        final String auth = BasicAuthentication.encodeToAuthorizationHeader(new PrincipalCredentialToken(principal, credential));
-        post.addHeader(BasicAuthentication.HEADER_AUTHORIZATION, auth);
         List<NameValuePair> formParams = new ArrayList<>();
         formParams.add(new BasicNameValuePair("grant_type", "client_credentials"));
-        post.setEntity(new UrlEncodedFormEntity(formParams, Consts.UTF_8));
 
         try {
-            AccessTokenResponse response = HttpRequest.withJsonResponse(post, httpClientFactory, AccessTokenResponse.class);
+            AccessTokenResponse response = http.post(tokenEndpoint)
+                    .withCredential(BasicAuthentication.encodeToCredential(new PrincipalCredentialToken(principal, credential)))
+                    .withEntityBody(new UrlEncodedFormEntity(formParams, Consts.UTF_8))
+                    .executeWithJsonResponse(AccessTokenResponse.class);
+
             accessToken = response.getAccess_token();
             scope = response.getScope();
             this.state = AuthState.Authenticated;

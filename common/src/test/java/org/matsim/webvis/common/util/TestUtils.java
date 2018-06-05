@@ -8,7 +8,9 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.matsim.webvis.common.communication.Http;
 import org.matsim.webvis.common.communication.HttpClientFactory;
 import org.matsim.webvis.common.communication.HttpClientFactoryWithTruststore;
+import org.matsim.webvis.common.communication.HttpResponseHandler;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
@@ -16,8 +18,7 @@ import java.nio.file.Paths;
 import java.util.Base64;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class TestUtils {
 
@@ -93,9 +94,25 @@ public class TestUtils {
         return response;
     }*/
 
-    public static HttpClientFactory mockClientFactory() {
+    public static <T> HttpClientFactory clientFactoryWithMockedHttpClient(T response) {
 
         CloseableHttpClient client = mock(CloseableHttpClient.class);
+        try {
+            doReturn(response).when(client).execute(any(), any(HttpResponseHandler.class));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return () -> client;
+    }
+
+    public static HttpClientFactory clientFactoryWithFailingHttpClient() {
+
+        CloseableHttpClient client = mock(CloseableHttpClient.class);
+        try {
+            doThrow(new IOException()).when(client).execute(any(), any(HttpResponseHandler.class));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         return () -> client;
     }

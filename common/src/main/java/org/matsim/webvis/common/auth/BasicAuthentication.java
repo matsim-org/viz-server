@@ -1,6 +1,7 @@
 package org.matsim.webvis.common.auth;
 
 import org.apache.commons.lang3.StringUtils;
+import org.matsim.webvis.common.communication.HttpCredential;
 import org.matsim.webvis.common.service.InvalidInputException;
 
 import java.util.Base64;
@@ -11,6 +12,10 @@ public class BasicAuthentication {
 
     public static String encodeToAuthorizationHeader(PrincipalCredentialToken token) {
         return "Basic " + Base64.getEncoder().encodeToString((token.getPrincipal() + ":" + token.getCredential()).getBytes());
+    }
+
+    public static HttpCredential encodeToCredential(PrincipalCredentialToken token) {
+        return () -> encodeToAuthorizationHeader(token);
     }
 
     public static PrincipalCredentialToken decodeAuthorizationHeader(String header) {
