@@ -1,5 +1,7 @@
 package org.matsim.webvis.common.communication;
 
+import org.apache.commons.lang3.StringUtils;
+
 public class ContentType {
 
     public static String APPLICATION_JSON = "application/json";
@@ -12,6 +14,6 @@ public class ContentType {
     }
 
     public static boolean isFormUrlEncoded(String contentType) {
-        return FORM_URL_ENCODED.contains(contentType);
+        return StringUtils.contains(contentType, FORM_URL_ENCODED);
     }
 }
