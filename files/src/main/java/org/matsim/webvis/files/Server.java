@@ -4,6 +4,10 @@ import com.beust.jcommander.JCommander;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.matsim.webvis.common.auth.AuthenticationHandler;
+import org.matsim.webvis.common.auth.PrincipalCredentialToken;
+import org.matsim.webvis.common.communication.Http;
+import org.matsim.webvis.common.communication.HttpClientFactory;
+import org.matsim.webvis.common.communication.HttpClientFactoryWithTruststore;
 import org.matsim.webvis.common.communication.StartSpark;
 import org.matsim.webvis.files.config.CommandLineArgs;
 import org.matsim.webvis.files.config.Configuration;
@@ -61,13 +65,19 @@ public class Server {
             StartSpark.withTLS(Configuration.getInstance().getTlsKeyStore(), Configuration.getInstance().getTlsKeyStorePassword(), null, null);
         }
         try {
-            AuthenticationHandler authHandler = AuthenticationHandler.builder()
-                    .setIntrospectionEndpoint(URI.create(Configuration.getInstance().getIntrospectionEndpoint()))
-                    .setRelyingPartyId(Configuration.getInstance().getRelyingPartyId())
-                    .setRelyingPartySecret(Configuration.getInstance().getRelyingPartySecret())
-                    .setTrustStore(Paths.get(Configuration.getInstance().getTlsTrustStore()))
-                    .setTrustStorePassword(Configuration.getInstance().getTlsTrustStorePassword().toCharArray())
-                    .build();
+            HttpClientFactory factory = new HttpClientFactoryWithTruststore(
+                    Paths.get(Configuration.getInstance().getTlsTrustStore()),
+                    Configuration.getInstance().getTlsTrustStorePassword().toCharArray());
+
+            Http http = new Http(factory);
+            PrincipalCredentialToken token = new PrincipalCredentialToken(
+                    Configuration.getInstance().getRelyingPartyId(),
+                    Configuration.getInstance().getRelyingPartySecret()
+            );
+
+            AuthenticationHandler authHandler = new AuthenticationHandler(
+                    http, token, URI.create(Configuration.getInstance().getIntrospectionEndpoint())
+            );
 
             StartSpark.withAuthHandler(authHandler);
             StartSpark.withPermissiveAccessControl();

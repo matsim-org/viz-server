@@ -5,6 +5,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.matsim.webvis.common.auth.AuthenticationHandler;
 import org.matsim.webvis.common.auth.ClientAuthentication;
+import org.matsim.webvis.common.auth.PrincipalCredentialToken;
 import org.matsim.webvis.common.communication.Http;
 import org.matsim.webvis.common.communication.HttpClientFactory;
 import org.matsim.webvis.common.communication.HttpClientFactoryWithTruststore;
@@ -37,8 +38,9 @@ public class Server {
 
         loadConfigFile(ca);
         //initializeData();
-        startSparkServer();
+
         initializeCommunication(ca);
+        startSparkServer();
     }
 
     private static void loadConfigFile(CommandlineArgs args) {
@@ -61,13 +63,14 @@ public class Server {
         StartSpark.withExceptionMapping();
 
         try {
-            AuthenticationHandler authHandler = AuthenticationHandler.builder()
-                    .setIntrospectionEndpoint(Configuration.getInstance().getIntrospectionEndpoint())
-                    .setRelyingPartyId(Configuration.getInstance().getRelyingPartyId())
-                    .setRelyingPartySecret(Configuration.getInstance().getRelyingPartySecret())
-                    .setTrustStore(Paths.get(Configuration.getInstance().getTlsTrustStore()))
-                    .setTrustStorePassword(Configuration.getInstance().getTlsTrustStorePassword().toCharArray())
-                    .build();
+            PrincipalCredentialToken token = new PrincipalCredentialToken(
+                    Configuration.getInstance().getRelyingPartyId(),
+                    Configuration.getInstance().getRelyingPartySecret()
+            );
+
+            AuthenticationHandler authHandler = new AuthenticationHandler(
+                    HttpRequest.Instance(), token, Configuration.getInstance().getIntrospectionEndpoint()
+            );
             StartSpark.withAuthHandler(authHandler);
         } catch (Exception e) {
             handleInitializationFailure(e);

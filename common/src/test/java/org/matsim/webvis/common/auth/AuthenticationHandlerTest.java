@@ -1,40 +1,26 @@
 package org.matsim.webvis.common.auth;
 
-import org.apache.http.HttpStatus;
-import org.apache.http.StatusLine;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.junit.Before;
 import org.junit.Test;
+import org.matsim.webvis.common.communication.Http;
 import org.matsim.webvis.common.errorHandling.InternalException;
 import org.matsim.webvis.common.errorHandling.UnauthorizedException;
 import spark.Request;
 import spark.Response;
 
-import java.io.IOException;
 import java.net.URI;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import static junit.framework.TestCase.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 public class AuthenticationHandlerTest {
 
-    private TestableAuthenticationHandler testObject;
-
-    @Before
-    public void setUp() {
-        testObject = new TestableAuthenticationHandler();
-    }
-
     @Test(expected = UnauthorizedException.class)
     public void handle_noAuthentication_unauthorizedException() {
+
+        AuthenticationHandler testObject = new AuthenticationHandler(null, null, null);
 
         Request request = mock(Request.class);
         when(request.headers(anyString())).thenReturn(null);
@@ -46,14 +32,17 @@ public class AuthenticationHandlerTest {
     }
 
     @Test(expected = InternalException.class)
-    public void handle_authenticationAtAuthServerFailed_internalException() throws IOException {
+    public void handle_authenticationAtAuthServerFailed_internalException() {
 
-        StatusLine mockedStatusLine = mock(StatusLine.class);
-        when(mockedStatusLine.getStatusCode()).thenReturn(HttpStatus.SC_UNAUTHORIZED);
+        Http.RequestExecutor executor = mock(Http.RequestExecutor.class);
+        when(executor.withCredential(any())).thenReturn(executor);
+        when(executor.executeWithJsonResponse(any())).thenThrow(new UnauthorizedException("unauthorized"));
 
-        CloseableHttpResponse mockedResponse = mock(CloseableHttpResponse.class);
-        when(mockedResponse.getStatusLine()).thenReturn(mockedStatusLine);
-        when(testObject.mockedHttpClient.execute(any())).thenReturn(mockedResponse);
+        Http http = mock(Http.class);
+        when(http.post(any())).thenReturn(executor);
+
+        AuthenticationHandler testObject = new AuthenticationHandler(http,
+                new PrincipalCredentialToken("p", "s"), URI.create("http://some.uri"));
 
         Request request = mock(Request.class);
         when(request.headers("Authorization")).thenReturn("Bearer some-token");
@@ -65,15 +54,18 @@ public class AuthenticationHandlerTest {
     }
 
     @Test(expected = UnauthorizedException.class)
-    public void handle_introspectionIsNotActive_unauthorizedException() throws IOException {
+    public void handle_introspectionIsNotActive_unauthorizedException() {
 
-        StatusLine mockedStatusLine = mock(StatusLine.class);
-        when(mockedStatusLine.getStatusCode()).thenReturn(HttpStatus.SC_OK);
+        AuthenticationResult result = AuthenticationResult.create(false);
+        Http.RequestExecutor executor = mock(Http.RequestExecutor.class);
+        when(executor.withCredential(any())).thenReturn(executor);
+        when(executor.executeWithJsonResponse(any())).thenReturn(result);
 
-        CloseableHttpResponse mockedResponse = mock(CloseableHttpResponse.class);
-        when(mockedResponse.getStatusLine()).thenReturn(mockedStatusLine);
-        when(mockedResponse.getEntity()).thenReturn(new StringEntity("{\"active\": false}"));
-        when(testObject.mockedHttpClient.execute(any())).thenReturn(mockedResponse);
+        Http http = mock(Http.class);
+        when(http.post(any())).thenReturn(executor);
+
+        AuthenticationHandler testObject = new AuthenticationHandler(http,
+                new PrincipalCredentialToken("p", "s"), URI.create("http://some.uri"));
 
         Request request = mock(Request.class);
         when(request.headers("Authorization")).thenReturn("Bearer some-token");
@@ -85,15 +77,18 @@ public class AuthenticationHandlerTest {
     }
 
     @Test
-    public void handle_activeToken_authenticationResultAsAttribute() throws IOException {
+    public void handle_activeToken_authenticationResultAsAttribute() {
 
-        StatusLine mockedStatusLine = mock(StatusLine.class);
-        when(mockedStatusLine.getStatusCode()).thenReturn(HttpStatus.SC_OK);
+        AuthenticationResult result = AuthenticationResult.create(true);
+        Http.RequestExecutor executor = mock(Http.RequestExecutor.class);
+        when(executor.withCredential(any())).thenReturn(executor);
+        when(executor.executeWithJsonResponse(any())).thenReturn(result);
 
-        CloseableHttpResponse mockedResponse = mock(CloseableHttpResponse.class);
-        when(mockedResponse.getStatusLine()).thenReturn(mockedStatusLine);
-        when(mockedResponse.getEntity()).thenReturn(new StringEntity("{\"active\": true}"));
-        when(testObject.mockedHttpClient.execute(any())).thenReturn(mockedResponse);
+        Http http = mock(Http.class);
+        when(http.post(any())).thenReturn(executor);
+
+        AuthenticationHandler testObject = new AuthenticationHandler(http,
+                new PrincipalCredentialToken("p", "s"), URI.create("http://some.uri"));
 
         Request request = mock(Request.class);
         when(request.headers("Authorization")).thenReturn("Bearer some-token");
@@ -101,35 +96,6 @@ public class AuthenticationHandlerTest {
 
         testObject.handle(request, response);
 
-        verify(testObject.mockedHttpClient).
-                execute(argThat(post ->
-                        post.getFirstHeader("Authorization") != null));
-
         verify(request).attribute(eq("subject"), any());
-    }
-
-    private class TestableAuthenticationHandler extends AuthenticationHandler {
-
-        CloseableHttpClient mockedHttpClient = mock(CloseableHttpClient.class);
-
-        TestableAuthenticationHandler() {
-            super(AuthenticationHandler.builder()
-                    .setIntrospectionEndpoint(URI.create("https://endpoint"))
-                    .setRelyingPartyId("id")
-                    .setRelyingPartySecret("secret")
-                    .setTrustStore(Paths.get("./"))
-                    .setTrustStorePassword("password".toCharArray()));
-        }
-
-        @Override
-        void initializeSSL(Path trustStore, char[] password) {
-
-            //don't set up any ssl context for testing
-        }
-
-        @Override
-        CloseableHttpClient createHttpClient() {
-            return mockedHttpClient;
-        }
     }
 }

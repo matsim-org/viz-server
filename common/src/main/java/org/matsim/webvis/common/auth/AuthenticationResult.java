@@ -33,4 +33,16 @@ public class AuthenticationResult {
     static void intoRequestAttribute(Request request, AuthenticationResult authenticationResult) {
         request.attribute(SUBJECT_ATTRIBUTE, authenticationResult);
     }
+
+    /**
+     * for testing purposes
+     *
+     * @param isActive whether authentication Result is active
+     * @return returns AuthenticationResult with only active parameter set. Everything else is null
+     */
+    static AuthenticationResult create(boolean isActive) {
+        AuthenticationResult result = new AuthenticationResult();
+        result.active = isActive;
+        return result;
+    }
 }
