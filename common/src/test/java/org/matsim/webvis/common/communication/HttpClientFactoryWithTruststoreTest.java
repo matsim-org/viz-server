@@ -9,7 +9,7 @@ import java.nio.file.Path;
 import static junit.framework.TestCase.assertNotNull;
 import static junit.framework.TestCase.fail;
 
-public class HttpClientFactoryTest {
+public class HttpClientFactoryWithTruststoreTest {
 
     @Test(expected = RuntimeException.class)
     public void constructor_keystoreInitFails_runtimeException() {
@@ -17,7 +17,7 @@ public class HttpClientFactoryTest {
         Path keystore = TestUtils.getKeystorePath();
         String password = "wrong-password";
 
-        new HttpClientFactory(keystore, password.toCharArray());
+        new HttpClientFactoryWithTruststore(keystore, password.toCharArray());
 
         fail("invalid keystore parameter should cause exception");
     }
@@ -25,7 +25,7 @@ public class HttpClientFactoryTest {
     @Test
     public void constructor_initSucceeds_instance() {
 
-        HttpClientFactory factory = new HttpClientFactory(TestUtils.getKeystorePath(), TestUtils.getKeystorePassword());
+        HttpClientFactoryWithTruststore factory = new HttpClientFactoryWithTruststore(TestUtils.getKeystorePath(), TestUtils.getKeystorePassword());
 
         assertNotNull(factory);
     }
@@ -33,7 +33,7 @@ public class HttpClientFactoryTest {
     @Test
     public void createClient_httpClientWithSslFactory() {
 
-        HttpClientFactory factory = new HttpClientFactory(TestUtils.getKeystorePath(), TestUtils.getKeystorePassword());
+        HttpClientFactoryWithTruststore factory = new HttpClientFactoryWithTruststore(TestUtils.getKeystorePath(), TestUtils.getKeystorePassword());
 
         CloseableHttpClient client = factory.createClient();
 
