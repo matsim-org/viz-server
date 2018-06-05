@@ -4,18 +4,19 @@ import com.beust.jcommander.JCommander;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.matsim.webvis.common.auth.AuthenticationHandler;
+import org.matsim.webvis.common.auth.ClientAuthentication;
+import org.matsim.webvis.common.communication.Http;
+import org.matsim.webvis.common.communication.HttpClientFactory;
+import org.matsim.webvis.common.communication.HttpClientFactoryWithTruststore;
 import org.matsim.webvis.common.communication.StartSpark;
 import org.matsim.webvis.frameAnimation.communication.Authentication;
+import org.matsim.webvis.frameAnimation.communication.HttpRequest;
 import org.matsim.webvis.frameAnimation.config.CommandlineArgs;
 import org.matsim.webvis.frameAnimation.config.Configuration;
-import org.matsim.webvis.frameAnimation.data.FileAPI;
 import org.matsim.webvis.frameAnimation.data.SimulationData;
 
 import java.io.FileNotFoundException;
 import java.nio.file.Paths;
-
-import static spark.Spark.port;
-import static spark.Spark.post;
 
 public class Server {
 
@@ -37,7 +38,7 @@ public class Server {
         loadConfigFile(ca);
         //initializeData();
         startSparkServer();
-        initializeAuth();
+        initializeCommunication(ca);
     }
 
     private static void loadConfigFile(CommandlineArgs args) {
@@ -75,9 +76,28 @@ public class Server {
         logger.info("\n\nStarted animation Server on Port: " + Configuration.getInstance().getPort() + "\n");
     }
 
-    private static void initializeAuth() {
-        Authentication.Instance.requestAccessToken();
-        FileAPI.fetchVisualizations();
+    private static void initializeCommunication(CommandlineArgs args) {
+
+        Http http;
+        if (args.isTrustSelfsignedTLSCertificates()) {
+            HttpClientFactory factory = new HttpClientFactoryWithTruststore(
+                    Paths.get(Configuration.getInstance().getTlsTrustStore()),
+                    Configuration.getInstance().getTlsTrustStorePassword().toCharArray());
+            http = new Http(factory);
+        } else {
+            http = new Http();
+        }
+
+        HttpRequest.initialize(http);
+        Authentication.initialize(new ClientAuthentication(http,
+                Configuration.getInstance().getTokenEndpoint(),
+                Configuration.getInstance().getRelyingPartyId(),
+                Configuration.getInstance().getRelyingPartySecret()));
+        try {
+            Authentication.Instance().requestAccessToken();
+        } catch (RuntimeException e) {
+            logger.error("Could not request access token", e);
+        }
     }
 
     private static void handleInitializationFailure(Exception e) {

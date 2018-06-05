@@ -1,25 +1,20 @@
 package org.matsim.webvis.frameAnimation.communication;
 
 import org.matsim.webvis.common.auth.ClientAuthentication;
-import org.matsim.webvis.common.communication.HttpClientFactoryWithTruststore;
-import org.matsim.webvis.frameAnimation.config.Configuration;
-
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 public class Authentication {
 
-    public static final ClientAuthentication Instance = initialize();
+    private static ClientAuthentication instance;
+
+    public static ClientAuthentication Instance() {
+        return instance;
+    }
 
     private Authentication() {
     }
 
-    private static ClientAuthentication initialize() {
+    public static void initialize(ClientAuthentication authentication) {
 
-        Path tlsTruststore = Paths.get(Configuration.getInstance().getTlsTrustStore());
-        char[] tlsTruststorePassword = Configuration.getInstance().getTlsTrustStorePassword().toCharArray();
-        HttpClientFactoryWithTruststore factory = new HttpClientFactoryWithTruststore(tlsTruststore, tlsTruststorePassword);
-
-        return null;
+        instance = authentication;
     }
 }
