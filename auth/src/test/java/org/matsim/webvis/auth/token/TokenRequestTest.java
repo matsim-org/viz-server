@@ -1,5 +1,6 @@
 package org.matsim.webvis.auth.token;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.junit.Test;
 import org.matsim.webvis.auth.util.TestUtils;
 import org.matsim.webvis.common.auth.BasicAuthentication;
@@ -7,11 +8,11 @@ import org.matsim.webvis.common.communication.ContentType;
 import org.matsim.webvis.common.errorHandling.InvalidInputException;
 import spark.Request;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.fail;
+import static junit.framework.TestCase.*;
 import static org.mockito.Mockito.when;
 
 public class TokenRequestTest {
@@ -57,11 +58,14 @@ public class TokenRequestTest {
     @Test
     public void constructor_allParametersSupplied_instance() {
 
+        final String scope = "some scopes";
         Map<String, String[]> map = new HashMap<>();
         map.put(OAuthParameters.GRANT_TYPE, new String[]{OAuthParameters.GRANT_TYPE_PASSWORD});
+        map.put(OAuthParameters.SCOPE, new String[]{scope});
         Request request = TestUtils.mockRequestWithQueryParamsMap(map, ContentType.FORM_URL_ENCODED);
         final String principal = "name";
         final String credential = "secret";
+
         final String basicAuth = TestUtils.encodeBasicAuth(principal, credential);
         when(request.headers(BasicAuthentication.HEADER_AUTHORIZATION)).thenReturn(basicAuth);
 
@@ -70,5 +74,8 @@ public class TokenRequestTest {
         assertEquals(OAuthParameters.GRANT_TYPE_PASSWORD, tokenRequest.getGrantType());
         assertEquals(principal, tokenRequest.getBasicAuth().getPrincipal());
         assertEquals(credential, tokenRequest.getBasicAuth().getCredential());
+        assertTrue(tokenRequest.getScope().length > 0);
+        String[] scopes = scope.split(" ");
+        Arrays.stream(tokenRequest.getScope()).forEach(e -> assertTrue(ArrayUtils.contains(scopes, e)));
     }
 }

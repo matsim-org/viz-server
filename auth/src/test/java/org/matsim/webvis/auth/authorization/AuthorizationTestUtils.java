@@ -12,19 +12,19 @@ import java.util.UUID;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class AuthorizationTestUtils {
+class AuthorizationTestUtils {
 
-    public static Map<String, String[]> createDefaultParameterMap() {
+    static Map<String, String[]> createDefaultParameterMap() {
         Map<String, String[]> parameterMap = new HashMap<>();
         parameterMap.put("scope", new String[]{"openid"});
         parameterMap.put("response_type", new String[]{"code"});
-        parameterMap.put("client_id", new String[]{"test-org.matsim.webvis.auth.relyingParty-id"});
+        parameterMap.put("client_id", new String[]{"test-id"});
         parameterMap.put("redirect_uri", new String[]{"http://valid.uri"});
 
         return parameterMap;
     }
 
-    public static QueryParamsMap mockQueryParams(String keyToReplace, String valueToReplace) {
+    static QueryParamsMap mockQueryParams(String keyToReplace, String valueToReplace) {
 
         Map<String, String[]> parameterMap = createDefaultParameterMap();
 
@@ -34,11 +34,11 @@ public class AuthorizationTestUtils {
         return TestUtils.mockQueryParamsMap(parameterMap);
     }
 
-    public static Request mockRequestWithParams() {
+    static Request mockRequestWithParams() {
         return mockRequestWithParams("", "");
     }
 
-    public static Request mockRequestWithParams(String keyToReplace, String valueToReplace) {
+    static Request mockRequestWithParams(String keyToReplace, String valueToReplace) {
 
         QueryParamsMap map = mockQueryParams(keyToReplace, valueToReplace);
         Session session = mock(Session.class);

@@ -53,7 +53,6 @@ public class AuthenticationRequest extends RequestWithParams {
         this.state = extractOptionalValue(STATE, params);
         if (!this.type.equals(Type.AuthCode))
             nonce = extractRequiredValue(NONCE, params);
-
     }
 
     private void initializeOptionalParameters(QueryParamsMap params) {

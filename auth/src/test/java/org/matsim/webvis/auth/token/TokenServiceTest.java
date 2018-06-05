@@ -16,6 +16,7 @@ import org.matsim.webvis.common.errorHandling.UnauthorizedException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
+import java.util.HashSet;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -74,7 +75,7 @@ public class TokenServiceTest {
 
         final String id = "rpId";
         final String secret = "secret";
-        RelyingParty party = rpService.createRelyingParty(new ConfigRelyingParty(id, "name", secret));
+        RelyingParty party = rpService.createRelyingParty(new ConfigRelyingParty(id, "name", secret, new HashSet<>()));
         ClientCredentialsGrantRequest request = new ClientCredentialsGrantRequest(TestUtils.mockTokenRequest(id, "wrong-secret"));
 
         testObject.grantWithClientCredentials(request);
@@ -87,7 +88,7 @@ public class TokenServiceTest {
 
         final String id = "rpId";
         final String secret = "secret";
-        RelyingParty party = rpService.createRelyingParty(new ConfigRelyingParty(id, "name", secret));
+        RelyingParty party = rpService.createRelyingParty(new ConfigRelyingParty(id, "name", secret, new HashSet<>()));
         ClientCredentialsGrantRequest request = new ClientCredentialsGrantRequest(TestUtils.mockTokenRequest(id, secret));
 
         Token token = testObject.grantWithClientCredentials(request);

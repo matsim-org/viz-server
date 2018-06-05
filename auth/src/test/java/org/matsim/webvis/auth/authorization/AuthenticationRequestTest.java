@@ -5,10 +5,10 @@ import org.matsim.webvis.auth.util.TestUtils;
 import org.matsim.webvis.common.errorHandling.InvalidInputException;
 import spark.QueryParamsMap;
 
+import java.util.Arrays;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 public class AuthenticationRequestTest {
 
@@ -128,7 +128,7 @@ public class AuthenticationRequestTest {
     public void constructor_responseTypeIdTokenTokenNoNonce_InvalidInputException() throws URIException, InvalidInputException {
 
         Map<String, String[]> map = AuthorizationTestUtils.createDefaultParameterMap();
-        map.put(AuthenticationRequest.RESPONSE_TYPE, new String[]{"id_token org.matsim.webvis.auth.token"});
+        map.put(AuthenticationRequest.RESPONSE_TYPE, new String[]{"id_token token"});
         QueryParamsMap params = TestUtils.mockQueryParamsMap(map);
 
         new AuthenticationRequest(params);
@@ -177,5 +177,19 @@ public class AuthenticationRequestTest {
         assertEquals(state, request.getState());
     }
 
+    @Test
+    public void constructor_scopesPresent_object() throws URIException {
+        Map<String, String[]> map = AuthorizationTestUtils.createDefaultParameterMap();
+        String scope = "openid some scopes";
+        map.put(AuthenticationRequest.SCOPE, new String[]{scope});
+        QueryParamsMap params = TestUtils.mockQueryParamsMap(map);
 
+        AuthenticationRequest request = new AuthenticationRequest(params);
+
+        assertTrue(request.getScopes().length > 0);
+        String[] scopes = scope.split(" ");
+        Arrays.stream(scopes).forEach(s ->
+                assertTrue(Arrays.stream(request.getScopes()).anyMatch(m -> m.equals(s))));
+
+    }
 }
