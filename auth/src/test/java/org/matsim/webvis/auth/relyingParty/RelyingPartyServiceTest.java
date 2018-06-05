@@ -12,6 +12,7 @@ import org.matsim.webvis.auth.entities.RelyingPartyCredential;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -59,7 +60,7 @@ public class RelyingPartyServiceTest {
         URI uri = URI.create("http://some.uri");
         List<URI> uris = new ArrayList<>();
         uris.add(uri);
-        ConfigClient configClient = new ConfigClient(name, id, secret, uris);
+        ConfigClient configClient = new ConfigClient(name, id, secret, uris, new HashSet<>());
 
         Client client = testObject.createClient(configClient);
 
@@ -74,7 +75,7 @@ public class RelyingPartyServiceTest {
         String name = "name";
         String id = "id";
         String secret = "secret";
-        ConfigRelyingParty configRelyingParty = new ConfigRelyingParty(id, name, secret);
+        ConfigRelyingParty configRelyingParty = new ConfigRelyingParty(id, name, secret, new HashSet<>());
 
         RelyingParty relyingParty = testObject.createRelyingParty(configRelyingParty);
 
