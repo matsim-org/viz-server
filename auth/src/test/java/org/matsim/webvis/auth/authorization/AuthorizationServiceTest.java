@@ -3,20 +3,21 @@ package org.matsim.webvis.auth.authorization;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.matsim.webvis.auth.entities.Token;
-import org.matsim.webvis.auth.entities.User;
+import org.matsim.webvis.auth.entities.Client;
 import org.matsim.webvis.auth.relyingParty.RelyingPartyService;
 import org.matsim.webvis.auth.token.TokenService;
+import org.matsim.webvis.auth.user.UserService;
 import org.matsim.webvis.auth.util.TestUtils;
 import org.matsim.webvis.common.errorHandling.CodedException;
+import org.matsim.webvis.common.errorHandling.InternalException;
 
 import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
 
+import static junit.framework.TestCase.fail;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -32,21 +33,75 @@ public class AuthorizationServiceTest {
     @Before
     public void setUp() {
         testObject = AuthorizationService.Instance;
+        testObject.userService = mock(UserService.class);
         testObject.relyingPartyService = mock(RelyingPartyService.class);
         testObject.tokenService = mock(TokenService.class);
     }
 
-    @Test
-    public void isValidClientInformation_clientInvalid_invalid() {
+    @Test(expected = CodedException.class)
+    public void isValidClient_clientInvalid_invalid() {
 
         when(testObject.relyingPartyService.validateClient(any(), any(), any())).thenThrow(new CodedException("bla", "bla"));
         AuthenticationRequest request = mock(AuthenticationRequest.class);
         when(request.getScopes()).thenReturn(new String[0]);
 
-        boolean result = testObject.isValidClientInformation(request);
+        testObject.validateClient(request);
 
-        assertFalse(result);
+        fail("exception of rpService should be passed through method");
     }
+
+    @Test
+    public void isValidClient_clientValid_client() {
+
+        Client client = new Client();
+        when(testObject.relyingPartyService.validateClient(any(), any(), any())).thenReturn(client);
+        AuthenticationRequest request = mock(AuthenticationRequest.class);
+        when(request.getScopes()).thenReturn(new String[0]);
+
+        Client result = testObject.validateClient(request);
+
+        assertEquals(client, result);
+
+    }
+
+    @Test(expected = InternalException.class)
+    public void generateAuthenticationResponse_userNotFound_exception() {
+
+        when(testObject.userService.findUser(anyString())).thenReturn(null);
+        AuthenticationRequest request = mock(AuthenticationRequest.class);
+
+        testObject.generateAuthenticationResponse(request, "invalid-id");
+
+        fail("missing user should cause exception");
+    }
+
+    @Test
+    public void generateAuthenticationResponse_noState_uri() {
+
+
+    }
+
+    @Test
+    public void generateAuthenticationResponse_withState_uri() {
+
+    }
+
+    @Test
+    public void generateAuthenticationResponse_withIdToken_uri() {
+
+    }
+
+    @Test
+    public void generateAuthenticationResponse_withAccessToken_uri() {
+
+    }
+
+    @Test
+    public void generateAuthenticationResponse_withAccessTokenAndIdToken_uri() {
+
+    }
+
+    /*
     @Test
     public void generateResponse_accessIdToken_uri() {
 
@@ -120,4 +175,6 @@ public class AuthorizationServiceTest {
                 idToken.getTokenValue() + "&state=some+state");
         assertEquals(expected, result);
     }
+
+    */
 }

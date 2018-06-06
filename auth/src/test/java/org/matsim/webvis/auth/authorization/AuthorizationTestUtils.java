@@ -17,7 +17,7 @@ class AuthorizationTestUtils {
     static Map<String, String[]> createDefaultParameterMap() {
         Map<String, String[]> parameterMap = new HashMap<>();
         parameterMap.put("scope", new String[]{"openid"});
-        parameterMap.put("response_type", new String[]{"code"});
+        parameterMap.put("response_type", new String[]{"token"});
         parameterMap.put("client_id", new String[]{"test-id"});
         parameterMap.put("redirect_uri", new String[]{"http://valid.uri"});
 

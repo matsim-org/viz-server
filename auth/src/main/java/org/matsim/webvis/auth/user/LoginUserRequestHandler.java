@@ -10,6 +10,8 @@ import spark.Route;
 
 public class LoginUserRequestHandler implements Route {
 
+    public static final String LOGIN_COOKIE_KEY = "login";
+
     UserService userService = UserService.Instance;
     TokenService tokenService = TokenService.Instance;
 
@@ -34,7 +36,7 @@ public class LoginUserRequestHandler implements Route {
         Token idToken = tokenService.createIdToken(user);
 
         //put token into a httpOnly cookie
-        response.cookie("/", "id_token", idToken.getTokenValue(), -1, true, true);
+        response.cookie("/", LOGIN_COOKIE_KEY, idToken.getTokenValue(), -1, true, true);
 
         //redirect to route which redirected to login for now it's always authorize
         response.redirect("/authorize/", 302);

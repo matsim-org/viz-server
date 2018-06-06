@@ -114,7 +114,7 @@ public class TokenServiceTest {
 
         assertEquals(party.getId(), token.getSubjectId());
     }
-
+/*
     @Test
     public void grantAccess_allGood_accessToken() {
 
@@ -125,6 +125,7 @@ public class TokenServiceTest {
         assertEquals(user.getId(), token.getSubjectId());
         verify(testObject.tokenDAO, atLeastOnce()).persist(eq(token));
     }
+    */
 
     @Test
     public void createIdToken_withNonce_idToken() {
@@ -201,6 +202,7 @@ public class TokenServiceTest {
         fail("invalid token should cause exception");
     }
 
+    /*
     @Test
     public void validateToken_validTokenAndFound_Token() {
 
@@ -211,6 +213,7 @@ public class TokenServiceTest {
 
         assertEquals(token.getTokenValue(), result.getTokenValue());
     }
+    */
 
     @Test
     public void findToken_noToken_null() {

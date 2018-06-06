@@ -4,7 +4,7 @@ import org.matsim.webvis.auth.entities.Token;
 
 public class ActiveIntrospectionResponse extends IntrospectionResponse {
 
-    ActiveIntrospectionResponse(Token token) {
-        super(token, true);
+    ActiveIntrospectionResponse(Token token, String scope) {
+        super(token, scope, true);
     }
 }

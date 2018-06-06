@@ -1,12 +1,13 @@
 package org.matsim.webvis.auth.authorization;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.matsim.webvis.auth.entities.Client;
 import org.matsim.webvis.auth.entities.Token;
 import org.matsim.webvis.auth.entities.User;
 import org.matsim.webvis.auth.relyingParty.RelyingPartyService;
 import org.matsim.webvis.auth.token.TokenService;
-import org.matsim.webvis.common.errorHandling.CodedException;
+import org.matsim.webvis.auth.user.UserService;
+import org.matsim.webvis.common.errorHandling.InternalException;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -17,49 +18,59 @@ class AuthorizationService {
 
     static final AuthorizationService Instance = new AuthorizationService();
     TokenService tokenService = TokenService.Instance;
-
-    private static Logger logger = LogManager.getLogger();
+    UserService userService = UserService.Instance;
 
     RelyingPartyService relyingPartyService = RelyingPartyService.Instance;
 
-    private AuthorizationService() {
-
+    Client validateClient(AuthenticationRequest request) {
+        return relyingPartyService.validateClient(
+                request.getClientId(), request.getRedirectUri(), Arrays.asList(request.getScopes())
+        );
     }
 
-    boolean isValidClientInformation(AuthenticationRequest request) {
-
-        //this is a bit ugly and will be removed as soon as the implicit grant is being refactored
-        try {
-            relyingPartyService.validateClient(
-                    request.getClientId(), request.getRedirectUri(), Arrays.asList(request.getScopes()));
-        } catch (CodedException e) {
-            return false;
-        }
-        return true;
-    }
-
-    URI generateResponse(AuthenticationRequest request, User user) {
-
-        return generateAccessResponse(request, user);
-    }
-
-    private URI generateAccessResponse(AuthenticationRequest request, User user) {
+    URI generateAuthenticationResponse(AuthenticationRequest request, String subjectId) {
 
         String fragment = "#token_type=bearer";
-
-        Token idToken = tokenService.createIdToken(user, request.getNonce());
-        fragment += "&id_token=" + idToken.getTokenValue();
-
-        logger.info("Issued token to user: " + user.getEMail());
-
-        if (request.getType().equals(AuthenticationRequest.Type.AccessAndIdToken)) {
-            Token accessToken = tokenService.grantAccess(user);
-            fragment += "&access_token=" + accessToken.getTokenValue();
-        }
-        if (!request.getState().isEmpty()) {
-            fragment += "&state=" + urlEncode(request.getState());
-        }
+        fragment += getStateIfNecessary(request);
+        fragment += getTokens(request, subjectId);
         return URI.create(request.getRedirectUri().toString() + fragment);
+    }
+
+    private String getStateIfNecessary(AuthenticationRequest request2) {
+        if (StringUtils.isNotBlank(request2.getState()))
+            return "&state=" + urlEncode(request2.getState());
+        return "";
+    }
+
+    private String getTokens(AuthenticationRequest request, String subjectId) {
+
+        User user = userService.findUser(subjectId);
+        if (user == null)
+            throw new InternalException("could not find user from id-token");
+
+        String result = addIdTokenIfNecessary(request, user);
+        result += addAccessTokenIfNecessary(request, user);
+        return result;
+    }
+
+    private String addIdTokenIfNecessary(AuthenticationRequest request, User user) {
+        if (request.getType() == AuthenticationRequest.Type.IdToken
+                || request.getType() == AuthenticationRequest.Type.AccessAndIdToken) {
+
+            Token idToken = tokenService.createIdToken(user, request.getNonce());
+            return "&id_token=" + idToken.getTokenValue();
+        }
+        return "";
+    }
+
+    private String addAccessTokenIfNecessary(AuthenticationRequest request, User user) {
+        if (request.getType() == AuthenticationRequest.Type.AccessToken
+                || request.getType() == AuthenticationRequest.Type.AccessAndIdToken) {
+
+            Token accessToken = tokenService.createAccessToken(user, String.join(" ", request.getScopes()));
+            return "&access_token=" + accessToken.getTokenValue();
+        }
+        return "";
     }
 
     /**
@@ -72,7 +83,7 @@ class AuthorizationService {
         try {
             return URLEncoder.encode(toEncode, "UTF-8");
         } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
+            throw new InternalException("Could not encode state");
         }
     }
 }

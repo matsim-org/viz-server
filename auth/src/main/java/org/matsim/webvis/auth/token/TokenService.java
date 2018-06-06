@@ -16,6 +16,7 @@ import org.matsim.webvis.auth.user.UserService;
 import org.matsim.webvis.common.auth.PrincipalCredentialToken;
 import org.matsim.webvis.common.database.AbstractEntity;
 import org.matsim.webvis.common.errorHandling.CodedException;
+import org.matsim.webvis.common.errorHandling.UnauthorizedException;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -41,7 +42,7 @@ public class TokenService {
 
     Token grantWithPassword(String username, char[] password) throws CodedException {
         User user = userService.authenticate(username, password);
-        return createAccessToken(user);
+        return createAccessToken(user, "");
     }
 
     Token grantWithClientCredentials(ClientCredentialsGrantRequest request) {
@@ -49,11 +50,7 @@ public class TokenService {
         PrincipalCredentialToken auth = request.getTokenRequest().getBasicAuth();
         RelyingParty relyingParty = relyingPartyService.validateRelyingParty(
                 auth.getPrincipal(), auth.getCredential(), Arrays.asList(request.getTokenRequest().getScope()));
-        return createAccessToken(relyingParty);
-    }
-
-    public Token grantAccess(User user) {
-        return createAccessToken(user);
+        return createAccessToken(relyingParty, String.join(" ", request.getTokenRequest().getScope()));
     }
 
     public Token createIdToken(User user) {
@@ -62,46 +59,28 @@ public class TokenService {
 
     public Token createIdToken(User user, String nonce) {
 
-        if (nonce.isEmpty()) {
-            return createSignedToken(user.getId());
-        } else {
-            Map<String, String> claims = new HashMap<>();
+        Map<String, String> claims = null;
+        if (StringUtils.isNotBlank(nonce)) {
+            claims = new HashMap<>();
             claims.put("nonce", nonce);
-            return createSignedToken(user.getId(), claims);
         }
+        return createSignedToken(user.getId(), null, claims);
     }
 
-    public Token validateToken(String encodedToken) {
-
-        JWTVerifier verifier = JWT.require(algorithm).build();
-        DecodedJWT decodedToken = verifier.verify(encodedToken);
-
-        if (StringUtils.isBlank(decodedToken.getId()) || decodedToken.getExpiresAt().before(Date.from(Instant.now())))
-            throw new RuntimeException("token expired");
-
-        Token token = tokenDAO.find(decodedToken.getId());
-        if (token == null)
-            throw new RuntimeException("token invalid.");
-        return token;
+    public Token createAccessToken(AbstractEntity subject, String scope) {
+        return createSignedToken(subject.getId(), scope);
     }
 
-    Token findToken(String token) {
-        return tokenDAO.findByTokenValue(token);
+    private Token createSignedToken(String subjectId, String scope) {
+        return createSignedToken(subjectId, scope, null);
     }
 
-    private Token createAccessToken(AbstractEntity subject) {
-        return createSignedToken(subject.getId());
-    }
-
-    private Token createSignedToken(String subjectId) {
-        return createSignedToken(subjectId, null);
-    }
-
-    private Token createSignedToken(String subjectId, Map<String, String> claims) {
+    private Token createSignedToken(String subjectId, String scope, Map<String, String> claims) {
 
         Token token = new Token();
         token.setSubjectId(subjectId);
         token.setExpiresAt(Instant.now().plus(Duration.ofHours(24)));
+        token.setScope(scope);
         token = tokenDAO.persist(token);
 
         JWTCreator.Builder jwt = JWT.create().withSubject(subjectId)
@@ -117,5 +96,23 @@ public class TokenService {
         String tokenValue = jwt.sign(algorithm);
         token.setTokenValue(tokenValue);
         return tokenDAO.persist(token);
+    }
+
+    public Token validateToken(String encodedToken) {
+
+        JWTVerifier verifier = JWT.require(algorithm).build();
+        DecodedJWT decodedToken = verifier.verify(encodedToken);
+
+        if (StringUtils.isBlank(decodedToken.getId()) || decodedToken.getExpiresAt().before(Date.from(Instant.now())))
+            throw new UnauthorizedException("token expired");
+
+        Token token = tokenDAO.find(decodedToken.getId());
+        if (token == null)
+            throw new UnauthorizedException("token invalid.");
+        return token;
+    }
+
+    Token findToken(String token) {
+        return tokenDAO.findByTokenValue(token);
     }
 }

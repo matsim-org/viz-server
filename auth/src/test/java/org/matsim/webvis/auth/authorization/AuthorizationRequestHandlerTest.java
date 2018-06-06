@@ -1,35 +1,10 @@
 package org.matsim.webvis.auth.authorization;
 
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.matsim.webvis.auth.Routes;
-import org.matsim.webvis.auth.entities.Token;
-import org.matsim.webvis.auth.entities.User;
-import org.matsim.webvis.auth.token.TokenService;
-import org.matsim.webvis.auth.user.UserService;
-import org.matsim.webvis.auth.util.TestUtils;
-import org.matsim.webvis.common.errorHandling.Error;
-import spark.Request;
-import spark.Response;
-
-import java.io.FileNotFoundException;
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.contains;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.*;
-
 public class AuthorizationRequestHandlerTest {
 
     private AuthorizationRequestHandler testObject;
 
-    @BeforeClass
+   /* @BeforeClass
     public static void setUpFixture() throws UnsupportedEncodingException, FileNotFoundException {
         TestUtils.loadTestConfig();
     }
@@ -127,4 +102,5 @@ public class AuthorizationRequestHandlerTest {
         assertEquals("error", message[0]);
         assertEquals(errorCode, message[1]);
     }
+    */
 }
