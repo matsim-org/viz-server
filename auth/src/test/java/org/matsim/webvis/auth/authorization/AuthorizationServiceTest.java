@@ -3,19 +3,19 @@ package org.matsim.webvis.auth.authorization;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.matsim.webvis.auth.entities.Client;
-import org.matsim.webvis.auth.entities.RedirectUri;
 import org.matsim.webvis.auth.entities.Token;
 import org.matsim.webvis.auth.entities.User;
 import org.matsim.webvis.auth.relyingParty.RelyingPartyService;
 import org.matsim.webvis.auth.token.TokenService;
 import org.matsim.webvis.auth.util.TestUtils;
+import org.matsim.webvis.common.errorHandling.CodedException;
 
 import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -37,52 +37,16 @@ public class AuthorizationServiceTest {
     }
 
     @Test
-    public void isValidClientInformation_clientNotRegistered_invalid() {
+    public void isValidClientInformation_clientInvalid_invalid() {
 
-        when(testObject.relyingPartyService.findClient(any())).thenReturn(null);
+        when(testObject.relyingPartyService.validateClient(any(), any(), any())).thenThrow(new CodedException("bla", "bla"));
         AuthenticationRequest request = mock(AuthenticationRequest.class);
+        when(request.getScopes()).thenReturn(new String[0]);
 
         boolean result = testObject.isValidClientInformation(request);
 
         assertFalse(result);
     }
-
-    @Test
-    public void isValidClientInformation_redirectUriNotRegistered_invalid() {
-
-        Client client = new Client();
-        RedirectUri someUri = new RedirectUri();
-        someUri.setUri("http://some.uri");
-        client.getRedirectUris().add(someUri);
-        URI otherUri = URI.create("http://some-other.uri");
-
-        when(testObject.relyingPartyService.findClient(any())).thenReturn(client);
-        AuthenticationRequest request = mock(AuthenticationRequest.class);
-        when(request.getRedirectUri()).thenReturn(otherUri);
-
-        boolean result = testObject.isValidClientInformation(request);
-
-        assertFalse(result);
-    }
-
-    @Test
-    public void isValidClientInformation_validClientValidUri_valid() {
-
-        URI redirectUri = URI.create("http://some.uri");
-        Client client = new Client();
-        RedirectUri someUri = new RedirectUri();
-        someUri.setUri(redirectUri.toString());
-        client.getRedirectUris().add(someUri);
-
-        when(testObject.relyingPartyService.findClient(any())).thenReturn(client);
-        AuthenticationRequest request = mock(AuthenticationRequest.class);
-        when(request.getRedirectUri()).thenReturn(redirectUri);
-
-        boolean result = testObject.isValidClientInformation(request);
-
-        assertTrue(result);
-    }
-
     @Test
     public void generateResponse_accessIdToken_uri() {
 

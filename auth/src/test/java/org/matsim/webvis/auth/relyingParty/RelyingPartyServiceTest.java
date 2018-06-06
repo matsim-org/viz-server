@@ -9,11 +9,13 @@ import org.matsim.webvis.auth.entities.Client;
 import org.matsim.webvis.auth.entities.RedirectUri;
 import org.matsim.webvis.auth.entities.RelyingParty;
 import org.matsim.webvis.auth.entities.RelyingPartyCredential;
+import org.matsim.webvis.common.errorHandling.UnauthorizedException;
 
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.Assert.*;
 
@@ -47,7 +49,7 @@ public class RelyingPartyServiceTest {
         assertEquals(1, client.getRedirectUris().size());
 
         RedirectUri redirect = client.getRedirectUris().iterator().next();
-        assertEquals(uri.toString(), redirect.getUri());
+        assertEquals(uri, redirect.getUri());
         assertEquals(client, redirect.getClient());
     }
 
@@ -60,13 +62,16 @@ public class RelyingPartyServiceTest {
         URI uri = URI.create("http://some.uri");
         List<URI> uris = new ArrayList<>();
         uris.add(uri);
-        ConfigClient configClient = new ConfigClient(name, id, secret, uris, new HashSet<>());
+        Set<String> scopes = new HashSet<>();
+        scopes.add("scope");
+        ConfigClient configClient = new ConfigClient(name, id, secret, uris, scopes);
 
         Client client = testObject.createClient(configClient);
 
         assertEquals(name, client.getName());
         assertEquals(id, client.getId());
-        assertEquals(1, client.getRedirectUris().size());
+        assertEquals(uris.size(), client.getRedirectUris().size());
+        assertEquals(scopes.size(), client.getScopes().size());
     }
 
     @Test
@@ -75,12 +80,16 @@ public class RelyingPartyServiceTest {
         String name = "name";
         String id = "id";
         String secret = "secret";
-        ConfigRelyingParty configRelyingParty = new ConfigRelyingParty(id, name, secret, new HashSet<>());
+        Set<String> scopes = new HashSet<>();
+        scopes.add("scope");
+        scopes.add("other-scope");
+        ConfigRelyingParty configRelyingParty = new ConfigRelyingParty(id, name, secret, scopes);
 
         RelyingParty relyingParty = testObject.createRelyingParty(configRelyingParty);
 
         assertEquals(name, relyingParty.getName());
         assertEquals(id, relyingParty.getId());
+        assertEquals(scopes.size(), relyingParty.getScopes().size());
     }
 
     @Test
@@ -106,7 +115,7 @@ public class RelyingPartyServiceTest {
         assertEquals(client.getId(), found.getId());
     }
 
-    @Test(expected = Exception.class)
+    @Test(expected = UnauthorizedException.class)
     public void validateRelyingParty_noClient_exception() {
 
         testObject.validateRelyingParty("invalid", "password");
@@ -114,10 +123,11 @@ public class RelyingPartyServiceTest {
         fail("if client is not present exception should be thrown");
     }
 
-    @Test(expected = Exception.class)
+    @Test(expected = UnauthorizedException.class)
     public void validateRelyingParty_secretsDontMatch_exception() {
 
         RelyingParty party = new RelyingParty();
+        party.getScopes().add("scope");
         RelyingPartyCredential credential = new RelyingPartyCredential();
         credential.setRelyingParty(party);
 
@@ -126,6 +136,23 @@ public class RelyingPartyServiceTest {
         testObject.validateRelyingParty(party.getId(), "wrong secret");
 
         fail("if secret is wrong exception should be thrown");
+    }
+
+    @Test(expected = UnauthorizedException.class)
+    public void validateRelyingParty_scopesDontMatch_unauthorizedException() {
+
+        List<String> scopes = new ArrayList<>();
+        scopes.add("scope");
+        RelyingParty party = new RelyingParty();
+        party.getScopes().add("other-scope");
+        RelyingPartyCredential credential = new RelyingPartyCredential();
+        credential.setRelyingParty(party);
+
+        RelyingPartyCredential persisted = relyingPartyDAO.persistCredential(credential);
+
+        testObject.validateRelyingParty(party.getId(), persisted.getSecret(), scopes);
+
+        fail("not matching scopes should cause exception");
     }
 
     @Test
@@ -141,5 +168,89 @@ public class RelyingPartyServiceTest {
 
         assertNotNull(result);
         assertEquals(party.getName(), result.getName());
+    }
+
+    @Test
+    public void validateRelyingParty_allGoodWithScopes_relyingParty() {
+
+        List<String> scopes = new ArrayList<>();
+        scopes.add("first-scope");
+        scopes.add("second-scope");
+        RelyingParty party = new RelyingParty();
+        party.getScopes().addAll(scopes);
+        RelyingPartyCredential credential = new RelyingPartyCredential();
+        credential.setRelyingParty(party);
+
+        RelyingPartyCredential persisted = relyingPartyDAO.persistCredential(credential);
+
+        RelyingParty result = testObject.validateRelyingParty(party.getId(), persisted.getSecret(), scopes);
+
+        assertNotNull(result);
+        assertEquals(party.getName(), result.getName());
+    }
+
+    @Test(expected = UnauthorizedException.class)
+    public void validateClient_clientNotPresent_exception() {
+
+        testObject.validateClient("some-id", null, null);
+
+        fail("invalid client id should cause exception");
+    }
+
+    @Test(expected = UnauthorizedException.class)
+    public void validateClient_wrongRedirectUri_exception() {
+
+        final URI redirectURI = URI.create("http://some.uri");
+        final List<String> scopes = new ArrayList<>();
+        scopes.add("scope");
+
+        RelyingPartyCredential credential = persistWithClient(URI.create("http://other.uri"), scopes);
+
+        testObject.validateClient(credential.getRelyingParty().getId(), redirectURI, scopes);
+
+        fail("invalid redirect uri should cause exception");
+    }
+
+    @Test(expected = UnauthorizedException.class)
+    public void validateClient_scopesDontMatch_exception() {
+
+        final URI redirectURI = URI.create("http://some.uri");
+        final List<String> scopes = new ArrayList<>();
+        scopes.add("some scopes");
+        final List<String> otherScopes = new ArrayList<>();
+        otherScopes.add("some other scopes");
+
+        RelyingPartyCredential credential = persistWithClient(redirectURI, scopes);
+
+        testObject.validateClient(credential.getRelyingParty().getId(), redirectURI, otherScopes);
+
+        fail("invalid scopes should cause exception");
+    }
+
+    @Test
+    public void validateClient_allGood_Client() {
+
+        final URI redirectURI = URI.create("http://some.uri");
+        final List<String> scopes = new ArrayList<>();
+        scopes.add("some scopes");
+
+        RelyingPartyCredential credential = persistWithClient(redirectURI, scopes);
+
+        Client client = testObject.validateClient(credential.getRelyingParty().getId(), redirectURI, scopes);
+
+        assertNotNull(client);
+        assertTrue(credential.getRelyingParty().equalId(client));
+    }
+
+    private RelyingPartyCredential persistWithClient(URI redirectUri, List<String> scopes) {
+        Client client = new Client();
+        RedirectUri uri = new RedirectUri();
+        uri.setUri(redirectUri);
+        client.addRedirectUri(uri);
+        client.getScopes().addAll(scopes);
+        RelyingPartyCredential credential = new RelyingPartyCredential();
+        credential.setRelyingParty(client);
+
+        return relyingPartyDAO.persistCredential(credential);
     }
 }

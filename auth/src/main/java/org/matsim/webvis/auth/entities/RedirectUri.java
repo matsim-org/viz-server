@@ -8,12 +8,14 @@ import javax.persistence.Entity;
 import javax.persistence.ForeignKey;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import java.net.URI;
 
 @Getter
 @Setter
 @Entity
 public class RedirectUri extends AbstractEntity {
-    private String uri;
+
+    private URI uri;
 
     @ManyToOne
     @JoinColumn(name = "client_id", foreignKey = @ForeignKey(name = "CLIENT_ID_FK"))

@@ -19,6 +19,7 @@ import org.matsim.webvis.common.errorHandling.CodedException;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -46,7 +47,8 @@ public class TokenService {
     Token grantWithClientCredentials(ClientCredentialsGrantRequest request) {
 
         PrincipalCredentialToken auth = request.getTokenRequest().getBasicAuth();
-        RelyingParty relyingParty = relyingPartyService.validateRelyingParty(auth.getPrincipal(), auth.getCredential());
+        RelyingParty relyingParty = relyingPartyService.validateRelyingParty(
+                auth.getPrincipal(), auth.getCredential(), Arrays.asList(request.getTokenRequest().getScope()));
         return createAccessToken(relyingParty);
     }
 

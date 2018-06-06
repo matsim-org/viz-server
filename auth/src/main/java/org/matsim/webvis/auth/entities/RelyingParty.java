@@ -6,6 +6,8 @@ import org.matsim.webvis.common.database.AbstractEntity;
 
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -14,6 +16,6 @@ import java.util.Set;
 public class RelyingParty extends AbstractEntity {
 
     private String name;
-    @ElementCollection
-    private Set<String> scopes;
+    @ElementCollection(fetch = FetchType.EAGER)
+    private Set<String> scopes = new HashSet<>();
 }

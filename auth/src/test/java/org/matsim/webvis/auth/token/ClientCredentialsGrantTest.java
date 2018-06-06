@@ -35,7 +35,7 @@ public class ClientCredentialsGrantTest {
     @Test
     public void processRequest_allGood_Answer() {
 
-        TokenRequest request = TestUtils.mockTokenRequest("principal", "credential");
+        TokenRequest request = TestUtils.mockTokenRequest("principal", "credential", new String[0]);
         Token token = new Token();
         token.setTokenValue("value");
         token.setExpiresAt(Instant.now());

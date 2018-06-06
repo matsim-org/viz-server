@@ -15,6 +15,7 @@ import org.matsim.webvis.common.errorHandling.UnauthorizedException;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 
@@ -75,8 +76,25 @@ public class TokenServiceTest {
 
         final String id = "rpId";
         final String secret = "secret";
-        RelyingParty party = rpService.createRelyingParty(new ConfigRelyingParty(id, "name", secret, new HashSet<>()));
-        ClientCredentialsGrantRequest request = new ClientCredentialsGrantRequest(TestUtils.mockTokenRequest(id, "wrong-secret"));
+        final String[] scopes = new String[]{"some scopes"};
+        rpService.createRelyingParty(new ConfigRelyingParty(id, "name", secret, new HashSet<>(Arrays.asList(scopes))));
+        TokenRequest tokenRequest = TestUtils.mockTokenRequest(id, "wrong-secret", scopes);
+        ClientCredentialsGrantRequest request = new ClientCredentialsGrantRequest(tokenRequest);
+
+        testObject.grantWithClientCredentials(request);
+
+        fail("authentication failure should cause exception");
+    }
+
+    @Test(expected = UnauthorizedException.class)
+    public void grantWithClientCredentials_scopesDontMatch_unauthorizedException() {
+
+        final String id = "rpId";
+        final String secret = "secret";
+        final String[] scopes = new String[]{"some scopes"};
+        rpService.createRelyingParty(new ConfigRelyingParty(id, "name", secret, new HashSet<>(Arrays.asList(scopes))));
+        TokenRequest tokenRequest = TestUtils.mockTokenRequest(id, secret, new String[]{"other-scope"});
+        ClientCredentialsGrantRequest request = new ClientCredentialsGrantRequest(tokenRequest);
 
         testObject.grantWithClientCredentials(request);
 
@@ -88,8 +106,9 @@ public class TokenServiceTest {
 
         final String id = "rpId";
         final String secret = "secret";
-        RelyingParty party = rpService.createRelyingParty(new ConfigRelyingParty(id, "name", secret, new HashSet<>()));
-        ClientCredentialsGrantRequest request = new ClientCredentialsGrantRequest(TestUtils.mockTokenRequest(id, secret));
+        final String[] scopes = new String[]{"some scopes"};
+        RelyingParty party = rpService.createRelyingParty(new ConfigRelyingParty(id, "name", secret, new HashSet<>(Arrays.asList(scopes))));
+        ClientCredentialsGrantRequest request = new ClientCredentialsGrantRequest(TestUtils.mockTokenRequest(id, secret, scopes));
 
         Token token = testObject.grantWithClientCredentials(request);
 

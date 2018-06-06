@@ -2,15 +2,16 @@ package org.matsim.webvis.auth.authorization;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.matsim.webvis.auth.entities.Client;
 import org.matsim.webvis.auth.entities.Token;
 import org.matsim.webvis.auth.entities.User;
 import org.matsim.webvis.auth.relyingParty.RelyingPartyService;
 import org.matsim.webvis.auth.token.TokenService;
+import org.matsim.webvis.common.errorHandling.CodedException;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLEncoder;
+import java.util.Arrays;
 
 class AuthorizationService {
 
@@ -27,19 +28,14 @@ class AuthorizationService {
 
     boolean isValidClientInformation(AuthenticationRequest request) {
 
-        boolean isValid = false;
-
-        //check whether client_id is registered
-        Client client = relyingPartyService.findClient(request.getClientId());
-
-        //check whether redirect uri is registered
-        if (client != null) {
-            String redirectUri = request.getRedirectUri().toString();
-            isValid = client.getRedirectUris().stream()
-                    .anyMatch(uri -> uri.getUri().equals(redirectUri));
+        //this is a bit ugly and will be removed as soon as the implicit grant is being refactored
+        try {
+            relyingPartyService.validateClient(
+                    request.getClientId(), request.getRedirectUri(), Arrays.asList(request.getScopes()));
+        } catch (CodedException e) {
+            return false;
         }
-
-        return isValid;
+        return true;
     }
 
     URI generateResponse(AuthenticationRequest request, User user) {

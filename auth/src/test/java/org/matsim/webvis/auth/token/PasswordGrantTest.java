@@ -35,7 +35,7 @@ public class PasswordGrantTest {
     @Test
     public void processRequest_allGood_answer() {
 
-        TokenRequest request = TestUtils.mockTokenRequest("principal", "credential");
+        TokenRequest request = TestUtils.mockTokenRequest("principal", "credential", new String[0]);
         when(request.getRequiredValue(any())).thenReturn("dummy");
         Token token = new Token();
         token.setTokenValue("value");
