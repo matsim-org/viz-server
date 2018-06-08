@@ -1,6 +1,5 @@
 package org.matsim.webvis.auth.token;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.junit.Test;
 import org.matsim.webvis.auth.util.TestUtils;
 import org.matsim.webvis.common.auth.BasicAuthentication;
@@ -8,11 +7,11 @@ import org.matsim.webvis.common.communication.ContentType;
 import org.matsim.webvis.common.errorHandling.InvalidInputException;
 import spark.Request;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import static junit.framework.TestCase.*;
+import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.fail;
 import static org.mockito.Mockito.when;
 
 public class TokenRequestTest {
@@ -74,8 +73,7 @@ public class TokenRequestTest {
         assertEquals(OAuthParameters.GRANT_TYPE_PASSWORD, tokenRequest.getGrantType());
         assertEquals(principal, tokenRequest.getBasicAuth().getPrincipal());
         assertEquals(credential, tokenRequest.getBasicAuth().getCredential());
-        assertTrue(tokenRequest.getScope().length > 0);
+        assertEquals(scope, tokenRequest.getScope());
         String[] scopes = scope.split(" ");
-        Arrays.stream(tokenRequest.getScope()).forEach(e -> assertTrue(ArrayUtils.contains(scopes, e)));
     }
 }

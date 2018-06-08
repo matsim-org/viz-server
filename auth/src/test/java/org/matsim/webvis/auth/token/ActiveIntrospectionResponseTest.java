@@ -22,8 +22,9 @@ public class ActiveIntrospectionResponseTest {
         token.setExpiresAt(expiresAt);
         token.setCreatedAt(issuedAt);
         token.setSubjectId(subjectId);
+        token.setScope(scope);
 
-        ActiveIntrospectionResponse instance = new ActiveIntrospectionResponse(token, scope);
+        ActiveIntrospectionResponse instance = new ActiveIntrospectionResponse(token);
 
         assertEquals(expiresAt.toEpochMilli(), instance.getExp());
         assertEquals(issuedAt.toEpochMilli(), instance.getIat());

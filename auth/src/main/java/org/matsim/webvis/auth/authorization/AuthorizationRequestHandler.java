@@ -6,8 +6,10 @@ import org.matsim.webvis.auth.Routes;
 import org.matsim.webvis.auth.entities.Token;
 import org.matsim.webvis.auth.token.TokenService;
 import org.matsim.webvis.auth.user.LoginUserRequestHandler;
-import org.matsim.webvis.auth.user.UserService;
+import org.matsim.webvis.common.communication.HttpStatus;
 import org.matsim.webvis.common.errorHandling.CodedException;
+import org.matsim.webvis.common.errorHandling.InvalidInputException;
+import org.matsim.webvis.common.errorHandling.UnauthorizedException;
 import spark.Request;
 import spark.Response;
 import spark.Route;
@@ -19,50 +21,64 @@ import java.util.concurrent.ConcurrentHashMap;
 public class AuthorizationRequestHandler implements Route {
 
     private static Logger logger = LogManager.getLogger();
-    private static Map<String, AuthenticationRequest> loginSession = new ConcurrentHashMap<>();
+    static Map<String, AuthenticationRequest> loginSession = new ConcurrentHashMap<>();
 
     AuthorizationService authService = AuthorizationService.Instance;
     TokenService tokenService = TokenService.Instance;
-    UserService userService = UserService.Instance;
 
     @Override
     public Object handle(Request request, Response response) {
 
+
+        AuthenticationRequest authRequest;
+
         if (request.queryMap().hasKeys())
-            return authenticate(request, response);
+            authRequest = authRequestFromRequest(request);
         else
-            return prepareResponse(request, response);
-    }
-
-    private Object authenticate(Request request, Response response) {
-
-        AuthenticationRequest authRequest = new AuthenticationRequest(request.queryMap());
-        authService.validateClient(authRequest);
-
-        request.session(true);
-        loginSession.put(request.session().id(), authRequest);
-        return redirectToLogin(response);
-    }
-
-    private Object prepareResponse(Request request, Response response) {
-
-        String encodedToken = request.cookie(LoginUserRequestHandler.LOGIN_COOKIE_KEY);
-
-        AuthenticationRequest authRequest = loginSession.remove(request.session().id());
-        request.session().invalidate();
+            authRequest = authRequestFromSession(request);
 
         try {
-            Token idToken = tokenService.validateToken(encodedToken);
-            URI uri = authService.generateAuthenticationResponse(authRequest, idToken.getSubjectId());
-            response.redirect(uri.toString(), 302);
-            return response;
+            String subjectId = authenticateWithCookie(request);
+            return prepareResponse(authRequest, subjectId, response);
+        } catch (UnauthorizedException e) {
+            return authenticateWithLogin(request, authRequest, response);
         } catch (CodedException e) {
             return redirectOnError(authRequest.getRedirectUri(), e.getErrorCode(), e.getMessage(), response);
         }
     }
 
-    private Object redirectToLogin(Response response) {
+    private AuthenticationRequest authRequestFromRequest(Request request) {
+        AuthenticationRequest authRequest = new AuthenticationRequest(request.queryMap());
+        authService.validateClient(authRequest);
+        return authRequest;
+    }
+
+    private AuthenticationRequest authRequestFromSession(Request request) {
+        AuthenticationRequest authRequest = loginSession.remove(request.session().id());
+        request.session().invalidate();
+        if (authRequest == null)
+            throw new InvalidInputException("must specify authorization parameters");
+        return authRequest;
+    }
+
+    private String authenticateWithCookie(Request request) {
+        String encodedToken = request.cookie(LoginUserRequestHandler.LOGIN_COOKIE_KEY);
+        Token idToken = tokenService.validateToken(encodedToken);
+        return idToken.getSubjectId();
+    }
+
+    private Object authenticateWithLogin(Request request, AuthenticationRequest authRequest, Response response) {
+
+        request.session(true);
+        loginSession.put(request.session().id(), authRequest);
         response.redirect(Routes.LOGIN, 302);
+        return response;
+    }
+
+    private Object prepareResponse(AuthenticationRequest authRequest, String subjectId, Response response) {
+
+        URI uri = authService.generateAuthenticationResponse(authRequest, subjectId);
+        response.redirect(uri.toString(), HttpStatus.FOUND);
         return response;
     }
 

@@ -1,5 +1,6 @@
 package org.matsim.webvis.auth.user;
 
+import org.matsim.webvis.auth.Routes;
 import org.matsim.webvis.auth.entities.Token;
 import org.matsim.webvis.auth.entities.User;
 import org.matsim.webvis.auth.token.TokenService;
@@ -39,7 +40,7 @@ public class LoginUserRequestHandler implements Route {
         response.cookie("/", LOGIN_COOKIE_KEY, idToken.getTokenValue(), -1, true, true);
 
         //redirect to route which redirected to login for now it's always authorize
-        response.redirect("/authorize/", 302);
+        response.redirect("/" + Routes.AUTHORIZE, 302);
 
         return "OK";
     }

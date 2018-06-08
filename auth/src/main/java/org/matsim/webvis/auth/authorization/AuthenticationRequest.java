@@ -1,7 +1,6 @@
 package org.matsim.webvis.auth.authorization;
 
 import lombok.Getter;
-import org.apache.commons.lang3.StringUtils;
 import org.matsim.webvis.common.communication.RequestWithParams;
 import org.matsim.webvis.common.errorHandling.InvalidInputException;
 import spark.QueryParamsMap;
@@ -20,26 +19,24 @@ public class AuthenticationRequest extends RequestWithParams {
     public static final String STATE = "state";
     public static final String NONCE = "nonce";
 
+    private String scope;
+
+    //required params
+    private String[] responseType;
+    private URI redirectUri;
+    //optional params
+    private String state;
+    private String clientId;
+    private AuthenticationRequest.Type type;
+    private String nonce;
     AuthenticationRequest(QueryParamsMap params) {
         this.redirectUri = initUri(params);
-        this.scopes = initScopes(params);
+        this.scope = initScope(params);
         this.responseType = initResponseType(params);
         this.clientId = extractRequiredValue(CLIENT_ID, params);
         this.state = extractOptionalValue(STATE, params);
         this.nonce = initNonce(params);
     }
-
-    //required params
-    private String[] responseType;
-    private URI redirectUri;
-    private String[] scopes;
-    private String clientId;
-    private AuthenticationRequest.Type type;
-
-
-    //optional params
-    private String state = "";
-    private String nonce = "";
     private String display = "";
     private String prompt = "";
     private String maxAge = "";
@@ -58,12 +55,12 @@ public class AuthenticationRequest extends RequestWithParams {
         }
     }
 
-    private String[] initScopes(QueryParamsMap params) {
+    private String initScope(QueryParamsMap params) {
 
         String scope = extractRequiredValue(SCOPE, params);
-        if (StringUtils.containsNone(scope, "openid"))
+        if (!scope.contains("openid"))
             throw new InvalidInputException("only openid-connect is supported. Scope must contain 'openid'");
-        return scope.split(" ");
+        return scope;
     }
 
     private String[] initResponseType(QueryParamsMap params) {

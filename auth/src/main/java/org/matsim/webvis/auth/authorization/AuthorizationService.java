@@ -12,7 +12,6 @@ import org.matsim.webvis.common.errorHandling.InternalException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLEncoder;
-import java.util.Arrays;
 
 class AuthorizationService {
 
@@ -24,8 +23,7 @@ class AuthorizationService {
 
     Client validateClient(AuthenticationRequest request) {
         return relyingPartyService.validateClient(
-                request.getClientId(), request.getRedirectUri(), Arrays.asList(request.getScopes())
-        );
+                request.getClientId(), request.getRedirectUri(), request.getScope());
     }
 
     URI generateAuthenticationResponse(AuthenticationRequest request, String subjectId) {
@@ -67,7 +65,8 @@ class AuthorizationService {
         if (request.getType() == AuthenticationRequest.Type.AccessToken
                 || request.getType() == AuthenticationRequest.Type.AccessAndIdToken) {
 
-            Token accessToken = tokenService.createAccessToken(user, String.join(" ", request.getScopes()));
+            String scope = request.getScope().replace("openid", "").trim();
+            Token accessToken = tokenService.createAccessToken(user, String.join(" ", scope));
             return "&access_token=" + accessToken.getTokenValue();
         }
         return "";

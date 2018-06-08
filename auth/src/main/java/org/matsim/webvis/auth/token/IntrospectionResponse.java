@@ -17,7 +17,7 @@ abstract class IntrospectionResponse {
     private String aud;
     private String iss;
 
-    IntrospectionResponse(Token token, String scope, boolean active) {
+    IntrospectionResponse(Token token, boolean active) {
 
         this.active = active;
         if (token != null) {
@@ -25,7 +25,7 @@ abstract class IntrospectionResponse {
             exp = token.getExpiresAt().toEpochMilli();
             token_type = "Bearer";
             sub = token.getSubjectId();
-            this.scope = scope;
+            this.scope = token.getScope();
         }
     }
 }

@@ -8,8 +8,6 @@ import org.matsim.webvis.common.communication.JsonResponseHandler;
 import spark.Request;
 import spark.Response;
 
-import java.util.ArrayList;
-
 public class IntrospectionRequestHandler extends JsonResponseHandler {
 
     RelyingPartyService rpService = RelyingPartyService.Instance;
@@ -25,7 +23,7 @@ public class IntrospectionRequestHandler extends JsonResponseHandler {
 
         try {
             Token token = tokenService.validateToken(introspection.getToken());
-            return Answer.ok(new ActiveIntrospectionResponse(token, String.join(" ", new ArrayList<>(party.getScopes()))));
+            return Answer.ok(new ActiveIntrospectionResponse(token));
         } catch (RuntimeException e) {
             return Answer.ok(new InactiveIntrospectionResponse());
         }

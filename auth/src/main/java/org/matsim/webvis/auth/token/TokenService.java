@@ -20,7 +20,6 @@ import org.matsim.webvis.common.errorHandling.UnauthorizedException;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -49,7 +48,7 @@ public class TokenService {
 
         PrincipalCredentialToken auth = request.getTokenRequest().getBasicAuth();
         RelyingParty relyingParty = relyingPartyService.validateRelyingParty(
-                auth.getPrincipal(), auth.getCredential(), Arrays.asList(request.getTokenRequest().getScope()));
+                auth.getPrincipal(), auth.getCredential(), request.getTokenRequest().getScope());
         return createAccessToken(relyingParty, String.join(" ", request.getTokenRequest().getScope()));
     }
 
@@ -101,7 +100,12 @@ public class TokenService {
     public Token validateToken(String encodedToken) {
 
         JWTVerifier verifier = JWT.require(algorithm).build();
-        DecodedJWT decodedToken = verifier.verify(encodedToken);
+        DecodedJWT decodedToken;
+        try {
+            decodedToken = verifier.verify(encodedToken);
+        } catch (RuntimeException e) {
+            throw new UnauthorizedException("invalid token");
+        }
 
         if (StringUtils.isBlank(decodedToken.getId()) || decodedToken.getExpiresAt().before(Date.from(Instant.now())))
             throw new UnauthorizedException("token expired");

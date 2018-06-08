@@ -64,7 +64,7 @@ public class TestUtils {
         return request;
     }
 
-    public static TokenRequest mockTokenRequest(String clientPrincipal, String clientCredential, String[] scope) {
+    public static TokenRequest mockTokenRequest(String clientPrincipal, String clientCredential, String scope) {
 
         TokenRequest request = mock(TokenRequest.class);
         when(request.getBasicAuth()).thenReturn(new PrincipalCredentialToken(clientPrincipal, clientCredential));

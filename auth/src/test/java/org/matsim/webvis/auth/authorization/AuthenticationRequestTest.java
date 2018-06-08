@@ -5,7 +5,6 @@ import org.matsim.webvis.auth.util.TestUtils;
 import org.matsim.webvis.common.errorHandling.InvalidInputException;
 import spark.QueryParamsMap;
 
-import java.util.Arrays;
 import java.util.Map;
 
 import static org.junit.Assert.*;
@@ -158,8 +157,7 @@ public class AuthenticationRequestTest {
         assertEquals(1, request.getResponseType().length);
         assertEquals(params.get("response_type").value(), request.getResponseType()[0]);
 
-        assertEquals(1, request.getScopes().length);
-        assertEquals("openid", request.getScopes()[0]);
+        assertTrue(request.getScope().contains("openid"));
 
         assertEquals(params.get(AuthenticationRequest.CLIENT_ID).value(), request.getClientId());
         assertEquals(params.get(AuthenticationRequest.REDIRECT_URI).value(), request.getRedirectUri().toString());
@@ -186,10 +184,6 @@ public class AuthenticationRequestTest {
 
         AuthenticationRequest request = new AuthenticationRequest(params);
 
-        assertTrue(request.getScopes().length > 0);
-        String[] scopes = scope.split(" ");
-        Arrays.stream(scopes).forEach(s ->
-                assertTrue(Arrays.stream(request.getScopes()).anyMatch(m -> m.equals(s))));
-
+        assertEquals(scope, request.getScope());
     }
 }

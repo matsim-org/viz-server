@@ -48,4 +48,15 @@ class AuthorizationTestUtils {
         when(req.session()).thenReturn(session);
         return req;
     }
+
+    static Request mockRequestWithQueryParamsMap(Map<String, String[]> map) {
+
+        QueryParamsMap params = TestUtils.mockQueryParamsMap(map);
+        Session session = mock(Session.class);
+        when(session.id()).thenReturn(UUID.randomUUID().toString());
+        Request request = mock(Request.class);
+        when(request.queryMap()).thenReturn(params);
+        when(request.session()).thenReturn(session);
+        return request;
+    }
 }

@@ -12,6 +12,7 @@ import org.matsim.webvis.auth.helper.SecretHelper;
 import org.matsim.webvis.common.errorHandling.UnauthorizedException;
 
 import java.net.URI;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Set;
 
@@ -70,11 +71,11 @@ public class RelyingPartyService {
         return persisted;
     }
 
-    public RelyingParty validateRelyingParty(String clientId, String secret, Collection<String> scopes) {
+    public RelyingParty validateRelyingParty(String clientId, String secret, String scope) {
 
         RelyingParty party = validateRelyingParty(clientId, secret);
 
-        if (scopesDontMatch(party.getScopes(), scopes))
+        if (scopesDontMatch(party.getScopes(), scope))
             throw new UnauthorizedException("scopes don't match");
 
         return party;
@@ -90,26 +91,27 @@ public class RelyingPartyService {
         return credential.getRelyingParty();
     }
 
-    public Client validateClient(String clientId, URI redirectUri, Collection<String> scopes) {
+    public Client validateClient(String clientId, URI redirectUri, String scope) {
 
         Client client = relyingPartyDAO.findClient(clientId);
 
         if (client == null || !clientHasRedirectUri(client, redirectUri))
             throw new UnauthorizedException("Client not found or redirect uri not valid");
-        if (scopesDontMatch(client.getScopes(), scopes))
+        if (scopesDontMatch(client.getScopes(), scope))
             throw new UnauthorizedException("requested scope is not registered");
 
         return client;
     }
 
-    public Client findClient(String clientId) {
+    Client findClient(String clientId) {
         return relyingPartyDAO.findClient(clientId);
     }
 
-    private boolean scopesDontMatch(Collection<String> scopes, Collection<String> toCompare) {
+    private boolean scopesDontMatch(Collection<String> scopes, String scope) {
 
-        return scopes.size() != toCompare.size()
-                || !scopes.stream().allMatch(scope -> containsScope(toCompare, scope));
+        Collection<String> scopesToCompare = Arrays.asList(scope.split(" "));
+        return (scopes.size() != scopesToCompare.size())
+                || !scopes.stream().allMatch(clientScope -> containsScope(scopesToCompare, clientScope));
     }
 
     private boolean containsScope(Collection<String> scopes, String scopeToMatch) {

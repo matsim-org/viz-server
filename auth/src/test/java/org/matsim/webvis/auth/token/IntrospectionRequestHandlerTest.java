@@ -82,6 +82,7 @@ public class IntrospectionRequestHandlerTest {
 
         Token token = new Token();
         token.setTokenValue("value");
+        token.setScope("scope");
         token.setExpiresAt(Instant.now().plus(Duration.ofHours(1)));
         when(testObject.rpService.validateRelyingParty(any(), any())).thenReturn(new RelyingParty());
         when(testObject.tokenService.validateToken(any())).thenReturn(token);
@@ -91,6 +92,7 @@ public class IntrospectionRequestHandlerTest {
         assertEquals(HttpStatus.OK, result.getStatusCode());
         assertTrue(result.getResponse() instanceof ActiveIntrospectionResponse);
         assertTrue(((IntrospectionResponse) result.getResponse()).isActive());
+        assertEquals(token.getScope(), ((IntrospectionResponse) result.getResponse()).getScope());
     }
 
     private Request createRequest() {

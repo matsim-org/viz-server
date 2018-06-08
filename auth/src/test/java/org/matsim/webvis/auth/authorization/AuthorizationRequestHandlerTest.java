@@ -1,10 +1,35 @@
 package org.matsim.webvis.auth.authorization;
 
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.matsim.webvis.auth.Routes;
+import org.matsim.webvis.auth.entities.Token;
+import org.matsim.webvis.auth.token.TokenService;
+import org.matsim.webvis.auth.util.TestUtils;
+import org.matsim.webvis.common.communication.HttpStatus;
+import org.matsim.webvis.common.errorHandling.CodedException;
+import org.matsim.webvis.common.errorHandling.InvalidInputException;
+import org.matsim.webvis.common.errorHandling.UnauthorizedException;
+import spark.Request;
+import spark.Response;
+
+import java.io.FileNotFoundException;
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.util.HashMap;
+
+import static junit.framework.TestCase.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
+
 public class AuthorizationRequestHandlerTest {
 
     private AuthorizationRequestHandler testObject;
 
-   /* @BeforeClass
+    @BeforeClass
     public static void setUpFixture() throws UnsupportedEncodingException, FileNotFoundException {
         TestUtils.loadTestConfig();
     }
@@ -12,95 +37,119 @@ public class AuthorizationRequestHandlerTest {
     @Before
     public void setUp() {
         testObject = new AuthorizationRequestHandler();
-        testObject.authService = mock(AuthorizationService.class);
-        when(testObject.authService.isValidClientInformation(any())).thenReturn(true);
         testObject.tokenService = mock(TokenService.class);
-        testObject.userService = mock(UserService.class);
+        testObject.authService = mock(AuthorizationService.class);
+    }
+
+    @Test(expected = InvalidInputException.class)
+    public void handle_requestWithoutParamsNoSession_exception() {
+
+        Request request = AuthorizationTestUtils.mockRequestWithQueryParamsMap(new HashMap<>());
+        Response response = mock(Response.class);
+
+        testObject.handle(request, response);
+
+        fail("no parameters and no session should cause exception");
     }
 
     @Test
-    public void handle_missingOrInvalidUri_errorResponse() {
+    public void handle_requestWithoutParamsWithSessionNoCookie_redirectToLogin() {
 
-        Request req = AuthorizationTestUtils.mockRequestWithParams(AuthenticationRequest.REDIRECT_URI, "invalid uri");
-        Object result = testObject.handle(req, null);
+        Request request = AuthorizationTestUtils.mockRequestWithQueryParamsMap(new HashMap<>());
+        Response response = mock(Response.class);
+        AuthenticationRequest authRequest = new AuthenticationRequest(AuthorizationTestUtils.mockRequestWithParams().queryMap());
+        AuthorizationRequestHandler.loginSession.put(request.session().id(), authRequest);
+        when(testObject.tokenService.validateToken(any())).thenThrow(new UnauthorizedException("bla"));
 
-        assertErrorResponse(result, Error.INVALID_REQUEST);
+        testObject.handle(request, response);
+
+        verify(response).redirect(eq(Routes.LOGIN), eq(HttpStatus.FOUND));
     }
 
     @Test
-    public void handle_missingOrInvalidRequiredParameter_redirect() {
+    public void handle_requestWithoutParamsWithSessionWithCookie_redirect() {
 
-        Request req = AuthorizationTestUtils.mockRequestWithParams(AuthenticationRequest.SCOPE, "notopenid");
-        Response res = mock(Response.class);
-        final String expectedQuery = "error=invalid_request";
+        Request request = AuthorizationTestUtils.mockRequestWithQueryParamsMap(new HashMap<>());
+        Response response = mock(Response.class);
+        AuthenticationRequest authRequest = new AuthenticationRequest(AuthorizationTestUtils.mockRequestWithParams().queryMap());
+        Token idToken = new Token();
+        idToken.setSubjectId("any-id");
+        AuthorizationRequestHandler.loginSession.put(request.session().id(), authRequest);
+        when(testObject.tokenService.validateToken(any())).thenReturn(idToken);
+        when(testObject.authService.generateAuthenticationResponse(any(), anyString())).thenReturn(authRequest.getRedirectUri());
 
-        testObject.handle(req, res);
+        testObject.handle(request, response);
 
-        verify(res).redirect(contains(expectedQuery), eq(302));
+        verify(response).redirect(eq(authRequest.getRedirectUri().toString()), eq(HttpStatus.FOUND));
+    }
+
+    @Test(expected = InvalidInputException.class)
+    public void handle_requestWithParamsWrongArgs_exception() {
+
+        Request request = AuthorizationTestUtils.mockRequestWithParams("response_type", "wrong types");
+        Response response = mock(Response.class);
+
+        testObject.handle(request, response);
+
+        fail("invalid request should cause exception");
+    }
+
+    @Test(expected = UnauthorizedException.class)
+    public void handle_requestWithParamsInvalidClient_exception() {
+
+        Request request = AuthorizationTestUtils.mockRequestWithParams();
+        Response response = mock(Response.class);
+        when(testObject.authService.validateClient(any())).thenThrow(new UnauthorizedException("bla"));
+
+        testObject.handle(request, response);
+
+        fail("invalid client should cause exception");
     }
 
     @Test
-    public void handle_invalidClientInformation_errorResponse() {
+    public void handle_requestWithParamsNoCookie_redirectToLogin() {
 
-        Request req = AuthorizationTestUtils.mockRequestWithParams();
-        when(testObject.authService.isValidClientInformation(any())).thenReturn(false);
+        Request request = AuthorizationTestUtils.mockRequestWithParams();
+        Response response = mock(Response.class);
+        when(testObject.authService.validateClient(any())).thenReturn(null);
+        when(testObject.tokenService.validateToken(any())).thenThrow(new UnauthorizedException("bla"));
 
-        Object result = testObject.handle(req, null);
+        testObject.handle(request, response);
 
-        assertErrorResponse(result, Error.UNAUTHORIZED_CLIENT);
+        verify(response).redirect(eq(Routes.LOGIN), eq(HttpStatus.FOUND));
     }
 
     @Test
-    public void handle_userIsNotLoggedIn_loginPrompt() {
+    public void handle_requestWithParamsWithCookieProcessingError_redirectWithError() {
 
-        Request req = AuthorizationTestUtils.mockRequestWithParams();
-        when(testObject.tokenService.validateToken(any())).thenThrow(new RuntimeException("message"));
-        Response res = mock(Response.class);
+        Request request = AuthorizationTestUtils.mockRequestWithParams();
+        Response response = mock(Response.class);
+        Token idToken = new Token();
+        idToken.setSubjectId("any-id");
 
-        testObject.handle(req, res);
+        when(testObject.authService.validateClient(any())).thenReturn(null);
+        when(testObject.tokenService.validateToken(any())).thenReturn(idToken);
+        when(testObject.authService.generateAuthenticationResponse(any(), anyString())).thenThrow(new CodedException("some", "error"));
 
-        verify(res).redirect(Routes.LOGIN, 302);
+        testObject.handle(request, response);
+
+        verify(response).redirect(anyString(), eq(HttpStatus.FOUND));
     }
 
     @Test
-    public void handle_unknownUser_loginPrompt() {
+    public void handle_requestWithParamsWithCookie_redirect() {
 
-        Request req = AuthorizationTestUtils.mockRequestWithParams();
-        when(testObject.tokenService.validateToken(any())).thenThrow(new RuntimeException("invalid"));
-        Response res = mock(Response.class);
+        Request request = AuthorizationTestUtils.mockRequestWithParams();
+        Response response = mock(Response.class);
+        Token idToken = new Token();
+        idToken.setSubjectId("any-id");
 
-        testObject.handle(req, res);
+        when(testObject.authService.validateClient(any())).thenReturn(null);
+        when(testObject.tokenService.validateToken(any())).thenReturn(idToken);
+        when(testObject.authService.generateAuthenticationResponse(any(), anyString())).thenReturn(URI.create("http://some.uri"));
 
-        verify(res).redirect(Routes.LOGIN, 302);
+        testObject.handle(request, response);
+
+        verify(response).redirect(anyString(), eq(HttpStatus.FOUND));
     }
-
-    @Test
-    public void handle_success_redirectWithParams() {
-
-        URI uri = URI.create("http://resulting.uri");
-        Token token = new Token();
-        token.setSubjectId("some-id");
-        when(testObject.tokenService.validateToken(any())).thenReturn(token);
-        when(testObject.userService.findUser(anyString())).thenReturn(new User());
-        when(testObject.authService.generateResponse(any(), any())).thenReturn(uri);
-
-        Request req = AuthorizationTestUtils.mockRequestWithParams();
-        Response res = mock(Response.class);
-
-        Object result = testObject.handle(req, res);
-
-        assertTrue(result instanceof String);
-        assertEquals("OK", (String) result);
-
-        verify(res).redirect(eq(uri.toString()), eq(302));
-    }
-
-    private void assertErrorResponse(Object result, String errorCode) {
-        assertTrue(result instanceof String);
-        String[] message = ((String) result).split(" ");
-        assertTrue(message.length > 1);
-        assertEquals("error", message[0]);
-        assertEquals(errorCode, message[1]);
-    }
-    */
 }
