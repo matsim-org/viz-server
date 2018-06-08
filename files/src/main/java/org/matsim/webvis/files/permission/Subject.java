@@ -11,8 +11,8 @@ import org.matsim.webvis.files.entities.User;
 @AllArgsConstructor
 public class Subject {
 
-    public static final String USER = "user";
-    public static final String PUBLIC_USER = "public-agent";
+    public static final String USER = "user-client";
+    public static final String PUBLIC_USER = "service-client";
     public static final String SERVICE = "service-agent";
 
     private Agent agent;

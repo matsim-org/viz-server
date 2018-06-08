@@ -33,7 +33,7 @@ public class AuthenticatedJsonRequestHandlerTest {
 
         User user = TestUtils.persistUser("auth-id");
 
-        Request request = TestUtils.mockRequest(ContentType.APPLICATION_JSON, "user", user.getAuthId());
+        Request request = TestUtils.mockRequest(ContentType.APPLICATION_JSON, "user-client", user.getAuthId());
 
         testObject.process(new TestableRequest(), request);
 
