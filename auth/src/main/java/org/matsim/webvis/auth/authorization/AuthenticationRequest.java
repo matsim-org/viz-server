@@ -6,11 +6,11 @@ import org.matsim.webvis.common.errorHandling.InvalidInputException;
 import spark.QueryParamsMap;
 
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Arrays;
 
 @Getter
 public class AuthenticationRequest extends RequestWithParams {
+
+    public static final String OPEN_ID = "openid";
 
     public static final String RESPONSE_TYPE = "response_type";
     public static final String REDIRECT_URI = "redirect_uri";
@@ -19,23 +19,24 @@ public class AuthenticationRequest extends RequestWithParams {
     public static final String STATE = "state";
     public static final String NONCE = "nonce";
 
-    AuthenticationRequest(QueryParamsMap params) throws URIException, InvalidInputException {
-
-        initializeRequiredParameters(params);
-        initializeOptionalParameters(params);
-    }
+    private String scope;
 
     //required params
     private String[] responseType;
     private URI redirectUri;
-    private String[] scopes;
+    //optional params
+    private String state;
     private String clientId;
     private AuthenticationRequest.Type type;
-
-
-    //optional params
-    private String state = "";
-    private String nonce = "";
+    private String nonce;
+    AuthenticationRequest(QueryParamsMap params) {
+        this.redirectUri = initUri(params);
+        this.scope = initScope(params);
+        this.responseType = initResponseType(params);
+        this.clientId = extractRequiredValue(CLIENT_ID, params);
+        this.state = extractOptionalValue(STATE, params);
+        this.nonce = initNonce(params);
+    }
     private String display = "";
     private String prompt = "";
     private String maxAge = "";
@@ -43,60 +44,49 @@ public class AuthenticationRequest extends RequestWithParams {
     private String loginHint = "";
     private String arcValues = "";
 
-    private void initializeRequiredParameters(QueryParamsMap params) throws URIException, InvalidInputException {
+    private URI initUri(QueryParamsMap params) {
 
-        this.scopes = initScope(params);
-        this.redirectUri = initRedirectURI(params);
-        this.responseType = initResponseType(params);
-        clientId = extractRequiredValue(CLIENT_ID, params);
+        String uri = extractRequiredValue(REDIRECT_URI, params);
 
-        this.state = extractOptionalValue(STATE, params);
-        if (!this.type.equals(Type.AuthCode))
-            nonce = extractRequiredValue(NONCE, params);
-
-    }
-
-    private void initializeOptionalParameters(QueryParamsMap params) {
-        state = extractOptionalValue(STATE, params);
-    }
-
-    private String[] initScope(QueryParamsMap params) throws InvalidInputException {
-        String[] scopes = extractRequiredValue(SCOPE, params).split(" ");
-        boolean openid = Arrays.stream(scopes).anyMatch(scope -> scope.equals("openid"));
-
-        if (!openid) throw new InvalidInputException("scope must contain 'openid'");
-        return scopes;
-    }
-
-    private URI initRedirectURI(QueryParamsMap params) throws URIException {
         try {
-            if (params.hasKey(REDIRECT_URI)) {
-                return new URI(params.get(REDIRECT_URI).value());
-            }
-        } catch (URISyntaxException ignored) {
+            return URI.create(uri);
+        } catch (IllegalArgumentException e) {
+            throw new InvalidInputException("invalid redirect uri");
         }
-        throw new URIException();
     }
 
-    private String[] initResponseType(QueryParamsMap params) throws InvalidInputException {
+    private String initScope(QueryParamsMap params) {
+
+        String scope = extractRequiredValue(SCOPE, params);
+        if (!scope.contains("openid"))
+            throw new InvalidInputException("only openid-connect is supported. Scope must contain 'openid'");
+        return scope;
+    }
+
+    private String[] initResponseType(QueryParamsMap params) {
+
         String[] responseTypes = extractRequiredValue(RESPONSE_TYPE, params).split(" ");
 
-        if (responseTypes.length == 1 && responseTypes[0].equals("code")) {
-            this.type = Type.AuthCode;
-        }
+        if (responseTypes.length == 1 && responseTypes[0].equals("token"))
+            this.type = Type.AccessToken;
         else if (responseTypes.length == 1 && responseTypes[0].equals("id_token"))
             this.type = Type.IdToken;
-        else if (responseTypes.length == 2 &&
-                responseTypes[0].equals("id_token") &&
-                responseTypes[1].equals("token"))
+        else if (responseTypes.length == 2
+                && responseTypes[0].equals("id_token")
+                && responseTypes[1].equals("token"))
             this.type = Type.AccessAndIdToken;
         else
-            throw new InvalidInputException("response types may be: 'code', 'id_token', 'id_token token'.");
+            throw new InvalidInputException("response types may be: 'token', 'id_token', 'id_token token'.");
 
         return responseTypes;
     }
 
-    public enum Type {AuthCode, AccessAndIdToken, IdToken}
+    private String initNonce(QueryParamsMap params) {
 
+        if (type == Type.AccessAndIdToken || type == Type.IdToken)
+            return extractRequiredValue(NONCE, params);
+        else return extractOptionalValue(NONCE, params);
+    }
 
+    public enum Type {AccessToken, AccessAndIdToken, IdToken}
 }

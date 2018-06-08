@@ -3,6 +3,7 @@ package org.matsim.webvis.auth.token;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.matsim.webvis.auth.entities.RelyingParty;
 import org.matsim.webvis.auth.entities.Token;
 import org.matsim.webvis.auth.relyingParty.RelyingPartyService;
 import org.matsim.webvis.auth.util.TestUtils;
@@ -81,8 +82,9 @@ public class IntrospectionRequestHandlerTest {
 
         Token token = new Token();
         token.setTokenValue("value");
+        token.setScope("scope");
         token.setExpiresAt(Instant.now().plus(Duration.ofHours(1)));
-        when(testObject.rpService.validateRelyingParty(any(), any())).thenReturn(null);
+        when(testObject.rpService.validateRelyingParty(any(), any())).thenReturn(new RelyingParty());
         when(testObject.tokenService.validateToken(any())).thenReturn(token);
 
         Answer result = testObject.process(createRequest(), null);
@@ -90,6 +92,7 @@ public class IntrospectionRequestHandlerTest {
         assertEquals(HttpStatus.OK, result.getStatusCode());
         assertTrue(result.getResponse() instanceof ActiveIntrospectionResponse);
         assertTrue(((IntrospectionResponse) result.getResponse()).isActive());
+        assertEquals(token.getScope(), ((IntrospectionResponse) result.getResponse()).getScope());
     }
 
     private Request createRequest() {

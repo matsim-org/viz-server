@@ -57,11 +57,14 @@ public class TokenRequestTest {
     @Test
     public void constructor_allParametersSupplied_instance() {
 
+        final String scope = "some scopes";
         Map<String, String[]> map = new HashMap<>();
         map.put(OAuthParameters.GRANT_TYPE, new String[]{OAuthParameters.GRANT_TYPE_PASSWORD});
+        map.put(OAuthParameters.SCOPE, new String[]{scope});
         Request request = TestUtils.mockRequestWithQueryParamsMap(map, ContentType.FORM_URL_ENCODED);
         final String principal = "name";
         final String credential = "secret";
+
         final String basicAuth = TestUtils.encodeBasicAuth(principal, credential);
         when(request.headers(BasicAuthentication.HEADER_AUTHORIZATION)).thenReturn(basicAuth);
 
@@ -70,5 +73,7 @@ public class TokenRequestTest {
         assertEquals(OAuthParameters.GRANT_TYPE_PASSWORD, tokenRequest.getGrantType());
         assertEquals(principal, tokenRequest.getBasicAuth().getPrincipal());
         assertEquals(credential, tokenRequest.getBasicAuth().getCredential());
+        assertEquals(scope, tokenRequest.getScope());
+        String[] scopes = scope.split(" ");
     }
 }

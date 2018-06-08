@@ -16,6 +16,8 @@ public class TokenRequest extends RequestWithParams {
     @Getter
     private String grantType;
     @Getter
+    private String scope;
+    @Getter
     private PrincipalCredentialToken basicAuth;
 
 
@@ -26,6 +28,7 @@ public class TokenRequest extends RequestWithParams {
         }
         basicAuth = BasicAuthentication.decodeAuthorizationHeader(request.headers(BasicAuthentication.HEADER_AUTHORIZATION));
         grantType = extractRequiredValue(OAuthParameters.GRANT_TYPE, request.queryMap());
+        scope = extractOptionalValue(OAuthParameters.SCOPE, request.queryMap());
         this.request = request;
     }
 

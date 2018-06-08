@@ -8,5 +8,6 @@ class OAuthParameters {
     final static String USERNAME = "username";
     final static String PASSWORD = "password";
     final static String TOKEN = "token";
+    final static String SCOPE = "scope";
 
 }

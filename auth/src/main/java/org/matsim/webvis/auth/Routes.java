@@ -13,9 +13,8 @@ public class Routes {
 
     private final static String TOKEN = "token/";
     private final static String INTROSPECT = "introspect/";
-    private final static String AUTHORIZE = "authorize/";
+    public final static String AUTHORIZE = "authorize/";
     public final static String LOGIN = "/login/";
-    private final static String LOGIN_FORM = "login/form/";
 
     static void initialize() {
 
@@ -23,7 +22,6 @@ public class Routes {
         post(INTROSPECT, new IntrospectionRequestHandler());
         post(AUTHORIZE, new AuthorizationRequestHandler());
         get(AUTHORIZE, new AuthorizationRequestHandler());
-        get(LOGIN_FORM, (request, response) -> LoginPrompt.renderLogin());
         post(LOGIN, new LoginUserRequestHandler());
         get(LOGIN, ((request, response) -> LoginPrompt.renderLogin()));
     }

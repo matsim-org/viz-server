@@ -15,7 +15,9 @@ import org.matsim.webvis.common.errorHandling.UnauthorizedException;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -74,8 +76,25 @@ public class TokenServiceTest {
 
         final String id = "rpId";
         final String secret = "secret";
-        RelyingParty party = rpService.createRelyingParty(new ConfigRelyingParty(id, "name", secret));
-        ClientCredentialsGrantRequest request = new ClientCredentialsGrantRequest(TestUtils.mockTokenRequest(id, "wrong-secret"));
+        final String scope = "some scopes";
+        rpService.createRelyingParty(new ConfigRelyingParty(id, "name", secret, new HashSet<>(Arrays.asList(scope.split(" ")))));
+        TokenRequest tokenRequest = TestUtils.mockTokenRequest(id, "wrong-secret", scope);
+        ClientCredentialsGrantRequest request = new ClientCredentialsGrantRequest(tokenRequest);
+
+        testObject.grantWithClientCredentials(request);
+
+        fail("authentication failure should cause exception");
+    }
+
+    @Test(expected = UnauthorizedException.class)
+    public void grantWithClientCredentials_scopesDontMatch_unauthorizedException() {
+
+        final String id = "rpId";
+        final String secret = "secret";
+        final String[] scopes = new String[]{"some scopes"};
+        rpService.createRelyingParty(new ConfigRelyingParty(id, "name", secret, new HashSet<>(Arrays.asList(scopes))));
+        TokenRequest tokenRequest = TestUtils.mockTokenRequest(id, secret, "other-scope");
+        ClientCredentialsGrantRequest request = new ClientCredentialsGrantRequest(tokenRequest);
 
         testObject.grantWithClientCredentials(request);
 
@@ -87,23 +106,13 @@ public class TokenServiceTest {
 
         final String id = "rpId";
         final String secret = "secret";
-        RelyingParty party = rpService.createRelyingParty(new ConfigRelyingParty(id, "name", secret));
-        ClientCredentialsGrantRequest request = new ClientCredentialsGrantRequest(TestUtils.mockTokenRequest(id, secret));
+        final String scope = "some scopes";
+        RelyingParty party = rpService.createRelyingParty(new ConfigRelyingParty(id, "name", secret, new HashSet<>(Arrays.asList(scope.split(" ")))));
+        ClientCredentialsGrantRequest request = new ClientCredentialsGrantRequest(TestUtils.mockTokenRequest(id, secret, scope));
 
         Token token = testObject.grantWithClientCredentials(request);
 
         assertEquals(party.getId(), token.getSubjectId());
-    }
-
-    @Test
-    public void grantAccess_allGood_accessToken() {
-
-        User user = TestUtils.persistUser("mail", "longpassword");
-
-        Token token = testObject.grantAccess(user);
-
-        assertEquals(user.getId(), token.getSubjectId());
-        verify(testObject.tokenDAO, atLeastOnce()).persist(eq(token));
     }
 
     @Test
@@ -126,6 +135,19 @@ public class TokenServiceTest {
 
         assertEquals(user.getId(), token.getSubjectId());
         verify(testObject.tokenDAO, atLeastOnce()).persist(eq(token));
+    }
+
+    @Test
+    public void createAccessToken_token() {
+
+        User user = TestUtils.persistUser("mail", "longpassword");
+        String scope = "some-scope";
+
+        Token token = testObject.createAccessToken(user, scope);
+
+        assertEquals(user.getId(), token.getSubjectId());
+        assertEquals(scope, token.getScope());
+        assertNotNull(token.getTokenValue());
     }
 
     @Test(expected = RuntimeException.class)
@@ -185,12 +207,13 @@ public class TokenServiceTest {
     public void validateToken_validTokenAndFound_Token() {
 
         User user = TestUtils.persistUser("some", "longpassword");
-        Token token = testObject.grantAccess(user);
+        Token token = testObject.createIdToken(user);
 
         Token result = testObject.validateToken(token.getTokenValue());
 
         assertEquals(token.getTokenValue(), result.getTokenValue());
     }
+
 
     @Test
     public void findToken_noToken_null() {

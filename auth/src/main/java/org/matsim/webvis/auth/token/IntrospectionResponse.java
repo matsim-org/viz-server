@@ -25,6 +25,7 @@ abstract class IntrospectionResponse {
             exp = token.getExpiresAt().toEpochMilli();
             token_type = "Bearer";
             sub = token.getSubjectId();
+            this.scope = token.getScope();
         }
     }
 }

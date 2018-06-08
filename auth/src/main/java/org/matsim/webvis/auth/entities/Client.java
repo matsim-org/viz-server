@@ -21,4 +21,9 @@ public class Client extends RelyingParty {
     private Set<RedirectUri> redirectUris = new HashSet<>();
 
     enum ClientType {Confidential, Public}
+
+    public void addRedirectUri(RedirectUri uri) {
+        redirectUris.add(uri);
+        uri.setClient(this);
+    }
 }

@@ -3,6 +3,7 @@ package org.matsim.webvis.auth.user;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.matsim.webvis.auth.Routes;
 import org.matsim.webvis.auth.entities.Token;
 import org.matsim.webvis.auth.entities.User;
 import org.matsim.webvis.auth.token.TokenService;
@@ -120,7 +121,7 @@ public class LoginUserRequestHandlerTest {
 
         assertTrue(response instanceof String);
         assertEquals("OK", response);
-        verify(res).redirect(eq("/authorize/"), eq(302));
-        verify(res).cookie(anyString(), eq("id_token"), eq(token.getTokenValue()), anyInt(), anyBoolean(), anyBoolean());
+        verify(res).redirect(eq("/" + Routes.AUTHORIZE), eq(302));
+        verify(res).cookie(anyString(), eq(LoginUserRequestHandler.LOGIN_COOKIE_KEY), eq(token.getTokenValue()), anyInt(), anyBoolean(), anyBoolean());
     }
 }

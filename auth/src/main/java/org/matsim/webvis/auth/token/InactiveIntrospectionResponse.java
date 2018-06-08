@@ -1,8 +1,8 @@
 package org.matsim.webvis.auth.token;
 
-public class InactiveIntrospectionResponse extends IntrospectionResponse {
+class InactiveIntrospectionResponse extends IntrospectionResponse {
 
-    protected InactiveIntrospectionResponse() {
+    InactiveIntrospectionResponse() {
         super(null, false);
     }
 }

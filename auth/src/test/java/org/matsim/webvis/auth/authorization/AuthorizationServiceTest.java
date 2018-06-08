@@ -4,19 +4,24 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.matsim.webvis.auth.entities.Client;
-import org.matsim.webvis.auth.entities.RedirectUri;
 import org.matsim.webvis.auth.entities.Token;
 import org.matsim.webvis.auth.entities.User;
 import org.matsim.webvis.auth.relyingParty.RelyingPartyService;
 import org.matsim.webvis.auth.token.TokenService;
+import org.matsim.webvis.auth.user.UserService;
 import org.matsim.webvis.auth.util.TestUtils;
+import org.matsim.webvis.common.errorHandling.CodedException;
+import org.matsim.webvis.common.errorHandling.InternalException;
 
 import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.util.Map;
 
-import static org.junit.Assert.*;
+import static junit.framework.TestCase.fail;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -32,128 +37,187 @@ public class AuthorizationServiceTest {
     @Before
     public void setUp() {
         testObject = AuthorizationService.Instance;
+        testObject.userService = mock(UserService.class);
         testObject.relyingPartyService = mock(RelyingPartyService.class);
         testObject.tokenService = mock(TokenService.class);
     }
 
-    @Test
-    public void isValidClientInformation_clientNotRegistered_invalid() {
+    @Test(expected = CodedException.class)
+    public void isValidClient_clientInvalid_invalid() {
 
-        when(testObject.relyingPartyService.findClient(any())).thenReturn(null);
+        when(testObject.relyingPartyService.validateClient(any(), any(), any())).thenThrow(new CodedException("bla", "bla"));
         AuthenticationRequest request = mock(AuthenticationRequest.class);
+        when(request.getScope()).thenReturn("");
 
-        boolean result = testObject.isValidClientInformation(request);
+        testObject.validateClient(request);
 
-        assertFalse(result);
+        fail("exception of rpService should be passed through method");
     }
 
     @Test
-    public void isValidClientInformation_redirectUriNotRegistered_invalid() {
+    public void isValidClient_clientValid_client() {
 
         Client client = new Client();
-        RedirectUri someUri = new RedirectUri();
-        someUri.setUri("http://some.uri");
-        client.getRedirectUris().add(someUri);
-        URI otherUri = URI.create("http://some-other.uri");
-
-        when(testObject.relyingPartyService.findClient(any())).thenReturn(client);
+        when(testObject.relyingPartyService.validateClient(any(), any(), any())).thenReturn(client);
         AuthenticationRequest request = mock(AuthenticationRequest.class);
-        when(request.getRedirectUri()).thenReturn(otherUri);
+        when(request.getScope()).thenReturn("");
 
-        boolean result = testObject.isValidClientInformation(request);
+        Client result = testObject.validateClient(request);
 
-        assertFalse(result);
+        assertEquals(client, result);
+
+    }
+
+    @Test(expected = InternalException.class)
+    public void generateAuthenticationResponse_userNotFound_exception() {
+
+        when(testObject.userService.findUser(anyString())).thenReturn(null);
+        AuthenticationRequest request = mock(AuthenticationRequest.class);
+
+        testObject.generateAuthenticationResponse(request, "invalid-id");
+
+        fail("missing user should cause exception");
     }
 
     @Test
-    public void isValidClientInformation_validClientValidUri_valid() {
+    public void generateAuthenticationResponse_noState_uri() {
 
-        URI redirectUri = URI.create("http://some.uri");
-        Client client = new Client();
-        RedirectUri someUri = new RedirectUri();
-        someUri.setUri(redirectUri.toString());
-        client.getRedirectUris().add(someUri);
-
-        when(testObject.relyingPartyService.findClient(any())).thenReturn(client);
-        AuthenticationRequest request = mock(AuthenticationRequest.class);
-        when(request.getRedirectUri()).thenReturn(redirectUri);
-
-        boolean result = testObject.isValidClientInformation(request);
-
-        assertTrue(result);
-    }
-
-    @Test
-    public void generateResponse_accessIdToken_uri() {
-
-        Token idToken = new Token();
-        idToken.setTokenValue("some-token");
-        when(testObject.tokenService.createIdToken(any(), any())).thenReturn(idToken);
-
-        URI redirectUri = URI.create("http://expected.uri");
-
-        AuthenticationRequest request = mock(AuthenticationRequest.class);
-        when(request.getState()).thenReturn("");
-        when(request.getType()).thenReturn(AuthenticationRequest.Type.IdToken);
-        when(request.getRedirectUri()).thenReturn(redirectUri);
         User user = new User();
-        user.setEMail("mail");
-
-        URI result = testObject.generateResponse(request, user);
-
-        URI expected = URI.create(redirectUri.toString() + "#token_type=bearer&id_token=" +
-                idToken.getTokenValue());
-        assertEquals(expected, result);
-    }
-
-    @Test
-    public void generateResponse_accessIdTokenToken_uri() {
-
-        Token idToken = new Token();
-        idToken.setTokenValue("some-token");
-        when(testObject.tokenService.createIdToken(any(), any())).thenReturn(idToken);
-
+        user.setId("some-id");
         Token accessToken = new Token();
-        accessToken.setTokenValue("some-token-value");
-        when(testObject.tokenService.grantAccess(any())).thenReturn(accessToken);
+        accessToken.setTokenValue("token-value");
+        when(testObject.userService.findUser(anyString())).thenReturn(user);
+        when(testObject.tokenService.createAccessToken(any(), anyString())).thenReturn(accessToken);
+        AuthenticationRequest request = new AuthenticationRequest(AuthorizationTestUtils.mockRequestWithParams().queryMap());
+        URI expectedURI = URI.create(request.getRedirectUri()
+                + "#token_type=bearer&access_token="
+                + accessToken.getTokenValue()
+        );
 
-        URI redirectUri = URI.create("http://expected.uri");
+        URI uri = testObject.generateAuthenticationResponse(request, "any-id");
 
-        AuthenticationRequest request = mock(AuthenticationRequest.class);
-        when(request.getState()).thenReturn("");
-        when(request.getType()).thenReturn(AuthenticationRequest.Type.AccessAndIdToken);
-        when(request.getRedirectUri()).thenReturn(redirectUri);
-        User user = new User();
-        user.setEMail("mail");
-
-        URI result = testObject.generateResponse(request, user);
-
-        URI expected = URI.create(redirectUri.toString() + "#token_type=bearer&id_token=" +
-                idToken.getTokenValue() + "&access_token=" +
-                accessToken.getTokenValue());
-        assertEquals(expected, result);
+        assertEquals(expectedURI, uri);
     }
 
     @Test
-    public void generateResponse_accessIdTokenWithState_uri() {
+    public void generateAuthenticationResponse_withState_uri() {
 
-        Token idToken = new Token();
-        idToken.setTokenValue("some-token");
-        when(testObject.tokenService.createIdToken(any(), any())).thenReturn(idToken);
-
-        URI redirectUri = URI.create("http://expected.uri");
-
-        AuthenticationRequest request = mock(AuthenticationRequest.class);
-        when(request.getState()).thenReturn("some state");
-        when(request.getType()).thenReturn(AuthenticationRequest.Type.IdToken);
-        when(request.getRedirectUri()).thenReturn(redirectUri);
         User user = new User();
-        user.setEMail("mail");
+        user.setId("some-id");
+        Token accessToken = new Token();
+        accessToken.setTokenValue("token-value");
+        String state = "some-state";
+        AuthenticationRequest request = new AuthenticationRequest(AuthorizationTestUtils.mockRequestWithParams("state", state).queryMap());
+        URI expectedURI = URI.create(request.getRedirectUri()
+                + "#token_type=bearer"
+                + "&state=" + state
+                + "&access_token=" + accessToken.getTokenValue()
+        );
 
-        URI result = testObject.generateResponse(request, user);
+        when(testObject.userService.findUser(anyString())).thenReturn(user);
+        when(testObject.tokenService.createAccessToken(any(), anyString())).thenReturn(accessToken);
 
-        URI expected = URI.create(redirectUri.toString() + "#token_type=bearer&id_token=" +
-                idToken.getTokenValue() + "&state=some+state");
-        assertEquals(expected, result);
+        URI uri = testObject.generateAuthenticationResponse(request, "any-id");
+
+        assertEquals(expectedURI, uri);
+    }
+
+    @Test
+    public void generateAuthenticationResponse_withIdToken_uri() {
+
+        User user = new User();
+        user.setId("some-id");
+        Token idToken = new Token();
+        idToken.setTokenValue("token-value");
+        String state = "some-state";
+
+        Map<String, String[]> map = AuthorizationTestUtils.createDefaultParameterMap();
+        map.put("response_type", new String[]{"id_token"});
+        map.put("nonce", new String[]{"some-nonce"});
+        map.put("state", new String[]{state});
+        AuthenticationRequest request = new AuthenticationRequest(AuthorizationTestUtils.mockRequestWithQueryParamsMap(map).queryMap());
+        URI expectedURI = URI.create(request.getRedirectUri()
+                + "#token_type=bearer"
+                + "&state=" + state
+                + "&id_token=" + idToken.getTokenValue()
+        );
+
+        when(testObject.userService.findUser(anyString())).thenReturn(user);
+        when(testObject.tokenService.createIdToken(any(), anyString())).thenReturn(idToken);
+
+        URI uri = testObject.generateAuthenticationResponse(request, "any-id");
+
+        assertEquals(expectedURI, uri);
+    }
+
+    @Test
+    public void generateAuthenticationResponse_withAccessToken_uri() {
+
+        User user = new User();
+        user.setId("some-id");
+        Token accessToken = new Token();
+        accessToken.setTokenValue("token-value");
+        String state = "some-state";
+
+        Map<String, String[]> map = AuthorizationTestUtils.createDefaultParameterMap();
+        map.put("response_type", new String[]{"token"});
+        map.put("nonce", new String[]{"some-nonce"});
+        map.put("state", new String[]{state});
+        AuthenticationRequest request = new AuthenticationRequest(AuthorizationTestUtils.mockRequestWithQueryParamsMap(map).queryMap());
+        URI expectedURI = URI.create(request.getRedirectUri()
+                + "#token_type=bearer"
+                + "&state=" + state
+                + "&access_token=" + accessToken.getTokenValue()
+        );
+
+        when(testObject.userService.findUser(anyString())).thenReturn(user);
+        when(testObject.tokenService.createAccessToken(any(), anyString())).thenReturn(accessToken);
+
+        URI uri = testObject.generateAuthenticationResponse(request, "any-id");
+
+        assertEquals(expectedURI, uri);
+    }
+
+    @Test
+    public void generateAuthenticationResponse_withAccessTokenAndIdToken_uri() {
+
+        User user = new User();
+        user.setId("some-id");
+        Token accessToken = new Token();
+        accessToken.setTokenValue("token-value");
+        Token idToken = new Token();
+        idToken.setTokenValue("some-other-value");
+        String state = "some-state";
+
+        Map<String, String[]> map = AuthorizationTestUtils.createDefaultParameterMap();
+        map.put("response_type", new String[]{"id_token token"});
+        map.put("nonce", new String[]{"some-nonce"});
+        map.put("state", new String[]{state});
+        AuthenticationRequest request = new AuthenticationRequest(AuthorizationTestUtils.mockRequestWithQueryParamsMap(map).queryMap());
+        URI expectedURI = URI.create(request.getRedirectUri()
+                + "#token_type=bearer"
+                + "&state=" + state
+                + "&id_token=" + idToken.getTokenValue()
+                + "&access_token=" + accessToken.getTokenValue()
+        );
+
+        when(testObject.userService.findUser(anyString())).thenReturn(user);
+        when(testObject.tokenService.createAccessToken(any(), anyString())).thenReturn(accessToken);
+        when(testObject.tokenService.createIdToken(any(), anyString())).thenReturn(idToken);
+
+        URI uri = testObject.generateAuthenticationResponse(request, "any-id");
+
+        assertEquals(expectedURI, uri);
+    }
+
+    @Test(expected = InternalException.class)
+    public void generateAuthenticationResponse_userNotFound_internalException() {
+
+        AuthenticationRequest request = new AuthenticationRequest(AuthorizationTestUtils.mockRequestWithParams().queryMap());
+        when(testObject.userService.findUser(anyString())).thenReturn(null);
+
+        testObject.generateAuthenticationResponse(request, "any-id");
+
+        fail("User not found should cause exception");
     }
 }

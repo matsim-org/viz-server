@@ -12,6 +12,9 @@ import org.matsim.webvis.auth.helper.SecretHelper;
 import org.matsim.webvis.common.errorHandling.UnauthorizedException;
 
 import java.net.URI;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Set;
 
 public class RelyingPartyService {
 
@@ -24,23 +27,23 @@ public class RelyingPartyService {
     private RelyingPartyDAO relyingPartyDAO = new RelyingPartyDAO();
 
     Client createClient(String name, Iterable<URI> redirectUris) {
-        return createClient(name, null, redirectUris);
+        return createClient(name, null, redirectUris, null);
     }
 
     public Client createClient(ConfigClient configClient) {
-        return createClient(configClient.getName(), configClient.getId(), configClient.getRedirectUris());
+        return createClient(configClient.getName(), configClient.getId(), configClient.getRedirectUris(), configClient.getScopes());
     }
 
-    private Client createClient(String name, String id, Iterable<URI> redirectUris) {
+    private Client createClient(String name, String id, Iterable<URI> redirectUris, Set<String> scopes) {
 
         Client client = new Client();
         client.setId(id);
         client.setName(name);
+        client.setScopes(scopes);
         for (URI uri : redirectUris) {
             RedirectUri redirectUri = new RedirectUri();
-            redirectUri.setUri(uri.toString());
-            redirectUri.setClient(client);
-            client.getRedirectUris().add(redirectUri);
+            redirectUri.setUri(uri);
+            client.addRedirectUri(redirectUri);
         }
         return (Client) persistNewRelyingParty(client);
     }
@@ -49,6 +52,7 @@ public class RelyingPartyService {
         RelyingParty party = new RelyingParty();
         party.setName(configParty.getName());
         party.setId(configParty.getId());
+        party.setScopes(configParty.getScopes());
         return createCredentialWithNonRandomSecret(party, configParty).getRelyingParty();
     }
 
@@ -67,18 +71,55 @@ public class RelyingPartyService {
         return persisted;
     }
 
+    public RelyingParty validateRelyingParty(String clientId, String secret, String scope) {
+
+        RelyingParty party = validateRelyingParty(clientId, secret);
+
+        if (scopesDontMatch(party.getScopes(), scope))
+            throw new UnauthorizedException("scopes don't match");
+
+        return party;
+    }
+
     public RelyingParty validateRelyingParty(String clientId, String secret) {
+
         RelyingPartyCredential credential = relyingPartyDAO.findCredential(clientId);
 
         if (credential == null || !SecretHelper.match(credential.getSecret(), secret))
-            throw new UnauthorizedException("invalid client id or secret");
+            throw new UnauthorizedException("invalid client id or secret or scope not allowed");
 
         return credential.getRelyingParty();
     }
 
-    public Client findClient(String clientId) {
+    public Client validateClient(String clientId, URI redirectUri, String scope) {
+
+        Client client = relyingPartyDAO.findClient(clientId);
+
+        if (client == null || !clientHasRedirectUri(client, redirectUri))
+            throw new UnauthorizedException("Client not found or redirect uri not valid");
+        if (scopesDontMatch(client.getScopes(), scope))
+            throw new UnauthorizedException("requested scope is not registered");
+
+        return client;
+    }
+
+    Client findClient(String clientId) {
         return relyingPartyDAO.findClient(clientId);
     }
 
+    private boolean scopesDontMatch(Collection<String> scopes, String scope) {
 
+        Collection<String> scopesToCompare = Arrays.asList(scope.split(" "));
+        return (scopes.size() != scopesToCompare.size())
+                || !scopes.stream().allMatch(clientScope -> containsScope(scopesToCompare, clientScope));
+    }
+
+    private boolean containsScope(Collection<String> scopes, String scopeToMatch) {
+        return scopes.stream().anyMatch(scope -> scope.equals(scopeToMatch));
+    }
+
+    private boolean clientHasRedirectUri(Client client, URI uriToTest) {
+        return client.getRedirectUris().stream()
+                .anyMatch(uri -> uri.getUri().equals(uriToTest));
+    }
 }
