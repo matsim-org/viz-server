@@ -29,7 +29,6 @@ public class AuthorizationRequestHandler implements Route {
     @Override
     public Object handle(Request request, Response response) {
 
-
         AuthenticationRequest authRequest;
 
         if (request.queryMap().hasKeys())
