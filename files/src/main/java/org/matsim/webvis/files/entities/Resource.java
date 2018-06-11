@@ -19,16 +19,16 @@ public abstract class Resource extends AbstractEntity {
     @OneToMany(mappedBy = "resource", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<Permission> permissions = new HashSet<>();
 
-    public void addPermission(Permission permission) {
+    public boolean addPermission(Permission permission) {
 
         if (permission.getId() == null) {
             if (permissions.stream().anyMatch(p -> p.getAgent().equals(permission.getAgent())))
-                return;
+                return false;
         }
 
         //resource
-        permissions.add(permission);
         permission.setResource(this);
+        return permissions.add(permission);
     }
 
     public void addPermissions(Collection<Permission> permissions) {

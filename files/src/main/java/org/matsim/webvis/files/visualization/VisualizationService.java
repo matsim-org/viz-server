@@ -9,7 +9,9 @@ import org.matsim.webvis.files.permission.PermissionService;
 import org.matsim.webvis.files.project.ProjectService;
 
 import javax.persistence.PersistenceException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class VisualizationService {
 
@@ -72,15 +74,12 @@ public class VisualizationService {
     private void addInputFilesAndPersistPermissions(Visualization viz, Project project, CreateVisualizationRequest request) {
 
         List<Permission> addedPermissions = new ArrayList<>();
-        Set<String> visitedFiles = new HashSet<>();
 
         for (Map.Entry<String, String> entry : request.getInputFiles().entrySet()) {
             FileEntry file = project.getFileEntry(entry.getValue());
-            if (visitedFiles.add(file.getId())) {
-                Permission permission = permissionService.createServicePermission(file);
-                file.addPermission(permission);
+            Permission permission = permissionService.createServicePermission(file);
+            if (file.addPermission(permission))
                 addedPermissions.add(permission);
-            }
 
             viz.addInput(new VisualizationInput(entry.getKey(), file, viz));
         }
