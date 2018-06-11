@@ -84,15 +84,6 @@ public class VisualizationService {
             viz.addInput(new VisualizationInput(entry.getKey(), file, viz));
         }
 
-        /*request.getInputFiles().entrySet().stream().forEach(entry -> {
-            FileEntry file = project.getFileEntry(entry.getValue());
-            Permission permission = permissionService.createServicePermission(file);
-            file.addPermission(permission);
-            addedPermissions.add(permission);
-            VisualizationInput input = new VisualizationInput(entry.getKey(), file, viz);
-            viz.addInput(input);
-        });*/
-
         //the permissions for input files must be persisted here, since they can't be persisted by hibernate's cascade
         //mechanism
         permissionService.persist(addedPermissions);
