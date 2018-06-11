@@ -9,8 +9,7 @@ import org.matsim.webvis.files.permission.PermissionService;
 import org.matsim.webvis.files.project.ProjectService;
 
 import javax.persistence.PersistenceException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class VisualizationService {
 
@@ -50,7 +49,6 @@ public class VisualizationService {
         project.addVisualization(viz);
         viz.setType(type);
         viz.addPermission(permissionService.createServicePermission(viz));
-        viz.addPermission(permissionService.createUserPermission(viz, user, Permission.Type.Delete));
         addInputFilesAndPersistPermissions(viz, project, request);
         addParameters(viz, request);
 
@@ -74,14 +72,27 @@ public class VisualizationService {
     private void addInputFilesAndPersistPermissions(Visualization viz, Project project, CreateVisualizationRequest request) {
 
         List<Permission> addedPermissions = new ArrayList<>();
-        request.getInputFiles().forEach((key, value) -> {
-            FileEntry file = project.getFileEntry(value);
+        Set<String> visitedFiles = new HashSet<>();
+
+        for (Map.Entry<String, String> entry : request.getInputFiles().entrySet()) {
+            FileEntry file = project.getFileEntry(entry.getValue());
+            if (visitedFiles.add(file.getId())) {
+                Permission permission = permissionService.createServicePermission(file);
+                file.addPermission(permission);
+                addedPermissions.add(permission);
+            }
+
+            viz.addInput(new VisualizationInput(entry.getKey(), file, viz));
+        }
+
+        /*request.getInputFiles().entrySet().stream().forEach(entry -> {
+            FileEntry file = project.getFileEntry(entry.getValue());
             Permission permission = permissionService.createServicePermission(file);
             file.addPermission(permission);
             addedPermissions.add(permission);
-            VisualizationInput input = new VisualizationInput(key, file, viz);
+            VisualizationInput input = new VisualizationInput(entry.getKey(), file, viz);
             viz.addInput(input);
-        });
+        });*/
 
         //the permissions for input files must be persisted here, since they can't be persisted by hibernate's cascade
         //mechanism

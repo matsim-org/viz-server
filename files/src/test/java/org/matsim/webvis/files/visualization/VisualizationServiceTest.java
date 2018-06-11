@@ -104,6 +104,43 @@ public class VisualizationServiceTest {
     }
 
     @Test
+    public void createVisualizationFromRequest_sameInputTwice_correctPermissions() {
+
+        Project project = TestUtils.persistProjectWithCreator("some-project");
+        project = TestUtils.addFileEntry(project);
+        project = TestUtils.addFileEntry(project);
+
+        FileEntry[] entries = project.getFiles().toArray(new FileEntry[0]);
+        Map<String, String> input = new HashMap<>();
+        input.put("network", entries[0].getId());
+        input.put("other", entries[0].getId());
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("some", "parameter");
+
+        CreateVisualizationRequest request = new CreateVisualizationRequest(
+                project.getId(),
+                typeKey,
+                input,
+                parameters);
+
+        Visualization viz = testObject.createVisualizationFromRequest(request, project.getCreator());
+
+        assertNotNull(viz.getId());
+        assertEquals(2, viz.getInputFiles().size());
+        assertEquals(1, viz.getParameters().size());
+        assertEquals(request.getTypeKey(), viz.getType().getKey());
+
+        Project finalProject = project;
+        assertTrue(viz.getPermissions().stream().anyMatch(p -> p.getAgent().equalId(finalProject.getCreator())));
+
+        for (VisualizationInput vizInput : viz.getInputFiles().values()) {
+
+            assertEquals(entries[0], vizInput.getFileEntry());
+            assertEquals(1, vizInput.getFileEntry().getPermissions().size()); //should be one permission service access
+        }
+    }
+
+    @Test
     public void find_allGood_visualization() throws CodedException {
 
         Project project = TestUtils.persistProjectWithCreator("bla");

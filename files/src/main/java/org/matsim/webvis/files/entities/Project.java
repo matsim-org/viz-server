@@ -1,6 +1,5 @@
 package org.matsim.webvis.files.entities;
 
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,7 +10,6 @@ import java.util.Set;
 
 @Getter
 @Setter
-@EqualsAndHashCode(callSuper = true, exclude = {"files", "visualizations"})
 @Entity
 @Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"creator_id", "name"})})
 public class Project extends Resource {

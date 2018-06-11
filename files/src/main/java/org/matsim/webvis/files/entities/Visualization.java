@@ -1,6 +1,5 @@
 package org.matsim.webvis.files.entities;
 
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,7 +9,6 @@ import java.util.Map;
 
 @Getter
 @Setter
-@EqualsAndHashCode(callSuper = true, exclude = {"inputFiles", "parameters"})
 @Entity
 public class Visualization extends Resource {
 
@@ -34,6 +32,4 @@ public class Visualization extends Resource {
     public void addParameter(VisualizationParameter parameter) {
         this.parameters.put(parameter.getKey(), parameter);
     }
-
-
 }

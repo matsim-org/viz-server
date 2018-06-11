@@ -12,8 +12,8 @@ import org.matsim.webvis.files.entities.User;
 public class Subject {
 
     public static final String USER = "user-client";
-    public static final String PUBLIC_USER = "service-client";
-    public static final String SERVICE = "service-agent";
+    public static final String PUBLIC_USER = "public-client";
+    public static final String SERVICE = "service-client";
 
     private Agent agent;
     //this is public for unit testing
