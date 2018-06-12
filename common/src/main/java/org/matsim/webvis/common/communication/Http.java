@@ -3,6 +3,7 @@ package org.matsim.webvis.common.communication;
 import com.google.gson.Gson;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
+import org.apache.commons.io.FileUtils;
 import org.apache.http.*;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.ResponseHandler;
@@ -23,6 +24,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URI;
+import java.nio.file.Path;
 import java.util.function.Supplier;
 
 public class Http {
@@ -89,6 +91,10 @@ public class Http {
             return execute(createInputStreamHandler());
         }
 
+        public void executeWithFileResponse(Path fileToWriteTo) {
+            execute(createFileHandler(fileToWriteTo));
+        }
+
         private <T> T execute(ResponseHandler<T> handler) {
             try (CloseableHttpClient client = this.client.get()) {
                 logger.info("making request to: " + request.getURI().toString());
@@ -134,6 +140,20 @@ public class Http {
                         return httpResponse.getEntity().getContent();
                     } catch (IOException e) {
                         throw new InternalException("Could not read InputStream from http response");
+                    }
+                }
+            };
+        }
+
+        HttpResponseHandler<Void> createFileHandler(Path file) {
+            return new HttpResponseHandler<Void>() {
+                @Override
+                protected Void processResponse(HttpResponse httpResponse) {
+                    try {
+                        FileUtils.copyInputStreamToFile(httpResponse.getEntity().getContent(), file.toFile());
+                        return null;
+                    } catch (IOException e) {
+                        throw new InternalException("Could not write stream to supplied file");
                     }
                 }
             };
