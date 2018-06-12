@@ -25,6 +25,9 @@ public class Configuration {
     private String relyingPartyId = "relyingPartyId";
     private String relyingPartySecret = "secret";
 
+    private String tmpFilePath = "./tmpFiles";
+    private String generatedFilesPath = "./generatedFiles";
+
     private Configuration() {
     }
 

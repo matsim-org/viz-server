@@ -8,7 +8,7 @@ import org.matsim.webvis.common.database.AbstractEntity;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-class VisualizationParameter extends AbstractEntity {
+public class VisualizationParameter extends AbstractEntity {
 
     private String key;
     private String value;

@@ -35,7 +35,7 @@ class DataController {
         scheduler.scheduleAtFixedRate(this::fetchVisualizationData, 0, 1, TimeUnit.HOURS);
     }
 
-    private void fetchVisualizationData() {
+    public void fetchVisualizationData() {
 
         URI vizByTypeEndpoint = Configuration.getInstance().getFileServer().resolve("/project/visualizations/");
 
@@ -48,8 +48,14 @@ class DataController {
             logger.info("Received " + response.length + " vizes.");
 
             metadataDAO.persistVisualizations(Arrays.asList(response));
+
+            SimulationDataFetcher fetcher = new SimulationDataFetcher();
+            for (Visualization viz : response) {
+                fetcher.generateSimulationData(viz);
+            }
+
         } catch (UnauthorizedException e) {
-            ServiceCommunication.authentication().requestAccessToken();
+            authentication.requestAccessToken();
         } catch (CodedException e) {
             logger.error("Error while fetching viz metadata.", e);
         }
