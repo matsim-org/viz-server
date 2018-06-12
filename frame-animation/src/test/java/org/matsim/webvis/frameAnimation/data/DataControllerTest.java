@@ -18,6 +18,6 @@ public class DataControllerTest {
 
         DataController controller = DataController.Instance;
 
-        controller.fetchVisualizationData();
+        controller.scheduleHourlyFetching();
     }
 }
