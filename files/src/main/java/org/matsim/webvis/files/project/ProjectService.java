@@ -27,6 +27,7 @@ public class ProjectService {
         project.setCreator(creator);
         Permission permission = permissionService.createUserPermission(project, creator, Permission.Type.Delete);
         project.addPermission(permission);
+        project.addPermission(permissionService.createServicePermission(project));
         try {
             return projectDAO.persist(project);
         } catch (Exception e) {
