@@ -1,30 +1,14 @@
 package org.matsim.webvis.frameAnimation.data;
 
-import org.junit.After;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.matsim.webvis.frameAnimation.communication.ServiceCommunication;
-import org.matsim.webvis.frameAnimation.config.Configuration;
-import org.matsim.webvis.frameAnimation.utils.TestUtils;
-
-import java.io.IOException;
-import java.nio.file.*;
-import java.nio.file.attribute.BasicFileAttributes;
-
 public class DataControllerTest {
-
+/*
     @BeforeClass
     public static void setUp() {
         TestUtils.loadConfig();
         ServiceCommunication.initialize(true);
     }
 
-    /**
-     * removes files like https://docs.oracle.com/javase/8/docs/api/java/nio/file/FileVisitor.html
-     *
-     * @param start root of the file tree. Will be removed as well.
-     * @throws IOException if something goes wrong
-     */
+
     public static void removeFileTree(Path start) throws IOException {
         if (!Files.exists(start)) {
             return;
@@ -61,4 +45,5 @@ public class DataControllerTest {
 
         controller.fetchVisualizationData();
     }
+    */
 }
