@@ -1,114 +1,131 @@
 package org.matsim.webvis.frameAnimation.data;
 
 import lombok.AllArgsConstructor;
+import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.matsim.webvis.common.auth.ClientAuthentication;
-import org.matsim.webvis.common.communication.Http;
 import org.matsim.webvis.common.errorHandling.InternalException;
 import org.matsim.webvis.common.errorHandling.InvalidInputException;
-import org.matsim.webvis.common.errorHandling.UnauthorizedException;
 import org.matsim.webvis.frameAnimation.communication.ServiceCommunication;
 import org.matsim.webvis.frameAnimation.config.Configuration;
-import org.matsim.webvis.frameAnimation.entities.FileEntry;
 import org.matsim.webvis.frameAnimation.entities.Visualization;
 import org.matsim.webvis.frameAnimation.entities.VisualizationInput;
-import org.matsim.webvis.frameAnimation.entities.VisualizationParameter;
 
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.Map;
 
-public class SimulationDataFetcher {
+class SimulationDataFetcher {
 
-    public static final String NETWORK_KEY = "network";
-    public static final String EVENTS_KEY = "events";
-    public static final String PLANS_KEY = "plans";
-    public static final String SNAPSHOT_INVERVAL_KEY = "snapshotInterval";
+    private static final String NETWORK_KEY = "network";
+    private static final String EVENTS_KEY = "events";
+    private static final String PLANS_KEY = "plans";
+    private static final String SNAPSHOT_INTERVAL_KEY = "snapshotInterval";
 
+    private static final Path tempFolder = createTempFolder(Configuration.getInstance().getTmpFilePath());
+    private static final URI fileEndpoint = Configuration.getInstance().getFileServer().resolve("/file/");
+    private static final SimulationDataDAO simulationDataDAO = new SimulationDataDAO();
 
     private static Logger logger = LogManager.getLogger();
-    SimulationDataDAO simulationDataDAO = new SimulationDataDAO();
-    private Path tmpFilePath = createFolder(Configuration.getInstance().getTmpFilePath());
-    private URI fileEndpoint = Configuration.getInstance().getFileServer().resolve("/file/");
-    private Http http = ServiceCommunication.http();
-    private ClientAuthentication authentication = ServiceCommunication.authentication();
 
-    public void generateSimulationData(Visualization visualization) {
+    private final Visualization visualization;
+    private Path vizFolder;
+    private Map<String, Path> writtenFiles = new HashMap<>();
 
-        Path vizDirectory = createFolder(tmpFilePath.resolve(visualization.getId()));
 
-        VisualizationInput network = extractRequiredValue(visualization.getInputFiles(), "network");
-        VisualizationInput events = extractRequiredValue(visualization.getInputFiles(), "events");
-        VisualizationInput plans = extractRequiredValue(visualization.getInputFiles(), "plans");
-        VisualizationParameter snapshotInterval = extractRequiredValue(visualization.getParameters(), "SnapshotIntervall");
+    private SimulationDataFetcher(Visualization visualization) {
+        if (!isValidInput(visualization))
+            throw new InvalidInputException("visualization did not contain required input");
+        this.visualization = visualization;
+    }
 
+    static void generateVisualization(Visualization visualization) {
+        SimulationDataFetcher generator = new SimulationDataFetcher(visualization);
+        generator.generate();
+    }
+
+    private static Path createVizFolder(String vizId) {
+
+        Path folder = tempFolder.resolve(vizId);
         try {
-            Path networkFile = fetchFile(visualization.getProject().getId(), network.getFileEntry(), vizDirectory);
-            Path eventsFile = fetchFile(visualization.getProject().getId(), events.getFileEntry(), vizDirectory);
-            Path plansFile = fetchFile(visualization.getProject().getId(), plans.getFileEntry(), vizDirectory);
-
-            SimulationData simData = new SimulationData(
-                    networkFile.toAbsolutePath().toString(),
-                    eventsFile.toAbsolutePath().toString(),
-                    plansFile.toAbsolutePath().toString(),
-                    Integer.parseInt(snapshotInterval.getValue())
-            );
-            simulationDataDAO.add(visualization.getId(), simData);
-        } catch (UnauthorizedException e) {
-            throw e;
-        } catch (Exception e) {
-            //clean up the temp files
-            logger.error("Error while downloading files", e);
+            return Files.createDirectory(folder);
+        } catch (IOException e) {
+            logger.error("could not create viz directory", e);
+            throw new InternalException("Could not create viz directory");
         }
     }
 
-    private Path fetchFile(String projectId, FileEntry input, Path vizFolder) throws IOException {
-
-        Path tmpFile = vizFolder.resolve(input.getUserFileName());
-        Files.createFile(tmpFile);
-
-        http.post(fileEndpoint)
-                .withJsonBody(new FileRequest(projectId, input.getId()))
-                .withCredential(authentication)
-                .executeWithFileResponse(tmpFile);
-        return tmpFile;
-    }
-
-    private void removeTmpFile(Path file) throws IOException {
-        Files.delete(file);
-    }
-
-    private <T> T extractRequiredValue(Map<String, T> map, String key) {
-        if (!map.containsKey(key))
-            throw new InternalException("required value " + key + " is not present");
-        return map.get(key);
-    }
-
-    private Path createFolder(String relativePath) {
+    private static Path createTempFolder(String relativePath) {
 
         Path directory = Paths.get(relativePath);
-        return createFolder(directory);
-    }
-
-    private Path createFolder(Path path) {
         try {
-            return Files.createDirectories(path);
+            return Files.createDirectories(directory);
         } catch (IOException e) {
-            logger.error("Error while creating tmp directory.", e);
-            throw new InvalidInputException("Could not create tmp directory");
+            logger.error("Error while creating temp directory", e);
+            throw new InvalidInputException("Could not create temp directory");
         }
     }
 
-   /* private void validateInput(Visualization visualization) {
-        if (!visualization.getInputFiles().containsKey(NETWORK_KEY)
-                || !visualization.getInputFiles().containsKey(EVENTS_KEY)
-                || !visualization.getInputFiles().c
-                )
-    }*/
+    private void generate() {
+
+        vizFolder = createVizFolder(this.visualization.getId());
+        try {
+            visualization.getInputFiles().forEach((key, value) -> fetchFile(value));
+
+            SimulationData data = new SimulationData(
+                    writtenFiles.get(NETWORK_KEY).toAbsolutePath().toString(),
+                    writtenFiles.get(EVENTS_KEY).toAbsolutePath().toString(),
+                    writtenFiles.get(PLANS_KEY).toAbsolutePath().toString(),
+                    Integer.parseInt(visualization.getParameters().get(SNAPSHOT_INTERVAL_KEY).getValue())
+            );
+            simulationDataDAO.add(visualization.getId(), data);
+        } finally {
+            removeAllInputFiles();
+        }
+    }
+
+    private void fetchFile(VisualizationInput input) {
+
+        Path inputFile = createEmptyInputFile(input.getFileEntry().getUserFileName());
+        writtenFiles.put(input.getKey(), inputFile);
+
+        ServiceCommunication.http().post(fileEndpoint)
+                .withCredential(ServiceCommunication.authentication())
+                .withJsonBody(new FileRequest(visualization.getProject().getId(), input.getFileEntry().getId()))
+                .executeWithFileResponse(inputFile);
+    }
+
+    private Path createEmptyInputFile(String filename) {
+        Path file = vizFolder.resolve(filename);
+        try {
+            return Files.createFile(file);
+        } catch (IOException e) {
+            logger.error("could not create input file", e);
+            throw new InternalException("Could not create input file");
+        }
+    }
+
+    private void removeAllInputFiles() {
+        try {
+            FileUtils.deleteDirectory(vizFolder.toFile());
+        } catch (IOException e) {
+            logger.error("Could not delete temporary viz folder");
+            throw new RuntimeException("Could not delete temporary viz folder", e);
+        }
+    }
+
+    private boolean isValidInput(Visualization visualization) {
+        return visualization.getInputFiles().size() == 3
+                && visualization.getInputFiles().containsKey(NETWORK_KEY)
+                && visualization.getInputFiles().containsKey(EVENTS_KEY)
+                && visualization.getInputFiles().containsKey(PLANS_KEY)
+                && visualization.getParameters().size() == 1
+                && visualization.getParameters().containsKey(SNAPSHOT_INTERVAL_KEY);
+    }
 
     @AllArgsConstructor
     private static class FileRequest {

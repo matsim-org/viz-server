@@ -9,6 +9,7 @@ import org.matsim.webvis.common.communication.StartSpark;
 import org.matsim.webvis.frameAnimation.communication.ServiceCommunication;
 import org.matsim.webvis.frameAnimation.config.CommandlineArgs;
 import org.matsim.webvis.frameAnimation.config.Configuration;
+import org.matsim.webvis.frameAnimation.data.DataController;
 import org.matsim.webvis.frameAnimation.data.SimulationData;
 
 import java.io.FileNotFoundException;
@@ -18,6 +19,7 @@ public class Server {
     private static final Logger logger = LogManager.getLogger();
 
     private static SimulationData data;
+    private static DataController dataController = DataController.Instance;
 
     private static String networkPath = "network.xml";
     private static String eventsPath = "events.xml.gz";
@@ -31,12 +33,12 @@ public class Server {
         JCommander.newBuilder().addObject(ca).build().parse(args);
 
         loadConfigFile(ca);
-        //initializeData();
         try {
             ServiceCommunication.initialize(ca.isTrustSelfsignedTLSCertificates());
         } catch (Exception e) {
             handleInitializationFailure(e);
         }
+        dataController.scheduleFetching();
         startSparkServer();
     }
 
