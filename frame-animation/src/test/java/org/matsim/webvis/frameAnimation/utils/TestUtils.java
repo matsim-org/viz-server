@@ -8,8 +8,11 @@ import org.matsim.core.network.NetworkUtils;
 import org.matsim.vis.snapshotwriters.AgentSnapshotInfo;
 import org.matsim.vis.snapshotwriters.AgentSnapshotInfoFactory;
 import org.matsim.vis.snapshotwriters.SnapshotLinkWidthCalculator;
+import org.matsim.webvis.frameAnimation.config.Configuration;
 import org.matsim.webvis.frameAnimation.data.SimulationData;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,5 +51,18 @@ public class TestUtils {
 
     public static SimulationData getDataProvider() {
         return dataProvider;
+    }
+
+    public static void loadConfig() {
+        try {
+            Configuration.loadConfigFile(getResourcePath("test-config.json"));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static String getResourcePath(String resourceFile) throws UnsupportedEncodingException {
+        //noinspection ConstantConditions
+        return URLDecoder.decode(TestUtils.class.getClassLoader().getResource(resourceFile).getFile(), "UTF-8");
     }
 }

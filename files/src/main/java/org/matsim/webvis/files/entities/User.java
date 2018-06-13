@@ -1,6 +1,5 @@
 package org.matsim.webvis.files.entities;
 
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,7 +12,6 @@ import java.util.Set;
 @Getter
 @Setter
 @Entity
-@EqualsAndHashCode(callSuper = true, exclude = "projects")
 public class User extends Agent {
 
     @OneToMany(mappedBy = "creator", cascade = {CascadeType.ALL}, fetch = FetchType.LAZY, orphanRemoval = true)

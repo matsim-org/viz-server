@@ -19,11 +19,21 @@ public class VisualizationDAO extends DAO {
         return database.updateOne(type);
     }
 
+    public Visualization findFlat(String vizId) {
+
+        QVisualization visualization = QVisualization.visualization;
+        return database.executeQuery(query -> query.selectFrom(visualization)
+                .where(visualization.id.eq(vizId))
+                .fetchOne());
+    }
+
     public Visualization find(String vizId) {
 
         QVisualization visualization = QVisualization.visualization;
         return database.executeQuery(query -> query.selectFrom(visualization)
                 .where(visualization.id.eq(vizId))
+                .leftJoin(visualization.inputFiles).fetchJoin()
+                .leftJoin(visualization.parameters).fetchJoin()
                 .fetchOne());
     }
 
@@ -35,6 +45,8 @@ public class VisualizationDAO extends DAO {
         return database.executeQuery(query -> query.selectFrom(visualization)
                 .where(visualization.type.key.eq(key))
                 .innerJoin(visualization.permissions, permission).on(permission.agent.eq(agent))
+                .leftJoin(visualization.inputFiles).fetchJoin()
+                .leftJoin(visualization.parameters).fetchJoin()
                 .distinct()
                 .fetch()
         );

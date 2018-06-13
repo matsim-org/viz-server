@@ -8,7 +8,7 @@ import org.matsim.webvis.common.database.AbstractEntity;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-class VisualizationInput extends AbstractEntity {
+public class VisualizationInput extends AbstractEntity {
 
     private String key;
     private FileEntry fileEntry;

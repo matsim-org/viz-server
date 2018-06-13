@@ -18,8 +18,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ClientAuthentication implements HttpCredential {
 
-    private final Http http;
-
     public enum AuthState {NotAuthenticated, Requesting, Failed, Authenticated}
 
     private static final Logger logger = LogManager.getLogger();
@@ -31,13 +29,15 @@ public class ClientAuthentication implements HttpCredential {
     @Getter
     private String scope;
 
+    private final Http http;
     private final URI tokenEndpoint;
     private final String principal;
     private final String credential;
+    private final String clientScope;
 
     @Override
     public String headerValue() {
-        return accessToken;
+        return "Bearer " + accessToken;
     }
 
     public void requestAccessToken() {
@@ -45,6 +45,7 @@ public class ClientAuthentication implements HttpCredential {
         state = AuthState.Requesting;
         List<NameValuePair> formParams = new ArrayList<>();
         formParams.add(new BasicNameValuePair("grant_type", "client_credentials"));
+        formParams.add(new BasicNameValuePair("scope", clientScope));
 
         try {
             AccessTokenResponse response = http.post(tokenEndpoint)

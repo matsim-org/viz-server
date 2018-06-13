@@ -21,7 +21,7 @@ public class ClientAuthenticationTest {
         final URI endpoint = URI.create("http://some-url.com");
         final Http http = new Http(factory);
 
-        ClientAuthentication auth = new ClientAuthentication(http, endpoint, principal, credential);
+        ClientAuthentication auth = new ClientAuthentication(http, endpoint, principal, credential, "");
 
         auth.requestAccessToken();
 
@@ -39,7 +39,7 @@ public class ClientAuthenticationTest {
         final URI endpoint = URI.create("http://some-url.com");
         final Http http = new Http(factory);
 
-        ClientAuthentication auth = new ClientAuthentication(http, endpoint, principal, credential);
+        ClientAuthentication auth = new ClientAuthentication(http, endpoint, principal, credential, "");
 
         auth.requestAccessToken();
 
