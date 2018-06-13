@@ -6,7 +6,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.matsim.webvis.frameAnimation.constants.Params;
 import org.matsim.webvis.frameAnimation.contracts.RectContract;
-import org.matsim.webvis.frameAnimation.utils.TestUtils;
 
 import static org.junit.Assert.*;
 
@@ -65,11 +64,11 @@ public class AbstractPostRequestHandlerTest {
 
     private static class AbstractPostRequestHandlerTestable extends AbstractPostRequestHandler<RectContract> {
 
-        public AbstractPostRequestHandlerTestable() {
-            super(RectContract.class, TestUtils.getDataProvider());
+        AbstractPostRequestHandlerTestable() {
+            super(RectContract.class);
         }
 
-        public Answer processBodyImpl(String body) {
+        Answer processBodyImpl(String body) {
             return processBody(body);
         }
 

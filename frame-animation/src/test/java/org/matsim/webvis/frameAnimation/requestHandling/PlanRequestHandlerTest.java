@@ -4,7 +4,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.matsim.webvis.frameAnimation.constants.Params;
 import org.matsim.webvis.frameAnimation.contracts.PlanRequest;
-import org.matsim.webvis.frameAnimation.utils.TestUtils;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -15,7 +14,7 @@ public class PlanRequestHandlerTest {
 
     @BeforeClass
     public static void setUp() {
-        testObject = new PlanRequestHandler(TestUtils.getDataProvider());
+        testObject = new PlanRequestHandler();
     }
 
     @Test

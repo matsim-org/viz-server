@@ -1,29 +1,26 @@
 package org.matsim.webvis.frameAnimation.requestHandling;
 
-import org.matsim.core.utils.collections.QuadTree;
 import org.matsim.webvis.frameAnimation.constants.Params;
 import org.matsim.webvis.frameAnimation.contracts.SnapshotRequest;
-import org.matsim.webvis.frameAnimation.data.SimulationData;
 
 import java.io.IOException;
 
 public class SnapshotRequestHandler extends AbstractPostRequestHandler<SnapshotRequest> {
 
-    public SnapshotRequestHandler(SimulationData data) {
-        super(SnapshotRequest.class, data);
+    public SnapshotRequestHandler() {
+        super(SnapshotRequest.class);
     }
 
     @Override
     public Answer process(SnapshotRequest body) {
 
-        QuadTree.Rect bounds = body.getBounds().copyToMatsimRect();
         double startTime = body.getFromTimestep();
         int size = body.getSize();
         double speedFactor = body.getSpeedFactor();
 
         byte[] bytes;
         try {
-            bytes = dataProvider.getSnapshots(bounds, startTime, size, speedFactor);
+            bytes = getData().getSnapshots(body.getId(), startTime, size, speedFactor);
         } catch (IOException e) {
             e.printStackTrace();
             return new Answer(Params.STATUS_INTERNAL_SERVER_ERROR, "Sorry.");

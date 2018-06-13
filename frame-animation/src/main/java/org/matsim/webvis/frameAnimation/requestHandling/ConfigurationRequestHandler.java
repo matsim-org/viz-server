@@ -3,21 +3,22 @@ package org.matsim.webvis.frameAnimation.requestHandling;
 import com.google.gson.Gson;
 import org.matsim.webvis.frameAnimation.contracts.ConfigurationResponse;
 import org.matsim.webvis.frameAnimation.contracts.RectContract;
-import org.matsim.webvis.frameAnimation.data.SimulationData;
+import org.matsim.webvis.frameAnimation.contracts.VisualizationRequest;
 
-public class ConfigurationRequestHandler extends AbstractPostRequestHandler<Object> {
+public class ConfigurationRequestHandler extends AbstractPostRequestHandler<VisualizationRequest> {
 
-    public ConfigurationRequestHandler(SimulationData data) {
-        super(Object.class, data);
+
+    public ConfigurationRequestHandler() {
+        super(VisualizationRequest.class);
     }
 
     @Override
-    public Answer process(Object body) {
+    public Answer process(VisualizationRequest body) {
 
-        RectContract bounds = dataProvider.getBounds();
-        double timestepSize = dataProvider.getTimestepSize();
-        double firstTimestep = dataProvider.getFirstTimestep();
-        double lastTimestep = dataProvider.getLastTimestep();
+        RectContract bounds = getData().getBounds(body.getId());
+        double timestepSize = getData().getTimestepSize(body.getId());
+        double firstTimestep = getData().getFirstTimestep(body.getId());
+        double lastTimestep = getData().getLastTimestep(body.getId());
         ConfigurationResponse response = new ConfigurationResponse(bounds, firstTimestep, lastTimestep,
                 timestepSize);
         String result = new Gson().toJson(response);

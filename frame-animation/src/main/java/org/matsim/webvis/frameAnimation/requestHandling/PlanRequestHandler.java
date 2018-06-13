@@ -6,12 +6,11 @@ import org.matsim.webvis.frameAnimation.contracts.PlanRequest;
 import org.matsim.webvis.frameAnimation.contracts.geoJSON.Feature;
 import org.matsim.webvis.frameAnimation.contracts.geoJSON.FeatureCollection;
 import org.matsim.webvis.frameAnimation.contracts.geoJSON.FeatureSerializer;
-import org.matsim.webvis.frameAnimation.data.SimulationData;
 
 public class PlanRequestHandler extends AbstractPostRequestHandler<PlanRequest>{
 
-    public PlanRequestHandler(SimulationData data) {
-        super(PlanRequest.class, data);
+    public PlanRequestHandler() {
+        super(PlanRequest.class);
     }
 
     @Override
@@ -19,7 +18,7 @@ public class PlanRequestHandler extends AbstractPostRequestHandler<PlanRequest>{
 
         FeatureCollection result;
         try {
-            result = dataProvider.getPlan(body.getIdIndex());
+            result = getData().getPlan(body.getId(), body.getIdIndex());
         } catch (RuntimeException e) {
             System.out.println("Error in PlanRequestHandler: requestedIndexId: " + body.getIdIndex());
             System.out.println(e.getMessage());

@@ -4,7 +4,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.matsim.webvis.frameAnimation.constants.Params;
 import org.matsim.webvis.frameAnimation.contracts.RectContract;
-import org.matsim.webvis.frameAnimation.utils.TestUtils;
+import org.matsim.webvis.frameAnimation.contracts.VisualizationRequest;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -15,7 +15,7 @@ public class NetworkRequestHandlerTest {
 
     @Before
     public void SetUp() {
-        testObject = new NetworkRequestHandler(TestUtils.getDataProvider());
+        testObject = new NetworkRequestHandler();
     }
 
     @Test
@@ -25,7 +25,7 @@ public class NetworkRequestHandlerTest {
         RectContract request = new RectContract(-1000, 1000, -1000, 1000);
 
         //act
-        Answer answer = testObject.process(request);
+        Answer answer = testObject.process(new VisualizationRequest());
 
         //assert
         assertEquals(Params.STATUS_OK, answer.getCode());

@@ -6,7 +6,7 @@ import org.junit.Test;
 import org.matsim.webvis.frameAnimation.constants.Params;
 import org.matsim.webvis.frameAnimation.contracts.ConfigurationResponse;
 import org.matsim.webvis.frameAnimation.contracts.RectContract;
-import org.matsim.webvis.frameAnimation.utils.TestUtils;
+import org.matsim.webvis.frameAnimation.contracts.VisualizationRequest;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
@@ -17,7 +17,7 @@ public class ConfigurationRequestHandlerTest {
 
     @BeforeClass
     public static void setUp() {
-        testObject = new ConfigurationRequestHandler(TestUtils.getDataProvider());
+        testObject = new ConfigurationRequestHandler();
     }
 
     @Test
@@ -31,7 +31,7 @@ public class ConfigurationRequestHandlerTest {
         final double bottom = -1000;
 
         //act
-        Answer answer = testObject.process(new Object());
+        Answer answer = testObject.process(new VisualizationRequest());
 
         //assert
         assertNotNull(answer);

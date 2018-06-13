@@ -5,7 +5,6 @@ import org.junit.Test;
 import org.matsim.webvis.frameAnimation.constants.Params;
 import org.matsim.webvis.frameAnimation.contracts.RectContract;
 import org.matsim.webvis.frameAnimation.contracts.SnapshotRequest;
-import org.matsim.webvis.frameAnimation.utils.TestUtils;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -16,7 +15,7 @@ public class SnapshotRequestHandlerTest {
 
     @BeforeClass
     public static void setUp() {
-        testObject = new SnapshotRequestHandler(TestUtils.getDataProvider());
+        testObject = new SnapshotRequestHandler();
     }
 
     @Test
@@ -24,7 +23,7 @@ public class SnapshotRequestHandlerTest {
 
         //arrange
         RectContract bounds = new RectContract(-1000, 1000, -1000, 1000);
-        SnapshotRequest request = new SnapshotRequest(bounds, 25210, 10, 1);
+        SnapshotRequest request = new SnapshotRequest(25210, 10, 1);
 
         //act
         Answer answer = testObject.process(request);
@@ -40,7 +39,7 @@ public class SnapshotRequestHandlerTest {
 
         //arrange
         RectContract bounds = new RectContract(-1000, 1000, -1000, 1000);
-        SnapshotRequest request = new SnapshotRequest(bounds, -1, 10, 1);
+        SnapshotRequest request = new SnapshotRequest(-1, 10, 1);
 
         //act
         Answer answer = testObject.process(request);

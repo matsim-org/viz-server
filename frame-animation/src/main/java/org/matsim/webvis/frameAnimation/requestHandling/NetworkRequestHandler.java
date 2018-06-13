@@ -1,20 +1,18 @@
 package org.matsim.webvis.frameAnimation.requestHandling;
 
-import org.matsim.webvis.frameAnimation.data.SimulationData;
+import org.matsim.webvis.frameAnimation.contracts.VisualizationRequest;
 
-public class NetworkRequestHandler extends AbstractPostRequestHandler<Object> {
+public class NetworkRequestHandler extends AbstractPostRequestHandler<VisualizationRequest> {
 
-    public NetworkRequestHandler(SimulationData dataProvider) {
+    public NetworkRequestHandler() {
 
-        super(Object.class, dataProvider);
+        super(VisualizationRequest.class);
     }
 
     @Override
-    public Answer process(Object body) {
+    public Answer process(VisualizationRequest body) {
 
-        byte[] bytes;
-
-        bytes = dataProvider.getLinks();
+        byte[] bytes = getData().getLinks(body.getId());
         return Answer.ok(bytes);
     }
 }

@@ -1,6 +1,7 @@
 package org.matsim.webvis.frameAnimation.data;
 
 import org.matsim.webvis.common.errorHandling.InvalidInputException;
+import org.matsim.webvis.frameAnimation.contracts.RectContract;
 import org.matsim.webvis.frameAnimation.contracts.geoJSON.FeatureCollection;
 
 import java.io.IOException;
@@ -27,7 +28,23 @@ public class SimulationDataDAO {
         return find(vizId).getPlan(idIndex);
     }
 
-    public SimulationData find(String vizId) {
+    public RectContract getBounds(String vizId) {
+        return find(vizId).getBounds();
+    }
+
+    public double getTimestepSize(String vizId) {
+        return find(vizId).getTimestepSize();
+    }
+
+    public double getFirstTimestep(String vizId) {
+        return find(vizId).getFirstTimestep();
+    }
+
+    public double getLastTimestep(String vizId) {
+        return find(vizId).getLastTimestep();
+    }
+
+    private SimulationData find(String vizId) {
 
         if (!data.containsKey(vizId))
             throw new InvalidInputException("Viz id: " + vizId + " is not in data set");

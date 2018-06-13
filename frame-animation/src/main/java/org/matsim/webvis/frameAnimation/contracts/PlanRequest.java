@@ -1,13 +1,13 @@
 package org.matsim.webvis.frameAnimation.contracts;
 
-public class PlanRequest {
+import lombok.Getter;
+
+@Getter
+public class PlanRequest extends VisualizationRequest {
+
     private int idIndex;
 
     public PlanRequest(int idIndex) {
         this.idIndex = idIndex;
-    }
-
-    public int getIdIndex() {
-        return idIndex;
     }
 }

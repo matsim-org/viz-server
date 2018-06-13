@@ -1,32 +1,17 @@
 package org.matsim.webvis.frameAnimation.contracts;
 
-public class SnapshotRequest {
+import lombok.Getter;
+
+@Getter
+public class SnapshotRequest extends VisualizationRequest {
 
     double speedFactor;
     private double fromTimestep;
     private int size;
-    private RectContract bounds;
 
-    public SnapshotRequest(RectContract bounds, double fromTimestep, int size, double speedFactor) {
-        this.bounds = bounds;
+    public SnapshotRequest(double fromTimestep, int size, double speedFactor) {
         this.fromTimestep = fromTimestep;
         this.size = size;
         this.speedFactor = speedFactor;
-    }
-
-    public double getFromTimestep() {
-        return fromTimestep;
-    }
-
-    public int getSize() {
-        return size;
-    }
-
-    public RectContract getBounds() {
-        return bounds;
-    }
-
-    public double getSpeedFactor() {
-        return this.speedFactor;
     }
 }
