@@ -43,6 +43,11 @@ public abstract class AbstractPostRequestHandler<T> implements Route {
         }
 
         //send raw bytes as response
+        String origin = request.headers("Origin");
+        response.header("Access-Control-Allow-Origin", (origin != null) ? origin : "*");
+        response.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+        response.header("Access-Control-Allow-Credentials", "true");
+        response.header("Access-Control-Allow-Methods", "GET, POST, PUT, OPTIONS, DELETE");
         response.type(Params.RESPONSETYPE_OCTET_STREAM);
         response.raw().setContentType(Params.RESPONSETYPE_OCTET_STREAM);
         response.raw().getOutputStream().write(answer.getEncodedMessage());

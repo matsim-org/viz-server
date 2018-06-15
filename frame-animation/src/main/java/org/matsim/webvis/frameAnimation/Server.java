@@ -61,7 +61,7 @@ public class Server {
             AuthenticationHandler authHandler = new AuthenticationHandler(
                     ServiceCommunication.http(), token, Configuration.getInstance().getIntrospectionEndpoint()
             );
-            StartSpark.withAuthHandler(authHandler);
+            //StartSpark.withAuthHandler(authHandler);
         } catch (Exception e) {
             handleInitializationFailure(e);
         }
