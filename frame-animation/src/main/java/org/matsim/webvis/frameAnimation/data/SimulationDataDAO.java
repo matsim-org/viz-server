@@ -44,6 +44,10 @@ public class SimulationDataDAO {
         return find(vizId).getLastTimestep();
     }
 
+    public SimulationData remove(String vizId) {
+        return data.remove(vizId);
+    }
+
     private SimulationData find(String vizId) {
 
         if (!data.containsKey(vizId))
