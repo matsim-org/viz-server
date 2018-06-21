@@ -6,6 +6,8 @@
         </Console>
     </Appenders>
     <Loggers>
+        <Logger name="org.apache.http" level="info"/>
+        <Logger name="org.apache.wire" level="info"/>
         <Root level="info">
             <AppenderRef ref="Console"/>
         </Root>

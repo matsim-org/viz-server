@@ -1,9 +1,11 @@
 package org.matsim.webvis.frameAnimation.requestHandling;
 
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.matsim.webvis.frameAnimation.constants.Params;
 import org.matsim.webvis.frameAnimation.contracts.PlanRequest;
+import org.matsim.webvis.frameAnimation.data.SimulationDataDAO;
 import org.matsim.webvis.frameAnimation.utils.TestUtils;
 
 import static org.junit.Assert.assertEquals;
@@ -12,17 +14,25 @@ import static org.junit.Assert.assertTrue;
 public class PlanRequestHandlerTest {
 
     private static PlanRequestHandler testObject;
+    private static SimulationDataDAO simulationDataDAO = new SimulationDataDAO();
+    private static String vizId = "id";
 
     @BeforeClass
     public static void setUp() {
-        testObject = new PlanRequestHandler(TestUtils.getDataProvider());
+        testObject = new PlanRequestHandler();
+        simulationDataDAO.add(vizId, TestUtils.getDataProvider());
+    }
+
+    @AfterClass
+    public static void tearDownClass() {
+        simulationDataDAO.remove(vizId);
     }
 
     @Test
     public void processTest() {
 
         //arrange
-        PlanRequest body = new PlanRequest(1);
+        PlanRequest body = new PlanRequest(vizId, 1);
         //there is probably a smarter way to test this...
         String expectedJson = "{\"features\":[{\"type\":\"Feature\",\"properties\":{\"type\":\"leg\"},\"geometry\":" +
                 "{\"coordinates\":[[-2000.0,0.0],[-1500.0,0.0],[-1500.0,0.0],[-469.8,400.0],[-469.8,400.0]," +
@@ -42,7 +52,7 @@ public class PlanRequestHandlerTest {
     public void processTest_badRequest() {
 
         //arrange
-        PlanRequest body = new PlanRequest(1000);
+        PlanRequest body = new PlanRequest(vizId, 1000);
 
         //act
         Answer answer = testObject.process(body);

@@ -10,22 +10,13 @@ import org.matsim.webvis.frameAnimation.communication.ServiceCommunication;
 import org.matsim.webvis.frameAnimation.config.CommandlineArgs;
 import org.matsim.webvis.frameAnimation.config.Configuration;
 import org.matsim.webvis.frameAnimation.data.DataController;
-import org.matsim.webvis.frameAnimation.data.SimulationData;
 
 import java.io.FileNotFoundException;
 
 public class Server {
 
     private static final Logger logger = LogManager.getLogger();
-
-    private static SimulationData data;
     private static DataController dataController = DataController.Instance;
-
-    private static String networkPath = "network.xml";
-    private static String eventsPath = "events.xml.gz";
-    private static String plansPath = "plans.xml";
-    private static double snapshotPeriod = 1.0;
-    private static int port = 3001;
 
     public static void main(String[] args) {
 
@@ -70,11 +61,11 @@ public class Server {
             AuthenticationHandler authHandler = new AuthenticationHandler(
                     ServiceCommunication.http(), token, Configuration.getInstance().getIntrospectionEndpoint()
             );
-            StartSpark.withAuthHandler(authHandler);
+            //StartSpark.withAuthHandler(authHandler);
         } catch (Exception e) {
             handleInitializationFailure(e);
         }
-        Routes.initialize(data);
+        Routes.initialize();
         logger.info("\n\nStarted animation Server on Port: " + Configuration.getInstance().getPort() + "\n");
     }
 
@@ -92,10 +83,5 @@ public class Server {
         }
         logger.error("Exception wich caused failure was: ", e);
         System.exit(100);
-    }
-
-    private static void initializeData() {
-
-        data = new SimulationData(networkPath, eventsPath, plansPath, snapshotPeriod);
     }
 }

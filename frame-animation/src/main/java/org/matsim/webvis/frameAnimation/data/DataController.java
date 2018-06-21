@@ -27,10 +27,10 @@ public class DataController {
 
     public void scheduleFetching() {
 
-        scheduler.scheduleAtFixedRate(this::fetchVisualizationData, 0, 1, TimeUnit.MINUTES);
+        scheduler.scheduleAtFixedRate(this::fetchVisualizationData, 0, 10, TimeUnit.HOURS);
     }
 
-    void fetchVisualizationData() {
+    private void fetchVisualizationData() {
 
         URI vizByTypeEndpoint = Configuration.getInstance().getFileServer().resolve("/project/visualizations/");
 
