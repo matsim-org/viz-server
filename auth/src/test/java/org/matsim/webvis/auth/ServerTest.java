@@ -33,7 +33,7 @@ public class ServerTest {
 
         CommandlineArgs args = new CommandlineArgs();
 
-        org.apache.logging.log4j.LogManager.getLogger().info("config file name" + args.getConfigFile());
+        //TODO org.apache.logging.log4j.LogManager.getLogger().info("config file name" + args.getConfigFile());
         Server.loadConfigFile(args);
 
         assertEquals(3000, Configuration.getInstance().getPort());

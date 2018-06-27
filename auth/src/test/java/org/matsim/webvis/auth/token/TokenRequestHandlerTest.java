@@ -92,7 +92,7 @@ public class TokenRequestHandlerTest {
         when(request.headers(BasicAuthentication.HEADER_AUTHORIZATION)).thenReturn(TestUtils.encodeBasicAuth("principal", "credential"));
 
         testObject.clientCredentialsGrant.tokenService = mock(TokenService.class);
-        when(testObject.clientCredentialsGrant.tokenService.grantWithClientCredentials(any())).thenReturn(getDummyToken());
+        when(testObject.clientCredentialsGrant.tokenService.grantForScope(any())).thenReturn(getDummyToken());
 
         Answer answer = testObject.process(request, null);
 

@@ -1,7 +1,4 @@
 package org.matsim.webvis.auth.relyingParty;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.matsim.webvis.auth.config.ConfigClient;
 import org.matsim.webvis.auth.config.ConfigRelyingParty;
 import org.matsim.webvis.auth.entities.Client;
@@ -23,7 +20,7 @@ public class RelyingPartyService {
     private RelyingPartyService() {
     }
 
-    private static Logger logger = LogManager.getLogger();
+
     private RelyingPartyDAO relyingPartyDAO = new RelyingPartyDAO();
 
     Client createClient(String name, Iterable<URI> redirectUris) {
@@ -67,7 +64,7 @@ public class RelyingPartyService {
         RelyingPartyCredential credential = new RelyingPartyCredential();
         credential.setRelyingParty(party);
         RelyingParty persisted = relyingPartyDAO.persistCredential(credential).getRelyingParty();
-        logger.info("persisted relying party: (id: " + persisted.getId() + ", secret: " + credential.getSecret());
+        //TODO logger.info("persisted relying party: (id: " + persisted.getId() + ", secret: " + credential.getSecret());
         return persisted;
     }
 
@@ -89,6 +86,12 @@ public class RelyingPartyService {
             throw new UnauthorizedException("invalid client id or secret or scope not allowed");
 
         return credential.getRelyingParty();
+    }
+
+    public String validateRelyingPartyScope(RelyingParty rp, String scope) {
+        if (scopesDontMatch(rp.getScopes(), scope))
+            throw new UnauthorizedException("requested scope is not registered");
+        return scope;
     }
 
     public Client validateClient(String clientId, URI redirectUri, String scope) {

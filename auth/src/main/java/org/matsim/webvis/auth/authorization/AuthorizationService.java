@@ -16,17 +16,17 @@ import java.net.URLEncoder;
 class AuthorizationService {
 
     static final AuthorizationService Instance = new AuthorizationService();
-    TokenService tokenService = TokenService.Instance;
-    UserService userService = UserService.Instance;
+    private TokenService tokenService = TokenService.Instance;
+    private UserService userService = UserService.Instance;
 
-    RelyingPartyService relyingPartyService = RelyingPartyService.Instance;
+    private RelyingPartyService relyingPartyService = RelyingPartyService.Instance;
 
-    Client validateClient(AuthenticationRequest request) {
+    Client validateClient(AuthRequest request) {
         return relyingPartyService.validateClient(
                 request.getClientId(), request.getRedirectUri(), request.getScope());
     }
 
-    URI generateAuthenticationResponse(AuthenticationRequest request, String subjectId) {
+    URI generateAuthenticationResponse(AuthRequest request, String subjectId) {
 
         String fragment = "#token_type=bearer";
         fragment += getStateIfNecessary(request);
@@ -34,13 +34,13 @@ class AuthorizationService {
         return URI.create(request.getRedirectUri().toString() + fragment);
     }
 
-    private String getStateIfNecessary(AuthenticationRequest request2) {
-        if (StringUtils.isNotBlank(request2.getState()))
-            return "&state=" + urlEncode(request2.getState());
+    private String getStateIfNecessary(AuthRequest request) {
+        if (StringUtils.isNotBlank(request.getState()))
+            return "&state=" + urlEncode(request.getState());
         return "";
     }
 
-    private String getTokens(AuthenticationRequest request, String subjectId) {
+    private String getTokens(AuthRequest request, String subjectId) {
 
         User user = userService.findUser(subjectId);
         if (user == null)
@@ -51,19 +51,17 @@ class AuthorizationService {
         return result;
     }
 
-    private String addIdTokenIfNecessary(AuthenticationRequest request, User user) {
-        if (request.getType() == AuthenticationRequest.Type.IdToken
-                || request.getType() == AuthenticationRequest.Type.AccessAndIdToken) {
+    private String addIdTokenIfNecessary(AuthRequest request, User user) {
 
+        if (request.isResponseTypeIdToken()) {
             Token idToken = tokenService.createIdToken(user, request.getNonce());
             return "&id_token=" + idToken.getTokenValue();
         }
         return "";
     }
 
-    private String addAccessTokenIfNecessary(AuthenticationRequest request, User user) {
-        if (request.getType() == AuthenticationRequest.Type.AccessToken
-                || request.getType() == AuthenticationRequest.Type.AccessAndIdToken) {
+    private String addAccessTokenIfNecessary(AuthRequest request, User user) {
+        if (request.isResponseTypeToken()) {
 
             String scope = request.getScope().replace("openid", "").trim();
             Token accessToken = tokenService.createAccessToken(user, String.join(" ", scope));

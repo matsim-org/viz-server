@@ -11,7 +11,7 @@ public class ClientCredentialsGrant implements Grant {
     public Answer processRequest(TokenRequest request) {
 
         ClientCredentialsGrantRequest clientRequest = new ClientCredentialsGrantRequest(request);
-        Token token = tokenService.grantWithClientCredentials(clientRequest);
+        Token token = tokenService.grantForScope(clientRequest);
         return Answer.ok(new AccessTokenResponse(token));
     }
 }

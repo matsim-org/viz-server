@@ -1,12 +1,10 @@
 package org.matsim.webvis.auth.authorization;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+
 import org.matsim.webvis.auth.Routes;
 import org.matsim.webvis.auth.entities.Token;
 import org.matsim.webvis.auth.token.TokenService;
 import org.matsim.webvis.auth.user.LoginUserRequestHandler;
-import org.matsim.webvis.common.communication.HttpStatus;
 import org.matsim.webvis.common.errorHandling.CodedException;
 import org.matsim.webvis.common.errorHandling.InvalidInputException;
 import org.matsim.webvis.common.errorHandling.UnauthorizedException;
@@ -20,7 +18,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class AuthorizationRequestHandler implements Route {
 
-    private static Logger logger = LogManager.getLogger();
     static Map<String, AuthenticationRequest> loginSession = new ConcurrentHashMap<>();
 
     AuthorizationService authService = AuthorizationService.Instance;
@@ -48,7 +45,7 @@ public class AuthorizationRequestHandler implements Route {
 
     private AuthenticationRequest authRequestFromRequest(Request request) {
         AuthenticationRequest authRequest = new AuthenticationRequest(request.queryMap());
-        authService.validateClient(authRequest);
+        //authService.validateClient(authRequest);
         return authRequest;
     }
 
@@ -76,14 +73,15 @@ public class AuthorizationRequestHandler implements Route {
 
     private Object prepareResponse(AuthenticationRequest authRequest, String subjectId, Response response) {
 
-        URI uri = authService.generateAuthenticationResponse(authRequest, subjectId);
-        response.redirect(uri.toString(), HttpStatus.FOUND);
-        return response;
+        //URI uri = authService.generateAuthenticationResponse(authRequest, subjectId);
+        //response.redirect(uri.toString(), HttpStatus.FOUND);
+        //return response;
+        return null;
     }
 
     private Object redirectOnError(URI redirectUri, String code, String message, Response response) {
 
-        logger.error("Error: " + code + " " + message + "redirecting to: " + redirectUri);
+        //TODO logger.error("Error: " + code + " " + message + "redirecting to: " + redirectUri);
         String redirect = redirectUri.toString() + "?error=" + code + "&error_description=" + message;
         response.redirect(redirect, 302);
         return response;

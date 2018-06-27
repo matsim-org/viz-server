@@ -15,5 +15,6 @@ class AccessTokenResponse {
         this.access_token = token.getTokenValue();
         this.token_type = "Bearer";
         this.expires_in = token.getExpiresAt().getEpochSecond();
+        this.scope = token.getScope();
     }
 }

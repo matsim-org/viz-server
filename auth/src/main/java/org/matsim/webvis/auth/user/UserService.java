@@ -1,7 +1,5 @@
 package org.matsim.webvis.auth.user;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.matsim.webvis.auth.config.ConfigUser;
 import org.matsim.webvis.auth.entities.User;
 import org.matsim.webvis.auth.entities.UserCredentials;
@@ -18,7 +16,6 @@ public class UserService {
     private UserService() {
     }
 
-    private static final Logger logger = LogManager.getLogger(UserService.class);
     private static final int minPasswordLength = 10;
 
     private UserDAO userDAO = new UserDAO();
@@ -45,12 +42,12 @@ public class UserService {
         user.setId(id);
         credentials.setUser(user);
         try {
-            logger.info("creating user with eMail: " + user.getEMail());
+            //TODO logger.info("creating user with eMail: " + user.getEMail());
             return userDAO.persistCredentials(credentials).getUser();
         } catch (RollbackException e) {
             throw new InvalidInputException("user already exists");
         } catch (Exception e) {
-            logger.error(e);
+            //TODO logger.error(e);
         }
         return null;
     }

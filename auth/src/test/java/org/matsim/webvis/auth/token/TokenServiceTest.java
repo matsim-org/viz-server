@@ -81,7 +81,7 @@ public class TokenServiceTest {
         TokenRequest tokenRequest = TestUtils.mockTokenRequest(id, "wrong-secret", scope);
         ClientCredentialsGrantRequest request = new ClientCredentialsGrantRequest(tokenRequest);
 
-        testObject.grantWithClientCredentials(request);
+        testObject.grantForScope(request);
 
         fail("authentication failure should cause exception");
     }
@@ -96,7 +96,7 @@ public class TokenServiceTest {
         TokenRequest tokenRequest = TestUtils.mockTokenRequest(id, secret, "other-scope");
         ClientCredentialsGrantRequest request = new ClientCredentialsGrantRequest(tokenRequest);
 
-        testObject.grantWithClientCredentials(request);
+        testObject.grantForScope(request);
 
         fail("authentication failure should cause exception");
     }
@@ -110,7 +110,7 @@ public class TokenServiceTest {
         RelyingParty party = rpService.createRelyingParty(new ConfigRelyingParty(id, "name", secret, new HashSet<>(Arrays.asList(scope.split(" ")))));
         ClientCredentialsGrantRequest request = new ClientCredentialsGrantRequest(TestUtils.mockTokenRequest(id, secret, scope));
 
-        Token token = testObject.grantWithClientCredentials(request);
+        Token token = testObject.grantForScope(request);
 
         assertEquals(party.getId(), token.getSubjectId());
     }

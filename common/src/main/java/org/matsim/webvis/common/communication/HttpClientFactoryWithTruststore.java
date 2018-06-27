@@ -5,16 +5,12 @@ import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContexts;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import java.nio.file.Path;
 
 public class HttpClientFactoryWithTruststore implements HttpClientFactory {
-
-    private static Logger logger = LogManager.getLogger();
     private SSLConnectionSocketFactory sslFactory;
 
     public HttpClientFactoryWithTruststore(Path tlsTruststore, char[] tlsTruststorePassword) {
@@ -32,7 +28,7 @@ public class HttpClientFactoryWithTruststore implements HttpClientFactory {
                     null, (String hostname, SSLSession session) -> hostname.equals("localhost")
             );
         } catch (Exception e) {
-            logger.error("Failed to initialize SSLFactory for selfsigned certificates.", e);
+            //TODO: Logging
             throw new RuntimeException(e);
         }
     }

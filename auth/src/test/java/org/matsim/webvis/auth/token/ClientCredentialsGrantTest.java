@@ -40,7 +40,7 @@ public class ClientCredentialsGrantTest {
         token.setTokenValue("value");
         token.setExpiresAt(Instant.now());
         testObject.tokenService = mock(TokenService.class);
-        when(testObject.tokenService.grantWithClientCredentials(any())).thenReturn(token);
+        when(testObject.tokenService.grantForScope(any())).thenReturn(token);
 
         Answer answer = testObject.processRequest(request);
 

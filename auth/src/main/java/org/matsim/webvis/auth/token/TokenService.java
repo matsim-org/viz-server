@@ -6,8 +6,6 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.matsim.webvis.auth.entities.RelyingParty;
 import org.matsim.webvis.auth.entities.Token;
 import org.matsim.webvis.auth.entities.User;
@@ -28,7 +26,6 @@ public class TokenService {
 
     public static final TokenService Instance = new TokenService();
 
-    private static final Logger logger = LogManager.getLogger();
     Algorithm algorithm;
     TokenDAO tokenDAO = new TokenDAO();
     private UserService userService = UserService.Instance;
@@ -44,12 +41,18 @@ public class TokenService {
         return createAccessToken(user, "");
     }
 
-    Token grantWithClientCredentials(ClientCredentialsGrantRequest request) {
+    Token grantForScope(ClientCredentialsGrantRequest request) {
 
         PrincipalCredentialToken auth = request.getTokenRequest().getBasicAuth();
         RelyingParty relyingParty = relyingPartyService.validateRelyingParty(
                 auth.getPrincipal(), auth.getCredential(), request.getTokenRequest().getScope());
         return createAccessToken(relyingParty, String.join(" ", request.getTokenRequest().getScope()));
+    }
+
+    Token grantForScope(RelyingParty relyingParty, String scope) {
+
+        relyingPartyService.validateRelyingPartyScope(relyingParty, scope);
+        return createAccessToken(relyingParty, scope);
     }
 
     public Token createIdToken(User user) {

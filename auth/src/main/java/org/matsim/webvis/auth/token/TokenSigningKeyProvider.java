@@ -1,9 +1,7 @@
 package org.matsim.webvis.auth.token;
 
 import lombok.Getter;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.matsim.webvis.auth.config.Configuration;
+import org.matsim.webvis.auth.config.AuthConfiguration;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -18,13 +16,11 @@ import java.security.interfaces.RSAPublicKey;
 @Getter
 class TokenSigningKeyProvider {
 
-    private static Logger logger = LogManager.getLogger();
-
     private RSAPublicKey publicKey;
     private RSAPrivateKey privateKey;
 
     TokenSigningKeyProvider() {
-        this(Configuration.getInstance().getTokenSigningKeyStore());
+        this(AuthConfiguration.getInstance().getTokenSigningKeyStore());
     }
 
     //for unit testing
@@ -40,10 +36,10 @@ class TokenSigningKeyProvider {
         File keyStoreFile = new File(keyStorePath);
         try (FileInputStream stream = new FileInputStream(keyStoreFile)) {
             KeyStore store = KeyStore.getInstance(KeyStore.getDefaultType());
-            store.load(stream, Configuration.getInstance().getTokenSigningKeyStorePassword().toCharArray());
+            store.load(stream, AuthConfiguration.getInstance().getTokenSigningKeyStorePassword().toCharArray());
             return store;
         } catch (Exception e) {
-            logger.error("Failed to load keystore!", e);
+            //TODO logger.error("Failed to load keystore!", e);
             throw new RuntimeException(e);
         }
     }
@@ -51,28 +47,28 @@ class TokenSigningKeyProvider {
     private RSAPublicKey loadPublicKey(KeyStore store) {
 
         try {
-            Certificate cert = store.getCertificate(Configuration.getInstance().getTokenSigningKeyAlias());
+            Certificate cert = store.getCertificate(AuthConfiguration.getInstance().getTokenSigningKeyAlias());
             PublicKey publicKey = cert.getPublicKey();
             return (RSAPublicKey) publicKey;
 
         } catch (KeyStoreException e) {
-            logger.error("Failed to load public token signing key.");
+            //TODO logger.error("Failed to load public token signing key.");
             throw new RuntimeException(e);
         } catch (ClassCastException e) {
-            logger.error("public signing key was not an RSA key.");
+            //TODO logger.error("public signing key was not an RSA key.");
             throw new RuntimeException(e);
         }
     }
 
     private RSAPrivateKey loadPrivateKey(KeyStore store) {
         try {
-        Key key = store.getKey(Configuration.getInstance().getTokenSigningKeyAlias(),
-                Configuration.getInstance().getTokenSigningKeyStorePassword().toCharArray());
+            Key key = store.getKey(AuthConfiguration.getInstance().getTokenSigningKeyAlias(),
+                    AuthConfiguration.getInstance().getTokenSigningKeyStorePassword().toCharArray());
             return (RSAPrivateKey) key;
         } catch (ClassCastException e) {
             throw new RuntimeException("Private signing key is not an RSA key.");
         } catch (Exception e) {
-            logger.error("failed to load private token signing key", e);
+            //TODO logger.error("failed to load private token signing key", e);
             throw new RuntimeException(e);
         }
     }
