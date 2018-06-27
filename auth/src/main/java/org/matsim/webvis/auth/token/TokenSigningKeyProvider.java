@@ -1,7 +1,7 @@
 package org.matsim.webvis.auth.token;
 
 import lombok.Getter;
-import org.matsim.webvis.auth.config.AuthConfiguration;
+import org.matsim.webvis.auth.config.AppConfiguration;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -20,7 +20,7 @@ class TokenSigningKeyProvider {
     private RSAPrivateKey privateKey;
 
     TokenSigningKeyProvider() {
-        this(AuthConfiguration.getInstance().getTokenSigningKeyStore());
+        this(AppConfiguration.getInstance().getTokenSigningKeyStore());
     }
 
     //for unit testing
@@ -36,7 +36,7 @@ class TokenSigningKeyProvider {
         File keyStoreFile = new File(keyStorePath);
         try (FileInputStream stream = new FileInputStream(keyStoreFile)) {
             KeyStore store = KeyStore.getInstance(KeyStore.getDefaultType());
-            store.load(stream, AuthConfiguration.getInstance().getTokenSigningKeyStorePassword().toCharArray());
+            store.load(stream, AppConfiguration.getInstance().getTokenSigningKeyStorePassword().toCharArray());
             return store;
         } catch (Exception e) {
             //TODO logger.error("Failed to load keystore!", e);
@@ -47,7 +47,7 @@ class TokenSigningKeyProvider {
     private RSAPublicKey loadPublicKey(KeyStore store) {
 
         try {
-            Certificate cert = store.getCertificate(AuthConfiguration.getInstance().getTokenSigningKeyAlias());
+            Certificate cert = store.getCertificate(AppConfiguration.getInstance().getTokenSigningKeyAlias());
             PublicKey publicKey = cert.getPublicKey();
             return (RSAPublicKey) publicKey;
 
@@ -62,8 +62,8 @@ class TokenSigningKeyProvider {
 
     private RSAPrivateKey loadPrivateKey(KeyStore store) {
         try {
-            Key key = store.getKey(AuthConfiguration.getInstance().getTokenSigningKeyAlias(),
-                    AuthConfiguration.getInstance().getTokenSigningKeyStorePassword().toCharArray());
+            Key key = store.getKey(AppConfiguration.getInstance().getTokenSigningKeyAlias(),
+                    AppConfiguration.getInstance().getTokenSigningKeyStorePassword().toCharArray());
             return (RSAPrivateKey) key;
         } catch (ClassCastException e) {
             throw new RuntimeException("Private signing key is not an RSA key.");

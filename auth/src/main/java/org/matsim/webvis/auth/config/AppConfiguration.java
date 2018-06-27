@@ -8,11 +8,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Getter
-public class AuthConfiguration extends Configuration {
+public class AppConfiguration extends Configuration {
 
     @Setter
     @Getter
-    private static AuthConfiguration instance;
+    private static AppConfiguration instance;
 
     private List<ConfigUser> users = new ArrayList<>();
     private List<ConfigClient> clients = new ArrayList<>();

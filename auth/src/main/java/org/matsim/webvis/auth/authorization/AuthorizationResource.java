@@ -20,14 +20,14 @@ import java.util.concurrent.ConcurrentHashMap;
 @Produces(MediaType.APPLICATION_JSON)
 public class AuthorizationResource {
 
-    private static Map<String, AuthRequest> loginSession = new ConcurrentHashMap<>();
+    private static Map<String, AuthenticationRequest> loginSession = new ConcurrentHashMap<>();
 
-    private TokenService tokenService = TokenService.Instance;
-    private AuthorizationService authService = AuthorizationService.Instance;
+    TokenService tokenService = TokenService.Instance;
+    AuthorizationService authService = AuthorizationService.Instance;
 
     @GET
     public Response authorize(
-            @Valid @BeanParam AuthGetRequest request,
+            @Valid @BeanParam AuthenticationGetRequest request,
             @Session HttpSession session,
             @CookieParam("login") String token) {
 
@@ -37,7 +37,7 @@ public class AuthorizationResource {
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public Response authorize(
-            @Valid @BeanParam AuthPostRequest request,
+            @Valid @BeanParam AuthenticationPostRequest request,
             @Session HttpSession session,
             @CookieParam("login") String token) {
 
@@ -48,14 +48,14 @@ public class AuthorizationResource {
     @Path("/from-login")
     public Response afterLogin(@Session HttpSession session, @CookieParam("login") String token) {
 
-        AuthRequest request = loginSession.get(session.getId());
+        AuthenticationRequest request = loginSession.get(session.getId());
         session.invalidate();
         if (request == null)
             throw new InvalidInputException("call '/authorize' with proper parameters");
         return doAuthorization(request, session, token);
     }
 
-    private Response doAuthorization(AuthRequest request, HttpSession session, String token) {
+    Response doAuthorization(AuthenticationRequest request, HttpSession session, String token) {
 
         request.validate();
         authService.validateClient(request);
@@ -76,13 +76,13 @@ public class AuthorizationResource {
         return idToken.getSubjectId();
     }
 
-    private Response authenticateWithLogin(AuthRequest request, HttpSession session) {
+    private Response authenticateWithLogin(AuthenticationRequest request, HttpSession session) {
 
         loginSession.put(session.getId(), request);
         return Response.seeOther(URI.create("/login")).build();
     }
 
-    private Response prepareResponse(AuthRequest request, String subjectId) {
+    private Response prepareResponse(AuthenticationRequest request, String subjectId) {
 
         URI uri = authService.generateAuthenticationResponse(request, subjectId);
         return Response.seeOther(uri).build();

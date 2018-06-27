@@ -4,31 +4,31 @@ import lombok.Getter;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.FormParam;
 import java.net.URI;
 
 @Getter
-class AuthGetRequest extends AuthRequest {
+class AuthenticationPostRequest extends AuthenticationRequest {
 
     @NotEmpty
-    @QueryParam(SCOPE)
+    @FormParam(SCOPE)
     private String scope;
 
     @NotEmpty
-    @QueryParam(RESPONSE_TYPE)
+    @FormParam(RESPONSE_TYPE)
     private String responseType;
 
     @NotNull
-    @QueryParam(REDIRECT_URI)
+    @FormParam(REDIRECT_URI)
     private URI redirectUri;
 
     @NotEmpty
-    @QueryParam(CLIENT_ID)
+    @FormParam(CLIENT_ID)
     private String clientId;
 
-    @QueryParam(STATE)
+    @FormParam(STATE)
     private String state;
 
-    @QueryParam(NONCE)
+    @FormParam(NONCE)
     private String nonce;
 }

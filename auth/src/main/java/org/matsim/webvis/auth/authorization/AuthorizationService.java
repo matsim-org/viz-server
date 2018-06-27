@@ -21,12 +21,12 @@ class AuthorizationService {
 
     private RelyingPartyService relyingPartyService = RelyingPartyService.Instance;
 
-    Client validateClient(AuthRequest request) {
+    Client validateClient(AuthenticationRequest request) {
         return relyingPartyService.validateClient(
                 request.getClientId(), request.getRedirectUri(), request.getScope());
     }
 
-    URI generateAuthenticationResponse(AuthRequest request, String subjectId) {
+    URI generateAuthenticationResponse(AuthenticationRequest request, String subjectId) {
 
         String fragment = "#token_type=bearer";
         fragment += getStateIfNecessary(request);
@@ -34,13 +34,13 @@ class AuthorizationService {
         return URI.create(request.getRedirectUri().toString() + fragment);
     }
 
-    private String getStateIfNecessary(AuthRequest request) {
+    private String getStateIfNecessary(AuthenticationRequest request) {
         if (StringUtils.isNotBlank(request.getState()))
             return "&state=" + urlEncode(request.getState());
         return "";
     }
 
-    private String getTokens(AuthRequest request, String subjectId) {
+    private String getTokens(AuthenticationRequest request, String subjectId) {
 
         User user = userService.findUser(subjectId);
         if (user == null)
@@ -51,7 +51,7 @@ class AuthorizationService {
         return result;
     }
 
-    private String addIdTokenIfNecessary(AuthRequest request, User user) {
+    private String addIdTokenIfNecessary(AuthenticationRequest request, User user) {
 
         if (request.isResponseTypeIdToken()) {
             Token idToken = tokenService.createIdToken(user, request.getNonce());
@@ -60,7 +60,7 @@ class AuthorizationService {
         return "";
     }
 
-    private String addAccessTokenIfNecessary(AuthRequest request, User user) {
+    private String addAccessTokenIfNecessary(AuthenticationRequest request, User user) {
         if (request.isResponseTypeToken()) {
 
             String scope = request.getScope().replace("openid", "").trim();

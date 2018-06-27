@@ -27,7 +27,7 @@ import static org.mockito.Mockito.*;
 
 public class AuthorizationRequestHandlerTest {
 
-    private AuthorizationRequestHandler testObject;
+    private AuthorizationResource testObject;
 
     @BeforeClass
     public static void setUpFixture() throws UnsupportedEncodingException, FileNotFoundException {
@@ -36,7 +36,7 @@ public class AuthorizationRequestHandlerTest {
 
     @Before
     public void setUp() {
-        testObject = new AuthorizationRequestHandler();
+        testObject = new AuthorizationResource();
         testObject.tokenService = mock(TokenService.class);
         testObject.authService = mock(AuthorizationService.class);
     }
