@@ -18,7 +18,7 @@ public class AppConfiguration extends Configuration {
     private List<ConfigClient> clients = new ArrayList<>();
     private List<ConfigRelyingParty> protectedResources = new ArrayList<>();
 
-    private String tokenSigningKeyStore = "";
-    private String tokenSigningKeyStorePassword = "";
-    private String tokenSigningKeyAlias = "";
+    protected String tokenSigningKeyStore = "";
+    protected String tokenSigningKeyStorePassword = "";
+    protected String tokenSigningKeyAlias = "";
 }

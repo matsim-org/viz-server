@@ -1,34 +1,8 @@
 package org.matsim.webvis.auth.user;
 
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.matsim.webvis.auth.Routes;
-import org.matsim.webvis.auth.entities.Token;
-import org.matsim.webvis.auth.entities.User;
-import org.matsim.webvis.auth.token.TokenService;
-import org.matsim.webvis.auth.util.TestUtils;
-import org.matsim.webvis.common.errorHandling.UnauthorizedException;
-import spark.Request;
-import spark.Response;
-
-import java.io.FileNotFoundException;
-import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
-import java.util.Map;
-
-import static junit.framework.TestCase.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.*;
-
 public class LoginUserRequestHandlerTest {
 
-    private LoginUserRequestHandler testObject;
+    /*private LoginUserRequestHandler testObject;
 
     @BeforeClass
     public static void setUpFixture() throws UnsupportedEncodingException, FileNotFoundException {
@@ -124,4 +98,5 @@ public class LoginUserRequestHandlerTest {
         verify(res).redirect(eq("/" + Routes.AUTHORIZE), eq(302));
         verify(res).cookie(anyString(), eq(LoginUserRequestHandler.LOGIN_COOKIE_KEY), eq(token.getTokenValue()), anyInt(), anyBoolean(), anyBoolean());
     }
+    */
 }

@@ -1,17 +1,9 @@
 package org.matsim.webvis.auth.authorization;
 
-import org.junit.Test;
-import org.matsim.webvis.auth.util.TestUtils;
-import org.matsim.webvis.common.errorHandling.InvalidInputException;
-import spark.QueryParamsMap;
-
-import java.util.Map;
-
-import static org.junit.Assert.*;
-
 public class AuthenticationRequestTest {
 
-    @Test(expected = InvalidInputException.class)
+    //TODO
+    /*@Test(expected = InvalidInputException.class)
     public void constructor_noRedirectUri_URIException() throws InvalidInputException {
 
         Map<String, String[]> map = AuthorizationTestUtils.createDefaultParameterMap();
@@ -186,4 +178,5 @@ public class AuthenticationRequestTest {
 
         assertEquals(scope, request.getScope());
     }
+    */
 }

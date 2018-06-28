@@ -1,34 +1,8 @@
 package org.matsim.webvis.auth.token;
 
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.matsim.webvis.auth.entities.RelyingParty;
-import org.matsim.webvis.auth.entities.Token;
-import org.matsim.webvis.auth.relyingParty.RelyingPartyService;
-import org.matsim.webvis.auth.util.TestUtils;
-import org.matsim.webvis.common.communication.Answer;
-import org.matsim.webvis.common.communication.HttpStatus;
-import org.matsim.webvis.common.errorHandling.CodedException;
-import org.matsim.webvis.common.errorHandling.InvalidInputException;
-import org.matsim.webvis.common.errorHandling.UnauthorizedException;
-import spark.Request;
-
-import java.io.FileNotFoundException;
-import java.io.UnsupportedEncodingException;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
-
-import static junit.framework.TestCase.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 public class IntrospectionRequestHandlerTest {
 
-    private IntrospectionRequestHandler testObject;
+   /* private IntrospectionRequestHandler testObject;
 
     @BeforeClass
     public static void setUpFixture() throws UnsupportedEncodingException, FileNotFoundException {
@@ -102,4 +76,6 @@ public class IntrospectionRequestHandlerTest {
                 map, "", "principal", "credential"
         );
     }
+
+    */
 }

@@ -1,17 +1,15 @@
 package org.matsim.webvis.auth.util;
 
-import org.matsim.webvis.auth.config.Configuration;
+import org.matsim.webvis.auth.config.AppConfiguration;
 import org.matsim.webvis.auth.entities.User;
 import org.matsim.webvis.auth.relyingParty.RelyingPartyDAO;
-import org.matsim.webvis.auth.token.TokenRequest;
 import org.matsim.webvis.auth.user.UserDAO;
 import org.matsim.webvis.auth.user.UserService;
-import org.matsim.webvis.common.auth.PrincipalCredentialToken;
 import spark.QueryParamsMap;
 import spark.Request;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.FileNotFoundException;
+import javax.servlet.http.HttpSession;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.Base64;
@@ -26,6 +24,21 @@ public class TestUtils {
     private static UserService userService = UserService.Instance;
     private static UserDAO userDAO = new UserDAO();
     private static RelyingPartyDAO relyingPartyDAO = new RelyingPartyDAO();
+
+    public static HttpSession mockSession(String id) {
+
+        HttpSession session = mock(HttpSession.class);
+        when(session.getId()).thenReturn(id);
+        return session;
+    }
+
+    public static void loadTestConfigIfNecessary() {
+
+        if (AppConfiguration.getInstance() != null)
+            return;
+
+        AppConfiguration.setInstance(new TestAppConfiguration());
+    }
 
     public static QueryParamsMap mockQueryParamsMap(Map<String, String[]> parameterMap) {
         HttpServletRequest servletRequest = mock(HttpServletRequest.class);
@@ -64,25 +77,8 @@ public class TestUtils {
         return request;
     }
 
-    public static TokenRequest mockTokenRequest(String clientPrincipal, String clientCredential, String scope) {
-
-        TokenRequest request = mock(TokenRequest.class);
-        when(request.getBasicAuth()).thenReturn(new PrincipalCredentialToken(clientPrincipal, clientCredential));
-        when(request.getGrantType()).thenReturn("some-grant-type");
-        when(request.getScope()).thenReturn(scope);
-        return request;
-    }
-
-    public static void loadTestConfig() throws UnsupportedEncodingException, FileNotFoundException {
-        Configuration.loadTestConfig(getTestConfigPath());
-    }
-
-    public static void loadEmptyTestConfig() throws UnsupportedEncodingException, FileNotFoundException {
-        Configuration.loadTestConfig(getEmptyTestConfigPath());
-    }
-
     public static String getTestConfigPath() throws UnsupportedEncodingException {
-        return getResourcePath("test-config.json");
+        return getResourcePath("test-config.yml");
     }
 
     public static String getEmptyTestConfigPath() throws UnsupportedEncodingException {

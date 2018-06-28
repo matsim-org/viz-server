@@ -1,5 +1,6 @@
 package org.matsim.webvis.auth.authorization;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -8,6 +9,7 @@ import javax.ws.rs.FormParam;
 import java.net.URI;
 
 @Getter
+@AllArgsConstructor
 class AuthenticationPostRequest extends AuthenticationRequest {
 
     @NotEmpty

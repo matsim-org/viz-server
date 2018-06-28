@@ -1,0 +1,37 @@
+server:
+    applicationConnectors:
+        - type: https
+          port: 3000
+          keyStorePath: keystore.jks
+          keyStorePassword: 123456
+
+tokenSigningKeyStore: keystore.jks
+tokenSigningKeyStorePassword: 123456
+tokenSigningKeyAlias: selfsigned
+
+users: 
+  - username: some@email.adress
+    password: longpassword
+    id: test-user-id
+    
+clients:
+    - name: test-client
+      id: test-client-id
+      secret: test-client-secret
+      redirectUris:
+        - http://localhost:8080/authentication
+      scopes: 
+        - openid
+        - user-client
+
+protectedResources: 
+    - name: file-server
+      secret: file-server-secret
+      id: file-server-id
+      scopes: 
+        - relying-party
+    - name: frame-animation-service
+      secret: frame-animation-service-secret
+      id: frame-animation-service-id
+      scopes: 
+        - service-client

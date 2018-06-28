@@ -3,35 +3,24 @@ package org.matsim.webvis.auth.authorization;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.matsim.webvis.auth.Routes;
-import org.matsim.webvis.auth.entities.Token;
 import org.matsim.webvis.auth.token.TokenService;
 import org.matsim.webvis.auth.util.TestUtils;
-import org.matsim.webvis.common.communication.HttpStatus;
-import org.matsim.webvis.common.errorHandling.CodedException;
 import org.matsim.webvis.common.errorHandling.InvalidInputException;
 import org.matsim.webvis.common.errorHandling.UnauthorizedException;
-import spark.Request;
-import spark.Response;
 
-import java.io.FileNotFoundException;
-import java.io.UnsupportedEncodingException;
+import javax.servlet.http.HttpSession;
 import java.net.URI;
-import java.util.HashMap;
 
-import static junit.framework.TestCase.fail;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
 
-public class AuthorizationRequestHandlerTest {
+public class AuthorizationResourceTest {
 
     private AuthorizationResource testObject;
 
     @BeforeClass
-    public static void setUpFixture() throws UnsupportedEncodingException, FileNotFoundException {
-        TestUtils.loadTestConfig();
+    public static void setUpFixture() {
+        TestUtils.loadTestConfigIfNecessary();
     }
 
     @Before
@@ -41,6 +30,48 @@ public class AuthorizationRequestHandlerTest {
         testObject.authService = mock(AuthorizationService.class);
     }
 
+    /*
+    Tests for application flow
+     */
+    @Test(expected = InvalidInputException.class)
+    public void doAuthorization_invalidRequest_exception() {
+
+        AuthenticationRequest request = new AuthenticationGetRequest(
+                "not-openid", "invalid-response-type", URI.create("http://uri.com"),
+                "client-id", "state", "nonce"
+        );
+        HttpSession session = TestUtils.mockSession("id");
+        String token = "some-token";
+
+        testObject.doAuthorization(request, session, token);
+
+        fail("invalid auth request should cause exception");
+    }
+
+    @Test(expected = UnauthorizedException.class)
+    public void doAuthorization_invalidClient_exception() {
+
+    }
+
+    @Test
+    public void doAuthorization_invalidToken_redirectToLogin() {
+
+    }
+
+    @Test
+    public void doAuthorization_errorDuringProcessing_redirectToCallbackWithError() {
+
+    }
+
+    /*
+    Tests for openid-connect spec
+     */
+
+    @Test
+    public void b() {
+
+    }
+/*
     @Test(expected = InvalidInputException.class)
     public void handle_requestWithoutParamsNoSession_exception() {
 
@@ -152,4 +183,5 @@ public class AuthorizationRequestHandlerTest {
 
         verify(response).redirect(anyString(), eq(HttpStatus.FOUND));
     }
+    */
 }

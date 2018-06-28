@@ -1,18 +1,9 @@
 package org.matsim.webvis.auth.token;
 
-import org.junit.Test;
-import org.matsim.webvis.auth.config.Configuration;
-import org.matsim.webvis.auth.util.TestUtils;
-
-import java.io.FileNotFoundException;
-import java.io.UnsupportedEncodingException;
-
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
-
 public class TokenSigningKeyProviderTest {
 
-    @Test(expected = Exception.class)
+
+   /* @Test(expected = Exception.class)
     public void initialization_noKeyStoreFile_exception() throws UnsupportedEncodingException, FileNotFoundException {
 
         TestUtils.loadEmptyTestConfig();
@@ -31,4 +22,6 @@ public class TokenSigningKeyProviderTest {
         assertNotNull(provider.getPrivateKey());
         assertNotNull(provider.getPublicKey());
     }
+
+*/
 }

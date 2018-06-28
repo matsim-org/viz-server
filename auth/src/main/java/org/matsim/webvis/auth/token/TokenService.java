@@ -11,7 +11,6 @@ import org.matsim.webvis.auth.entities.Token;
 import org.matsim.webvis.auth.entities.User;
 import org.matsim.webvis.auth.relyingParty.RelyingPartyService;
 import org.matsim.webvis.auth.user.UserService;
-import org.matsim.webvis.common.auth.PrincipalCredentialToken;
 import org.matsim.webvis.common.database.AbstractEntity;
 import org.matsim.webvis.common.errorHandling.CodedException;
 import org.matsim.webvis.common.errorHandling.UnauthorizedException;
@@ -39,14 +38,6 @@ public class TokenService {
     Token grantWithPassword(String username, char[] password) throws CodedException {
         User user = userService.authenticate(username, password);
         return createAccessToken(user, "");
-    }
-
-    Token grantForScope(ClientCredentialsGrantRequest request) {
-
-        PrincipalCredentialToken auth = request.getTokenRequest().getBasicAuth();
-        RelyingParty relyingParty = relyingPartyService.validateRelyingParty(
-                auth.getPrincipal(), auth.getCredential(), request.getTokenRequest().getScope());
-        return createAccessToken(relyingParty, String.join(" ", request.getTokenRequest().getScope()));
     }
 
     Token grantForScope(RelyingParty relyingParty, String scope) {
