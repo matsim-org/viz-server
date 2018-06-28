@@ -7,9 +7,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.matsim.webvis.auth.entities.Token;
 import org.matsim.webvis.auth.entities.User;
-import org.matsim.webvis.auth.relyingParty.RelyingPartyService;
 import org.matsim.webvis.auth.util.TestUtils;
-import org.matsim.webvis.common.errorHandling.UnauthorizedException;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -21,12 +19,11 @@ import static org.mockito.Mockito.*;
 public class TokenServiceTest {
 
     private static TokenDAO tokenDAO = new TokenDAO();
-    private static RelyingPartyService rpService = RelyingPartyService.Instance;
     private TokenService testObject;
 
     @BeforeClass
     public static void setUpFixture() {
-        //TODO TestUtils.loadTestConfig();
+        TestUtils.loadTestConfigIfNecessary();
     }
 
     @Before
@@ -41,33 +38,6 @@ public class TokenServiceTest {
         TestUtils.removeAllRelyingParties();
         TestUtils.removeAllUser();
     }
-
-    @Test
-    public void grantWithPassword_allRight_accessToken() {
-
-        final String password = "longpassword";
-        final String name = "name";
-        User user = TestUtils.persistUser(name, password);
-
-        Token token = testObject.grantWithPassword(name, password.toCharArray());
-
-        assertEquals(user.getId(), token.getSubjectId());
-        assertTrue(token.getExpiresAt().toEpochMilli() > 0);
-        assertFalse(token.getTokenValue().isEmpty());
-    }
-
-    @Test(expected = UnauthorizedException.class)
-    public void grantWithPassword_authenticationFails_Exception() {
-
-        final String password = "longpassword";
-        final String name = "name";
-        TestUtils.persistUser(name, password);
-        testObject.grantWithPassword(name, "wrong password".toCharArray());
-
-        fail("grantWithPassword should have thrown exception if password is wrong");
-    }
-
-
 
     @Test
     public void createIdToken_withNonce_idToken() {

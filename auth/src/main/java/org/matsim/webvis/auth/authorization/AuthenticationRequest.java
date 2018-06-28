@@ -41,6 +41,8 @@ abstract class AuthenticationRequest {
     abstract String getNonce();
 
     void validate() {
+        if (requiredParamsMissing())
+            throw new InvalidInputException("required param missing");
         if (isInvalidScope())
             throw new InvalidInputException("scope must be set and contain 'openid'");
         if (isInvalidResponseType())
@@ -50,11 +52,17 @@ abstract class AuthenticationRequest {
     }
 
     boolean isResponseTypeIdToken() {
-        return getResponseType().contains(ID_TOKEN);
+        return Arrays.stream(getResponseType().split(" ")).anyMatch(type -> type.equals(ID_TOKEN));
     }
 
     boolean isResponseTypeToken() {
-        return getResponseType().contains(TOKEN);
+        return Arrays.stream(getResponseType().split(" ")).anyMatch(type -> type.equals(TOKEN));
+    }
+
+    private boolean requiredParamsMissing() {
+        return StringUtils.isBlank(getResponseType()) ||
+                StringUtils.isBlank(getClientId()) ||
+                getRedirectUri() == null;
     }
 
     private boolean isInvalidScope() {
@@ -64,7 +72,7 @@ abstract class AuthenticationRequest {
     private boolean isInvalidResponseType() {
 
         String[] responseTypes = getResponseType().split(" ");
-        return Arrays.stream(responseTypes).noneMatch(validResponseTypes::contains);
+        return !Arrays.stream(responseTypes).allMatch(validResponseTypes::contains);
     }
 
 }

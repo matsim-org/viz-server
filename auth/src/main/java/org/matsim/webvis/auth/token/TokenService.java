@@ -10,9 +10,7 @@ import org.matsim.webvis.auth.entities.RelyingParty;
 import org.matsim.webvis.auth.entities.Token;
 import org.matsim.webvis.auth.entities.User;
 import org.matsim.webvis.auth.relyingParty.RelyingPartyService;
-import org.matsim.webvis.auth.user.UserService;
 import org.matsim.webvis.common.database.AbstractEntity;
-import org.matsim.webvis.common.errorHandling.CodedException;
 import org.matsim.webvis.common.errorHandling.UnauthorizedException;
 
 import java.time.Duration;
@@ -27,17 +25,11 @@ public class TokenService {
 
     Algorithm algorithm;
     TokenDAO tokenDAO = new TokenDAO();
-    private UserService userService = UserService.Instance;
     private RelyingPartyService relyingPartyService = RelyingPartyService.Instance;
 
     private TokenService() {
         TokenSigningKeyProvider provider = new TokenSigningKeyProvider();
         algorithm = Algorithm.RSA512(provider.getPublicKey(), provider.getPrivateKey());
-    }
-
-    Token grantWithPassword(String username, char[] password) throws CodedException {
-        User user = userService.authenticate(username, password);
-        return createAccessToken(user, "");
     }
 
     Token grantForScope(RelyingParty relyingParty, String scope) {

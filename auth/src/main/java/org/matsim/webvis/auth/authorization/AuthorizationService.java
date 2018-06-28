@@ -16,10 +16,10 @@ import java.net.URLEncoder;
 class AuthorizationService {
 
     static final AuthorizationService Instance = new AuthorizationService();
-    private TokenService tokenService = TokenService.Instance;
-    private UserService userService = UserService.Instance;
+    TokenService tokenService = TokenService.Instance;
+    UserService userService = UserService.Instance;
 
-    private RelyingPartyService relyingPartyService = RelyingPartyService.Instance;
+    RelyingPartyService relyingPartyService = RelyingPartyService.Instance;
 
     Client validateClient(AuthenticationRequest request) {
         return relyingPartyService.validateClient(

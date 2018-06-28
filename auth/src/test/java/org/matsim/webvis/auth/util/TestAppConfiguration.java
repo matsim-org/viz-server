@@ -2,17 +2,20 @@ package org.matsim.webvis.auth.util;
 
 import org.matsim.webvis.auth.config.AppConfiguration;
 
-import java.net.URISyntaxException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 
-public class TestAppConfiguration extends AppConfiguration {
+class TestAppConfiguration extends AppConfiguration {
 
     TestAppConfiguration() {
         try {
-            this.tokenSigningKeyStore = this.getClass().getClassLoader().getResource("keystore.jks").toURI().toString();
-        } catch (URISyntaxException e) {
+            //noinspection ConstantConditions
+            this.tokenSigningKeyStore = URLDecoder.decode(
+                    this.getClass().getClassLoader().getResource("keystore.jks").getFile(), "UTF-8");
+        } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
-        this.tokenSigningKeyStorePassword = "123456";
+        this.tokenSigningKeyStorePassword = "chocopause";
         this.tokenSigningKeyAlias = "selfsigned";
     }
 }

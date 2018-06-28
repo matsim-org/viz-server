@@ -1,18 +1,25 @@
 package org.matsim.webvis.auth.authorization;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.matsim.webvis.auth.entities.Client;
+import org.matsim.webvis.auth.entities.Token;
 import org.matsim.webvis.auth.token.TokenService;
 import org.matsim.webvis.auth.util.TestUtils;
+import org.matsim.webvis.common.errorHandling.CodedException;
 import org.matsim.webvis.common.errorHandling.InvalidInputException;
 import org.matsim.webvis.common.errorHandling.UnauthorizedException;
 
 import javax.servlet.http.HttpSession;
+import javax.ws.rs.core.Response;
 import java.net.URI;
 
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
+import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 
 public class AuthorizationResourceTest {
 
@@ -30,9 +37,6 @@ public class AuthorizationResourceTest {
         testObject.authService = mock(AuthorizationService.class);
     }
 
-    /*
-    Tests for application flow
-     */
     @Test(expected = InvalidInputException.class)
     public void doAuthorization_invalidRequest_exception() {
 
@@ -51,137 +55,168 @@ public class AuthorizationResourceTest {
     @Test(expected = UnauthorizedException.class)
     public void doAuthorization_invalidClient_exception() {
 
-    }
-
-    @Test
-    public void doAuthorization_invalidToken_redirectToLogin() {
-
-    }
-
-    @Test
-    public void doAuthorization_errorDuringProcessing_redirectToCallbackWithError() {
-
-    }
-
-    /*
-    Tests for openid-connect spec
-     */
-
-    @Test
-    public void b() {
-
-    }
-/*
-    @Test(expected = InvalidInputException.class)
-    public void handle_requestWithoutParamsNoSession_exception() {
-
-        Request request = AuthorizationTestUtils.mockRequestWithQueryParamsMap(new HashMap<>());
-        Response response = mock(Response.class);
-
-        testObject.handle(request, response);
-
-        fail("no parameters and no session should cause exception");
-    }
-
-    @Test
-    public void handle_requestWithoutParamsWithSessionNoCookie_redirectToLogin() {
-
-        Request request = AuthorizationTestUtils.mockRequestWithQueryParamsMap(new HashMap<>());
-        Response response = mock(Response.class);
-        AuthenticationRequest authRequest = new AuthenticationRequest(AuthorizationTestUtils.mockRequestWithParams().queryMap());
-        AuthorizationRequestHandler.loginSession.put(request.session().id(), authRequest);
-        when(testObject.tokenService.validateToken(any())).thenThrow(new UnauthorizedException("bla"));
-
-        testObject.handle(request, response);
-
-        verify(response).redirect(eq(Routes.LOGIN), eq(HttpStatus.FOUND));
-    }
-
-    @Test
-    public void handle_requestWithoutParamsWithSessionWithCookie_redirect() {
-
-        Request request = AuthorizationTestUtils.mockRequestWithQueryParamsMap(new HashMap<>());
-        Response response = mock(Response.class);
-        AuthenticationRequest authRequest = new AuthenticationRequest(AuthorizationTestUtils.mockRequestWithParams().queryMap());
-        Token idToken = new Token();
-        idToken.setSubjectId("any-id");
-        AuthorizationRequestHandler.loginSession.put(request.session().id(), authRequest);
-        when(testObject.tokenService.validateToken(any())).thenReturn(idToken);
-        when(testObject.authService.generateAuthenticationResponse(any(), anyString())).thenReturn(authRequest.getRedirectUri());
-
-        testObject.handle(request, response);
-
-        verify(response).redirect(eq(authRequest.getRedirectUri().toString()), eq(HttpStatus.FOUND));
-    }
-
-    @Test(expected = InvalidInputException.class)
-    public void handle_requestWithParamsWrongArgs_exception() {
-
-        Request request = AuthorizationTestUtils.mockRequestWithParams("response_type", "wrong types");
-        Response response = mock(Response.class);
-
-        testObject.handle(request, response);
-
-        fail("invalid request should cause exception");
-    }
-
-    @Test(expected = UnauthorizedException.class)
-    public void handle_requestWithParamsInvalidClient_exception() {
-
-        Request request = AuthorizationTestUtils.mockRequestWithParams();
-        Response response = mock(Response.class);
         when(testObject.authService.validateClient(any())).thenThrow(new UnauthorizedException("bla"));
+        AuthenticationRequest request = new AuthenticationGetRequest(
+                "openid", "token", URI.create("http://uri.com"),
+                "invalid-client", "state", "nonce"
+        );
+        HttpSession session = TestUtils.mockSession("id");
+        String token = "token";
 
-        testObject.handle(request, response);
+        testObject.doAuthorization(request, session, token);
 
         fail("invalid client should cause exception");
     }
 
     @Test
-    public void handle_requestWithParamsNoCookie_redirectToLogin() {
+    public void doAuthorization_invalidToken_redirectToLogin() {
 
-        Request request = AuthorizationTestUtils.mockRequestWithParams();
-        Response response = mock(Response.class);
-        when(testObject.authService.validateClient(any())).thenReturn(null);
-        when(testObject.tokenService.validateToken(any())).thenThrow(new UnauthorizedException("bla"));
+        when(testObject.tokenService.validateToken(anyString())).thenThrow(new UnauthorizedException("no"));
+        when(testObject.authService.validateClient(any())).thenReturn(new Client());
+        AuthenticationRequest request = new AuthenticationPostRequest(
+                "openid", "token", URI.create("http://uri.com"),
+                "client-id", "state", "nonce"
+        );
+        HttpSession session = TestUtils.mockSession("id");
+        String token = "token";
 
-        testObject.handle(request, response);
+        Response response = testObject.doAuthorization(request, session, token);
 
-        verify(response).redirect(eq(Routes.LOGIN), eq(HttpStatus.FOUND));
+        assertEquals(Response.Status.Family.REDIRECTION, response.getStatusInfo().getFamily());
+        assertEquals("/login", response.getLocation().toString());
     }
 
     @Test
-    public void handle_requestWithParamsWithCookieProcessingError_redirectWithError() {
+    public void doAuthorization_errorDuringProcessing_redirectToCallbackWithError() {
 
-        Request request = AuthorizationTestUtils.mockRequestWithParams();
-        Response response = mock(Response.class);
-        Token idToken = new Token();
-        idToken.setSubjectId("any-id");
+        Token token = new Token();
+        token.setSubjectId("some-id");
+        token.setTokenValue("some-value");
+        URI callback = URI.create("http://some.callback");
+        String errorCode = "code";
+        String errorMessage = "message";
+        when(testObject.tokenService.validateToken(anyString())).thenReturn(token);
+        when(testObject.authService.validateClient(any())).thenReturn(new Client());
+        when(testObject.authService.generateAuthenticationResponse(any(), anyString())).thenThrow(new CodedException(errorCode, errorMessage));
+        AuthenticationRequest request = new AuthenticationPostRequest(
+                "openid", "token", callback,
+                "client-id", "state", "nonce"
+        );
+        HttpSession session = TestUtils.mockSession("id");
 
-        when(testObject.authService.validateClient(any())).thenReturn(null);
-        when(testObject.tokenService.validateToken(any())).thenReturn(idToken);
-        when(testObject.authService.generateAuthenticationResponse(any(), anyString())).thenThrow(new CodedException("some", "error"));
+        Response response = testObject.doAuthorization(request, session, token.getTokenValue());
 
-        testObject.handle(request, response);
-
-        verify(response).redirect(anyString(), eq(HttpStatus.FOUND));
+        assertEquals(Response.Status.Family.SERVER_ERROR, response.getStatusInfo().getFamily());
+        assertEquals(callback.getHost(), response.getLocation().getHost());
+        assertEquals("error=" + errorCode + "&error_description=" + errorMessage, response.getLocation().getQuery());
     }
 
     @Test
-    public void handle_requestWithParamsWithCookie_redirect() {
+    public void doAuthorization_validRequest_redirectToCallback() {
 
-        Request request = AuthorizationTestUtils.mockRequestWithParams();
-        Response response = mock(Response.class);
-        Token idToken = new Token();
-        idToken.setSubjectId("any-id");
+        Token token = new Token();
+        token.setSubjectId("some-id");
+        token.setTokenValue("some-value");
+        URI callback = URI.create("http://some.callback");
+        when(testObject.tokenService.validateToken(token.getTokenValue())).thenReturn(token);
+        when(testObject.authService.validateClient(any())).thenReturn(new Client());
+        when(testObject.authService.generateAuthenticationResponse(any(), anyString())).thenReturn(callback);
 
-        when(testObject.authService.validateClient(any())).thenReturn(null);
-        when(testObject.tokenService.validateToken(any())).thenReturn(idToken);
-        when(testObject.authService.generateAuthenticationResponse(any(), anyString())).thenReturn(URI.create("http://some.uri"));
+        AuthenticationRequest request = new AuthenticationPostRequest(
+                "openid", "token", callback,
+                "client-id", "state", "nonce"
+        );
+        HttpSession session = TestUtils.mockSession("id");
 
-        testObject.handle(request, response);
+        Response response = testObject.doAuthorization(request, session, token.getTokenValue());
 
-        verify(response).redirect(anyString(), eq(HttpStatus.FOUND));
+        assertEquals(Response.Status.Family.REDIRECTION, response.getStatusInfo().getFamily());
+        assertEquals(callback.getHost(), response.getLocation().getHost());
+        assertTrue(StringUtils.isBlank(response.getLocation().getQuery()));
     }
-    */
+
+    @Test
+    public void authorize_postRequest_redirectToCallback() {
+
+        Token token = new Token();
+        token.setSubjectId("some-id");
+        token.setTokenValue("some-value");
+        URI callback = URI.create("http://some.callback");
+        when(testObject.tokenService.validateToken(token.getTokenValue())).thenReturn(token);
+        when(testObject.authService.validateClient(any())).thenReturn(new Client());
+        when(testObject.authService.generateAuthenticationResponse(any(), anyString())).thenReturn(callback);
+
+        AuthenticationPostRequest request = new AuthenticationPostRequest(
+                "openid", "token", callback,
+                "client-id", "state", "nonce"
+        );
+        HttpSession session = TestUtils.mockSession("id");
+
+        Response response = testObject.authorize(request, session, token.getTokenValue());
+
+        assertEquals(Response.Status.Family.REDIRECTION, response.getStatusInfo().getFamily());
+        assertEquals(callback.getHost(), response.getLocation().getHost());
+        assertTrue(StringUtils.isBlank(response.getLocation().getQuery()));
+    }
+
+    @Test
+    public void authorize_getRequest_redirectToCallback() {
+
+        Token token = new Token();
+        token.setSubjectId("some-id");
+        token.setTokenValue("some-value");
+        URI callback = URI.create("http://some.callback");
+        when(testObject.tokenService.validateToken(token.getTokenValue())).thenReturn(token);
+        when(testObject.authService.validateClient(any())).thenReturn(new Client());
+        when(testObject.authService.generateAuthenticationResponse(any(), anyString())).thenReturn(callback);
+
+        AuthenticationGetRequest request = new AuthenticationGetRequest(
+                "openid", "token", callback,
+                "client-id", "state", "nonce"
+        );
+        HttpSession session = TestUtils.mockSession("id");
+
+        Response response = testObject.authorize(request, session, token.getTokenValue());
+
+        assertEquals(Response.Status.Family.REDIRECTION, response.getStatusInfo().getFamily());
+        assertEquals(callback.getHost(), response.getLocation().getHost());
+        assertTrue(StringUtils.isBlank(response.getLocation().getQuery()));
+    }
+
+    @Test(expected = InvalidInputException.class)
+    public void afterLogin_noRequest_exception() {
+
+        HttpSession session = TestUtils.mockSession("id");
+
+        testObject.afterLogin(session, "some-token");
+
+        fail("no stored session should cause exception");
+    }
+
+    @Test
+    public void afterLogin_success_redirect() {
+
+        Token token = new Token();
+        token.setSubjectId("some-id");
+        token.setTokenValue("some-value");
+        URI callback = URI.create("http://some.callback");
+        AuthenticationGetRequest request = new AuthenticationGetRequest(
+                "openid", "token", callback,
+                "client-id", "state", "nonce"
+        );
+        HttpSession session = TestUtils.mockSession("id");
+        AuthorizationResource.loginSession.put(session.getId(), request);
+
+        when(testObject.tokenService.validateToken(token.getTokenValue())).thenReturn(token);
+        when(testObject.authService.validateClient(any())).thenReturn(new Client());
+        when(testObject.authService.generateAuthenticationResponse(any(), anyString())).thenReturn(callback);
+
+        Response response = testObject.afterLogin(session, token.getTokenValue());
+
+        assertEquals(Response.Status.Family.REDIRECTION, response.getStatusInfo().getFamily());
+        assertEquals(callback.getHost(), response.getLocation().getHost());
+        assertTrue(StringUtils.isBlank(response.getLocation().getQuery()));
+
+        verify(session).invalidate();
+    }
 }

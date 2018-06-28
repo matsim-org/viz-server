@@ -2,6 +2,7 @@ package org.matsim.webvis.auth.user;
 
 import io.dropwizard.views.View;
 import lombok.Getter;
+import org.apache.commons.lang3.StringUtils;
 import org.matsim.webvis.auth.entities.Token;
 import org.matsim.webvis.auth.entities.User;
 import org.matsim.webvis.auth.token.TokenService;
@@ -17,13 +18,13 @@ import java.net.URI;
 @Produces(MediaType.TEXT_HTML)
 public class LoginResource {
 
-    private UserService userService = UserService.Instance;
-    private TokenService tokenService = TokenService.Instance;
+    UserService userService = UserService.Instance;
+    TokenService tokenService = TokenService.Instance;
 
     @POST
     public Response login(@FormParam("username") String username, @FormParam("password") String password) {
 
-        if (username == null || password == null)
+        if (StringUtils.isBlank(username) || StringUtils.isBlank(password))
             return Response.status(Response.Status.OK).type(MediaType.TEXT_HTML)
                     .entity(LoginView.create()).build();
 
@@ -53,7 +54,7 @@ public class LoginResource {
     }
 
     @Getter
-    public static class LoginView extends View {
+    static class LoginView extends View {
 
         private final boolean error;
         private final String errorMessage = "username or password was wrong";

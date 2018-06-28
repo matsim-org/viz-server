@@ -8,7 +8,6 @@ import org.matsim.webvis.common.errorHandling.InvalidInputException;
 import org.matsim.webvis.common.errorHandling.UnauthorizedException;
 
 import javax.servlet.http.HttpSession;
-import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -20,14 +19,14 @@ import java.util.concurrent.ConcurrentHashMap;
 @Produces(MediaType.APPLICATION_JSON)
 public class AuthorizationResource {
 
-    private static Map<String, AuthenticationRequest> loginSession = new ConcurrentHashMap<>();
+    static Map<String, AuthenticationRequest> loginSession = new ConcurrentHashMap<>();
 
     TokenService tokenService = TokenService.Instance;
     AuthorizationService authService = AuthorizationService.Instance;
 
     @GET
     public Response authorize(
-            @Valid @BeanParam AuthenticationGetRequest request,
+            @BeanParam AuthenticationGetRequest request,
             @Session HttpSession session,
             @CookieParam("login") String token) {
 
@@ -37,7 +36,7 @@ public class AuthorizationResource {
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public Response authorize(
-            @Valid @BeanParam AuthenticationPostRequest request,
+            @BeanParam AuthenticationPostRequest request,
             @Session HttpSession session,
             @CookieParam("login") String token) {
 
@@ -91,6 +90,6 @@ public class AuthorizationResource {
     private Response redirectOnError(URI redirectURI, String code, String message) {
 
         redirectURI = redirectURI.resolve("?error=" + code + "&error_description=" + message);
-        return Response.seeOther(redirectURI).build();
+        return Response.seeOther(redirectURI).status(Response.Status.INTERNAL_SERVER_ERROR).build();
     }
 }

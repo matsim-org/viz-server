@@ -96,7 +96,7 @@ public class UserServiceTest {
     @Test
     public void createUser_configUser_allFine() {
 
-        ConfigUser configUser = new ConfigUser("name", "id", "longpassword");
+        ConfigUser configUser = new ConfigUser("name", "longpassword", "id");
 
         User result = testObject.createUser(configUser);
 

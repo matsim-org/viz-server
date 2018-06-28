@@ -19,35 +19,18 @@ public class TokenResource {
     private final static String GRANT_TYPE = "grant_type";
     private final static String SCOPE = "scope";
     private final static String CLIENT_CREDENTIALS = "client_credentials";
-    private final static String PASSWORD = "password";
-    private final static String USERNAME = "username";
 
-    private TokenService tokenService = TokenService.Instance;
+    TokenService tokenService = TokenService.Instance;
 
-    @Path("/client-credentials")
     @POST
-    public AccessTokenResponse grantWithClientCredentials(
+    public AccessTokenResponse token(
             @Auth RelyingParty rp,
             @QueryParam(GRANT_TYPE) @NotEmpty String grantType,
             @QueryParam(SCOPE) @NotEmpty String scope
     ) {
         if (!CLIENT_CREDENTIALS.equals(grantType))
-            throw new InvalidInputException("parameters don't match grant type");
+            throw new InvalidInputException("unsupported grant type");
         Token token = tokenService.grantForScope(rp, scope);
-        return new AccessTokenResponse(token);
-    }
-
-    @Path("/password")
-    @POST
-    public AccessTokenResponse grantWithPassword(
-            @QueryParam(GRANT_TYPE) @NotEmpty String grantType,
-            @QueryParam(SCOPE) @NotEmpty String scope,
-            @QueryParam(USERNAME) @NotEmpty String username,
-            @QueryParam(PASSWORD) @NotEmpty String password) {
-
-        if (!PASSWORD.equals(grantType))
-            throw new InvalidInputException("parameters don't match grant type");
-        Token token = tokenService.grantWithPassword(username, password.toCharArray());
         return new AccessTokenResponse(token);
     }
 }
