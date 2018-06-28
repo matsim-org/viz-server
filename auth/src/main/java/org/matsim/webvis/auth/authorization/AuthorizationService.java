@@ -34,9 +34,9 @@ class AuthorizationService {
         return URI.create(request.getRedirectUri().toString() + fragment);
     }
 
-    private String getStateIfNecessary(AuthenticationRequest request2) {
-        if (StringUtils.isNotBlank(request2.getState()))
-            return "&state=" + urlEncode(request2.getState());
+    private String getStateIfNecessary(AuthenticationRequest request) {
+        if (StringUtils.isNotBlank(request.getState()))
+            return "&state=" + urlEncode(request.getState());
         return "";
     }
 
@@ -52,9 +52,8 @@ class AuthorizationService {
     }
 
     private String addIdTokenIfNecessary(AuthenticationRequest request, User user) {
-        if (request.getType() == AuthenticationRequest.Type.IdToken
-                || request.getType() == AuthenticationRequest.Type.AccessAndIdToken) {
 
+        if (request.isResponseTypeIdToken()) {
             Token idToken = tokenService.createIdToken(user, request.getNonce());
             return "&id_token=" + idToken.getTokenValue();
         }
@@ -62,8 +61,7 @@ class AuthorizationService {
     }
 
     private String addAccessTokenIfNecessary(AuthenticationRequest request, User user) {
-        if (request.getType() == AuthenticationRequest.Type.AccessToken
-                || request.getType() == AuthenticationRequest.Type.AccessAndIdToken) {
+        if (request.isResponseTypeToken()) {
 
             String scope = request.getScope().replace("openid", "").trim();
             Token accessToken = tokenService.createAccessToken(user, String.join(" ", scope));

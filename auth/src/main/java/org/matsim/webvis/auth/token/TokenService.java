@@ -6,16 +6,11 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.matsim.webvis.auth.entities.RelyingParty;
 import org.matsim.webvis.auth.entities.Token;
 import org.matsim.webvis.auth.entities.User;
 import org.matsim.webvis.auth.relyingParty.RelyingPartyService;
-import org.matsim.webvis.auth.user.UserService;
-import org.matsim.webvis.common.auth.PrincipalCredentialToken;
 import org.matsim.webvis.common.database.AbstractEntity;
-import org.matsim.webvis.common.errorHandling.CodedException;
 import org.matsim.webvis.common.errorHandling.UnauthorizedException;
 
 import java.time.Duration;
@@ -28,10 +23,8 @@ public class TokenService {
 
     public static final TokenService Instance = new TokenService();
 
-    private static final Logger logger = LogManager.getLogger();
     Algorithm algorithm;
     TokenDAO tokenDAO = new TokenDAO();
-    private UserService userService = UserService.Instance;
     private RelyingPartyService relyingPartyService = RelyingPartyService.Instance;
 
     private TokenService() {
@@ -39,17 +32,10 @@ public class TokenService {
         algorithm = Algorithm.RSA512(provider.getPublicKey(), provider.getPrivateKey());
     }
 
-    Token grantWithPassword(String username, char[] password) throws CodedException {
-        User user = userService.authenticate(username, password);
-        return createAccessToken(user, "");
-    }
+    Token grantForScope(RelyingParty relyingParty, String scope) {
 
-    Token grantWithClientCredentials(ClientCredentialsGrantRequest request) {
-
-        PrincipalCredentialToken auth = request.getTokenRequest().getBasicAuth();
-        RelyingParty relyingParty = relyingPartyService.validateRelyingParty(
-                auth.getPrincipal(), auth.getCredential(), request.getTokenRequest().getScope());
-        return createAccessToken(relyingParty, String.join(" ", request.getTokenRequest().getScope()));
+        relyingPartyService.validateRelyingPartyScope(relyingParty, scope);
+        return createAccessToken(relyingParty, scope);
     }
 
     public Token createIdToken(User user) {

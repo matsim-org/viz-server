@@ -1,8 +1,7 @@
 package org.matsim.webvis.auth.helper;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.matsim.webvis.auth.user.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
@@ -14,7 +13,8 @@ import java.util.Base64;
 
 public class SecretHelper {
 
-    private static final Logger logger = LogManager.getLogger(UserService.class);
+    private static Logger logger = LoggerFactory.getLogger(SecretHelper.class);
+
     private static final String algorithm = "PBKDF2WithHmacSHA512";
     private static final int iterations = 1024;
     private static final int keyLength = 256;

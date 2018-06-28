@@ -1,8 +1,6 @@
 package org.matsim.webvis.common.auth;
 
 import org.apache.http.client.utils.URIBuilder;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.matsim.webvis.common.communication.Http;
 import org.matsim.webvis.common.communication.HttpCredential;
 import org.matsim.webvis.common.errorHandling.InternalException;
@@ -15,8 +13,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 public class AuthenticationHandler implements Filter {
-
-    private static Logger logger = LogManager.getLogger();
     private Http http;
     private HttpCredential credential;
     private URI introspectionEndpoint;
@@ -53,7 +49,7 @@ public class AuthenticationHandler implements Filter {
         try {
             return new URIBuilder(introspectionEndpoint).setParameter("token", token).build();
         } catch (URISyntaxException e) {
-            logger.error("Could not create introspection uri", e);
+            //TODO: logger.error("Could not create introspection uri", e);
             throw new InternalException("Could not create URI");
         }
     }

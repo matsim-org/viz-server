@@ -6,8 +6,6 @@ import org.apache.http.Consts;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.matsim.webvis.common.communication.Http;
 import org.matsim.webvis.common.communication.HttpCredential;
 
@@ -19,8 +17,6 @@ import java.util.List;
 public class ClientAuthentication implements HttpCredential {
 
     public enum AuthState {NotAuthenticated, Requesting, Failed, Authenticated}
-
-    private static final Logger logger = LogManager.getLogger();
 
     @Getter
     private AuthState state = AuthState.NotAuthenticated;
@@ -56,9 +52,9 @@ public class ClientAuthentication implements HttpCredential {
             accessToken = response.getAccess_token();
             scope = response.getScope();
             this.state = AuthState.Authenticated;
-            logger.info("received access_token! " + accessToken);
+            //TODO: logger.info("received access_token! " + accessToken);
         } catch (RuntimeException e) {
-            logger.error("Error while requesting authentication ", e);
+            //TODO: logger.error("Error while requesting authentication ", e);
             this.state = AuthState.Failed;
         }
     }

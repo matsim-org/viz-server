@@ -1,8 +1,6 @@
 package org.matsim.webvis.common.database;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -12,8 +10,6 @@ import java.util.function.Function;
 
 @SuppressWarnings("WeakerAccess")
 public class PersistenceUnit {
-
-    private static final Logger logger = LogManager.getLogger();
     private EntityManagerFactory entityManagerFactory;
 
     public PersistenceUnit(String unitName) {
@@ -114,7 +110,7 @@ public class PersistenceUnit {
             result = query.apply(queryFactory);
             em.getTransaction().commit();
         } catch (Exception e) {
-            logger.error(e);
+            //logger.error(e);
         } finally {
             em.close();
         }

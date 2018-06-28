@@ -128,7 +128,7 @@ public class RelyingPartyServiceTest {
         RelyingPartyCredential credential = new RelyingPartyCredential();
         credential.setRelyingParty(party);
 
-        RelyingPartyCredential persisted = relyingPartyDAO.persistCredential(credential);
+        relyingPartyDAO.persistCredential(credential);
 
         testObject.validateRelyingParty(party.getId(), "wrong secret");
 

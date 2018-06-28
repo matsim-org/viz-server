@@ -5,19 +5,13 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.matsim.webvis.auth.config.ConfigRelyingParty;
-import org.matsim.webvis.auth.entities.RelyingParty;
 import org.matsim.webvis.auth.entities.Token;
 import org.matsim.webvis.auth.entities.User;
-import org.matsim.webvis.auth.relyingParty.RelyingPartyService;
 import org.matsim.webvis.auth.util.TestUtils;
-import org.matsim.webvis.common.errorHandling.UnauthorizedException;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.HashSet;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -25,12 +19,11 @@ import static org.mockito.Mockito.*;
 public class TokenServiceTest {
 
     private static TokenDAO tokenDAO = new TokenDAO();
-    private static RelyingPartyService rpService = RelyingPartyService.Instance;
     private TokenService testObject;
 
     @BeforeClass
-    public static void setUpFixture() throws Exception {
-        TestUtils.loadTestConfig();
+    public static void setUpFixture() {
+        TestUtils.loadTestConfigIfNecessary();
     }
 
     @Before
@@ -44,75 +37,6 @@ public class TokenServiceTest {
         tokenDAO.removeAllTokens();
         TestUtils.removeAllRelyingParties();
         TestUtils.removeAllUser();
-    }
-
-    @Test
-    public void grantWithPassword_allRight_accessToken() {
-
-        final String password = "longpassword";
-        final String name = "name";
-        User user = TestUtils.persistUser(name, password);
-
-        Token token = testObject.grantWithPassword(name, password.toCharArray());
-
-        assertEquals(user.getId(), token.getSubjectId());
-        assertTrue(token.getExpiresAt().toEpochMilli() > 0);
-        assertFalse(token.getTokenValue().isEmpty());
-    }
-
-    @Test(expected = UnauthorizedException.class)
-    public void grantWithPassword_authenticationFails_Exception() {
-
-        final String password = "longpassword";
-        final String name = "name";
-        TestUtils.persistUser(name, password);
-        testObject.grantWithPassword(name, "wrong password".toCharArray());
-
-        fail("grantWithPassword should have thrown exception if password is wrong");
-    }
-
-    @Test(expected = UnauthorizedException.class)
-    public void grantWithClientCredentials_authenticationFails_unauthorizedException() {
-
-        final String id = "rpId";
-        final String secret = "secret";
-        final String scope = "some scopes";
-        rpService.createRelyingParty(new ConfigRelyingParty(id, "name", secret, new HashSet<>(Arrays.asList(scope.split(" ")))));
-        TokenRequest tokenRequest = TestUtils.mockTokenRequest(id, "wrong-secret", scope);
-        ClientCredentialsGrantRequest request = new ClientCredentialsGrantRequest(tokenRequest);
-
-        testObject.grantWithClientCredentials(request);
-
-        fail("authentication failure should cause exception");
-    }
-
-    @Test(expected = UnauthorizedException.class)
-    public void grantWithClientCredentials_scopesDontMatch_unauthorizedException() {
-
-        final String id = "rpId";
-        final String secret = "secret";
-        final String[] scopes = new String[]{"some scopes"};
-        rpService.createRelyingParty(new ConfigRelyingParty(id, "name", secret, new HashSet<>(Arrays.asList(scopes))));
-        TokenRequest tokenRequest = TestUtils.mockTokenRequest(id, secret, "other-scope");
-        ClientCredentialsGrantRequest request = new ClientCredentialsGrantRequest(tokenRequest);
-
-        testObject.grantWithClientCredentials(request);
-
-        fail("authentication failure should cause exception");
-    }
-
-    @Test
-    public void grantWithClientCredential_allGood_Token() {
-
-        final String id = "rpId";
-        final String secret = "secret";
-        final String scope = "some scopes";
-        RelyingParty party = rpService.createRelyingParty(new ConfigRelyingParty(id, "name", secret, new HashSet<>(Arrays.asList(scope.split(" ")))));
-        ClientCredentialsGrantRequest request = new ClientCredentialsGrantRequest(TestUtils.mockTokenRequest(id, secret, scope));
-
-        Token token = testObject.grantWithClientCredentials(request);
-
-        assertEquals(party.getId(), token.getSubjectId());
     }
 
     @Test

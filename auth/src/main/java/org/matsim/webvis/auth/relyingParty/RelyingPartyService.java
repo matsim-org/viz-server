@@ -1,7 +1,4 @@
 package org.matsim.webvis.auth.relyingParty;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.matsim.webvis.auth.config.ConfigClient;
 import org.matsim.webvis.auth.config.ConfigRelyingParty;
 import org.matsim.webvis.auth.entities.Client;
@@ -10,6 +7,8 @@ import org.matsim.webvis.auth.entities.RelyingParty;
 import org.matsim.webvis.auth.entities.RelyingPartyCredential;
 import org.matsim.webvis.auth.helper.SecretHelper;
 import org.matsim.webvis.common.errorHandling.UnauthorizedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.util.Arrays;
@@ -18,12 +17,14 @@ import java.util.Set;
 
 public class RelyingPartyService {
 
+    private static Logger logger = LoggerFactory.getLogger(RelyingPartyService.class);
+
     public static final RelyingPartyService Instance = new RelyingPartyService();
 
     private RelyingPartyService() {
     }
 
-    private static Logger logger = LogManager.getLogger();
+
     private RelyingPartyDAO relyingPartyDAO = new RelyingPartyDAO();
 
     Client createClient(String name, Iterable<URI> redirectUris) {
@@ -71,7 +72,7 @@ public class RelyingPartyService {
         return persisted;
     }
 
-    public RelyingParty validateRelyingParty(String clientId, String secret, String scope) {
+    RelyingParty validateRelyingParty(String clientId, String secret, String scope) {
 
         RelyingParty party = validateRelyingParty(clientId, secret);
 
@@ -81,7 +82,7 @@ public class RelyingPartyService {
         return party;
     }
 
-    public RelyingParty validateRelyingParty(String clientId, String secret) {
+    RelyingParty validateRelyingParty(String clientId, String secret) {
 
         RelyingPartyCredential credential = relyingPartyDAO.findCredential(clientId);
 
@@ -89,6 +90,12 @@ public class RelyingPartyService {
             throw new UnauthorizedException("invalid client id or secret or scope not allowed");
 
         return credential.getRelyingParty();
+    }
+
+    public String validateRelyingPartyScope(RelyingParty rp, String scope) {
+        if (scopesDontMatch(rp.getScopes(), scope))
+            throw new UnauthorizedException("requested scope is not registered");
+        return scope;
     }
 
     public Client validateClient(String clientId, URI redirectUri, String scope) {

@@ -1,24 +1,25 @@
 package org.matsim.webvis.auth.user;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.matsim.webvis.auth.config.ConfigUser;
 import org.matsim.webvis.auth.entities.User;
 import org.matsim.webvis.auth.entities.UserCredentials;
 import org.matsim.webvis.auth.helper.SecretHelper;
 import org.matsim.webvis.common.errorHandling.InvalidInputException;
 import org.matsim.webvis.common.errorHandling.UnauthorizedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.persistence.RollbackException;
 
 public class UserService {
+
+    private static Logger logger = LoggerFactory.getLogger(UserService.class);
 
     public static final UserService Instance = new UserService();
 
     private UserService() {
     }
 
-    private static final Logger logger = LogManager.getLogger(UserService.class);
     private static final int minPasswordLength = 10;
 
     private UserDAO userDAO = new UserDAO();
@@ -50,7 +51,7 @@ public class UserService {
         } catch (RollbackException e) {
             throw new InvalidInputException("user already exists");
         } catch (Exception e) {
-            logger.error(e);
+            logger.error("tja", e);
         }
         return null;
     }
@@ -59,7 +60,7 @@ public class UserService {
         return userDAO.findUser(id);
     }
 
-    public User authenticate(String eMail, char[] password) {
+    User authenticate(String eMail, char[] password) {
 
         UserCredentials credentials = userDAO.findUserCredentials(eMail);
 

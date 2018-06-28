@@ -13,8 +13,6 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.matsim.webvis.common.errorHandling.CodedException;
 import org.matsim.webvis.common.errorHandling.InternalException;
 import org.matsim.webvis.common.errorHandling.UnauthorizedException;
@@ -30,8 +28,6 @@ import java.util.function.Supplier;
 public class Http {
 
     static final String AUTHORIZATION = "Authorization";
-
-    private static final Logger logger = LogManager.getLogger();
     private static final Gson gson = new Gson();
 
     private HttpClientFactory clientFactory;
@@ -97,7 +93,7 @@ public class Http {
 
         private <T> T execute(ResponseHandler<T> handler) {
             try (CloseableHttpClient client = this.client.get()) {
-                logger.info("making request to: " + request.getURI().toString());
+                //TODO: logger.info("making request to: " + request.getURI().toString());
                 return client.execute(request, handler);
             } catch (IOException e) {
                 throw new InternalException("Request to: " + request.getURI().toString() + " failed.");
