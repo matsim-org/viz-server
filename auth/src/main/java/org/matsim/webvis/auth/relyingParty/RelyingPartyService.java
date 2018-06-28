@@ -7,6 +7,8 @@ import org.matsim.webvis.auth.entities.RelyingParty;
 import org.matsim.webvis.auth.entities.RelyingPartyCredential;
 import org.matsim.webvis.auth.helper.SecretHelper;
 import org.matsim.webvis.common.errorHandling.UnauthorizedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.util.Arrays;
@@ -14,6 +16,8 @@ import java.util.Collection;
 import java.util.Set;
 
 public class RelyingPartyService {
+
+    private static Logger logger = LoggerFactory.getLogger(RelyingPartyService.class);
 
     public static final RelyingPartyService Instance = new RelyingPartyService();
 
@@ -64,11 +68,11 @@ public class RelyingPartyService {
         RelyingPartyCredential credential = new RelyingPartyCredential();
         credential.setRelyingParty(party);
         RelyingParty persisted = relyingPartyDAO.persistCredential(credential).getRelyingParty();
-        //TODO logger.info("persisted relying party: (id: " + persisted.getId() + ", secret: " + credential.getSecret());
+        logger.info("persisted relying party: (id: " + persisted.getId() + ", secret: " + credential.getSecret());
         return persisted;
     }
 
-    public RelyingParty validateRelyingParty(String clientId, String secret, String scope) {
+    RelyingParty validateRelyingParty(String clientId, String secret, String scope) {
 
         RelyingParty party = validateRelyingParty(clientId, secret);
 
@@ -78,7 +82,7 @@ public class RelyingPartyService {
         return party;
     }
 
-    public RelyingParty validateRelyingParty(String clientId, String secret) {
+    RelyingParty validateRelyingParty(String clientId, String secret) {
 
         RelyingPartyCredential credential = relyingPartyDAO.findCredential(clientId);
 

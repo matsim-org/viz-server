@@ -6,10 +6,14 @@ import org.matsim.webvis.auth.entities.UserCredentials;
 import org.matsim.webvis.auth.helper.SecretHelper;
 import org.matsim.webvis.common.errorHandling.InvalidInputException;
 import org.matsim.webvis.common.errorHandling.UnauthorizedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.persistence.RollbackException;
 
 public class UserService {
+
+    private static Logger logger = LoggerFactory.getLogger(UserService.class);
 
     public static final UserService Instance = new UserService();
 
@@ -42,12 +46,12 @@ public class UserService {
         user.setId(id);
         credentials.setUser(user);
         try {
-            //TODO logger.info("creating user with eMail: " + user.getEMail());
+            logger.info("creating user with eMail: " + user.getEMail());
             return userDAO.persistCredentials(credentials).getUser();
         } catch (RollbackException e) {
             throw new InvalidInputException("user already exists");
         } catch (Exception e) {
-            //TODO logger.error(e);
+            logger.error("tja", e);
         }
         return null;
     }
@@ -56,7 +60,7 @@ public class UserService {
         return userDAO.findUser(id);
     }
 
-    public User authenticate(String eMail, char[] password) {
+    User authenticate(String eMail, char[] password) {
 
         UserCredentials credentials = userDAO.findUserCredentials(eMail);
 

@@ -2,6 +2,8 @@ package org.matsim.webvis.auth.token;
 
 import lombok.Getter;
 import org.matsim.webvis.auth.config.AppConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -16,16 +18,13 @@ import java.security.interfaces.RSAPublicKey;
 @Getter
 class TokenSigningKeyProvider {
 
+    private static Logger logger = LoggerFactory.getLogger(TokenSigningKeyProvider.class);
+
     private RSAPublicKey publicKey;
     private RSAPrivateKey privateKey;
 
     TokenSigningKeyProvider() {
-        this(AppConfiguration.getInstance().getTokenSigningKeyStore());
-    }
-
-    //for unit testing
-    TokenSigningKeyProvider(String keyStorePath) {
-            KeyStore store = loadKeyStore(keyStorePath);
+        KeyStore store = loadKeyStore(AppConfiguration.getInstance().getTokenSigningKeyStore());
             publicKey = loadPublicKey(store);
             privateKey = loadPrivateKey(store);
 
@@ -39,7 +38,7 @@ class TokenSigningKeyProvider {
             store.load(stream, AppConfiguration.getInstance().getTokenSigningKeyStorePassword().toCharArray());
             return store;
         } catch (Exception e) {
-            //TODO logger.error("Failed to load keystore!", e);
+            logger.error("Failed to load keystore!", e);
             throw new RuntimeException(e);
         }
     }
@@ -52,10 +51,10 @@ class TokenSigningKeyProvider {
             return (RSAPublicKey) publicKey;
 
         } catch (KeyStoreException e) {
-            //TODO logger.error("Failed to load public token signing key.");
+            logger.error("Failed to load public token signing key.");
             throw new RuntimeException(e);
         } catch (ClassCastException e) {
-            //TODO logger.error("public signing key was not an RSA key.");
+            logger.error("public signing key was not an RSA key.");
             throw new RuntimeException(e);
         }
     }
@@ -68,7 +67,7 @@ class TokenSigningKeyProvider {
         } catch (ClassCastException e) {
             throw new RuntimeException("Private signing key is not an RSA key.");
         } catch (Exception e) {
-            //TODO logger.error("failed to load private token signing key", e);
+            logger.error("failed to load private token signing key", e);
             throw new RuntimeException(e);
         }
     }

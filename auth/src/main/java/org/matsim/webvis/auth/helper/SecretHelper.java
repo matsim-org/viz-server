@@ -1,5 +1,8 @@
 package org.matsim.webvis.auth.helper;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
@@ -10,6 +13,7 @@ import java.util.Base64;
 
 public class SecretHelper {
 
+    private static Logger logger = LoggerFactory.getLogger(SecretHelper.class);
 
     private static final String algorithm = "PBKDF2WithHmacSHA512";
     private static final int iterations = 1024;
@@ -31,7 +35,7 @@ public class SecretHelper {
             byte[] res = key.getEncoded();
             return Base64.getEncoder().encodeToString(res);
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-            //TODO logger.error("Error while hashing password.", e);
+            logger.error("Error while hashing password.", e);
             throw new RuntimeException("Failed to hash password", e);
         }
     }

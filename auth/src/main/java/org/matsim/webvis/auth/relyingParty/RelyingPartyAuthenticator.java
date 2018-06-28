@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public class RelyingPartyAuthenticator implements Authenticator<BasicCredentials, RelyingParty> {
 
-    private RelyingPartyService rpService = RelyingPartyService.Instance;
+    RelyingPartyService rpService = RelyingPartyService.Instance;
 
     @Override
     public Optional<RelyingParty> authenticate(BasicCredentials basicCredentials) {
