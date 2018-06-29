@@ -3,9 +3,9 @@ package org.matsim.webvis.auth.authorization;
 import io.dropwizard.jersey.sessions.Session;
 import org.matsim.webvis.auth.entities.Token;
 import org.matsim.webvis.auth.token.TokenService;
-import org.matsim.webvis.common.errorHandling.CodedException;
-import org.matsim.webvis.common.errorHandling.InvalidInputException;
-import org.matsim.webvis.common.errorHandling.UnauthorizedException;
+import org.matsim.webvis.error.CodedException;
+import org.matsim.webvis.error.InvalidInputException;
+import org.matsim.webvis.error.UnauthorizedException;
 
 import javax.servlet.http.HttpSession;
 import javax.ws.rs.*;
@@ -65,7 +65,7 @@ public class AuthorizationResource {
         } catch (UnauthorizedException e) {
             return authenticateWithLogin(request, session);
         } catch (CodedException e) {
-            return redirectOnError(request.getRedirectUri(), e.getErrorCode(), e.getMessage());
+            return redirectOnError(request.getRedirectUri(), e.getInternalErrorCode(), e.getMessage());
         }
     }
 

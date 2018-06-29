@@ -1,7 +1,7 @@
 package org.matsim.webvis.auth.authorization;
 
 import org.apache.commons.lang3.StringUtils;
-import org.matsim.webvis.common.errorHandling.InvalidInputException;
+import org.matsim.webvis.error.InvalidInputException;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -46,7 +46,7 @@ abstract class AuthenticationRequest {
         if (isInvalidScope())
             throw new InvalidInputException("scope must be set and contain 'openid'");
         if (isInvalidResponseType())
-            throw new InvalidInputException("response type was not set");
+            throw new InvalidInputException("response type was not set or invalid");
         if (isResponseTypeIdToken() && StringUtils.isBlank(getNonce()))
             throw new InvalidInputException("nonce must be provided if response type is id_token");
     }

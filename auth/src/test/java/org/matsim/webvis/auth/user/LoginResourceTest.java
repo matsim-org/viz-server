@@ -7,7 +7,7 @@ import org.matsim.webvis.auth.entities.Token;
 import org.matsim.webvis.auth.entities.User;
 import org.matsim.webvis.auth.token.TokenService;
 import org.matsim.webvis.auth.util.TestUtils;
-import org.matsim.webvis.common.errorHandling.UnauthorizedException;
+import org.matsim.webvis.error.UnauthorizedException;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;

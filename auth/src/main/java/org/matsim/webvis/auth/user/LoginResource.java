@@ -6,7 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.matsim.webvis.auth.entities.Token;
 import org.matsim.webvis.auth.entities.User;
 import org.matsim.webvis.auth.token.TokenService;
-import org.matsim.webvis.common.errorHandling.UnauthorizedException;
+import org.matsim.webvis.error.UnauthorizedException;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;

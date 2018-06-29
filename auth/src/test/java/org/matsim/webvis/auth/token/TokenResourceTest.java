@@ -6,7 +6,7 @@ import org.junit.Test;
 import org.matsim.webvis.auth.entities.RelyingParty;
 import org.matsim.webvis.auth.entities.Token;
 import org.matsim.webvis.auth.util.TestUtils;
-import org.matsim.webvis.common.errorHandling.InvalidInputException;
+import org.matsim.webvis.error.InvalidInputException;
 
 import java.time.Instant;
 

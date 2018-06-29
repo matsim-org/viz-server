@@ -10,8 +10,8 @@ import org.matsim.webvis.auth.relyingParty.RelyingPartyService;
 import org.matsim.webvis.auth.token.TokenService;
 import org.matsim.webvis.auth.user.UserService;
 import org.matsim.webvis.auth.util.TestUtils;
-import org.matsim.webvis.common.errorHandling.CodedException;
-import org.matsim.webvis.common.errorHandling.InternalException;
+import org.matsim.webvis.error.CodedException;
+import org.matsim.webvis.error.InternalException;
 
 import java.net.URI;
 
@@ -42,7 +42,7 @@ public class AuthorizationServiceTest {
     @Test(expected = CodedException.class)
     public void isValidClient_clientInvalid_invalid() {
 
-        when(testObject.relyingPartyService.validateClient(any(), any(), any())).thenThrow(new CodedException("bla", "bla"));
+        when(testObject.relyingPartyService.validateClient(any(), any(), any())).thenThrow(new CodedException(1, "bla", "bla"));
 
         testObject.validateClient(createAuthRequest());
 

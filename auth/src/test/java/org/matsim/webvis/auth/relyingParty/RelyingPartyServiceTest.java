@@ -9,7 +9,7 @@ import org.matsim.webvis.auth.entities.Client;
 import org.matsim.webvis.auth.entities.RedirectUri;
 import org.matsim.webvis.auth.entities.RelyingParty;
 import org.matsim.webvis.auth.entities.RelyingPartyCredential;
-import org.matsim.webvis.common.errorHandling.UnauthorizedException;
+import org.matsim.webvis.error.UnauthorizedException;
 
 import java.net.URI;
 import java.util.*;

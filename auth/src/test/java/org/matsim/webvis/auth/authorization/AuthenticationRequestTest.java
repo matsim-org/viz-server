@@ -1,7 +1,7 @@
 package org.matsim.webvis.auth.authorization;
 
 import org.junit.Test;
-import org.matsim.webvis.common.errorHandling.InvalidInputException;
+import org.matsim.webvis.error.InvalidInputException;
 
 import java.net.URI;
 

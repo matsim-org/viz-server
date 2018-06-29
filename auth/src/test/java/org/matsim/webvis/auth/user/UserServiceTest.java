@@ -6,8 +6,8 @@ import org.junit.Test;
 import org.matsim.webvis.auth.config.ConfigUser;
 import org.matsim.webvis.auth.entities.User;
 import org.matsim.webvis.auth.util.TestUtils;
-import org.matsim.webvis.common.errorHandling.InvalidInputException;
-import org.matsim.webvis.common.errorHandling.UnauthorizedException;
+import org.matsim.webvis.error.InvalidInputException;
+import org.matsim.webvis.error.UnauthorizedException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;

@@ -4,7 +4,7 @@ import io.dropwizard.auth.Auth;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.matsim.webvis.auth.entities.RelyingParty;
 import org.matsim.webvis.auth.entities.Token;
-import org.matsim.webvis.common.errorHandling.InvalidInputException;
+import org.matsim.webvis.error.InvalidInputException;
 
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -28,6 +28,7 @@ public class TokenResource {
             @QueryParam(GRANT_TYPE) @NotEmpty String grantType,
             @QueryParam(SCOPE) @NotEmpty String scope
     ) {
+
         if (!CLIENT_CREDENTIALS.equals(grantType))
             throw new InvalidInputException("unsupported grant type");
         Token token = tokenService.grantForScope(rp, scope);

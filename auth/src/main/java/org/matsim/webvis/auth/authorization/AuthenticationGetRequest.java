@@ -2,12 +2,14 @@ package org.matsim.webvis.auth.authorization;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.ws.rs.QueryParam;
 import java.net.URI;
 
 @Getter
 @AllArgsConstructor
+@NoArgsConstructor
 class AuthenticationGetRequest extends AuthenticationRequest {
 
     @QueryParam(SCOPE)

@@ -8,9 +8,9 @@ import org.matsim.webvis.auth.entities.Client;
 import org.matsim.webvis.auth.entities.Token;
 import org.matsim.webvis.auth.token.TokenService;
 import org.matsim.webvis.auth.util.TestUtils;
-import org.matsim.webvis.common.errorHandling.CodedException;
-import org.matsim.webvis.common.errorHandling.InvalidInputException;
-import org.matsim.webvis.common.errorHandling.UnauthorizedException;
+import org.matsim.webvis.error.CodedException;
+import org.matsim.webvis.error.InvalidInputException;
+import org.matsim.webvis.error.UnauthorizedException;
 
 import javax.servlet.http.HttpSession;
 import javax.ws.rs.core.Response;
@@ -97,7 +97,7 @@ public class AuthorizationResourceTest {
         String errorMessage = "message";
         when(testObject.tokenService.validateToken(anyString())).thenReturn(token);
         when(testObject.authService.validateClient(any())).thenReturn(new Client());
-        when(testObject.authService.generateAuthenticationResponse(any(), anyString())).thenThrow(new CodedException(errorCode, errorMessage));
+        when(testObject.authService.generateAuthenticationResponse(any(), anyString())).thenThrow(new CodedException(1, errorCode, errorMessage));
         AuthenticationRequest request = new AuthenticationPostRequest(
                 "openid", "token", callback,
                 "client-id", "state", "nonce"

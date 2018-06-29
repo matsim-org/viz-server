@@ -4,7 +4,7 @@ import io.dropwizard.auth.basic.BasicCredentials;
 import org.junit.Before;
 import org.junit.Test;
 import org.matsim.webvis.auth.entities.RelyingParty;
-import org.matsim.webvis.common.errorHandling.UnauthorizedException;
+import org.matsim.webvis.error.UnauthorizedException;
 
 import java.util.Optional;
 
@@ -35,7 +35,7 @@ public class RelyingPartyAuthenticatorTest {
         assertTrue(result.isPresent());
     }
 
-    @Test
+    @Test(expected = UnauthorizedException.class)
     public void authenticate_noSucess() {
 
         when(testObject.rpService.validateRelyingParty(anyString(), anyString())).thenThrow(new UnauthorizedException("no"));

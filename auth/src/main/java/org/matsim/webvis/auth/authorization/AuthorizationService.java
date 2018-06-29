@@ -7,7 +7,7 @@ import org.matsim.webvis.auth.entities.User;
 import org.matsim.webvis.auth.relyingParty.RelyingPartyService;
 import org.matsim.webvis.auth.token.TokenService;
 import org.matsim.webvis.auth.user.UserService;
-import org.matsim.webvis.common.errorHandling.InternalException;
+import org.matsim.webvis.error.InternalException;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;

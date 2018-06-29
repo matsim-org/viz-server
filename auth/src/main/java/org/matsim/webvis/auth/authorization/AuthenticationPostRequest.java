@@ -2,6 +2,7 @@ package org.matsim.webvis.auth.authorization;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;
@@ -10,6 +11,7 @@ import java.net.URI;
 
 @Getter
 @AllArgsConstructor
+@NoArgsConstructor
 class AuthenticationPostRequest extends AuthenticationRequest {
 
     @NotEmpty

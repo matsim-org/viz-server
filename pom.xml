@@ -14,6 +14,7 @@
         <module>auth</module>
         <module>files</module>
         <module>frame-animation</module>
+        <module>error-handling</module>
     </modules>
 
     <build>
