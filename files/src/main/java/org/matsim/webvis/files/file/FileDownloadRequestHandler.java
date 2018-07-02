@@ -32,7 +32,7 @@ public class FileDownloadRequestHandler implements Route {
 
         FileRequest body = JsonHelper.parseJson(request.body(), FileRequest.class);
         AuthenticationResult authResult = AuthenticationResult.fromRequestAttribute(request);
-        Subject subject = Subject.createSubject(authResult);
+        Subject subject = null; //Subject.createSubject(authResult);
         Project project = projectService.find(body.getProjectId(), subject.getAgent());
 
         FileEntry fileEntry = project.getFiles().stream().filter(file -> file.getId().equals(body.getFileId())).findFirst()

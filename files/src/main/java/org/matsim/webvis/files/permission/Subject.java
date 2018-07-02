@@ -2,10 +2,12 @@ package org.matsim.webvis.files.permission;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.matsim.webvis.common.auth.AuthenticationResult;
+import org.matsim.webis.oauth.IntrospectionResult;
 import org.matsim.webvis.files.agent.AgentService;
 import org.matsim.webvis.files.entities.Agent;
 import org.matsim.webvis.files.entities.User;
+
+import java.util.Optional;
 
 @Getter
 @AllArgsConstructor
@@ -18,17 +20,17 @@ public class Subject {
     private Agent agent;
     //this is public for unit testing
     public static AgentService agentService = AgentService.Instance;
-    private AuthenticationResult authenticationResult;
+    private IntrospectionResult authenticationResult;
 
-    public static Subject createSubject(AuthenticationResult authResult) {
+    public static Optional<Agent> createSubject(IntrospectionResult authResult) {
 
         switch(authResult.getScope()) {
             case USER:
-                return new Subject(findOrCreateUser(authResult.getSub()), authResult);
+                return Optional.of(findOrCreateUser(authResult.getSub()));
             case SERVICE:
-                return new Subject(agentService.getServiceAgent(), authResult);
+                return Optional.of(agentService.getServiceAgent());
             default:
-                return new Subject(agentService.getPublicAgent(), authResult);
+                return Optional.of(agentService.getPublicAgent());
         }
     }
 

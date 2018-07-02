@@ -1,13 +1,7 @@
 package org.matsim.webvis.files.permission;
 
 import org.junit.After;
-import org.junit.Test;
-import org.matsim.webvis.common.auth.AuthenticationResult;
-import org.matsim.webvis.files.agent.AgentService;
-import org.matsim.webvis.files.entities.User;
 import org.matsim.webvis.files.util.TestUtils;
-
-import static org.junit.Assert.assertEquals;
 
 public class SubjectTest {
 
@@ -16,7 +10,7 @@ public class SubjectTest {
         TestUtils.removeAllEntities();
     }
 
-
+/*
     @Test
     public void createSubject_userScope_subjectWithUser() {
 
@@ -61,4 +55,5 @@ public class SubjectTest {
         assertEquals(result, subject.getAuthenticationResult());
         assertEquals(AgentService.Instance.getPublicAgent(), subject.getAgent());
     }
+    */
 }

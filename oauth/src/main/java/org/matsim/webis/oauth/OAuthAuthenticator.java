@@ -15,14 +15,14 @@ public class OAuthAuthenticator<P extends Principal> implements Authenticator<St
 
     Client client;
     URI introspectionEndpoint;
-    Function<String, Optional<P>> principalProvider;
+    Function<IntrospectionResult, Optional<P>> principalProvider;
 
     @Override
     public Optional<P> authenticate(String token) throws AuthenticationException {
 
         IntrospectionResult result = introspectToken(token);
         if (result.isActive())
-            return principalProvider.apply(result.getSub());
+            return principalProvider.apply(result);
 
         return Optional.empty();
     }

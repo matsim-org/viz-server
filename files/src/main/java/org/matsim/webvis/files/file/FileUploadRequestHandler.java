@@ -24,7 +24,7 @@ public class FileUploadRequestHandler extends JsonResponseHandler {
     protected Answer process(Request request, Response response) {
 
         AuthenticationResult authResult = AuthenticationResult.fromRequestAttribute(request);
-        Subject subject = Subject.createSubject(authResult);
+        Subject subject = null;//Subject.createSubject(authResult);
 
         // Parsing and uploading of the request
         FileUploadRequest uploadRequest = requestFactory.createRequest(request);

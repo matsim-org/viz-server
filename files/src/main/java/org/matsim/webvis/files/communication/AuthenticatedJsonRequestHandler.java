@@ -19,6 +19,7 @@ public abstract class AuthenticatedJsonRequestHandler<T> extends JsonRequestHand
     protected Answer process(T body, Request rawRequest) {
 
         AuthenticationResult authResult = AuthenticationResult.fromRequestAttribute(rawRequest);
-        return process(body, Subject.createSubject(authResult));
+        //return process(body, Subject.createSubject(null));
+        return null;
     }
 }

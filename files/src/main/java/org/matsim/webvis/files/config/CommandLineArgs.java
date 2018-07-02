@@ -1,8 +1,7 @@
 package org.matsim.webvis.files.config;
 
-import com.beust.jcommander.Parameter;
-import lombok.Getter;
 
+/*
 @Getter
 public class CommandLineArgs {
 
@@ -13,3 +12,5 @@ public class CommandLineArgs {
     @Parameter(names = {"-config", "-c"}, description = "path to a configuration file")
     private String configFile = "";
 }
+
+*/

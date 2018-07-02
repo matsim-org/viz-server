@@ -1,6 +1,7 @@
 package org.matsim.webvis.files.config;
 
 import io.dropwizard.Configuration;
+import io.dropwizard.client.JerseyClientConfiguration;
 import lombok.Getter;
 import lombok.Setter;
 import org.matsim.webvis.files.entities.VisualizationType;
@@ -22,4 +23,5 @@ public class AppConfiguration extends Configuration {
     private String relyingPartyId = "relyingPartyId";
     private String relyingPartySecret = "secret";
     private List<VisualizationType> vizTypes = new ArrayList<>();
+    private JerseyClientConfiguration jerseyClient = new JerseyClientConfiguration();
 }

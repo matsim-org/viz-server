@@ -1,28 +1,7 @@
 package org.matsim.webvis.files;
 
-import com.beust.jcommander.JCommander;
-import org.matsim.webvis.common.auth.AuthenticationHandler;
-import org.matsim.webvis.common.auth.PrincipalCredentialToken;
-import org.matsim.webvis.common.communication.Http;
-import org.matsim.webvis.common.communication.HttpClientFactory;
-import org.matsim.webvis.common.communication.HttpClientFactoryWithTruststore;
-import org.matsim.webvis.common.communication.StartSpark;
-import org.matsim.webvis.files.config.CommandLineArgs;
-import org.matsim.webvis.files.config.Configuration;
-import org.matsim.webvis.files.entities.VisualizationType;
-import org.matsim.webvis.files.visualization.VisualizationService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
 public class Server {
-
+/*
     private static Logger logger = LoggerFactory.getLogger(Server.class);
 
     public static void main(String[] args) {
@@ -114,4 +93,5 @@ public class Server {
             service.persistType(type);
         }
     }
+    */
 }

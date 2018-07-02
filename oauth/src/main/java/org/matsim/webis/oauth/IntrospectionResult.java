@@ -3,7 +3,7 @@ package org.matsim.webis.oauth;
 import lombok.Getter;
 
 @Getter
-class IntrospectionResult {
+public class IntrospectionResult {
 
     private boolean active;
     private String scope;
