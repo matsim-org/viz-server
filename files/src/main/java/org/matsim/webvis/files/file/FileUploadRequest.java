@@ -5,10 +5,10 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.matsim.webvis.common.errorHandling.InvalidInputException;
 import org.matsim.webvis.files.config.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import spark.Request;
 
 import java.nio.file.Path;
@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 @Getter
 class FileUploadRequest {
 
-    private static Logger logger = LogManager.getLogger();
+    private static Logger logger = LoggerFactory.getLogger(FileUploadRequest.class);
 
     ServletFileUpload upload;
     private String projectId;

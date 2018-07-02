@@ -1,8 +1,6 @@
 package org.matsim.webvis.files;
 
 import com.beust.jcommander.JCommander;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.matsim.webvis.common.auth.AuthenticationHandler;
 import org.matsim.webvis.common.auth.PrincipalCredentialToken;
 import org.matsim.webvis.common.communication.Http;
@@ -13,6 +11,8 @@ import org.matsim.webvis.files.config.CommandLineArgs;
 import org.matsim.webvis.files.config.Configuration;
 import org.matsim.webvis.files.entities.VisualizationType;
 import org.matsim.webvis.files.visualization.VisualizationService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -23,7 +23,7 @@ import java.nio.file.Paths;
 
 public class Server {
 
-    private static Logger logger = LogManager.getLogger();
+    private static Logger logger = LoggerFactory.getLogger(Server.class);
 
     public static void main(String[] args) {
 
@@ -34,7 +34,7 @@ public class Server {
             loadConfigFile(commandLineArgs);
             createUploadDirectories();
         } catch (IOException e) {
-            logger.error(e);
+            logger.error("bla", e);
             System.exit(10);
         }
 

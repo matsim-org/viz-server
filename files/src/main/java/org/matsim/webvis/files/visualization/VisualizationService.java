@@ -1,12 +1,11 @@
 package org.matsim.webvis.files.visualization;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.matsim.webvis.common.errorHandling.CodedException;
 import org.matsim.webvis.common.errorHandling.Error;
 import org.matsim.webvis.files.entities.*;
 import org.matsim.webvis.files.permission.PermissionService;
 import org.matsim.webvis.files.project.ProjectService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.persistence.PersistenceException;
 import java.util.ArrayList;
@@ -15,7 +14,7 @@ import java.util.Map;
 
 public class VisualizationService {
 
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger logger = LoggerFactory.getLogger(VisualizationService.class);
 
     private ProjectService projectService = new ProjectService();
     private VisualizationDAO visualizationDAO = new VisualizationDAO();
