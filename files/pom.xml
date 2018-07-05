@@ -19,11 +19,7 @@
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>org.matsim</groupId>
-            <artifactId>common</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
+
         <dependency>
             <groupId>io.dropwizard</groupId>
             <artifactId>dropwizard-core</artifactId>
@@ -33,6 +29,11 @@
             <groupId>io.dropwizard</groupId>
             <artifactId>dropwizard-client</artifactId>
             <version>${dropwizard.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-hibernate5</artifactId>
+            <version>2.9.0</version>
         </dependency>
         <!--
         <dependency>
@@ -91,7 +92,7 @@
         </dependency>
         <dependency>
             <groupId>org.matsim</groupId>
-            <artifactId>oauth</artifactId>
+            <artifactId>database</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>

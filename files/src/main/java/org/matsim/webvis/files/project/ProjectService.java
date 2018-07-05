@@ -1,8 +1,7 @@
 package org.matsim.webvis.files.project;
 
 import org.apache.commons.fileupload.FileItem;
-import org.matsim.webvis.common.errorHandling.CodedException;
-import org.matsim.webvis.common.errorHandling.Error;
+import org.matsim.webvis.error.InternalException;
 import org.matsim.webvis.files.entities.*;
 import org.matsim.webvis.files.permission.PermissionService;
 import org.slf4j.Logger;
@@ -31,7 +30,7 @@ public class ProjectService {
         try {
             return projectDAO.persist(project);
         } catch (Exception e) {
-            throw new CodedException(Error.RESOURCE_EXISTS, "project already exists");
+            throw new InternalException("project already exists");
         }
     }
 
@@ -69,7 +68,7 @@ public class ProjectService {
             return projectDAO.persist(project);
         } catch (Exception e) {
             repository.removeFiles(entries);
-            throw new CodedException(Error.UNSPECIFIED_ERROR, "Error while persisting project");
+            throw new InternalException("Error while persisting project");
         }
     }
 
@@ -88,7 +87,7 @@ public class ProjectService {
         Project project = find(projectId, creator);
         Optional<FileEntry> optional = project.getFiles().stream().filter(e -> e.getId().equals(fileId)).findFirst();
         if (!optional.isPresent()) {
-            throw new CodedException(Error.RESOURCE_NOT_FOUND, "fileId not present");
+            throw new InternalException("fileId not present");
         }
 
         ProjectRepository repository = this.repositoryFactory.getRepository(project);

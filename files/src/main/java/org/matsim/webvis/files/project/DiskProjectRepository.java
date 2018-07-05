@@ -2,8 +2,7 @@ package org.matsim.webvis.files.project;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.io.FilenameUtils;
-import org.matsim.webvis.common.errorHandling.CodedException;
-import org.matsim.webvis.common.errorHandling.Error;
+import org.matsim.webvis.error.InternalException;
 import org.matsim.webvis.files.config.Configuration;
 import org.matsim.webvis.files.entities.FileEntry;
 import org.matsim.webvis.files.entities.Project;
@@ -22,6 +21,7 @@ import java.util.List;
 import java.util.UUID;
 
 public class DiskProjectRepository implements ProjectRepository {
+
 
     private static Logger logger = LoggerFactory.getLogger(DiskProjectRepository.class);
 
@@ -52,7 +52,7 @@ public class DiskProjectRepository implements ProjectRepository {
             item.write(file.toFile());
         } catch (Exception e) {
             logger.error("Error while writing file.", e);
-            throw new CodedException(Error.UNSPECIFIED_ERROR, "Error while writing file");
+            throw new InternalException("Error while writing file");
         }
 
         FileEntry entry = new FileEntry();
@@ -69,7 +69,7 @@ public class DiskProjectRepository implements ProjectRepository {
             return Files.newInputStream(filePath);
         } catch (IOException | InvalidPathException e) {
             logger.error("could not get file stream.", e);
-            throw new CodedException(Error.UNSPECIFIED_ERROR, "could not get file stream");
+            throw new InternalException("could not get file stream");
         }
     }
 
@@ -96,7 +96,7 @@ public class DiskProjectRepository implements ProjectRepository {
             Files.delete(file);
         } catch (IOException | InvalidPathException e) {
             logger.error("Error while removing file", e);
-            throw new CodedException(Error.UNSPECIFIED_ERROR, "could not remove file.");
+            throw new InternalException("could not remove file.");
         }
     }
 
@@ -106,7 +106,7 @@ public class DiskProjectRepository implements ProjectRepository {
             return Files.createDirectories(directory);
         } catch (IOException e) {
             logger.error("Error while creating project directory.", e);
-            throw new CodedException(Error.UNSPECIFIED_ERROR, "Could not open directory");
+            throw new InternalException("Could not open directory");
         }
     }
 }

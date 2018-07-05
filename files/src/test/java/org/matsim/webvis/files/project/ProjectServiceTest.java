@@ -5,10 +5,10 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
-import org.matsim.webvis.common.errorHandling.CodedException;
-import org.matsim.webvis.common.errorHandling.ForbiddenException;
+import org.matsim.webvis.error.CodedException;
+import org.matsim.webvis.error.ForbiddenException;
 import org.matsim.webvis.files.agent.UserDAO;
-import org.matsim.webvis.files.config.Configuration;
+import org.matsim.webvis.files.config.AppConfiguration;
 import org.matsim.webvis.files.entities.FileEntry;
 import org.matsim.webvis.files.entities.Permission;
 import org.matsim.webvis.files.entities.Project;
@@ -26,10 +26,12 @@ import java.util.Optional;
 
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @SuppressWarnings("ConstantConditions")
 public class ProjectServiceTest {
+
 
     private ProjectService testObject;
     private UserDAO userDAO = new UserDAO();
@@ -48,7 +50,7 @@ public class ProjectServiceTest {
 
     @AfterClass
     public static void tearDownFixture() throws IOException {
-        TestUtils.removeFileTree(Paths.get(Configuration.getInstance().getUploadedFilePath()));
+        TestUtils.removeFileTree(Paths.get(AppConfiguration.getInstance().getUploadFilePath()));
     }
 
     @Test(expected = CodedException.class)
@@ -86,9 +88,9 @@ public class ProjectServiceTest {
         assertEquals(name, project.getName());
         assertEquals(user.getId(), project.getCreator().getId());
 
-        Optional<Permission> optional = project.getPermissions().stream().filter(p -> p.getAgent().equalId(user)).findFirst();
+        Optional<Permission> optional = project.getPermissions().stream().filter(p -> p.getAgent().equals(user)).findFirst();
         assertTrue(optional.isPresent());
-        assertTrue(user.equalId(optional.get().getAgent()));
+        assertEquals(user, optional.get().getAgent());
     }
 
     @Test(expected = ForbiddenException.class)
@@ -290,4 +292,5 @@ public class ProjectServiceTest {
         project.addFileEntry(entry);
         return projectDAO.persist(project);
     }
+
 }

@@ -8,10 +8,7 @@ import java.util.List;
 public class ProjectDAO extends DAO {
 
     public Project persist(Project project) {
-        if (project.getId() == null) {
-            return database.persistOne(project);
-        }
-        return database.updateOne(project);
+        return database.persist(project);
     }
 
     Project find(String projectId) {
@@ -94,7 +91,7 @@ public class ProjectDAO extends DAO {
 
     public void removeAllProjects() {
 
-        EntityManager em = database.getEntityManager();
+        EntityManager em = database.createEntityManager();
         List<Project> projects = database.executeQuery(query -> query.selectFrom(QProject.project).fetch(), em);
         em.getTransaction().begin();
 
