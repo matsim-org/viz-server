@@ -1,34 +1,8 @@
 package org.matsim.webvis.files.file;
 
-import com.google.gson.Gson;
-import org.apache.http.HttpStatus;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.matsim.webvis.common.auth.AuthenticationResult;
-import org.matsim.webvis.common.communication.ContentType;
-import org.matsim.webvis.common.errorHandling.CodedException;
-import org.matsim.webvis.common.errorHandling.Error;
-import org.matsim.webvis.common.errorHandling.InvalidInputException;
-import org.matsim.webvis.files.entities.FileEntry;
-import org.matsim.webvis.files.entities.Project;
-import org.matsim.webvis.files.entities.User;
-import org.matsim.webvis.files.project.ProjectService;
-import org.matsim.webvis.files.util.TestUtils;
-import spark.Request;
-import spark.Response;
-
-import javax.servlet.ServletOutputStream;
-import javax.servlet.WriteListener;
-import javax.servlet.http.HttpServletResponse;
-import java.io.InputStream;
-
-import static junit.framework.TestCase.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-
 public class FileDownloadRequestHandlerTest {
 
+    /*
     private FileDownloadRequestHandler testObject;
 
     @Before
@@ -172,4 +146,5 @@ public class FileDownloadRequestHandlerTest {
         assertTrue(result instanceof Integer);
         assertEquals(HttpStatus.SC_OK, (int) result);
     }
+    */
 }

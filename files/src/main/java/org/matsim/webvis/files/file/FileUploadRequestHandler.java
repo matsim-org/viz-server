@@ -1,19 +1,7 @@
 package org.matsim.webvis.files.file;
 
-import org.matsim.webvis.common.auth.AuthenticationResult;
-import org.matsim.webvis.common.communication.Answer;
-import org.matsim.webvis.common.communication.JsonResponseHandler;
-import org.matsim.webvis.common.errorHandling.InvalidInputException;
-import org.matsim.webvis.files.communication.GsonFactory;
-import org.matsim.webvis.files.entities.Project;
-import org.matsim.webvis.files.permission.Subject;
-import org.matsim.webvis.files.project.ProjectService;
-import spark.Request;
-import spark.Response;
-
-
-public class FileUploadRequestHandler extends JsonResponseHandler {
-
+public class FileUploadRequestHandler {
+/*
     ProjectService projectService = new ProjectService();
     RequestFactory requestFactory = new RequestFactory();
 
@@ -41,4 +29,5 @@ public class FileUploadRequestHandler extends JsonResponseHandler {
             return new FileUploadRequest(request);
         }
     }
+    */
 }

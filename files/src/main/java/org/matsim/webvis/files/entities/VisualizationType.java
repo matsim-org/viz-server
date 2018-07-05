@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.matsim.webvis.common.database.AbstractEntity;
+import org.matsim.webvis.database.AbstractEntity;
 
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;

@@ -1,6 +1,8 @@
 package org.matsim.webvis.files.visualization;
-import org.matsim.webvis.common.errorHandling.CodedException;
-import org.matsim.webvis.common.errorHandling.Error;
+
+import org.matsim.webvis.error.CodedException;
+import org.matsim.webvis.error.Error;
+import org.matsim.webvis.error.InvalidInputException;
 import org.matsim.webvis.files.entities.*;
 import org.matsim.webvis.files.permission.PermissionService;
 import org.matsim.webvis.files.project.ProjectService;
@@ -28,15 +30,15 @@ public class VisualizationService {
         return visualizationDAO.findAllTypes();
     }
 
+    private static void validate(Visualization viz) throws CodedException {
+        if (viz == null) throw new InvalidInputException("could not find visualization");
+    }
+
     private VisualizationType findOrThrow(String visualizationType) throws CodedException {
         VisualizationType type = visualizationDAO.findType(visualizationType);
         if (type == null)
-            throw new CodedException(Error.RESOURCE_NOT_FOUND, "Could not find visualization type: " + visualizationType);
+            throw new InvalidInputException("Could not find visualization type: " + visualizationType);
         return type;
-    }
-
-    private static void validate(Visualization viz) throws CodedException {
-        if (viz == null) throw new CodedException(Error.RESOURCE_NOT_FOUND, "could not find visualization");
     }
 
     Visualization createVisualizationFromRequest(CreateVisualizationRequest request, Agent user) {
@@ -57,7 +59,7 @@ public class VisualizationService {
             return visualizationDAO.persist(viz);
         } catch (PersistenceException e) {
             logger.error("Could not perist", e);
-            throw new CodedException(Error.RESOURCE_EXISTS, "Visualization already exists");
+            throw new CodedException(409, Error.RESOURCE_EXISTS, "Visualization already exists");
         }
     }
 

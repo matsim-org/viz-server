@@ -1,6 +1,6 @@
 package org.matsim.webvis.files.permission;
 
-import org.matsim.webvis.common.errorHandling.ForbiddenException;
+import org.matsim.webvis.error.ForbiddenException;
 import org.matsim.webvis.files.agent.AgentService;
 import org.matsim.webvis.files.entities.Agent;
 import org.matsim.webvis.files.entities.Permission;

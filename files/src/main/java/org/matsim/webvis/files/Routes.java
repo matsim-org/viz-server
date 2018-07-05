@@ -1,17 +1,5 @@
 package org.matsim.webvis.files;
 
-import org.matsim.webvis.files.file.FileDeleteRequestHandler;
-import org.matsim.webvis.files.file.FileDownloadRequestHandler;
-import org.matsim.webvis.files.file.FileUploadRequestHandler;
-import org.matsim.webvis.files.project.CreateProjectRequestHandler;
-import org.matsim.webvis.files.project.ProjectRequestHandler;
-import org.matsim.webvis.files.visualization.CreateVisualizationRequestHandler;
-import org.matsim.webvis.files.visualization.VisualizationRequestHandler;
-import org.matsim.webvis.files.visualization.VisualizationTypeRequestHandler;
-import org.matsim.webvis.files.visualization.VisualizationsRequestHandler;
-
-import static spark.Spark.*;
-
 class Routes {
 
     private final static String FILE = "file/";
@@ -23,7 +11,7 @@ class Routes {
 
     static void initialize() {
 
-        put(PROJECT, new CreateProjectRequestHandler());
+        /*put(PROJECT, new CreateProjectRequestHandler());
         post(PROJECT, new ProjectRequestHandler());
         post(FILE_UPLOAD, new FileUploadRequestHandler());
         post(FILE, new FileDownloadRequestHandler());
@@ -32,6 +20,6 @@ class Routes {
         post(VISUALIZATION, new VisualizationRequestHandler());
         post(VISUALIZATION_TYPE, new VisualizationTypeRequestHandler());
         post(VISUALIZATIONS, new VisualizationsRequestHandler());
-
+*/
     }
 }

@@ -1,27 +1,7 @@
 package org.matsim.webvis.files.file;
 
-import org.apache.commons.io.IOUtils;
-import org.matsim.webvis.common.auth.AuthenticationResult;
-import org.matsim.webvis.common.communication.ContentType;
-import org.matsim.webvis.common.communication.HttpStatus;
-import org.matsim.webvis.common.communication.JsonHelper;
-import org.matsim.webvis.common.errorHandling.CodedException;
-import org.matsim.webvis.common.errorHandling.Error;
-import org.matsim.webvis.common.errorHandling.InvalidInputException;
-import org.matsim.webvis.files.entities.FileEntry;
-import org.matsim.webvis.files.entities.Project;
-import org.matsim.webvis.files.permission.Subject;
-import org.matsim.webvis.files.project.ProjectService;
-import spark.Request;
-import spark.Response;
-import spark.Route;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
-public class FileDownloadRequestHandler implements Route {
-
+public class FileDownloadRequestHandler {
+/*
     ProjectService projectService = new ProjectService();
 
     @Override
@@ -50,4 +30,5 @@ public class FileDownloadRequestHandler implements Route {
 
         return HttpStatus.OK;
     }
+    */
 }

@@ -6,10 +6,8 @@ import org.matsim.webvis.files.entities.*;
 public class AgentDAO extends DAO {
 
     public <T extends Agent> T persist(T agent) {
-        if (agent.getId() == null)
-           return database.persistOne(agent);
 
-        return database.updateOne(agent);
+        return database.persist(agent);
     }
 
     ServiceAgent findOrCreateServiceAgent() {

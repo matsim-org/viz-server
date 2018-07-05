@@ -1,16 +1,20 @@
 package org.matsim.webvis.files;
 
+import com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module;
 import io.dropwizard.Application;
 import io.dropwizard.auth.AuthDynamicFeature;
 import io.dropwizard.auth.AuthValueFactoryProvider;
 import io.dropwizard.auth.oauth.OAuthCredentialAuthFilter;
 import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.jersey.setup.JerseyEnvironment;
+import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.matsim.webis.oauth.OAuthAuthenticator;
+import org.matsim.webvis.database.AbstractEntity;
 import org.matsim.webvis.error.CodedExceptionMapper;
 import org.matsim.webvis.error.DefaultExceptionMapper;
+import org.matsim.webvis.files.communication.AbstractEntityMixin;
 import org.matsim.webvis.files.config.AppConfiguration;
 import org.matsim.webvis.files.entities.Agent;
 import org.matsim.webvis.files.entities.VisualizationType;
@@ -33,6 +37,13 @@ public class App extends Application<AppConfiguration> {
 
     public static void main(String[] args) throws Exception {
         new App().run(args);
+    }
+
+    @Override
+    public void initialize(Bootstrap<AppConfiguration> bootstrap) {
+
+        bootstrap.getObjectMapper().registerModule(new Hibernate5Module());
+        bootstrap.getObjectMapper().addMixIn(AbstractEntity.class, AbstractEntityMixin.class);
     }
 
     @Override

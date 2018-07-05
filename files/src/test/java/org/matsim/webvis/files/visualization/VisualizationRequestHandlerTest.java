@@ -1,24 +1,8 @@
 package org.matsim.webvis.files.visualization;
 
-import org.apache.http.HttpStatus;
-import org.junit.Before;
-import org.junit.Test;
-import org.matsim.webvis.common.communication.Answer;
-import org.matsim.webvis.common.errorHandling.CodedException;
-import org.matsim.webvis.common.errorHandling.InvalidInputException;
-import org.matsim.webvis.files.entities.User;
-import org.matsim.webvis.files.entities.Visualization;
-import org.matsim.webvis.files.util.TestUtils;
-
-import static junit.framework.TestCase.fail;
-import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 public class VisualizationRequestHandlerTest {
 
+    /*
     private VisualizationRequestHandler testObject;
 
     @Before
@@ -60,4 +44,5 @@ public class VisualizationRequestHandlerTest {
         assertEquals(HttpStatus.SC_OK, answer.getStatusCode());
         assertEquals(result, answer.getResponse());
     }
+    */
 }

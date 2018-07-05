@@ -1,8 +1,8 @@
 package org.matsim.webvis.files.agent;
 
 import lombok.Getter;
-import org.matsim.webvis.common.errorHandling.CodedException;
-import org.matsim.webvis.common.errorHandling.Error;
+import org.matsim.webvis.error.CodedException;
+import org.matsim.webvis.error.Error;
 import org.matsim.webvis.files.entities.PublicAgent;
 import org.matsim.webvis.files.entities.ServiceAgent;
 import org.matsim.webvis.files.entities.User;
@@ -34,7 +34,7 @@ public class AgentService {
         try {
             return userDAO.persist(user);
         } catch (Exception e) {
-            throw new CodedException(Error.RESOURCE_EXISTS, "user already exists");
+            throw new CodedException(409, Error.RESOURCE_EXISTS, "user already exists");
         }
     }
 

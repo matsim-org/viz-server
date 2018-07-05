@@ -1,23 +1,7 @@
 package org.matsim.webvis.files.file;
 
-import org.apache.http.HttpStatus;
-import org.junit.Before;
-import org.junit.Test;
-import org.matsim.webvis.common.communication.Answer;
-import org.matsim.webvis.common.errorHandling.CodedException;
-import org.matsim.webvis.files.entities.Project;
-import org.matsim.webvis.files.entities.User;
-import org.matsim.webvis.files.permission.Subject;
-import org.matsim.webvis.files.project.ProjectService;
-import org.matsim.webvis.files.util.TestUtils;
-
-import static junit.framework.TestCase.fail;
-import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 public class FileDeleteRequestHandlerTest {
+    /*
 
     private FileDeleteRequestHandler testObject;
 
@@ -74,4 +58,5 @@ public class FileDeleteRequestHandlerTest {
         assertEquals(HttpStatus.SC_OK, answer.getStatusCode());
         assertEquals(result, answer.getResponse());
     }
+    */
 }

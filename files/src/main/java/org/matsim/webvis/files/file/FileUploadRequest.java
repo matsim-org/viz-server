@@ -5,7 +5,7 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.matsim.webvis.common.errorHandling.InvalidInputException;
+import org.matsim.webvis.error.InvalidInputException;
 import org.matsim.webvis.files.config.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

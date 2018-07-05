@@ -4,7 +4,7 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.junit.Test;
-import org.matsim.webvis.common.errorHandling.InvalidInputException;
+import org.matsim.webvis.error.InvalidInputException;
 import org.matsim.webvis.files.util.TestUtils;
 import spark.Request;
 

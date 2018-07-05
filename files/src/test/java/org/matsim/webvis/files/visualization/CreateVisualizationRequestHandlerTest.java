@@ -1,25 +1,7 @@
 package org.matsim.webvis.files.visualization;
 
-import org.apache.http.HttpStatus;
-import org.junit.Before;
-import org.junit.Test;
-import org.matsim.webvis.common.communication.Answer;
-import org.matsim.webvis.common.errorHandling.CodedException;
-import org.matsim.webvis.common.errorHandling.InvalidInputException;
-import org.matsim.webvis.files.entities.User;
-import org.matsim.webvis.files.entities.Visualization;
-import org.matsim.webvis.files.util.TestUtils;
-
-import java.util.HashMap;
-
-import static junit.framework.TestCase.fail;
-import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 public class CreateVisualizationRequestHandlerTest {
-
+/*
     private CreateVisualizationRequestHandler testObject;
 
     @Before
@@ -91,4 +73,5 @@ public class CreateVisualizationRequestHandlerTest {
                 projectId, type, new HashMap<>(), new HashMap<>()
         );
     }
+    */
 }
