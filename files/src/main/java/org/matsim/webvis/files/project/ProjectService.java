@@ -1,8 +1,8 @@
 package org.matsim.webvis.files.project;
 
-import org.apache.commons.fileupload.FileItem;
 import org.matsim.webvis.error.InternalException;
 import org.matsim.webvis.files.entities.*;
+import org.matsim.webvis.files.file.FileUpload;
 import org.matsim.webvis.files.permission.PermissionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,9 +15,15 @@ public class ProjectService {
 
     private static Logger logger = LoggerFactory.getLogger(ProjectService.class);
 
-    ProjectDAO projectDAO = new ProjectDAO();
+    public static ProjectService Instance = new ProjectService();
+
+    private ProjectDAO projectDAO = new ProjectDAO();
     RepositoryFactory repositoryFactory = new RepositoryFactory();
-    PermissionService permissionService = PermissionService.Instance;
+    private PermissionService permissionService = PermissionService.Instance;
+
+    ProjectService() {
+
+    }
 
     public Project createNewProject(String projectName, User creator) {
 
@@ -56,12 +62,13 @@ public class ProjectService {
     }
 
 
-    public Project addFilesToProject(List<FileItem> items, Project project, Agent agent) {
+    public Project addFilesToProject(List<FileUpload> uploads, String projectId, Agent agent) {
 
-        permissionService.findWritePermission(agent, project.getId());
+        permissionService.findWritePermission(agent, projectId);
 
+        Project project = projectDAO.findWithFullGraph(projectId);
         ProjectRepository repository = repositoryFactory.getRepository(project);
-        List<FileEntry> entries = repository.addFiles(items);
+        List<FileEntry> entries = repository.addFiles(uploads);
         project.addFileEntries(entries);
 
         try {
@@ -72,15 +79,32 @@ public class ProjectService {
         }
     }
 
-    public InputStream getFileStream(Project project, FileEntry file, Agent agent) {
+    /* public Project addFilesToProject(List<FileItem> items, Project project, Agent agent) {
 
-        permissionService.findReadPermission(agent, file.getId());
+         permissionService.findWritePermission(agent, project.getId());
 
-        ProjectRepository repository = repositoryFactory.getRepository(project);
-        return repository.getFileStream(file);
+         ProjectRepository repository = repositoryFactory.getRepository(project);
+         List<FileEntry> entries = repository.addFiles(items);
+         project.addFileEntries(entries);
+
+         try {
+             return projectDAO.persist(project);
+         } catch (Exception e) {
+             repository.removeFiles(entries);
+             throw new InternalException("Error while persisting project");
+         }
+     }
+     */
+    public InputStream getFileStream(String projectId, String fileId, Agent agent) {
+
+        permissionService.findReadPermission(agent, fileId);
+
+        FileEntry entry = projectDAO.findFileEntry(projectId, fileId);
+        ProjectRepository repository = repositoryFactory.getRepository(entry.getProject());
+        return repository.getFileStream(entry);
     }
 
-    public Project removeFileFromProject(String projectId, String fileId, User creator) {
+    public Project removeFileFromProject(String projectId, String fileId, Agent creator) {
 
         permissionService.findDeletePermission(creator, fileId);
 

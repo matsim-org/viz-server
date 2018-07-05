@@ -1,11 +1,11 @@
 package org.matsim.webvis.files.project;
 
-import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.io.FilenameUtils;
 import org.matsim.webvis.error.InternalException;
-import org.matsim.webvis.files.config.Configuration;
+import org.matsim.webvis.files.config.AppConfiguration;
 import org.matsim.webvis.files.entities.FileEntry;
 import org.matsim.webvis.files.entities.Project;
+import org.matsim.webvis.files.file.FileUpload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class DiskProjectRepository implements ProjectRepository {
 
@@ -34,32 +35,56 @@ public class DiskProjectRepository implements ProjectRepository {
         this.projectDirectory = getProjectDirectory();
     }
 
-    public List<FileEntry> addFiles(Collection<FileItem> items) {
+    /* public List<FileEntry> addFiles(Collection<FileItem> items) {
 
-        List<FileEntry> writtenFiles = new ArrayList<>();
-        for (FileItem item : items) {
-            FileEntry entry = addFile(item);
-            writtenFiles.add(entry);
-        }
-        return writtenFiles;
+         List<FileEntry> writtenFiles = new ArrayList<>();
+         for (FileItem item : items) {
+             FileEntry entry = addFile(item);
+             writtenFiles.add(entry);
+         }
+         return writtenFiles;
+     }
+
+     public FileEntry addFile(FileItem item) {
+
+         String diskFileName = UUID.randomUUID().toString() + "." + FilenameUtils.getExtension(item.getName());
+         Path file = projectDirectory.resolve(diskFileName);
+         try {
+             item.write(file.toFile());
+         } catch (Exception e) {
+             logger.error("Error while writing file.", e);
+             throw new InternalException("Error while writing file");
+         }
+
+         FileEntry entry = new FileEntry();
+         entry.setUserFileName(item.getName());
+         entry.setPersistedFileName(diskFileName);
+         entry.setContentType(item.getContentType());
+         entry.setSizeInBytes(item.getSize());
+         return entry;
+     }
+     */
+    public List<FileEntry> addFiles(Collection<FileUpload> uploads) {
+
+        return uploads.stream().map(this::addFile).collect(Collectors.toList());
     }
 
-    public FileEntry addFile(FileItem item) {
+    public FileEntry addFile(FileUpload upload) {
 
-        String diskFileName = UUID.randomUUID().toString() + "." + FilenameUtils.getExtension(item.getName());
+        String diskFileName = UUID.randomUUID().toString() + "." + FilenameUtils.getExtension(upload.getFileName());
         Path file = projectDirectory.resolve(diskFileName);
         try {
-            item.write(file.toFile());
-        } catch (Exception e) {
-            logger.error("Error while writing file.", e);
+            Files.copy(upload.getFile(), file);
+        } catch (IOException e) {
+            logger.error("Error while writing file", e);
             throw new InternalException("Error while writing file");
         }
 
         FileEntry entry = new FileEntry();
-        entry.setUserFileName(item.getName());
+        entry.setUserFileName(upload.getFileName());
         entry.setPersistedFileName(diskFileName);
-        entry.setContentType(item.getContentType());
-        entry.setSizeInBytes(item.getSize());
+        entry.setContentType(upload.getContentType());
+        entry.setSizeInBytes(upload.getSizeInBytes());
         return entry;
     }
 
@@ -102,7 +127,7 @@ public class DiskProjectRepository implements ProjectRepository {
 
     Path getProjectDirectory() {
         try {
-            Path directory = Paths.get(Configuration.getInstance().getUploadedFilePath(), project.getCreator().getId(), project.getId());
+            Path directory = Paths.get(AppConfiguration.getInstance().getUploadFilePath(), project.getCreator().getId(), project.getId());
             return Files.createDirectories(directory);
         } catch (IOException e) {
             logger.error("Error while creating project directory.", e);

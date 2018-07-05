@@ -1,13 +1,11 @@
 package org.matsim.webvis.files.util;
 
 import org.apache.commons.fileupload.FileItem;
-import org.matsim.webvis.common.auth.AuthenticationResult;
 import org.matsim.webvis.files.agent.UserDAO;
 import org.matsim.webvis.files.config.Configuration;
 import org.matsim.webvis.files.entities.FileEntry;
 import org.matsim.webvis.files.entities.Project;
 import org.matsim.webvis.files.entities.User;
-import org.matsim.webvis.files.permission.Subject;
 import org.matsim.webvis.files.project.ProjectDAO;
 import org.matsim.webvis.files.project.ProjectService;
 import spark.Request;
@@ -31,7 +29,7 @@ public class TestUtils {
 
     private static UserDAO userDAO = new UserDAO();
     private static ProjectDAO projectDAO = new ProjectDAO();
-    private static ProjectService projectService = new ProjectService();
+    private static ProjectService projectService = ProjectService.Instance;
 
     public static Project persistProjectWithCreator(String projectName, String creatorsAuthId) {
         User user = new User();
@@ -111,31 +109,6 @@ public class TestUtils {
         when(result.raw()).thenReturn(raw);
         when(result.contentType()).thenReturn(contentType);
         return result;
-    }
-
-    public static Request mockRequest(String contentType, String scope, String subjectId) {
-        return mockRequest(contentType, mockAuthResult(scope, subjectId));
-    }
-
-    private static Request mockRequest(String contentType, AuthenticationResult authResult) {
-
-        Request request = mock(Request.class);
-        when(request.contentType()).thenReturn(contentType);
-        when(request.attribute(AuthenticationResult.SUBJECT_ATTRIBUTE)).thenReturn(authResult);
-        return request;
-    }
-
-    public static AuthenticationResult mockAuthResult(String scope, String subjectId) {
-
-        AuthenticationResult result = mock(AuthenticationResult.class);
-        when(result.getScope()).thenReturn(scope);
-        when(result.getSub()).thenReturn(subjectId);
-        return result;
-    }
-
-
-    public static Subject createSubject(User user) {
-        return new Subject(user, null);
     }
 
     /**

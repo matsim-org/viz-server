@@ -1,11 +1,10 @@
 package org.matsim.webvis.files.file;
 
 import org.matsim.webvis.files.communication.AuthenticatedJsonRequestHandler;
-import org.matsim.webvis.files.project.ProjectService;
 
 public class FileDeleteRequestHandler extends AuthenticatedJsonRequestHandler<FileRequest> {
 
-    ProjectService projectService = new ProjectService();
+    //ProjectService projectService = new ProjectService();
 /*
     public FileDeleteRequestHandler() {
         super(FileRequest.class, GsonFactory.createParserWithExclusionStrategy());

@@ -18,7 +18,7 @@ public class VisualizationService {
 
     private static final Logger logger = LoggerFactory.getLogger(VisualizationService.class);
 
-    private ProjectService projectService = new ProjectService();
+    private ProjectService projectService = ProjectService.Instance;
     private VisualizationDAO visualizationDAO = new VisualizationDAO();
     private PermissionService permissionService = PermissionService.Instance;
 

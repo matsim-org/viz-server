@@ -6,6 +6,7 @@ import io.dropwizard.auth.AuthDynamicFeature;
 import io.dropwizard.auth.AuthValueFactoryProvider;
 import io.dropwizard.auth.oauth.OAuthCredentialAuthFilter;
 import io.dropwizard.client.JerseyClientBuilder;
+import io.dropwizard.forms.MultiPartBundle;
 import io.dropwizard.jersey.setup.JerseyEnvironment;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
@@ -13,7 +14,6 @@ import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.matsim.webis.oauth.OAuthAuthenticator;
 import org.matsim.webvis.database.AbstractEntity;
 import org.matsim.webvis.error.CodedExceptionMapper;
-import org.matsim.webvis.error.DefaultExceptionMapper;
 import org.matsim.webvis.files.communication.AbstractEntityMixin;
 import org.matsim.webvis.files.config.AppConfiguration;
 import org.matsim.webvis.files.entities.Agent;
@@ -44,6 +44,8 @@ public class App extends Application<AppConfiguration> {
 
         bootstrap.getObjectMapper().registerModule(new Hibernate5Module());
         bootstrap.getObjectMapper().addMixIn(AbstractEntity.class, AbstractEntityMixin.class);
+
+        bootstrap.addBundle(new MultiPartBundle());
     }
 
     @Override
@@ -96,12 +98,13 @@ public class App extends Application<AppConfiguration> {
     private void registerExceptionMappers(JerseyEnvironment jersey) {
 
         jersey.register(new CodedExceptionMapper());
-        jersey.register(new DefaultExceptionMapper());
+        //jersey.register(new DefaultExceptionMapper());
     }
 
     private void registerEndpoints(JerseyEnvironment jersey) {
 
         jersey.register(new ProjectResource());
+        // jersey.register(FileResource.class);
 
     }
 }

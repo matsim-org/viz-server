@@ -1,12 +1,11 @@
 package org.matsim.webvis.files.project;
 
-import org.apache.commons.fileupload.FileItem;
 import org.junit.*;
+import org.matsim.webvis.files.agent.UserDAO;
 import org.matsim.webvis.files.config.Configuration;
 import org.matsim.webvis.files.entities.FileEntry;
 import org.matsim.webvis.files.entities.Project;
 import org.matsim.webvis.files.entities.User;
-import org.matsim.webvis.files.agent.UserDAO;
 import org.matsim.webvis.files.util.TestUtils;
 import spark.utils.IOUtils;
 
@@ -14,13 +13,8 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 
 import static junit.framework.TestCase.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
 
 public class DiskProjectRepositoryTest {
 
@@ -41,7 +35,7 @@ public class DiskProjectRepositoryTest {
     }
 
     @Before
-    public void setUp() throws IOException {
+    public void setUp() {
         User user = userDAO.persist(new User());
         Project toPersist = new Project();
         toPersist.setCreator(user);
@@ -56,35 +50,35 @@ public class DiskProjectRepositoryTest {
     }
 
     @Test
-    public void constructor_object() throws Exception {
+    public void constructor_object() {
 
         DiskProjectRepository repository = new DiskProjectRepository(project);
         assertNotNull(repository);
     }
 
-    @Test
-    public void addFile() throws Exception {
+    /* @Test
+     public void addFile() throws Exception {
 
-        final String filename = "filename.file";
-        final String contentType = "content-type";
-        final long size = 1L;
-        FileItem item = TestUtils.mockFileItem(filename, contentType, size);
-        List<FileItem> items = new ArrayList<>();
-        items.add(item);
+         final String filename = "filename.file";
+         final String contentType = "content-type";
+         final long size = 1L;
+         FileItem item = TestUtils.mockFileItem(filename, contentType, size);
+         List<FileItem> items = new ArrayList<>();
+         items.add(item);
 
-        List<FileEntry> entries = testObject.addFiles(items);
+         List<FileEntry> entries = testObject.addFiles(items);
 
-        verify(item).write(any());
-        assertEquals(1, entries.size());
-        FileEntry entry = entries.get(0);
-        assertEquals(filename, entry.getUserFileName());
-        assertEquals(contentType, entry.getContentType());
-        assertEquals(size, entry.getSizeInBytes());
-        String diskFilename = entry.getPersistedFileName().split("\\.")[0];
-        UUID uuid = UUID.fromString(diskFilename);
-        assertNotNull(uuid);
-    }
-
+         verify(item).write(any());
+         assertEquals(1, entries.size());
+         FileEntry entry = entries.get(0);
+         assertEquals(filename, entry.getUserFileName());
+         assertEquals(contentType, entry.getContentType());
+         assertEquals(size, entry.getSizeInBytes());
+         String diskFilename = entry.getPersistedFileName().split("\\.")[0];
+         UUID uuid = UUID.fromString(diskFilename);
+         assertNotNull(uuid);
+     }
+ */
     @Test
     public void getFileStream() throws IOException {
 

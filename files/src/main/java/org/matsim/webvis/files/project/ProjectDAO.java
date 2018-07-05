@@ -77,6 +77,16 @@ public class ProjectDAO extends DAO {
                 .fetchOne());
     }
 
+    FileEntry findFileEntry(String projectId, String fileId) {
+
+        QFileEntry fileEntry = QFileEntry.fileEntry;
+
+        return database.executeQuery(query -> query.selectFrom(fileEntry)
+                .where(fileEntry.project.id.eq(projectId).and(fileEntry.id.eq(fileId)))
+                .fetchOne()
+        );
+    }
+
     void remove(Project project) {
 
         //all child entities must be removed first. We do it this way until it becomes too many child relations

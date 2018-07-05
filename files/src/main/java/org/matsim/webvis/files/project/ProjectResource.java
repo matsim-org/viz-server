@@ -6,6 +6,7 @@ import org.matsim.webvis.error.UnauthorizedException;
 import org.matsim.webvis.files.entities.Agent;
 import org.matsim.webvis.files.entities.Project;
 import org.matsim.webvis.files.entities.User;
+import org.matsim.webvis.files.file.FileResource;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -15,7 +16,7 @@ import java.util.List;
 @Produces(MediaType.APPLICATION_JSON)
 public class ProjectResource {
 
-    private ProjectService projectService = new ProjectService();
+    private ProjectService projectService = ProjectService.Instance;
 
     @POST
     public Project createProject(
@@ -37,5 +38,10 @@ public class ProjectResource {
     @Path("/{id}")
     public Project findProject(@Auth Agent subject, @PathParam("id") String id) {
         return projectService.find(id, subject);
+    }
+
+    @Path("{id}/files")
+    public FileResource files(@PathParam("id") String projectId) {
+        return new FileResource(projectId);
     }
 }
