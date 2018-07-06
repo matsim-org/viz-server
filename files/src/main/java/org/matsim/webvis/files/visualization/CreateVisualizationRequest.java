@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.NotEmpty;
 
-import javax.validation.constraints.NotNull;
 import java.util.Map;
 
 @Getter
@@ -17,8 +16,8 @@ class CreateVisualizationRequest {
     private String projectId;
     @NotEmpty
     private String typeKey;
-    @NotNull
+    @NotEmpty
     private Map<String, String> inputFiles;
-    @NotNull
+    @NotEmpty
     private Map<String, String> inputParameters;
 }

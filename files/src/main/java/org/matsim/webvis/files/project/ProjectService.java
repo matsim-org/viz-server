@@ -2,12 +2,12 @@ package org.matsim.webvis.files.project;
 
 import org.matsim.webvis.error.InternalException;
 import org.matsim.webvis.files.entities.*;
+import org.matsim.webvis.files.file.FileDownload;
 import org.matsim.webvis.files.file.FileUpload;
 import org.matsim.webvis.files.permission.PermissionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.InputStream;
 import java.util.List;
 import java.util.Optional;
 
@@ -95,13 +95,13 @@ public class ProjectService {
          }
      }
      */
-    public InputStream getFileStream(String projectId, String fileId, Agent agent) {
+    public FileDownload getFileDownload(String projectId, String fileId, Agent agent) {
 
         permissionService.findReadPermission(agent, fileId);
 
         FileEntry entry = projectDAO.findFileEntry(projectId, fileId);
         ProjectRepository repository = repositoryFactory.getRepository(entry.getProject());
-        return repository.getFileStream(entry);
+        return new FileDownload(repository.getFileStream(entry), entry);
     }
 
     public Project removeFileFromProject(String projectId, String fileId, Agent creator) {

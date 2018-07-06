@@ -12,6 +12,7 @@ import org.matsim.webvis.files.project.ProjectService;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -36,7 +37,6 @@ public class FileResource {
                     uploads.add(new FileUpload(
                             bodyPart.getContentDisposition().getFileName(),
                             bodyPart.getMediaType().toString(),
-                            bodyPart.getContentDisposition().getSize(),
                             bodyPart.getValueAs(InputStream.class)));
             }
         }
@@ -47,10 +47,15 @@ public class FileResource {
     @GET
     @Path("{fileId}")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    public StreamingOutput downloadFile(@Auth Agent agent, @PathParam("fileId") String fileId) {
+    public Response downloadFile(@Auth Agent agent, @PathParam("fileId") String fileId) {
 
-        InputStream file = projectService.getFileStream(projectId, fileId, agent);
-        return output -> IOUtils.copy(file, output);
+        FileDownload download = projectService.getFileDownload(projectId, fileId, agent);
+
+        return Response.ok((StreamingOutput) output -> IOUtils.copy(download.getFile(), output))
+                .type(download.getFileEntry().getContentType())
+                .header("Content-Length", download.getFileEntry().getSizeInBytes())
+                .header("Content-Disposition", "attachment; filename=" + download.getFileEntry().getUserFileName())
+                .build();
     }
 
     @DELETE

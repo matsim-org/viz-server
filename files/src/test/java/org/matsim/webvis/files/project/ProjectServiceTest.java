@@ -251,7 +251,7 @@ public class ProjectServiceTest {
         when(repository.getFileStream(any())).thenReturn(mock(FileInputStream.class));
         when(testObject.repositoryFactory.getRepository(any())).thenReturn(repository);
 
-        //InputStream result = testObject.getFileStream(project, entry, project.getCreator());
+        //InputStream result = testObject.getFileDownload(project, entry, project.getCreator());
         //assertNotNull(result);
     }
 

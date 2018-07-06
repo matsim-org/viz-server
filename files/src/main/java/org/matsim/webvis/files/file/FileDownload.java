@@ -2,14 +2,14 @@ package org.matsim.webvis.files.file;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.matsim.webvis.files.entities.FileEntry;
 
 import java.io.InputStream;
 
 @Getter
 @AllArgsConstructor
-public class FileUpload {
+public class FileDownload {
 
-    private String fileName;
-    private String contentType;
     private InputStream file;
+    private FileEntry fileEntry;
 }

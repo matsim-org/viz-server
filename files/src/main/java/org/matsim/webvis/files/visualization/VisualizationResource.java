@@ -1,38 +1,36 @@
 package org.matsim.webvis.files.visualization;
 
 import io.dropwizard.auth.Auth;
-import lombok.AllArgsConstructor;
+import org.hibernate.validator.constraints.NotEmpty;
 import org.matsim.webvis.files.entities.Agent;
 import org.matsim.webvis.files.entities.Visualization;
+import org.matsim.webvis.files.entities.VisualizationType;
 
-import javax.validation.Valid;
-import javax.ws.rs.*;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import java.util.List;
 
-@AllArgsConstructor
-@Path("/")
+@Path("")
 @Produces(MediaType.APPLICATION_JSON)
 public class VisualizationResource {
 
     private final VisualizationService visualizationService = VisualizationService.Instance;
-    private String projectId;
 
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    public Visualization createVisualization(
+    @GET
+    @Path("/visualizations")
+    public List<Visualization> findByType(
             @Auth Agent agent,
-            @Valid @BeanParam CreateVisualizationRequest request) {
-
-        return visualizationService.createVisualizationFromRequest(request, agent);
+            @NotEmpty @QueryParam("type") String type) {
+        return visualizationService.findByType(type, agent);
     }
 
     @GET
-    @Path("{vizId}")
-    public Visualization getVisualization(
-            @Auth Agent agent,
-            @PathParam("vizId") String vizId
-    ) {
-        return visualizationService.find(vizId, agent);
+    @Path("/visualization-types")
+    public List<VisualizationType> types() {
+        return visualizationService.findAllTypes();
     }
 
 }

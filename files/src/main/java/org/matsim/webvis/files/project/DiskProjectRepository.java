@@ -73,18 +73,18 @@ public class DiskProjectRepository implements ProjectRepository {
 
         String diskFileName = UUID.randomUUID().toString() + "." + FilenameUtils.getExtension(upload.getFileName());
         Path file = projectDirectory.resolve(diskFileName);
+        FileEntry entry = new FileEntry();
         try {
-            Files.copy(upload.getFile(), file);
+            long bytes = Files.copy(upload.getFile(), file);
+            entry.setSizeInBytes(bytes);
         } catch (IOException e) {
             logger.error("Error while writing file", e);
             throw new InternalException("Error while writing file");
         }
 
-        FileEntry entry = new FileEntry();
         entry.setUserFileName(upload.getFileName());
         entry.setPersistedFileName(diskFileName);
         entry.setContentType(upload.getContentType());
-        entry.setSizeInBytes(upload.getSizeInBytes());
         return entry;
     }
 
