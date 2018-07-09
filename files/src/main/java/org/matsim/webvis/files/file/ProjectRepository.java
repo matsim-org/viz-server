@@ -1,7 +1,6 @@
-package org.matsim.webvis.files.project;
+package org.matsim.webvis.files.file;
 
 import org.matsim.webvis.files.entities.FileEntry;
-import org.matsim.webvis.files.file.FileUpload;
 
 import java.io.InputStream;
 import java.util.Collection;

@@ -1,6 +1,7 @@
 package org.matsim.webvis.files.util;
 
 import org.matsim.webvis.files.agent.UserDAO;
+import org.matsim.webvis.files.config.AppConfiguration;
 import org.matsim.webvis.files.entities.FileEntry;
 import org.matsim.webvis.files.entities.Project;
 import org.matsim.webvis.files.entities.User;
@@ -58,6 +59,11 @@ public class TestUtils {
     public static void removeAllEntities() {
         projectDAO.removeAllProjects();
         userDAO.removeAllUser();
+    }
+
+    public static void loadTestConfig() {
+        if (AppConfiguration.getInstance() == null)
+            AppConfiguration.setInstance(new AppConfiguration());
     }
 
     /**

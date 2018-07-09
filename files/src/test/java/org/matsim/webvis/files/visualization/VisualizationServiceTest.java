@@ -64,7 +64,7 @@ public class VisualizationServiceTest {
             testObject.createVisualizationFromRequest(request, project.getCreator());
             fail("invalid viz type should cause exception");
         } catch (CodedException e) {
-            assertEquals(Error.RESOURCE_NOT_FOUND, e.getInternalErrorCode());
+            assertEquals(Error.INVALID_REQUEST, e.getInternalErrorCode());
         }
     }
 

@@ -1,6 +1,7 @@
 package org.matsim.webvis.files.project;
 
 import io.dropwizard.auth.Auth;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.matsim.webvis.error.UnauthorizedException;
@@ -20,7 +21,7 @@ import java.util.List;
 @Produces(MediaType.APPLICATION_JSON)
 public class ProjectResource {
 
-    private ProjectService projectService = ProjectService.Instance;
+    ProjectService projectService = ProjectService.Instance;
 
     @POST
     public Project createProject(
@@ -55,7 +56,8 @@ public class ProjectResource {
     }
 
     @Getter
-    private static class CreateProject {
+    @AllArgsConstructor
+    static class CreateProject {
 
         @NotEmpty
         private String name;

@@ -1,22 +1,25 @@
 package org.matsim.webvis.files.project;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 import org.matsim.webvis.error.CodedException;
 import org.matsim.webvis.error.ForbiddenException;
+import org.matsim.webvis.error.InternalException;
 import org.matsim.webvis.files.agent.UserDAO;
 import org.matsim.webvis.files.config.AppConfiguration;
 import org.matsim.webvis.files.entities.FileEntry;
 import org.matsim.webvis.files.entities.Permission;
 import org.matsim.webvis.files.entities.Project;
 import org.matsim.webvis.files.entities.User;
+import org.matsim.webvis.files.file.DiskProjectRepository;
+import org.matsim.webvis.files.file.FileDownload;
+import org.matsim.webvis.files.file.FileUpload;
+import org.matsim.webvis.files.file.RepositoryFactory;
 import org.matsim.webvis.files.util.TestUtils;
 
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,6 +35,11 @@ public class ProjectServiceTest {
     private UserDAO userDAO = new UserDAO();
     private ProjectDAO projectDAO = new ProjectDAO();
 
+    @BeforeClass
+    public static void setUpFixture() {
+        TestUtils.loadTestConfig();
+    }
+
     @Before
     public void setUp() {
         testObject = new ProjectService();
@@ -39,8 +47,7 @@ public class ProjectServiceTest {
 
     @After
     public void tearDown() {
-        projectDAO.removeAllProjects();
-        userDAO.removeAllUser();
+        TestUtils.removeAllEntities();
     }
 
     @AfterClass
@@ -178,81 +185,82 @@ public class ProjectServiceTest {
         assertTrue(result.stream().noneMatch(e -> e.getName().equals(otherProject.getName())));
     }
 
-  /*  @Test
+    @Test
     public void addFilesToProject() {
 
-        final String filename = "filename";
-        final String contentType = "content-type";
-        final long size = 1L;
-
         Project project = TestUtils.persistProjectWithCreator("test");
-        List<FileItem> items = new ArrayList<>();
-        items.add(TestUtils.mockFileItem(filename, contentType, size));
+        List<FileUpload> uploads = new ArrayList<>();
+        uploads.add(new FileUpload("first.txt", "plain/text", mock(InputStream.class)));
+        uploads.add(new FileUpload("second.txt", "plain/text", mock(InputStream.class)));
 
-        Project result = testObject.addFilesToProject(items, project, project.getCreator());
+        Project result = testObject.addFilesToProject(uploads, project.getId(), project.getCreator());
 
-        assertEquals(project.getId(), result.getId());
-        assertEquals(1, project.getFiles().size());
+        assertEquals(project, result);
+        assertEquals(uploads.size(), result.getFiles().size());
     }
 
     @Test(expected = ForbiddenException.class)
-    public void addFilesToProject_noPermission_forbiddenException() {
+    public void addFilesToProject_noPermission_exception() {
 
         User user = TestUtils.persistUser("some-id");
         Project project = TestUtils.persistProjectWithCreator("project", "auth-id");
 
-        testObject.addFilesToProject(null, project, user);
+        testObject.addFilesToProject(null, project.getId(), user);
 
         fail("user without permission should raise forbidden exception");
     }
 
-
     @Test
     public void addFilesToProject_errorWhilePersisting_cleanupFiles() {
 
-        final String filename = "filename";
-        final String contentType = "content-type";
-        final long size = 1L;
+        Project project = TestUtils.persistProjectWithCreator("test");
+        List<FileUpload> uploads = new ArrayList<>();
+        uploads.add(new FileUpload("same-name.txt", "plain/text", mock(InputStream.class)));
+        uploads.add(new FileUpload("same-name.txt", "plain/text", mock(InputStream.class)));
 
-        List<FileEntry> entries = new ArrayList<>();
-        entries.add(new FileEntry());
-        DiskProjectRepository repository = mock(DiskProjectRepository.class);
-        when(repository.addFiles(any())).thenReturn(entries);
-
+        DiskProjectRepository repository = spy(new DiskProjectRepository(project));
+        spy(repository);
         testObject.repositoryFactory = mock(RepositoryFactory.class);
-        when(testObject.repositoryFactory.getRepository(any())).thenReturn(repository);
-
-        testObject.projectDAO = mock(ProjectDAO.class);
-        when(testObject.projectDAO.persist(any())).thenThrow(new RuntimeException());
-
-        testObject.permissionService = mock(PermissionService.class);
-        when(testObject.permissionService.findWritePermission(any(), anyString())).thenReturn(new Permission());
-
-        List<FileItem> items = new ArrayList<>();
-        items.add(TestUtils.mockFileItem(filename, contentType, size));
+        when(testObject.repositoryFactory.getRepository(project)).thenReturn(repository);
 
         try {
-            testObject.addFilesToProject(items, new Project(), new User());
+            testObject.addFilesToProject(uploads, project.getId(), project.getCreator());
             fail("exception while persisting project should raise exception and delete written files");
-        } catch (Exception e) {
+        } catch (InternalException e) {
             verify(repository).removeFiles(any());
         }
-    }*/
+    }
+
+    @Test(expected = ForbiddenException.class)
+    public void getFileDownload_noPermission() {
+
+        User user = TestUtils.persistUser("some-id");
+        Project project = TestUtils.persistProjectWithCreator("project", "auth-id");
+
+        testObject.getFileDownload(project.getId(), "some-id", user);
+
+        fail("user without permission should raise forbidden exception");
+    }
 
     @Test
-    public void getFileStream_inputStream() {
+    public void getFileDownload_success() {
 
-        Project project = TestUtils.persistProjectWithCreator("test");
+        Project project = TestUtils.persistProjectWithCreator("project");
         project = addFileEntry(project);
         FileEntry entry = project.getFiles().iterator().next();
 
-        testObject.repositoryFactory = mock(RepositoryFactory.class);
         DiskProjectRepository repository = mock(DiskProjectRepository.class);
-        when(repository.getFileStream(any())).thenReturn(mock(FileInputStream.class));
-        when(testObject.repositoryFactory.getRepository(any())).thenReturn(repository);
+        InputStream stream = mock(InputStream.class);
+        when(repository.getFileStream(any())).thenReturn(stream);
 
-        //InputStream result = testObject.getFileDownload(project, entry, project.getCreator());
-        //assertNotNull(result);
+        RepositoryFactory factory = mock(RepositoryFactory.class);
+        when(factory.getRepository(project)).thenReturn(repository);
+        testObject.repositoryFactory = factory;
+
+        FileDownload result = testObject.getFileDownload(project.getId(), entry.getId(), project.getCreator());
+
+        assertEquals(entry, result.getFileEntry());
+        assertEquals(stream, result.getFile());
     }
 
     @Test(expected = ForbiddenException.class)

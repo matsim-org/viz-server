@@ -17,7 +17,7 @@ import java.util.List;
 @Produces(MediaType.APPLICATION_JSON)
 public class VisualizationResource {
 
-    private final VisualizationService visualizationService = VisualizationService.Instance;
+    VisualizationService visualizationService = VisualizationService.Instance;
 
     @GET
     @Path("/visualizations")

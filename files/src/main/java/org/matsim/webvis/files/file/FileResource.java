@@ -1,11 +1,12 @@
 package org.matsim.webvis.files.file;
 
 import io.dropwizard.auth.Auth;
-import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
+import org.matsim.webvis.error.InvalidInputException;
 import org.matsim.webvis.files.entities.Agent;
 import org.matsim.webvis.files.entities.Project;
 import org.matsim.webvis.files.project.ProjectService;
@@ -18,12 +19,16 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-@AllArgsConstructor
 @Path("/")
 public class FileResource {
 
-    private final ProjectService projectService = ProjectService.Instance;
+    ProjectService projectService = ProjectService.Instance;
+    @Getter
     private String projectId;
+
+    public FileResource(String projectId) {
+        this.projectId = projectId;
+    }
 
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -40,7 +45,8 @@ public class FileResource {
                             bodyPart.getValueAs(InputStream.class)));
             }
         }
-
+        if (uploads.size() == 0)
+            throw new InvalidInputException("No files to upload");
         return projectService.addFilesToProject(uploads, projectId, agent);
     }
 

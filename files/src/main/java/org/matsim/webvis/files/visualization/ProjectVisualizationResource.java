@@ -12,7 +12,7 @@ import javax.ws.rs.core.MediaType;
 @Produces(MediaType.APPLICATION_JSON)
 public class ProjectVisualizationResource {
 
-    private final VisualizationService visualizationService = VisualizationService.Instance;
+    VisualizationService visualizationService = VisualizationService.Instance;
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)

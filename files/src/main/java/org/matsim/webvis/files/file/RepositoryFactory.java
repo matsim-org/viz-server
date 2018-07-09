@@ -1,11 +1,11 @@
-package org.matsim.webvis.files.project;
+package org.matsim.webvis.files.file;
 
 import org.matsim.webvis.files.entities.Project;
 
-class RepositoryFactory {
+public class RepositoryFactory {
 
 
-    ProjectRepository getRepository(Project project) {
+    public ProjectRepository getRepository(Project project) {
 
         //may return other repository types in the future
         return new DiskProjectRepository(project);

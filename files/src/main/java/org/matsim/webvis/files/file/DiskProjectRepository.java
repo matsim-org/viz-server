@@ -1,11 +1,10 @@
-package org.matsim.webvis.files.project;
+package org.matsim.webvis.files.file;
 
 import org.apache.commons.io.FilenameUtils;
 import org.matsim.webvis.error.InternalException;
 import org.matsim.webvis.files.config.AppConfiguration;
 import org.matsim.webvis.files.entities.FileEntry;
 import org.matsim.webvis.files.entities.Project;
-import org.matsim.webvis.files.file.FileUpload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,47 +22,17 @@ import java.util.stream.Collectors;
 
 public class DiskProjectRepository implements ProjectRepository {
 
-
     private static Logger logger = LoggerFactory.getLogger(DiskProjectRepository.class);
 
     private Project project;
     private Path projectDirectory;
 
-    DiskProjectRepository(Project project) {
+    public DiskProjectRepository(Project project) {
 
         this.project = project;
         this.projectDirectory = getProjectDirectory();
     }
 
-    /* public List<FileEntry> addFiles(Collection<FileItem> items) {
-
-         List<FileEntry> writtenFiles = new ArrayList<>();
-         for (FileItem item : items) {
-             FileEntry entry = addFile(item);
-             writtenFiles.add(entry);
-         }
-         return writtenFiles;
-     }
-
-     public FileEntry addFile(FileItem item) {
-
-         String diskFileName = UUID.randomUUID().toString() + "." + FilenameUtils.getExtension(item.getName());
-         Path file = projectDirectory.resolve(diskFileName);
-         try {
-             item.write(file.toFile());
-         } catch (Exception e) {
-             logger.error("Error while writing file.", e);
-             throw new InternalException("Error while writing file");
-         }
-
-         FileEntry entry = new FileEntry();
-         entry.setUserFileName(item.getName());
-         entry.setPersistedFileName(diskFileName);
-         entry.setContentType(item.getContentType());
-         entry.setSizeInBytes(item.getSize());
-         return entry;
-     }
-     */
     public List<FileEntry> addFiles(Collection<FileUpload> uploads) {
 
         return uploads.stream().map(this::addFile).collect(Collectors.toList());

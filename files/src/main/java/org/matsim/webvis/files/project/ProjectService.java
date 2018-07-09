@@ -4,6 +4,8 @@ import org.matsim.webvis.error.InternalException;
 import org.matsim.webvis.files.entities.*;
 import org.matsim.webvis.files.file.FileDownload;
 import org.matsim.webvis.files.file.FileUpload;
+import org.matsim.webvis.files.file.ProjectRepository;
+import org.matsim.webvis.files.file.RepositoryFactory;
 import org.matsim.webvis.files.permission.PermissionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,22 +81,6 @@ public class ProjectService {
         }
     }
 
-    /* public Project addFilesToProject(List<FileItem> items, Project project, Agent agent) {
-
-         permissionService.findWritePermission(agent, project.getId());
-
-         ProjectRepository repository = repositoryFactory.getRepository(project);
-         List<FileEntry> entries = repository.addFiles(items);
-         project.addFileEntries(entries);
-
-         try {
-             return projectDAO.persist(project);
-         } catch (Exception e) {
-             repository.removeFiles(entries);
-             throw new InternalException("Error while persisting project");
-         }
-     }
-     */
     public FileDownload getFileDownload(String projectId, String fileId, Agent agent) {
 
         permissionService.findReadPermission(agent, fileId);
