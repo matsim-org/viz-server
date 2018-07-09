@@ -118,7 +118,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>org.matsim.webvis.files.Server</mainClass>
+                            <mainClass>org.matsim.webvis.files.App</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

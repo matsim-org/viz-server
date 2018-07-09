@@ -2,14 +2,17 @@ package org.matsim.webvis.files.project;
 
 import org.junit.*;
 import org.matsim.webvis.files.agent.UserDAO;
-import org.matsim.webvis.files.config.Configuration;
+import org.matsim.webvis.files.config.AppConfiguration;
 import org.matsim.webvis.files.entities.FileEntry;
 import org.matsim.webvis.files.entities.Project;
 import org.matsim.webvis.files.entities.User;
 import org.matsim.webvis.files.util.TestUtils;
 import spark.utils.IOUtils;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -24,13 +27,13 @@ public class DiskProjectRepositoryTest {
     private DiskProjectRepository testObject;
 
     @BeforeClass
-    public static void setUpFixture() throws UnsupportedEncodingException, FileNotFoundException {
-        TestUtils.loadConfig();
+    public static void setUpFixture() {
+        //TestUtils.loadConfig();
     }
 
     @AfterClass
     public static void tearDownFixture() throws IOException {
-        Path start = Paths.get(Configuration.getInstance().getUploadedFilePath());
+        Path start = Paths.get(AppConfiguration.getInstance().getUploadFilePath());
         TestUtils.removeFileTree(start);
     }
 

@@ -1,4 +1,4 @@
-package org.matsim.webvis.files.communication;
+package org.matsim.webvis.files.serialization;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;

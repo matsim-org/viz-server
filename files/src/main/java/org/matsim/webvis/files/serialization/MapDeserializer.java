@@ -1,4 +1,4 @@
-package org.matsim.webvis.files.communication;
+package org.matsim.webvis.files.serialization;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.BeanProperty;
@@ -23,16 +23,21 @@ public class MapDeserializer extends JsonDeserializer<Map<Object, Object>> imple
         Map<Object, Object> result = new HashMap<>();
         if (node.isArray()) {
 
-            node.forEach(entry -> {
-                try {
-                    JsonNode keyNode = entry.get(0);
-                    JsonNode valueNode = entry.get(1);
-                    result.put(keyNode.traverse(jsonParser.getCodec()).readValueAs(keyType),
-                            valueNode.traverse(jsonParser.getCodec()).readValueAs(valueType));
-                } catch (Exception e) {
-                    e.printStackTrace();
+            for (JsonNode entry : node) {
+                if (entry.isArray()) {
+                    try {
+                        JsonNode keyNode = entry.get(0);
+                        JsonNode valueNode = entry.get(1);
+                        result.put(keyNode.traverse(jsonParser.getCodec()).readValueAs(keyType),
+                                valueNode.traverse(jsonParser.getCodec()).readValueAs(valueType));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        throw new IOException("Could not parse map", e);
+                    }
+                } else {
+                    throw new IOException("Incorrect map format.");
                 }
-            });
+            }
         }
 
         return result;
