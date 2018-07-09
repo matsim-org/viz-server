@@ -1,9 +1,9 @@
 package org.matsim.webvis.files.visualization;
 
 import org.junit.*;
-import org.matsim.webvis.common.errorHandling.CodedException;
-import org.matsim.webvis.common.errorHandling.Error;
-import org.matsim.webvis.common.errorHandling.ForbiddenException;
+import org.matsim.webvis.error.CodedException;
+import org.matsim.webvis.error.Error;
+import org.matsim.webvis.error.ForbiddenException;
 import org.matsim.webvis.files.agent.AgentService;
 import org.matsim.webvis.files.entities.*;
 import org.matsim.webvis.files.permission.PermissionService;
@@ -64,7 +64,7 @@ public class VisualizationServiceTest {
             testObject.createVisualizationFromRequest(request, project.getCreator());
             fail("invalid viz type should cause exception");
         } catch (CodedException e) {
-            assertEquals(Error.RESOURCE_NOT_FOUND, e.getErrorCode());
+            assertEquals(Error.INVALID_REQUEST, e.getInternalErrorCode());
         }
     }
 
@@ -93,7 +93,7 @@ public class VisualizationServiceTest {
         assertEquals(1, viz.getParameters().size());
         assertEquals(request.getTypeKey(), viz.getType().getKey());
         Project finalProject = project;
-        assertTrue(viz.getPermissions().stream().anyMatch(p -> p.getAgent().equalId(finalProject.getCreator())));
+        assertTrue(viz.getPermissions().stream().anyMatch(p -> p.getAgent().equals(finalProject.getCreator())));
 
         for (VisualizationInput vizInput : viz.getInputFiles().values()) {
 
@@ -131,7 +131,7 @@ public class VisualizationServiceTest {
         assertEquals(request.getTypeKey(), viz.getType().getKey());
 
         Project finalProject = project;
-        assertTrue(viz.getPermissions().stream().anyMatch(p -> p.getAgent().equalId(finalProject.getCreator())));
+        assertTrue(viz.getPermissions().stream().anyMatch(p -> p.getAgent().equals(finalProject.getCreator())));
 
         for (VisualizationInput vizInput : viz.getInputFiles().values()) {
 

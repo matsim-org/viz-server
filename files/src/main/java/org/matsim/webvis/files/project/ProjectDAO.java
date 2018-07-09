@@ -8,10 +8,7 @@ import java.util.List;
 public class ProjectDAO extends DAO {
 
     public Project persist(Project project) {
-        if (project.getId() == null) {
-            return database.persistOne(project);
-        }
-        return database.updateOne(project);
+        return database.persist(project);
     }
 
     Project find(String projectId) {
@@ -26,21 +23,6 @@ public class ProjectDAO extends DAO {
                 .leftJoin(project.visualizations, visualization).fetchJoin()
                 .leftJoin(project.permissions).fetchJoin()
                 .fetchOne());
-    }
-
-    List<Project> find(List<String> projectIds, User creator) {
-        QProject project = QProject.project;
-        QFileEntry fileEntry = QFileEntry.fileEntry;
-        QVisualization visualization = QVisualization.visualization;
-
-        return database.executeQuery(query -> query.selectFrom(project)
-                .where(project.creator.eq(creator)
-                               .and(project.id.in(projectIds)))
-                .leftJoin(project.files, fileEntry).fetchJoin()
-                .leftJoin(project.visualizations, visualization).fetchJoin()
-                .distinct()
-                .fetch()
-        );
     }
 
     Project findFlat(String projectId) {
@@ -80,22 +62,21 @@ public class ProjectDAO extends DAO {
                 .fetchOne());
     }
 
-    void remove(Project project) {
+    FileEntry findFileEntry(String projectId, String fileId) {
 
-        //all child entities must be removed first. We do it this way until it becomes too many child relations
-        //we would have to resort to jpa's cascading functionality then.
-        QProject projectTable = QProject.project;
         QFileEntry fileEntry = QFileEntry.fileEntry;
-        database.executeTransactionalQuery(query -> query.delete(fileEntry).where(fileEntry.project.eq(project)).execute());
-        database.executeTransactionalQuery(query -> query.delete(projectTable).where(projectTable.eq(project)).execute());
 
-
+        return database.executeQuery(query -> query.selectFrom(fileEntry)
+                .where(fileEntry.project.id.eq(projectId).and(fileEntry.id.eq(fileId)))
+                .fetchOne()
+        );
     }
 
     public void removeAllProjects() {
 
-        EntityManager em = database.getEntityManager();
-        List<Project> projects = database.executeQuery(query -> query.selectFrom(QProject.project).fetch(), em);
+        EntityManager em = database.createEntityManager();
+
+        List<Project> projects = database.createQuery(em).selectFrom(QProject.project).fetch();
         em.getTransaction().begin();
 
         for (Project project : projects) {

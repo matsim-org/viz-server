@@ -2,8 +2,8 @@ package org.matsim.webvis.files.agent;
 
 import org.junit.After;
 import org.junit.Test;
-import org.matsim.webvis.common.errorHandling.CodedException;
-import org.matsim.webvis.common.errorHandling.Error;
+import org.matsim.webvis.error.CodedException;
+import org.matsim.webvis.error.Error;
 import org.matsim.webvis.files.entities.User;
 import org.matsim.webvis.files.util.TestUtils;
 
@@ -38,7 +38,7 @@ public class AgentServiceTest {
             AgentService.Instance.createUser(authId);
             fail("duplicate authId should cause exception");
         } catch (CodedException e) {
-            assertEquals(Error.RESOURCE_EXISTS, e.getErrorCode());
+            assertEquals(Error.RESOURCE_EXISTS, e.getInternalErrorCode());
         }
     }
 
@@ -49,6 +49,6 @@ public class AgentServiceTest {
 
         User result = AgentService.Instance.findByIdentityProviderId(user.getAuthId());
 
-        assertTrue(user.equalId(result));
+        assertTrue(user.equals(result));
     }
 }

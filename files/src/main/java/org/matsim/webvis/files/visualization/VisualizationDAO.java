@@ -7,16 +7,11 @@ import java.util.List;
 public class VisualizationDAO extends DAO {
 
     Visualization persist(Visualization viz) {
-        if (viz.getId() == null)
-            return database.persistOne(viz);
-
-        return database.updateOne(viz);
+        return database.persist(viz);
     }
 
     VisualizationType persistType(VisualizationType type) {
-        if (type.getId() == null)
-            return database.persistOne(type);
-        return database.updateOne(type);
+        return database.persist(type);
     }
 
     public Visualization findFlat(String vizId) {

@@ -1,8 +1,8 @@
 package org.matsim.webvis.files.entities;
 
-import org.matsim.webvis.common.database.PersistenceUnit;
+import org.matsim.webvis.database.PersistenceUnit;
 
-public abstract class DAO {
+public class DAO {
 
     protected static PersistenceUnit database = new PersistenceUnit("org.matsim.matsim-webvis.files");
 }

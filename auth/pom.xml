@@ -68,7 +68,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>org.matsim.webvis.auth.Server</mainClass>
+                            <mainClass>org.matsim.webvis.auth.App</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
