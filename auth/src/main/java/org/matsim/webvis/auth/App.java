@@ -25,7 +25,6 @@ import org.matsim.webvis.auth.token.TokenResource;
 import org.matsim.webvis.auth.user.LoginResource;
 import org.matsim.webvis.auth.user.UserService;
 import org.matsim.webvis.error.CodedExceptionMapper;
-import org.matsim.webvis.error.DefaultExceptionMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,7 +52,7 @@ public class App extends Application<AppConfiguration> {
         registerEndpoints(environment.jersey());
 
         environment.jersey().register(new CodedExceptionMapper());
-        environment.jersey().register(new DefaultExceptionMapper());
+        //environment.jersey().register(new DefaultExceptionMapper());
     }
 
     private void loadResources(AppConfiguration config) {
