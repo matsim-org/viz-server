@@ -2,7 +2,7 @@ package org.matsim.webvis.auth.entities;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.matsim.webvis.common.database.AbstractEntity;
+import org.matsim.webvis.database.AbstractEntity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

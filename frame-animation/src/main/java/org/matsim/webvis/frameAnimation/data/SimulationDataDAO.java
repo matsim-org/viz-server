@@ -1,6 +1,6 @@
 package org.matsim.webvis.frameAnimation.data;
 
-import org.matsim.webvis.common.errorHandling.InvalidInputException;
+import org.matsim.webvis.error.InvalidInputException;
 import org.matsim.webvis.frameAnimation.contracts.RectContract;
 import org.matsim.webvis.frameAnimation.contracts.geoJSON.FeatureCollection;
 

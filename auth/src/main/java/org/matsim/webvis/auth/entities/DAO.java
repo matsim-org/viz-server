@@ -1,6 +1,6 @@
 package org.matsim.webvis.auth.entities;
 
-import org.matsim.webvis.common.database.PersistenceUnit;
+import org.matsim.webvis.database.PersistenceUnit;
 
 public abstract class DAO {
 

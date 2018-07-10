@@ -8,12 +8,12 @@ import java.util.List;
 
 public class RelyingPartyDAO extends DAO {
 
-    public RelyingPartyCredential persistCredential(RelyingPartyCredential credential) {
+    RelyingPartyCredential persistCredential(RelyingPartyCredential credential) {
 
         if (credential.getRelyingParty().getId() == null)
-            return database.persistOne(credential);
+            return database.persist(credential);
 
-        EntityManager manager = database.getEntityManager();
+        EntityManager manager = database.createEntityManager();
         manager.getTransaction().begin();
         RelyingParty party = manager.merge(credential.getRelyingParty());
         credential.setRelyingParty(party);
@@ -23,7 +23,7 @@ public class RelyingPartyDAO extends DAO {
         return credential;
     }
 
-    public Client findClient(String clientId) {
+    Client findClient(String clientId) {
         QClient client = QClient.client;
         QRedirectUri uri = QRedirectUri.redirectUri;
 
@@ -33,7 +33,7 @@ public class RelyingPartyDAO extends DAO {
                 .fetchOne());
     }
 
-    public RelyingPartyCredential findCredential(String clientId) {
+    RelyingPartyCredential findCredential(String clientId) {
         QRelyingPartyCredential credential = QRelyingPartyCredential.relyingPartyCredential;
         return database.executeQuery(query -> query.selectFrom(credential)
                 .where(credential.relyingParty.id.eq(clientId))
@@ -42,7 +42,7 @@ public class RelyingPartyDAO extends DAO {
 
     public void removeAllRelyingParties() {
 
-        EntityManager em = database.getEntityManager();
+        EntityManager em = database.createEntityManager();
         em.getTransaction().begin();
         JPAQueryFactory query = database.createQuery(em);
 

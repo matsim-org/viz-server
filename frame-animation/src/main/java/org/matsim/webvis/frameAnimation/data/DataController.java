@@ -1,7 +1,7 @@
 package org.matsim.webvis.frameAnimation.data;
 
 import org.glassfish.jersey.client.oauth2.OAuth2ClientSupport;
-import org.matsim.webvis.common.errorHandling.UnauthorizedException;
+import org.matsim.webvis.error.UnauthorizedException;
 import org.matsim.webvis.frameAnimation.communication.ServiceCommunication;
 import org.matsim.webvis.frameAnimation.config.AppConfiguration;
 import org.matsim.webvis.frameAnimation.entities.Visualization;

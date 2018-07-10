@@ -7,9 +7,7 @@ import org.matsim.webvis.auth.entities.Token;
 class TokenDAO extends DAO {
 
     Token persist(Token token) {
-        if (token.getId() == null)
-            return database.persistOne(token);
-        return database.updateOne(token);
+        return database.persist(token);
     }
 
     Token find(String tokenId) {

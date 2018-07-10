@@ -1,6 +1,6 @@
 package org.matsim.webvis.frameAnimation.data;
 
-import org.matsim.webvis.common.database.AbstractEntity;
+import org.matsim.webvis.database.AbstractEntity;
 import org.matsim.webvis.frameAnimation.entities.Visualization;
 
 import java.util.Collection;
