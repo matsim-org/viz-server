@@ -3,6 +3,7 @@ package org.matsim.webvis.files.project;
 import io.dropwizard.auth.Auth;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.matsim.webvis.error.UnauthorizedException;
 import org.matsim.webvis.files.entities.Agent;
@@ -57,6 +58,7 @@ public class ProjectResource {
 
     @Getter
     @AllArgsConstructor
+    @NoArgsConstructor
     static class CreateProject {
 
         @NotEmpty
