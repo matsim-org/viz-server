@@ -1,53 +1,20 @@
 package org.matsim.webvis.frameAnimation.communication;
 
-import org.matsim.webvis.common.auth.ClientAuthentication;
-import org.matsim.webvis.common.communication.Http;
-import org.matsim.webvis.common.communication.HttpClientFactory;
-import org.matsim.webvis.common.communication.HttpClientFactoryWithTruststore;
-import org.matsim.webvis.frameAnimation.config.Configuration;
+import lombok.Getter;
+import org.matsim.webis.oauth.ClientAuthentication;
 
-import java.nio.file.Paths;
+import javax.ws.rs.client.Client;
+
 
 public class ServiceCommunication {
 
-    private static ClientAuthentication clientAuthentication;
-    private static Http http;
+    @Getter
+    private static Client client;
+    @Getter
+    private static ClientAuthentication authentication;
 
-    public static ClientAuthentication authentication() {
-        return clientAuthentication;
-    }
-
-    public static Http http() {
-        return http;
-    }
-
-    public static void initialize(boolean trustSelfsignedTLSCertificates) {
-
-        initializeHttp(trustSelfsignedTLSCertificates);
-        initializeAuthentication();
-
-    }
-
-    private static void initializeHttp(boolean trustSelfsignedTLSCertificates) {
-
-        if (trustSelfsignedTLSCertificates) {
-            HttpClientFactory factory = new HttpClientFactoryWithTruststore(
-                    Paths.get(Configuration.getInstance().getTlsTrustStore()),
-                    Configuration.getInstance().getTlsTrustStorePassword().toCharArray());
-            http = new Http(factory);
-        } else {
-            http = new Http();
-        }
-    }
-
-    private static void initializeAuthentication() {
-
-        clientAuthentication = new ClientAuthentication(http,
-                Configuration.getInstance().getTokenEndpoint(),
-                Configuration.getInstance().getRelyingPartyId(),
-                Configuration.getInstance().getRelyingPartySecret(),
-                "service-client");
-
-        clientAuthentication.requestAccessToken();
+    public static void initialize(Client client, ClientAuthentication authentication) {
+        ServiceCommunication.client = client;
+        ServiceCommunication.authentication = authentication;
     }
 }

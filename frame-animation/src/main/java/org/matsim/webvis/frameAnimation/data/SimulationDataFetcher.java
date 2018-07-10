@@ -2,15 +2,17 @@ package org.matsim.webvis.frameAnimation.data;
 
 import lombok.AllArgsConstructor;
 import org.apache.commons.io.FileUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.glassfish.jersey.client.oauth2.OAuth2ClientSupport;
 import org.matsim.webvis.common.errorHandling.InternalException;
 import org.matsim.webvis.common.errorHandling.InvalidInputException;
 import org.matsim.webvis.frameAnimation.communication.ServiceCommunication;
-import org.matsim.webvis.frameAnimation.config.Configuration;
+import org.matsim.webvis.frameAnimation.config.AppConfiguration;
 import org.matsim.webvis.frameAnimation.entities.Visualization;
 import org.matsim.webvis.frameAnimation.entities.VisualizationInput;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
@@ -26,11 +28,10 @@ class SimulationDataFetcher {
     private static final String PLANS_KEY = "plans";
     private static final String SNAPSHOT_INTERVAL_KEY = "snapshotInterval";
 
-    private static final Path tempFolder = createTempFolder(Configuration.getInstance().getTmpFilePath());
-    private static final URI fileEndpoint = Configuration.getInstance().getFileServer().resolve("/file/");
+    private static final URI fileEndpoint = AppConfiguration.getInstance().getFileServer().resolve("/file/");
+    private static Logger logger = LoggerFactory.getLogger(SimulationDataFetcher.class);
     private static final SimulationDataDAO simulationDataDAO = new SimulationDataDAO();
-
-    private static Logger logger = LogManager.getLogger();
+    private static final Path tempFolder = createTempFolder(AppConfiguration.getInstance().getTmpFilePath());
 
     private final Visualization visualization;
     private Path vizFolder;
@@ -93,10 +94,13 @@ class SimulationDataFetcher {
         Path inputFile = createEmptyInputFile(input.getFileEntry().getUserFileName());
         writtenFiles.put(input.getKey(), inputFile);
 
-        ServiceCommunication.http().post(fileEndpoint)
-                .withCredential(ServiceCommunication.authentication())
-                .withJsonBody(new FileRequest(visualization.getProject().getId(), input.getFileEntry().getId()))
-                .executeWithFileResponse(inputFile);
+        URI uri = UriBuilder.fromUri(AppConfiguration.getInstance().getFileServer())
+                .path("projects").path(visualization.getProject().getId()).path("files")
+                .path(input.getFileEntry().getId()).build();
+
+        Object response = ServiceCommunication.getClient().target(uri)
+                .property(OAuth2ClientSupport.OAUTH2_PROPERTY_ACCESS_TOKEN, ServiceCommunication.getAuthentication().getAccessToken())
+                .request().get(Object.class);
     }
 
     private Path createEmptyInputFile(String filename) {

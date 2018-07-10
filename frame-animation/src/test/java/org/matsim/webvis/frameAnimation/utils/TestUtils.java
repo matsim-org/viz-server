@@ -8,7 +8,7 @@ import org.matsim.core.network.NetworkUtils;
 import org.matsim.vis.snapshotwriters.AgentSnapshotInfo;
 import org.matsim.vis.snapshotwriters.AgentSnapshotInfoFactory;
 import org.matsim.vis.snapshotwriters.SnapshotLinkWidthCalculator;
-import org.matsim.webvis.frameAnimation.config.Configuration;
+import org.matsim.webvis.frameAnimation.config.AppConfiguration;
 import org.matsim.webvis.frameAnimation.data.SimulationData;
 
 import java.io.UnsupportedEncodingException;
@@ -54,11 +54,8 @@ public class TestUtils {
     }
 
     public static void loadConfig() {
-        try {
-            Configuration.loadConfigFile(getResourcePath("test-config.json"));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        if (AppConfiguration.getInstance() == null)
+            AppConfiguration.setInstance(new AppConfiguration());
     }
 
     private static String getResourcePath(String resourceFile) throws UnsupportedEncodingException {

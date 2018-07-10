@@ -1,11 +1,12 @@
 package org.matsim.webvis.frameAnimation.data;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.glassfish.jersey.client.oauth2.OAuth2ClientSupport;
 import org.matsim.webvis.common.errorHandling.UnauthorizedException;
 import org.matsim.webvis.frameAnimation.communication.ServiceCommunication;
-import org.matsim.webvis.frameAnimation.config.Configuration;
+import org.matsim.webvis.frameAnimation.config.AppConfiguration;
 import org.matsim.webvis.frameAnimation.entities.Visualization;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.util.Arrays;
@@ -17,7 +18,7 @@ public class DataController {
 
     public static final DataController Instance = new DataController();
 
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger logger = LoggerFactory.getLogger(DataController.class);
     private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
     private MetadataDAO metadataDAO = new MetadataDAO();
@@ -32,13 +33,14 @@ public class DataController {
 
     private void fetchVisualizationData() {
 
-        URI vizByTypeEndpoint = Configuration.getInstance().getFileServer().resolve("/project/visualizations/");
+        URI vizByTypeEndpoint = AppConfiguration.getInstance().getFileServer().resolve("/visualizations");
 
         try {
-            Visualization[] response = ServiceCommunication.http().post(vizByTypeEndpoint)
-                    .withCredential(ServiceCommunication.authentication())
-                    .withJsonBody(new VizTypeRequest())
-                    .executeWithJsonResponse(Visualization[].class);
+            Visualization[] response = ServiceCommunication.getClient().target(vizByTypeEndpoint)
+                    .queryParam("type", "Animation")
+                    .request()
+                    .property(OAuth2ClientSupport.OAUTH2_PROPERTY_ACCESS_TOKEN, ServiceCommunication.getAuthentication().getAccessToken())
+                    .get(Visualization[].class);
 
             logger.info("Received " + response.length + " vizes.");
 
@@ -48,7 +50,7 @@ public class DataController {
 
         } catch (UnauthorizedException e) {
             logger.info("could not authenticate attempting to refresh access_token");
-            ServiceCommunication.authentication().requestAccessToken();
+            ServiceCommunication.getAuthentication().requestAccessToken();
         } catch (Exception e) {
             logger.error("Error while fetching viz metadata.", e);
         }

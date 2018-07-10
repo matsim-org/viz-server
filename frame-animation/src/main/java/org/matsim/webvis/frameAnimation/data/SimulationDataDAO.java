@@ -10,6 +10,8 @@ import java.util.Map;
 
 public class SimulationDataDAO {
 
+    public static SimulationDataDAO Instance = new SimulationDataDAO();
+
     private static Map<String, SimulationData> data = new HashMap<>();
 
     public void add(String vizId, SimulationData simulationData) {
