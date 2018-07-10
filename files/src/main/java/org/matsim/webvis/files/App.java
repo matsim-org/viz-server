@@ -110,7 +110,6 @@ public class App extends Application<AppConfiguration> {
     private void registerExceptionMappers(JerseyEnvironment jersey) {
 
         jersey.register(new CodedExceptionMapper());
-        //jersey.register(new DefaultExceptionMapper());
     }
 
     private void registerCORSFilter(ServletEnvironment servlet) {
@@ -120,13 +119,6 @@ public class App extends Application<AppConfiguration> {
         cors.setInitParameter(CrossOriginFilter.ALLOWED_METHODS_PARAM, "GET, POST, PUT, OPTIONS, DELETE");
         cors.setInitParameter(CrossOriginFilter.ALLOWED_HEADERS_PARAM, "Authorization, Content-Type");
         cors.setInitParameter(CrossOriginFilter.ALLOW_CREDENTIALS_PARAM, "true");
-
-        /*
-        cors.setInitParameter(CrossOriginFilter.ACCESS_CONTROL_ALLOW_ORIGIN_HEADER, "*");
-        cors.setInitParameter(CrossOriginFilter.ACCESS_CONTROL_ALLOW_CREDENTIALS_HEADER, "true");
-        cors.setInitParameter(CrossOriginFilter.ACCESS_CONTROL_ALLOW_METHODS_HEADER, "GET, POST, PUT, OPTIONS, DELETE");
-        cors.setInitParameter(CrossOriginFilter.ACCESS_CONTROL_ALLOW_HEADERS_HEADER, "Authorization, Content-Type");
-        */
 
         cors.addMappingForUrlPatterns(EnumSet.allOf(DispatcherType.class), true, "/*");
         cors.setInitParameter(CrossOriginFilter.CHAIN_PREFLIGHT_PARAM, Boolean.FALSE.toString());
