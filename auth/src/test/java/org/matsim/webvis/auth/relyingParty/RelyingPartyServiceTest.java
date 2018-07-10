@@ -229,7 +229,7 @@ public class RelyingPartyServiceTest {
         Client client = testObject.validateClient(credential.getRelyingParty().getId(), redirectURI, scope);
 
         assertNotNull(client);
-        assertTrue(credential.getRelyingParty().equalId(client));
+        assertEquals(credential.getRelyingParty(), client);
     }
 
     private RelyingPartyCredential persistWithClient(URI redirectUri, String scope) {
