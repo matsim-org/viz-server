@@ -83,7 +83,7 @@
                         <target>${java.version}</target>
                     </configuration>
                 </plugin>
-
+                <!-- Configure class generation for QueryDSL -->
                 <plugin>
                     <groupId>com.mysema.maven</groupId>
                     <artifactId>apt-maven-plugin</artifactId>
@@ -100,6 +100,7 @@
                         </execution>
                     </executions>
                 </plugin>
+                <!-- Also, configures class generation for QueryDSL -->
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>build-helper-maven-plugin</artifactId>
@@ -119,6 +120,8 @@
                         </execution>
                     </executions>
                 </plugin>
+                <!-- Generates fat-jars of executable components. Main class must be defined in
+                    Child-POM. -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-assembly-plugin</artifactId>
