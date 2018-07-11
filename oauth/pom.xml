@@ -11,11 +11,12 @@
 
     <artifactId>oauth</artifactId>
 
-    <properties>
-        <dropwizard.version>1.3.5</dropwizard.version>
-    </properties>
-
     <dependencies>
+        <dependency>
+            <groupId>org.matsim</groupId>
+            <artifactId>error-handling</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
         <dependency>
             <groupId>io.dropwizard</groupId>
             <artifactId>dropwizard-auth</artifactId>
@@ -26,11 +27,7 @@
             <artifactId>oauth2-client</artifactId>
             <version>2.27</version>
         </dependency>
-        <dependency>
-            <groupId>org.matsim</groupId>
-            <artifactId>error-handling</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
+
     </dependencies>
 
 </project>
