@@ -1,14 +1,16 @@
 package org.matsim.webvis.frameAnimation.data;
 
-import org.matsim.webvis.common.errorHandling.InvalidInputException;
+import org.geojson.FeatureCollection;
+import org.matsim.webvis.error.InvalidInputException;
 import org.matsim.webvis.frameAnimation.contracts.RectContract;
-import org.matsim.webvis.frameAnimation.contracts.geoJSON.FeatureCollection;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 public class SimulationDataDAO {
+
+    public static SimulationDataDAO Instance = new SimulationDataDAO();
 
     private static Map<String, SimulationData> data = new HashMap<>();
 

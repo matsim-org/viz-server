@@ -1,6 +1,7 @@
 package org.matsim.webvis.files.file;
 
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 import org.junit.*;
 import org.matsim.webvis.files.agent.UserDAO;
 import org.matsim.webvis.files.config.AppConfiguration;
@@ -9,7 +10,6 @@ import org.matsim.webvis.files.entities.Project;
 import org.matsim.webvis.files.entities.User;
 import org.matsim.webvis.files.project.ProjectDAO;
 import org.matsim.webvis.files.util.TestUtils;
-import spark.utils.IOUtils;
 
 import java.io.BufferedWriter;
 import java.io.IOException;

@@ -14,6 +14,7 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
+import org.matsim.webis.oauth.Credentials;
 import org.matsim.webis.oauth.OAuthAuthenticator;
 import org.matsim.webvis.database.AbstractEntity;
 import org.matsim.webvis.error.CodedExceptionMapper;
@@ -93,11 +94,11 @@ public class App extends Application<AppConfiguration> {
 
     private void registerOAuth(AppConfiguration config, Environment environment) {
 
-        HttpAuthenticationFeature auth = HttpAuthenticationFeature.basic(config.getRelyingPartyId(), config.getRelyingPartySecret());
+        HttpAuthenticationFeature auth = HttpAuthenticationFeature.basicBuilder().nonPreemptive().build();
         final Client client = new JerseyClientBuilder(environment).using(config.getJerseyClient()).build("bla");
         client.register(auth);
         final OAuthAuthenticator<Agent> authenticator = new OAuthAuthenticator<>(client, config.getIntrospectionEndpoint(),
-                Subject::createSubject);
+                Subject::createSubject, new Credentials(config.getRelyingPartyId(), config.getRelyingPartySecret()));
 
         environment.jersey().register(new AuthDynamicFeature(new OAuthCredentialAuthFilter.Builder<Agent>()
                 .setAuthenticator(authenticator)

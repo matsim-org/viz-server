@@ -1,4 +1,4 @@
-package org.matsim.webvis.common.auth;
+package org.matsim.webis.oauth;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

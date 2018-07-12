@@ -1,11 +1,11 @@
-package org.matsim.webvis.common.auth;
+package org.matsim.webis.oauth;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class PrincipalCredentialToken {
+public class Credentials {
 
     private String principal;
     private String credential;

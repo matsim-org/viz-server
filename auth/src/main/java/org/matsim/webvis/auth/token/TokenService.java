@@ -10,7 +10,7 @@ import org.matsim.webvis.auth.entities.RelyingParty;
 import org.matsim.webvis.auth.entities.Token;
 import org.matsim.webvis.auth.entities.User;
 import org.matsim.webvis.auth.relyingParty.RelyingPartyService;
-import org.matsim.webvis.common.database.AbstractEntity;
+import org.matsim.webvis.database.AbstractEntity;
 import org.matsim.webvis.error.UnauthorizedException;
 
 import java.time.Duration;

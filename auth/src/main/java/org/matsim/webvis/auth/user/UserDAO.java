@@ -8,12 +8,12 @@ import java.util.List;
 
 public class UserDAO extends DAO {
 
-    public UserCredentials persistCredentials(UserCredentials credentials) {
+    UserCredentials persistCredentials(UserCredentials credentials) {
 
         if (credentials.getUser().getId() == null)
-            return database.persistOne(credentials);
+            return database.persist(credentials);
 
-        EntityManager manager = database.getEntityManager();
+        EntityManager manager = database.createEntityManager();
         manager.getTransaction().begin();
         User persisted = manager.merge(credentials.getUser());
         credentials.setUser(persisted);
@@ -23,26 +23,26 @@ public class UserDAO extends DAO {
         return credentials;
     }
 
-    public UserCredentials findUserCredentials(String eMail) {
+    UserCredentials findUserCredentials(String eMail) {
         QUserCredentials credentials = QUserCredentials.userCredentials;
         return database.executeQuery(query -> query.selectFrom(credentials)
                 .where(credentials.user.eMail.eq(eMail))
                 .fetchOne());
     }
 
-    public User findUser(String id) {
+    User findUser(String id) {
         QUser user = QUser.user;
         return database.executeQuery(query -> query.selectFrom(user)
                 .where(user.id.eq(id))
                 .fetchOne());
     }
 
-    public void deleteUser(User user) {
+    void deleteUser(User user) {
         QUserCredentials userCredentials = QUserCredentials.userCredentials;
         UserCredentials credentials = database.executeQuery(query -> query.selectFrom(userCredentials)
                 .where(userCredentials.user.eq(user))
                 .fetchFirst());
-        database.removeOne(credentials);
+        database.remove(credentials);
     }
 
     public List<User> getAllUser() {
@@ -51,7 +51,7 @@ public class UserDAO extends DAO {
     }
 
     public void removeAllUsers() {
-        EntityManager em = database.getEntityManager();
+        EntityManager em = database.createEntityManager();
         em.getTransaction().begin();
         JPAQueryFactory query = database.createQuery(em);
 
