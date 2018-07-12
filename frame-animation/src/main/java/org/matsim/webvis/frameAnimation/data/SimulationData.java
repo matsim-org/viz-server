@@ -1,9 +1,9 @@
 package org.matsim.webvis.frameAnimation.data;
 
+import org.geojson.FeatureCollection;
 import org.matsim.api.core.v01.Id;
 import org.matsim.core.utils.collections.QuadTree;
 import org.matsim.webvis.frameAnimation.contracts.RectContract;
-import org.matsim.webvis.frameAnimation.contracts.geoJSON.FeatureCollection;
 
 import java.io.IOException;
 
@@ -26,34 +26,34 @@ public class SimulationData {
         populationData = reader.getPopulationData();
     }
 
-    public byte[] getLinks() {
+    byte[] getLinks() {
         return networkData.getLinks();
     }
 
-    public byte[] getSnapshots(QuadTree.Rect bounds, double fromTimestep, int numberOfTimesteps, double speedFactor)
+    byte[] getSnapshots(QuadTree.Rect bounds, double fromTimestep, int numberOfTimesteps, double speedFactor)
             throws IOException {
         //This will respect the given bounds later
         return simulationData.getSnapshots(fromTimestep, numberOfTimesteps, speedFactor);
     }
 
-    public FeatureCollection getPlan(int idIndex) {
+    FeatureCollection getPlan(int idIndex) {
         Id id = simulationData.getId(idIndex);
         return populationData.getSelectedPlan(id);
     }
 
-    public RectContract getBounds() {
+    RectContract getBounds() {
         return networkData.getBounds();
     }
 
-    public double getTimestepSize() {
+    double getTimestepSize() {
         return snapshotPeriod;
     }
 
-    public double getFirstTimestep() {
+    double getFirstTimestep() {
         return simulationData.getFirstTimestep();
     }
 
-    public double getLastTimestep() {
+    double getLastTimestep() {
         return simulationData.getLastTimestep();
     }
 }

@@ -1,6 +1,5 @@
 package org.matsim.webvis.frameAnimation.data;
 
-import lombok.AllArgsConstructor;
 import org.apache.commons.io.FileUtils;
 import org.glassfish.jersey.client.oauth2.OAuth2ClientSupport;
 import org.matsim.webvis.error.InternalException;
@@ -14,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -28,7 +28,6 @@ class SimulationDataFetcher {
     private static final String PLANS_KEY = "plans";
     private static final String SNAPSHOT_INTERVAL_KEY = "snapshotInterval";
 
-    private static final URI fileEndpoint = AppConfiguration.getInstance().getFileServer().resolve("/file/");
     private static Logger logger = LoggerFactory.getLogger(SimulationDataFetcher.class);
     private static final SimulationDataDAO simulationDataDAO = new SimulationDataDAO();
     private static final Path tempFolder = createTempFolder(AppConfiguration.getInstance().getTmpFilePath());
@@ -75,7 +74,8 @@ class SimulationDataFetcher {
 
         vizFolder = createVizFolder(this.visualization.getId());
         try {
-            visualization.getInputFiles().forEach((key, value) -> fetchFile(value));
+            for (VisualizationInput input : visualization.getInputFiles().values())
+                fetchFile(input);
 
             SimulationData data = new SimulationData(
                     writtenFiles.get(NETWORK_KEY).toAbsolutePath().toString(),
@@ -84,33 +84,32 @@ class SimulationDataFetcher {
                     Integer.parseInt(visualization.getParameters().get(SNAPSHOT_INTERVAL_KEY).getValue())
             );
             simulationDataDAO.add(visualization.getId(), data);
+        } catch (IOException e) {
+            logger.error("Error while fetching input files", e);
         } finally {
             removeAllInputFiles();
         }
     }
 
-    private void fetchFile(VisualizationInput input) {
+    private void fetchFile(VisualizationInput input) throws IOException {
 
-        Path inputFile = createEmptyInputFile(input.getFileEntry().getUserFileName());
-        writtenFiles.put(input.getKey(), inputFile);
 
         URI uri = UriBuilder.fromUri(AppConfiguration.getInstance().getFileServer())
                 .path("projects").path(visualization.getProject().getId()).path("files")
                 .path(input.getFileEntry().getId()).build();
-
-        Object response = ServiceCommunication.getClient().target(uri)
-                .property(OAuth2ClientSupport.OAUTH2_PROPERTY_ACCESS_TOKEN, ServiceCommunication.getAuthentication().getAccessToken())
-                .request().get(Object.class);
-    }
-
-    private Path createEmptyInputFile(String filename) {
-        Path file = vizFolder.resolve(filename);
         try {
-            return Files.createFile(file);
-        } catch (IOException e) {
-            logger.error("could not create input file", e);
-            throw new InternalException("Could not create input file");
+            InputStream fileStream = ServiceCommunication.getClient().target(uri)
+                    .request()
+                    .property(OAuth2ClientSupport.OAUTH2_PROPERTY_ACCESS_TOKEN, ServiceCommunication.getAuthentication().getAccessToken())
+                    .get(InputStream.class);
+
+            Path inputFile = vizFolder.resolve(input.getFileEntry().getUserFileName());
+            Files.copy(fileStream, inputFile);
+            writtenFiles.put(input.getKey(), inputFile);
+        } catch (RuntimeException e) {
+            logger.error("error while fetching file: ", e);
         }
+
     }
 
     private void removeAllInputFiles() {
@@ -129,12 +128,5 @@ class SimulationDataFetcher {
                 && visualization.getInputFiles().containsKey(PLANS_KEY)
                 && visualization.getParameters().size() == 1
                 && visualization.getParameters().containsKey(SNAPSHOT_INTERVAL_KEY);
-    }
-
-    @AllArgsConstructor
-    private static class FileRequest {
-
-        final String projectId;
-        final String fileId;
     }
 }

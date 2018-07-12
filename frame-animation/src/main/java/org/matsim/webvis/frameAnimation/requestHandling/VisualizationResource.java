@@ -1,8 +1,8 @@
 package org.matsim.webvis.frameAnimation.requestHandling;
 
+import org.geojson.FeatureCollection;
 import org.matsim.webvis.error.InternalException;
 import org.matsim.webvis.frameAnimation.contracts.ConfigurationResponse;
-import org.matsim.webvis.frameAnimation.contracts.geoJSON.FeatureCollection;
 import org.matsim.webvis.frameAnimation.data.SimulationDataDAO;
 
 import javax.ws.rs.*;
@@ -39,7 +39,7 @@ public class VisualizationResource {
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     public byte[] snapshots(@PathParam("id") String vizId,
                             @QueryParam("fromTimestep") double fromTimestep,
-                            @QueryParam("numberOfTimestepes") int numberOfTimesteps,
+                            @QueryParam("numberOfTimesteps") int numberOfTimesteps,
                             @QueryParam("speedFactor") double speedFactor) {
         try {
             return data.getSnapshots(vizId, fromTimestep, numberOfTimesteps, speedFactor);
