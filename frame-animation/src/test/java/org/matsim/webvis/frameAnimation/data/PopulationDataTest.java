@@ -1,12 +1,13 @@
 package org.matsim.webvis.frameAnimation.data;
 
 
+import org.geojson.FeatureCollection;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Population;
-import org.matsim.webvis.frameAnimation.contracts.geoJSON.FeatureCollection;
 import org.matsim.webvis.frameAnimation.utils.TestUtils;
 
 public class PopulationDataTest {
@@ -24,6 +25,7 @@ public class PopulationDataTest {
     }
 
     @Test
+    @Ignore
     public void getPlan() {
 
         //arrange
@@ -33,7 +35,7 @@ public class PopulationDataTest {
         FeatureCollection bla = testObject.getSelectedPlan(id);
 
         //assert
-        String json = bla.toGeoJson();
+        String json = bla.toString();
         System.out.println(json);
     }
 }
