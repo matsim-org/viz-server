@@ -29,10 +29,11 @@ class SimulationDataFetcher {
     private static final String SNAPSHOT_INTERVAL_KEY = "snapshotInterval";
 
     private static Logger logger = LoggerFactory.getLogger(SimulationDataFetcher.class);
-    private static final SimulationDataDAO simulationDataDAO = new SimulationDataDAO();
+    private static final DataProvider dataProvider = new DataProvider();
     private static final Path tempFolder = createTempFolder(AppConfiguration.getInstance().getTmpFilePath());
 
     private final Visualization visualization;
+    private final VisualizationData visualizationData;
     private Path vizFolder;
     private Map<String, Path> writtenFiles = new HashMap<>();
 
@@ -41,6 +42,7 @@ class SimulationDataFetcher {
         if (!isValidInput(visualization))
             throw new InvalidInputException("visualization did not contain required input");
         this.visualization = visualization;
+        visualizationData = new VisualizationData();
     }
 
     static void generateVisualization(Visualization visualization) {
@@ -73,26 +75,31 @@ class SimulationDataFetcher {
     private void generate() {
 
         vizFolder = createVizFolder(this.visualization.getId());
+        visualizationData.setProgress(VisualizationData.Progress.DownloadingInput);
+        dataProvider.add(visualization.getId(), visualizationData);
         try {
             for (VisualizationInput input : visualization.getInputFiles().values())
                 fetchFile(input);
 
+            visualizationData.setProgress(VisualizationData.Progress.GeneratingData);
             SimulationData data = new SimulationData(
                     writtenFiles.get(NETWORK_KEY).toAbsolutePath().toString(),
                     writtenFiles.get(EVENTS_KEY).toAbsolutePath().toString(),
                     writtenFiles.get(PLANS_KEY).toAbsolutePath().toString(),
                     Integer.parseInt(visualization.getParameters().get(SNAPSHOT_INTERVAL_KEY).getValue())
             );
-            simulationDataDAO.add(visualization.getId(), data);
+            visualizationData.setSimulationData(data);
+            visualizationData.setProgress(VisualizationData.Progress.Done);
         } catch (IOException e) {
             logger.error("Error while fetching input files", e);
+            dataProvider.remove(visualization.getId());
         } finally {
             removeAllInputFiles();
+            logger.info("Done processing data for viz: " + visualization.getId());
         }
     }
 
     private void fetchFile(VisualizationInput input) throws IOException {
-
 
         URI uri = UriBuilder.fromUri(AppConfiguration.getInstance().getFileServer())
                 .path("projects").path(visualization.getProject().getId()).path("files")
@@ -109,7 +116,6 @@ class SimulationDataFetcher {
         } catch (RuntimeException e) {
             logger.error("error while fetching file: ", e);
         }
-
     }
 
     private void removeAllInputFiles() {

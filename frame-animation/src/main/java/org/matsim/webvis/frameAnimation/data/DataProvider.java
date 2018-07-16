@@ -1,35 +1,81 @@
 package org.matsim.webvis.frameAnimation.data;
 
-import org.matsim.webvis.frameAnimation.entities.Visualization;
+import org.geojson.FeatureCollection;
+import org.matsim.webvis.error.InternalException;
+import org.matsim.webvis.error.InvalidInputException;
+import org.matsim.webvis.frameAnimation.contracts.ConfigurationResponse;
+import org.matsim.webvis.frameAnimation.contracts.RectContract;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 public class DataProvider {
 
-    public final DataProvider Instance = new DataProvider();
-    private DataProvider() {}
+    public static DataProvider Instance = new DataProvider();
 
-    private Map<Visualization, SimulationData> visualizations = new HashMap<>();
+    private static Map<String, VisualizationData> data = new HashMap<>();
 
-    public void createVisualization(String visualizationId) {
-
-        //1. fetch viz data from file server
-
-        //2. create simulation data
-
-        //3. store visualization and simulation data in map
+    public void add(String vizId, VisualizationData visualizationData) {
+        data.put(vizId, visualizationData);
     }
 
-    public void getVisualization(String visualizationId) {
-
-        //1. get the viz from the map
-
-        // return sim data
+    public byte[] getLinks(String vizId) {
+        return find(vizId).getLinks();
     }
 
-    public void removeViz(String visualizationId) {
+    public byte[] getSnapshots(String vizId, double fromTimestamp, int numberOfTimesteps, double speedFactor) throws IOException {
+        return find(vizId).getSnapshots(null, fromTimestamp, numberOfTimesteps, speedFactor);
+    }
 
-        // well, remove visualization and all the data.
+    public FeatureCollection getPlan(String vizId, int idIndex) {
+        return find(vizId).getPlan(idIndex);
+    }
+
+    public RectContract getBounds(String vizId) {
+        return find(vizId).getBounds();
+    }
+
+    public double getTimestepSize(String vizId) {
+        return find(vizId).getTimestepSize();
+    }
+
+    public double getFirstTimestep(String vizId) {
+        return find(vizId).getFirstTimestep();
+    }
+
+    public double getLastTimestep(String vizId) {
+        return find(vizId).getLastTimestep();
+    }
+
+    public ConfigurationResponse getConfiguration(String vizId) {
+
+        if (!data.containsKey(vizId))
+            throw new InvalidInputException("Viz id: " + vizId + " is not in data set");
+
+        VisualizationData viz = data.get(vizId);
+
+        if (!viz.isDone())
+            return new ConfigurationResponse(viz.getProgress());
+        else
+            return new ConfigurationResponse(viz.getSimulationData().getBounds(),
+                    viz.getSimulationData().getFirstTimestep(),
+                    viz.getSimulationData().getLastTimestep(),
+                    viz.getSimulationData().getTimestepSize(),
+                    viz.getProgress()
+            );
+    }
+
+    VisualizationData remove(String vizId) {
+        return data.remove(vizId);
+    }
+
+    private SimulationData find(String vizId) {
+
+        if (!data.containsKey(vizId))
+            throw new InvalidInputException("Viz id: " + vizId + " is not in data set");
+        if (data.get(vizId).getProgress() != VisualizationData.Progress.Done)
+            throw new InternalException("visualization is not ready yet");
+        return data.get(vizId).getSimulationData();
     }
 }

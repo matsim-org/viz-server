@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URI;
-import java.util.Arrays;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -20,8 +19,6 @@ public class DataController {
 
     private static final Logger logger = LoggerFactory.getLogger(DataController.class);
     private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-
-    private MetadataDAO metadataDAO = new MetadataDAO();
 
     private DataController() {
     }
@@ -44,7 +41,6 @@ public class DataController {
 
             logger.info("Received " + response.length + " vizes.");
 
-            metadataDAO.persistVisualizations(Arrays.asList(response));
             for (Visualization viz : response)
                 SimulationDataFetcher.generateVisualization(viz);
 

@@ -3,7 +3,7 @@ package org.matsim.webvis.frameAnimation.requestHandling;
 import org.geojson.FeatureCollection;
 import org.matsim.webvis.error.InternalException;
 import org.matsim.webvis.frameAnimation.contracts.ConfigurationResponse;
-import org.matsim.webvis.frameAnimation.data.SimulationDataDAO;
+import org.matsim.webvis.frameAnimation.data.DataProvider;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -12,19 +12,14 @@ import java.io.IOException;
 @Path("{id}")
 public class VisualizationResource {
 
-    private final SimulationDataDAO data = SimulationDataDAO.Instance;
+    private final DataProvider data = DataProvider.Instance;
 
     @GET
     @Path("/configuration")
     @Produces(MediaType.APPLICATION_JSON)
     public ConfigurationResponse configuration(@PathParam("id") String vizId) {
 
-        return new ConfigurationResponse(
-                data.getBounds(vizId),
-                data.getFirstTimestep(vizId),
-                data.getLastTimestep(vizId),
-                data.getTimestepSize(vizId)
-        );
+        return data.getConfiguration(vizId);
     }
 
     @GET
