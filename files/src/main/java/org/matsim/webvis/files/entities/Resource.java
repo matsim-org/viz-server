@@ -2,10 +2,12 @@ package org.matsim.webvis.files.entities;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 import org.matsim.webvis.database.AbstractEntity;
 
 import javax.persistence.*;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -18,6 +20,9 @@ public abstract class Resource extends AbstractEntity {
 
     @OneToMany(mappedBy = "resource", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<Permission> permissions = new HashSet<>();
+
+    @CreationTimestamp
+    private Date createdAt;
 
     public boolean addPermission(Permission permission) {
 
