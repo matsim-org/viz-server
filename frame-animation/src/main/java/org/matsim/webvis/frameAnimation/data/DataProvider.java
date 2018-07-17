@@ -4,7 +4,6 @@ import org.geojson.FeatureCollection;
 import org.matsim.webvis.error.InternalException;
 import org.matsim.webvis.error.InvalidInputException;
 import org.matsim.webvis.frameAnimation.contracts.ConfigurationResponse;
-import org.matsim.webvis.frameAnimation.contracts.RectContract;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -32,26 +31,13 @@ public class DataProvider {
         return find(vizId).getPlan(idIndex);
     }
 
-    public RectContract getBounds(String vizId) {
-        return find(vizId).getBounds();
-    }
-
-    public double getTimestepSize(String vizId) {
-        return find(vizId).getTimestepSize();
-    }
-
-    public double getFirstTimestep(String vizId) {
-        return find(vizId).getFirstTimestep();
-    }
-
-    public double getLastTimestep(String vizId) {
-        return find(vizId).getLastTimestep();
-    }
-
     public ConfigurationResponse getConfiguration(String vizId) {
 
-        if (!data.containsKey(vizId))
+        if (!data.containsKey(vizId)) {
+            DataController.Instance.fetchVisualizations();
             throw new InvalidInputException("Viz id: " + vizId + " is not in data set");
+        }
+
 
         VisualizationData viz = data.get(vizId);
 
@@ -72,9 +58,11 @@ public class DataProvider {
 
     private SimulationData find(String vizId) {
 
-        if (!data.containsKey(vizId))
+        if (!data.containsKey(vizId)) {
+            DataController.Instance.fetchVisualizations();
             throw new InvalidInputException("Viz id: " + vizId + " is not in data set");
-        if (data.get(vizId).getProgress() != VisualizationData.Progress.Done)
+        }
+        if (!data.get(vizId).isDone())
             throw new InternalException("visualization is not ready yet");
         return data.get(vizId).getSimulationData();
     }

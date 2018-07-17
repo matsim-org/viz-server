@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.persistence.PersistenceException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -99,7 +100,7 @@ public class VisualizationService {
         });
     }
 
-    List<Visualization> findByType(String vizType, Agent agent) {
-        return visualizationDAO.findAllByTypeIfHasPermission(vizType, agent);
+    List<Visualization> findByType(String vizType, Instant after, Agent agent) {
+        return visualizationDAO.findAllByTypeIfHasPermission(vizType, after, agent);
     }
 }
