@@ -59,7 +59,6 @@ public class DataProvider {
     private SimulationData find(String vizId) {
 
         if (!data.containsKey(vizId)) {
-            DataController.Instance.fetchVisualizations();
             throw new InvalidInputException("Viz id: " + vizId + " is not in data set");
         }
         if (!data.get(vizId).isDone())
