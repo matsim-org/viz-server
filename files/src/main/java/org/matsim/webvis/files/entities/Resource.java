@@ -6,8 +6,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.matsim.webvis.database.AbstractEntity;
 
 import javax.persistence.*;
+import java.time.Instant;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -22,7 +22,7 @@ public abstract class Resource extends AbstractEntity {
     private Set<Permission> permissions = new HashSet<>();
 
     @CreationTimestamp
-    private Date createdAt;
+    private Instant createdAt;
 
     public boolean addPermission(Permission permission) {
 

@@ -10,6 +10,7 @@ import org.matsim.webvis.files.permission.PermissionService;
 import org.matsim.webvis.files.project.ProjectDAO;
 import org.matsim.webvis.files.util.TestUtils;
 
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -188,7 +189,7 @@ public class VisualizationServiceTest {
         User user = TestUtils.persistUser("id");
         String type = "some-type";
 
-        List<Visualization> result = testObject.findByType(type, user);
+        List<Visualization> result = testObject.findByType(type, Instant.EPOCH, user);
 
         assertEquals(0, result.size());
     }
@@ -202,7 +203,7 @@ public class VisualizationServiceTest {
 
         User user = TestUtils.persistUser("id");
 
-        List<Visualization> result = testObject.findByType(type.getKey(), user);
+        List<Visualization> result = testObject.findByType(type.getKey(), Instant.EPOCH, user);
 
         assertEquals(0, result.size());
     }
@@ -215,10 +216,30 @@ public class VisualizationServiceTest {
         CreateVisualizationRequest create = new CreateVisualizationRequest(project.getId(), typeKey, new HashMap<>(), new HashMap<>());
         Visualization viz = testObject.createVisualizationFromRequest(create, project.getCreator());
 
-        List<Visualization> result = testObject.findByType(typeKey, project.getCreator());
+        List<Visualization> result = testObject.findByType(typeKey, Instant.EPOCH, project.getCreator());
 
         assertEquals(1, result.size());
         Visualization resultViz = result.get(0);
         assertEquals(viz, resultViz);
+    }
+
+    @Test
+    public void findByType_afterInstant_listOfVisualizations() {
+
+        Project project = TestUtils.persistProjectWithCreator("first project");
+
+        CreateVisualizationRequest create = new CreateVisualizationRequest(project.getId(), typeKey, new HashMap<>(), new HashMap<>());
+        Visualization viz = testObject.createVisualizationFromRequest(create, project.getCreator());
+
+        Instant afterFirst = Instant.now();
+
+        CreateVisualizationRequest secondCreate = new CreateVisualizationRequest(project.getId(), typeKey, new HashMap<>(), new HashMap<>());
+        Visualization secondViz = testObject.createVisualizationFromRequest(secondCreate, project.getCreator());
+
+        List<Visualization> result = testObject.findByType(typeKey, afterFirst, project.getCreator());
+
+        assertEquals(1, result.size());
+        Visualization resultViz = result.get(0);
+        assertEquals(secondViz, resultViz);
     }
 }

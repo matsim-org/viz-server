@@ -2,6 +2,7 @@ package org.matsim.webvis.files.visualization;
 
 import org.matsim.webvis.files.entities.*;
 
+import java.time.Instant;
 import java.util.List;
 
 public class VisualizationDAO extends DAO {
@@ -32,13 +33,13 @@ public class VisualizationDAO extends DAO {
                 .fetchOne());
     }
 
-    List<Visualization> findAllByTypeIfHasPermission(String key, Agent agent) {
+    List<Visualization> findAllByTypeIfHasPermission(String key, Instant after, Agent agent) {
 
         QVisualization visualization = QVisualization.visualization;
         QPermission permission = QPermission.permission;
 
         return database.executeQuery(query -> query.selectFrom(visualization)
-                .where(visualization.type.key.eq(key))
+                .where(visualization.type.key.eq(key).and(visualization.createdAt.after(after)))
                 .innerJoin(visualization.permissions, permission).on(permission.agent.eq(agent))
                 .leftJoin(visualization.inputFiles).fetchJoin()
                 .leftJoin(visualization.parameters).fetchJoin()

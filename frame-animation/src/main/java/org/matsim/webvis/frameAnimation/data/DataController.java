@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URI;
-import java.util.Arrays;
+import java.time.Instant;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -21,7 +21,7 @@ public class DataController {
     private static final Logger logger = LoggerFactory.getLogger(DataController.class);
     private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
-    private MetadataDAO metadataDAO = new MetadataDAO();
+    private Instant lastFetch = Instant.MIN;
 
     private DataController() {
     }
@@ -31,20 +31,27 @@ public class DataController {
         scheduler.scheduleAtFixedRate(this::fetchVisualizationData, 0, 10, TimeUnit.HOURS);
     }
 
+    public void fetchVisualizations() {
+        logger.info("scheduling single fetch.");
+        scheduler.schedule(this::fetchVisualizationData, 0, TimeUnit.SECONDS);
+    }
+
     private void fetchVisualizationData() {
 
+        Instant requestTime = Instant.now();
         URI vizByTypeEndpoint = AppConfiguration.getInstance().getFileServer().resolve("/visualizations");
-
         try {
             Visualization[] response = ServiceCommunication.getClient().target(vizByTypeEndpoint)
                     .queryParam("type", "Animation")
+                    .queryParam("after", lastFetch.toString())
                     .request()
                     .property(OAuth2ClientSupport.OAUTH2_PROPERTY_ACCESS_TOKEN, ServiceCommunication.getAuthentication().getAccessToken())
                     .get(Visualization[].class);
 
             logger.info("Received " + response.length + " vizes.");
 
-            metadataDAO.persistVisualizations(Arrays.asList(response));
+            lastFetch = requestTime;
+
             for (Visualization viz : response)
                 SimulationDataFetcher.generateVisualization(viz);
 
@@ -52,11 +59,7 @@ public class DataController {
             logger.info("could not authenticate attempting to refresh access_token");
             ServiceCommunication.getAuthentication().requestAccessToken();
         } catch (Exception e) {
-            logger.error("Error while fetching viz metadata.", e);
+            logger.error("Error while fetching viz metadata from: " + vizByTypeEndpoint, e);
         }
-    }
-
-    private static class VizTypeRequest {
-        final String visualizationType = "Animation";
     }
 }

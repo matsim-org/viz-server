@@ -30,9 +30,9 @@ public class VisualizationResourceTest {
 
         List<Visualization> vizes = new ArrayList<>();
         vizes.add(new Visualization());
-        when(testObject.visualizationService.findByType(anyString(), any())).thenReturn(vizes);
+        when(testObject.visualizationService.findByType(anyString(), any(), any())).thenReturn(vizes);
 
-        List<Visualization> result = testObject.findByType(new User(), "type");
+        List<Visualization> result = testObject.findByType(new User(), "type", null);
 
         assertEquals(vizes, result);
     }

@@ -19,6 +19,4 @@ public class Visualization extends AbstractEntity {
     private Set<Permission> permissions = new HashSet<>();
     private Map<String, VisualizationInput> inputFiles = new HashMap<>();
     private Map<String, VisualizationParameter> parameters = new HashMap<>();
-
-
 }
