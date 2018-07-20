@@ -7,6 +7,7 @@ import org.matsim.vis.snapshotwriters.AgentSnapshotInfo;
 import org.matsim.webvis.frameAnimation.contracts.SnapshotContract;
 import org.matsim.webvis.frameAnimation.utils.TestUtils;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -61,11 +62,12 @@ public class SnapshotDataTest {
         }
 
         //act
-        byte[] result = testObject.getSnapshots(150, 50, 1);
+        ByteArrayOutputStream result = testObject.getSnapshots(150, 50, 1);
 
         //assert
-        assertNotNull(result);
-        ByteBuffer buffer = ByteBuffer.wrap(result);
+        byte[] bytes = result.toByteArray();
+        assertNotNull(bytes);
+        ByteBuffer buffer = ByteBuffer.wrap(bytes);
         buffer.order(ByteOrder.BIG_ENDIAN);
 
         int contractsIndex = 25;
@@ -105,8 +107,7 @@ public class SnapshotDataTest {
             List<AgentSnapshotInfo> infos = TestUtils.createAgentSnapshotInfos(100);
             snapshotInfos.add(infos);
             SnapshotContract contract = new SnapshotContract(time);
-            for (int i = 0; i < infos.size(); i++) {
-                AgentSnapshotInfo info = infos.get(i);
+            for (AgentSnapshotInfo info : infos) {
                 int index = testObject.addId(info.getId());
                 contract.add(info, index);
             }

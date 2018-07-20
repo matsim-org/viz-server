@@ -9,26 +9,26 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SnapshotData {
+class SnapshotData {
     private List<SnapshotContract> snapshots = new ArrayList<>();
     private List<Id> agentIds = new ArrayList<>();
     private double firstTimestep = Double.MAX_VALUE;
     private double lastTimestep = Double.MIN_VALUE;
-    private double timestepSize = 1;
+    private double timestepSize;
 
-    public SnapshotData(double timestepSize) {
+    SnapshotData(double timestepSize) {
         this.timestepSize = timestepSize;
     }
 
-    public double getFirstTimestep() {
+    double getFirstTimestep() {
         return firstTimestep;
     }
 
-    public double getLastTimestep() {
+    double getLastTimestep() {
         return lastTimestep;
     }
 
-    public int addId(Id id) {
+    int addId(Id id) {
         int indexOfId = agentIds.indexOf(id);
         if (indexOfId < 0) {
             agentIds.add(id);
@@ -37,7 +37,7 @@ public class SnapshotData {
         return indexOfId;
     }
 
-    public Id getId(int index) {
+    Id getId(int index) {
         return agentIds.get(index);
     }
 
@@ -47,7 +47,7 @@ public class SnapshotData {
      *
      * @param snapshot - The snapshot to be added
      */
-    public void addSnapshot(SnapshotContract snapshot) {
+    void addSnapshot(SnapshotContract snapshot) {
         snapshot.encodeSnapshot();
         snapshots.add(snapshot);
         setFirstOrLastTimestep(snapshot.getTime());
@@ -60,9 +60,9 @@ public class SnapshotData {
      * @param fromTimestep      - first Timestep included into the result
      * @param numberOfTimesteps - retreived from simulation data
      * @return encoded snapshots
-     * @throws IOException
+     * @throws IOException if anything goes wrong with writing to the stream
      */
-    public byte[] getSnapshots(double fromTimestep, int numberOfTimesteps, double speedFactor) throws IOException {
+    ByteArrayOutputStream getSnapshots(double fromTimestep, int numberOfTimesteps, double speedFactor) throws IOException {
 
         int startingIndex = getStartingIndex(fromTimestep);
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -74,7 +74,7 @@ public class SnapshotData {
         for (int i = startingIndex; i < startingIndex + numberOfTimesteps && i < snapshots.size(); i += speedFactor) {
             stream.write(snapshots.get(i).getEncodedMessage());
         }
-        return stream.toByteArray();
+        return stream;
     }
 
     private int getStartingIndex(double fromTimestep) {

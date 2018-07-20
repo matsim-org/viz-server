@@ -5,6 +5,7 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.core.utils.collections.QuadTree;
 import org.matsim.webvis.frameAnimation.contracts.RectContract;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 public class SimulationData {
@@ -30,7 +31,7 @@ public class SimulationData {
         return networkData.getLinks();
     }
 
-    byte[] getSnapshots(QuadTree.Rect bounds, double fromTimestep, int numberOfTimesteps, double speedFactor)
+    ByteArrayOutputStream getSnapshots(QuadTree.Rect bounds, double fromTimestep, int numberOfTimesteps, double speedFactor)
             throws IOException {
         //This will respect the given bounds later
         return simulationData.getSnapshots(fromTimestep, numberOfTimesteps, speedFactor);
