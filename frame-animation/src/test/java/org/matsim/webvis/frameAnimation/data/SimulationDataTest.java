@@ -46,7 +46,7 @@ public class SimulationDataTest {
         int size = 2;
 
         //act
-        byte[] result = testObject.getSnapshots(bounds, startTime, size, 1);
+        byte[] result = testObject.getSnapshots(bounds, startTime, size, 1).toByteArray();
 
         //assert
         assertNotNull(result);

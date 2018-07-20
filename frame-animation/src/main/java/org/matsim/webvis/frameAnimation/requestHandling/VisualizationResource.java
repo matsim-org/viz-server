@@ -7,6 +7,9 @@ import org.matsim.webvis.frameAnimation.data.DataProvider;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 @Path("{id}")
@@ -32,12 +35,20 @@ public class VisualizationResource {
     @GET
     @Path("/snapshots")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    public byte[] snapshots(@PathParam("id") String vizId,
-                            @QueryParam("fromTimestep") double fromTimestep,
-                            @QueryParam("numberOfTimesteps") int numberOfTimesteps,
-                            @QueryParam("speedFactor") double speedFactor) {
+    public Response snapshots(@PathParam("id") String vizId,
+                              @QueryParam("fromTimestep") double fromTimestep,
+                              @QueryParam("numberOfTimesteps") int numberOfTimesteps,
+                              @QueryParam("speedFactor") double speedFactor) {
         try {
-            return data.getSnapshots(vizId, fromTimestep, numberOfTimesteps, speedFactor);
+
+            ByteArrayOutputStream snapshots = data.getSnapshots(vizId, fromTimestep, numberOfTimesteps, speedFactor);
+
+            return Response.ok((StreamingOutput) outputStream -> {
+                snapshots.writeTo(outputStream);
+                outputStream.flush();
+                outputStream.close();
+            }).build();
+
         } catch (IOException e) {
             e.printStackTrace();
             throw new InternalException("Could not read snapshots");

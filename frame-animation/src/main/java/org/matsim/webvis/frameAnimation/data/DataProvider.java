@@ -5,6 +5,7 @@ import org.matsim.webvis.error.InternalException;
 import org.matsim.webvis.error.InvalidInputException;
 import org.matsim.webvis.frameAnimation.contracts.ConfigurationResponse;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,7 +24,7 @@ public class DataProvider {
         return find(vizId).getLinks();
     }
 
-    public byte[] getSnapshots(String vizId, double fromTimestamp, int numberOfTimesteps, double speedFactor) throws IOException {
+    public ByteArrayOutputStream getSnapshots(String vizId, double fromTimestamp, int numberOfTimesteps, double speedFactor) throws IOException {
         return find(vizId).getSnapshots(null, fromTimestamp, numberOfTimesteps, speedFactor);
     }
 
