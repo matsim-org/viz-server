@@ -1,6 +1,5 @@
 package org.matsim.webvis.files;
 
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module;
 import io.dropwizard.Application;
 import io.dropwizard.auth.AuthDynamicFeature;
@@ -24,7 +23,6 @@ import org.matsim.webvis.files.entities.VisualizationType;
 import org.matsim.webvis.files.permission.Subject;
 import org.matsim.webvis.files.project.ProjectResource;
 import org.matsim.webvis.files.serialization.AbstractEntityMixin;
-import org.matsim.webvis.files.serialization.MapDeserializer;
 import org.matsim.webvis.files.visualization.VisualizationResource;
 import org.matsim.webvis.files.visualization.VisualizationService;
 import org.slf4j.Logger;
@@ -38,7 +36,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.EnumSet;
-import java.util.Map;
 
 public class App extends Application<AppConfiguration> {
 
@@ -54,8 +51,6 @@ public class App extends Application<AppConfiguration> {
 
         bootstrap.getObjectMapper().registerModule(new Hibernate5Module());
         bootstrap.getObjectMapper().addMixIn(AbstractEntity.class, AbstractEntityMixin.class);
-        SimpleModule module = new SimpleModule().addDeserializer(Map.class, new MapDeserializer());
-        bootstrap.getObjectMapper().registerModule(module);
 
         bootstrap.addBundle(new MultiPartBundle());
     }
