@@ -10,6 +10,7 @@ deploy:
     secure: $BEANSTALK_KEY
   region: eu-central-1
   env: matsim-viz
+  application: matsim-viz
   zip_file: ./auth/target/auth-1.0-SNAPSHOT.jar
   bucket_name: elasticbeanstalk-eu-central-1-760858299633
   
