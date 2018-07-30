@@ -11,6 +11,6 @@ deploy:
   region: eu-central-1
   app: matsim-viz
   ent: Test-env-3
-  zip_file: /auth/target/auth-1.0-SNAPSHOT.jar
+  zip_file: ./auth/target/auth-1.0-SNAPSHOT.jar
   bucket_name: elasticbeanstalk-eu-central-1-760858299633
   
