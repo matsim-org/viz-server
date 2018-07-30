@@ -7,7 +7,7 @@ deploy:
   provider: elasticbeanstalk
   access_key_id: $BEANSTALK_KEY_ID
   secret_access_key:
-    secure: $BEANSTALK_SECRET
+    secure: $BEANSTALK_KEY
   region: eu-central-1
   app: matsim-viz
   ent: Test-env-3
