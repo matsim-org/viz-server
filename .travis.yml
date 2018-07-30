@@ -1,1 +1,16 @@
 language: java
+
+deploy:
+  on:
+    branch: develop
+  skip_cleanup: true
+  provider: elasticbeanstalk
+  access_key_id: $BEANSTALK_KEY_ID
+  secret_access_key:
+    secure: $BEANSTALK_SECRET
+  region: eu-central-1
+  app: matsim-viz
+  ent: Test-env-3
+  zip_file: /auth/target/auth-1.0-SNAPSHOT.jar
+  bucket_name: elasticbeanstalk-eu-central-1-760858299633
+  
