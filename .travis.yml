@@ -2,7 +2,7 @@ language: java
 sudo: required
 dist: trusty
 
-before_deploy:
+after_success:
   - bash ./aws-deploy/deploy.sh auth 1.0-SNAPSHOT
   - bash ./aws-deploy/deploy.sh files 1.0-SNAPSHOT
   - bash ./aws-deploy/deploy.sh frame-animation 1.0-SNAPSHOT
