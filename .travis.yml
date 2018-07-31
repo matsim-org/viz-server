@@ -3,8 +3,7 @@ sudo: required
 dist: trusty
 
 before_deploy:
-  - sudo apt-get install zip
-  - ./aws-deploy/deploy.sh auth 1.0-SNAPSHOT
+  - bash ./aws-deploy/deploy.sh auth 1.0-SNAPSHOT
 
 deploy:
   on:
@@ -17,6 +16,6 @@ deploy:
   region: eu-central-1
   env: authentication
   app: matsim-viz-server
-  zip_file: ./auth/target/auth-1.0-SNAPSHOT.jar
+  zip_file: ./auth/target/aws-bundle.zip
   bucket_name: elasticbeanstalk-eu-central-1-760858299633
   
