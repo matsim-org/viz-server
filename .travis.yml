@@ -4,18 +4,43 @@ dist: trusty
 
 before_deploy:
   - bash ./aws-deploy/deploy.sh auth 1.0-SNAPSHOT
+  - bash ./aws-deploy/deploy.sh files 1.0-SNAPSHOT
+  - bash ./aws-deploy/deploy.sh frame-animation 1.0-SNAPSHOT
 
 deploy:
-  on:
-    branch: develop
-  skip_cleanup: true
-  provider: elasticbeanstalk
-  access_key_id: $BEANSTALK_KEY_ID
-  secret_access_key:
-    secure: $BEANSTALK_KEY
-  region: eu-central-1
-  env: authentication
-  app: matsim-viz-server
-  zip_file: ./auth/target/aws-bundle.zip
-  bucket_name: elasticbeanstalk-eu-central-1-760858299633
-  
+  - on:
+      branch: develop
+    skip_cleanup: true
+    provider: elasticbeanstalk
+    access_key_id: $BEANSTALK_KEY_ID
+    secret_access_key:
+      secure: $BEANSTALK_KEY
+    region: eu-central-1
+    env: auth
+    app: matsim-viz-server
+    zip_file: ./auth/target/aws-bundle.zip
+    bucket_name: elasticbeanstalk-eu-central-1-760858299633
+  - on:
+      branch: develop
+    skip_cleanup: true
+    provider: elasticbeanstalk
+    access_key_id: $BEANSTALK_KEY_ID
+    secret_access_key:
+      secure: $BEANSTALK_KEY
+    region: eu-central-1
+    env: files
+    app: matsim-viz-server
+    zip_file: ./files/target/aws-bundle.zip
+    bucket_name: elasticbeanstalk-eu-central-1-760858299633
+  - on:
+      branch: develop
+    skip_cleanup: true
+    provider: elasticbeanstalk
+    access_key_id: $BEANSTALK_KEY_ID
+    secret_access_key:
+      secure: $BEANSTALK_KEY
+    region: eu-central-1
+    env: frame-animation
+    app: matsim-viz-server
+    zip_file: ./frame-animation/target/aws-bundle.zip
+    bucket_name: elasticbeanstalk-eu-central-1-760858299633
