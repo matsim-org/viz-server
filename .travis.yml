@@ -1,6 +1,9 @@
 language: java
+sudo: required
+dist: trusty
 
 before_deploy:
+  - sudo apt-get install zip
   - ./aws-deploy/deploy.sh auth 1.0-SNAPSHOT
 
 deploy:
