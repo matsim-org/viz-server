@@ -1,5 +1,8 @@
 language: java
 
+before_deploy:
+  - ./aws-deploy/deploy.sh auth 1.0-SNAPSHOT
+
 deploy:
   on:
     branch: develop
@@ -9,8 +12,8 @@ deploy:
   secret_access_key:
     secure: $BEANSTALK_KEY
   region: eu-central-1
-  env: matsim-viz
-  app: test
+  env: authentication
+  app: matsim-viz-server
   zip_file: ./auth/target/auth-1.0-SNAPSHOT.jar
   bucket_name: elasticbeanstalk-eu-central-1-760858299633
   
