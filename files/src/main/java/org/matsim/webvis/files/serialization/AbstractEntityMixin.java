@@ -1,11 +1,10 @@
 package org.matsim.webvis.files.serialization;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.voodoodyne.jackson.jsog.JSOGGenerator;
 
 @JsonIdentityInfo(
-        generator = ObjectIdGenerators.PropertyGenerator.class,
-        property = "id"
+        generator = JSOGGenerator.class
 )
-public class AbstractEntityMixin {
+public abstract class AbstractEntityMixin {
 }
