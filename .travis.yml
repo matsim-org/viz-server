@@ -2,11 +2,15 @@ language: java
 sudo: required
 dist: trusty
 
+after_success:
+  - bash ./aws-deploy/create-aws.bundle.sh auth 1.0-SNAPSHOT
+  - bash ./aws-deploy/create-aws.bundle.sh files 1.0-SNAPSHOT
+  - bash ./aws-deploy/create-aws.bundle.sh frame-animation 1.0-SNAPSHOT
+
 deploy:
   - on:
       branch: develop
     skip_cleanup: true
-    script: bash ./aws-deploy/create-aws.bundle.sh auth 1.0-SNAPSHOT
     provider: elasticbeanstalk
     access_key_id: $BEANSTALK_KEY_ID
     secret_access_key:
@@ -20,7 +24,6 @@ deploy:
   - on:
       branch: develop
     skip_cleanup: true
-    script: bash ./aws-deploy/create-aws.bundle.sh files 1.0-SNAPSHOT
     provider: elasticbeanstalk
     access_key_id: $BEANSTALK_KEY_ID
     secret_access_key:
@@ -34,7 +37,6 @@ deploy:
   - on:
       branch: develop
     skip_cleanup: true
-    script: bash ./aws-deploy/create-aws.bundle.sh frame-animation 1.0-SNAPSHOT
     provider: elasticbeanstalk
     access_key_id: $BEANSTALK_KEY_ID
     secret_access_key:
