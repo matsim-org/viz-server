@@ -8,15 +8,16 @@ echo "module is: " $MODULE
 echo "Version is: " $VERSION
 
 mkdir $TARGET
+
 echo "copying ./"$MODULE"/target/"$MODULE-$VERSION".jar to app.jar"
 cp ./$MODULE/target/$MODULE-$VERSION.jar $TARGET/app.jar
 
 echo "create Procfile"
 printf "web: java -jar app.jar server /tmp/config.yml" > $TARGET/Procfile
 
-echo "create .ebextensions folder with config file"
+echo "create .ebextensions folder with config files"
 mkdir $TARGET/.ebextensions
-cp ./aws-deploy/$MODULE-storage.config $TARGET/.ebextensions/storage.config
+cp -a ./aws-deploy/$MODULE/. $TARGET/.ebextensions/
 
 echo "put app.jar and Procfile and .ebextensions into aws-bundle.zip"
 #zip -j ./$WORKING_DIR/target/bundle.zip ./$WORKING_DIR/target/app.jar ./$WORKING_DIR/target/Procfile ./$WORKING_DIR/target/.ebextensions
