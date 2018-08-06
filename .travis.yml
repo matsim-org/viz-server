@@ -2,15 +2,11 @@ language: java
 sudo: required
 dist: trusty
 
-after_success:
-  - bash ./aws-deploy/deploy.sh auth 1.0-SNAPSHOT
-  - bash ./aws-deploy/deploy.sh files 1.0-SNAPSHOT
-  - bash ./aws-deploy/deploy.sh frame-animation 1.0-SNAPSHOT
-
 deploy:
   - on:
       branch: develop
     skip_cleanup: true
+    script: bash ./aws-deploy/create-aws.bundle.sh auth 1.0-SNAPSHOT
     provider: elasticbeanstalk
     access_key_id: $BEANSTALK_KEY_ID
     secret_access_key:
@@ -20,9 +16,11 @@ deploy:
     app: matsim-viz-server
     zip_file: ./auth/target/aws-bundle.zip
     bucket_name: elasticbeanstalk-eu-central-1-760858299633
+
   - on:
       branch: develop
     skip_cleanup: true
+    script: bash ./aws-deploy/create-aws.bundle.sh files 1.0-SNAPSHOT
     provider: elasticbeanstalk
     access_key_id: $BEANSTALK_KEY_ID
     secret_access_key:
@@ -32,9 +30,11 @@ deploy:
     app: matsim-viz-server
     zip_file: ./files/target/aws-bundle.zip
     bucket_name: elasticbeanstalk-eu-central-1-760858299633
+
   - on:
       branch: develop
     skip_cleanup: true
+    script: bash ./aws-deploy/create-aws.bundle.sh frame-animation 1.0-SNAPSHOT
     provider: elasticbeanstalk
     access_key_id: $BEANSTALK_KEY_ID
     secret_access_key:
