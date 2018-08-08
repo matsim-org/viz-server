@@ -10,17 +10,22 @@ import org.matsim.webvis.error.InvalidInputException;
 import org.matsim.webvis.files.entities.Agent;
 import org.matsim.webvis.files.entities.Project;
 import org.matsim.webvis.files.project.ProjectService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 @Path("/")
 public class FileResource {
+
+    private static Logger logger = LoggerFactory.getLogger(FileResource.class);
 
     ProjectService projectService = ProjectService.Instance;
     @Getter
@@ -57,7 +62,14 @@ public class FileResource {
 
         FileDownload download = projectService.getFileDownload(projectId, fileId, agent);
 
-        return Response.ok((StreamingOutput) output -> IOUtils.copy(download.getFile(), output))
+        return Response.ok((StreamingOutput) output -> {
+            try {
+                IOUtils.copy(download.getFile(), output);
+            } catch (IOException e) {
+                logger.error("IO error while copying file", e);
+                throw e;
+            }
+        })
                 .type(download.getFileEntry().getContentType())
                 .header("Content-Length", download.getFileEntry().getSizeInBytes())
                 .header("Content-Disposition", "attachment; filename=" + download.getFileEntry().getUserFileName())

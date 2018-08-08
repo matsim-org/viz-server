@@ -89,8 +89,8 @@ public class App extends Application<AppConfiguration> {
 
     private void registerOAuth(AppConfiguration config, Environment environment) {
 
-        HttpAuthenticationFeature auth = HttpAuthenticationFeature.basicBuilder().nonPreemptive().build();
-        final Client client = new JerseyClientBuilder(environment).using(config.getJerseyClient()).build("bla");
+        HttpAuthenticationFeature auth = HttpAuthenticationFeature.basicBuilder().build();
+        final Client client = new JerseyClientBuilder(environment).using(config.getJerseyClient()).build("files");
         client.register(auth);
         final OAuthAuthenticator<Agent> authenticator = new OAuthAuthenticator<>(client, config.getIntrospectionEndpoint(),
                 Subject::createSubject, new Credentials(config.getRelyingPartyId(), config.getRelyingPartySecret()));
