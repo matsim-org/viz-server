@@ -20,6 +20,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 class SimulationDataFetcher {
 
@@ -31,6 +34,7 @@ class SimulationDataFetcher {
     private static Logger logger = LoggerFactory.getLogger(SimulationDataFetcher.class);
     private static final DataProvider dataProvider = new DataProvider();
     private static final Path tempFolder = createTempFolder(AppConfiguration.getInstance().getTmpFilePath());
+    private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(8);
 
     private final Visualization visualization;
     private final VisualizationData visualizationData;
@@ -47,14 +51,14 @@ class SimulationDataFetcher {
 
     static void generateVisualization(Visualization visualization) {
         SimulationDataFetcher generator = new SimulationDataFetcher(visualization);
-        generator.generate();
+        scheduler.schedule(generator::generate, 0, TimeUnit.SECONDS);
     }
 
     private static Path createVizFolder(String vizId) {
 
         Path folder = tempFolder.resolve(vizId);
         try {
-            return Files.createDirectory(folder);
+            return Files.createDirectories(folder);
         } catch (IOException e) {
             logger.error("could not create viz directory", e);
             throw new InternalException("Could not create viz directory");
@@ -122,7 +126,7 @@ class SimulationDataFetcher {
         try {
             FileUtils.deleteDirectory(vizFolder.toFile());
         } catch (IOException e) {
-            logger.error("Could not delete temporary viz folder");
+            logger.error("Could not delete temporary viz folder", e);
             throw new RuntimeException("Could not delete temporary viz folder", e);
         }
     }

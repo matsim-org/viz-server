@@ -1,20 +1,22 @@
 package org.matsim.webvis.frameAnimation;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.dropwizard.Application;
 import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.jersey.setup.JerseyEnvironment;
 import io.dropwizard.jetty.setup.ServletEnvironment;
-import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.glassfish.jersey.client.oauth2.OAuth2ClientSupport;
 import org.matsim.webis.oauth.ClientAuthentication;
 import org.matsim.webis.oauth.Credentials;
+import org.matsim.webvis.database.AbstractEntity;
 import org.matsim.webvis.frameAnimation.communication.ServiceCommunication;
 import org.matsim.webvis.frameAnimation.config.AppConfiguration;
 import org.matsim.webvis.frameAnimation.data.DataController;
+import org.matsim.webvis.frameAnimation.entities.AbstractEntityMixin;
 import org.matsim.webvis.frameAnimation.requestHandling.VisualizationResource;
 
 import javax.servlet.DispatcherType;
@@ -32,12 +34,6 @@ public class App extends Application<AppConfiguration> {
 
     public static void main(String[] args) throws Exception {
         new App().run(args);
-    }
-
-    @Override
-    public void initialize(Bootstrap<AppConfiguration> bootstrap) {
-
-        bootstrap.getObjectMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     }
 
     @Override
@@ -61,8 +57,18 @@ public class App extends Application<AppConfiguration> {
 
     private void registerOauth(AppConfiguration config, Environment environment) {
 
+        // register a new objectMapper for jersey client because we are using jsonIdentityInfo for serializing out
+        // object graph and the default object mapper by dropwizard does not support this.
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        mapper.addMixIn(AbstractEntity.class, AbstractEntityMixin.class);
+
+        final Client client = new JerseyClientBuilder(environment)
+                .using(config.getJerseyClient())
+                .using(mapper)
+                .build("frame-animation");
+
         // register basic auth support for retrieving access tokens
-        final Client client = new JerseyClientBuilder(environment).using(config.getJerseyClient()).build("frame-animation");
         HttpAuthenticationFeature basicAuth = HttpAuthenticationFeature.basicBuilder().nonPreemptive().build();
         client.register(basicAuth);
 
