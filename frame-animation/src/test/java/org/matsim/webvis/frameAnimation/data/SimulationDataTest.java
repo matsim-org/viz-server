@@ -19,7 +19,7 @@ public class SimulationDataTest {
 
     @BeforeClass
     public static void setUp() {
-        testObject = TestUtils.getDataProvider();
+        testObject = TestUtils.getSimulationData();
     }
 
     @Test
@@ -50,7 +50,7 @@ public class SimulationDataTest {
 
         //assert
         assertNotNull(result);
-        assertEquals(64, result.length);
+        assertEquals(100, result.length);
     }
 
     @Test

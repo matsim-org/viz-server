@@ -19,9 +19,9 @@ public class AppConfiguration extends Configuration {
     private String relyingPartyId = "id";
     private String relyingPartySecret = "secret";
 
-    private URI introspectionEndpoint;
-    private URI tokenEndpoint;
-    private URI fileServer;
+    private URI introspectionEndpoint = URI.create("http://dummy-endpoint.com");
+    private URI tokenEndpoint = URI.create("http://dummy-endpoint.com");
+    private URI fileServer = URI.create("http://dummy-endpoint.com");
 
 
     private JerseyClientConfiguration jerseyClient = new JerseyClientConfiguration();

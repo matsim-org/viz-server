@@ -14,10 +14,23 @@ public class DataProvider {
 
     public static DataProvider Instance = new DataProvider();
 
-    private static Map<String, VisualizationData> data = new HashMap<>();
+    DataController dataController = DataController.Instance;
+    private Map<String, VisualizationData> data = new HashMap<>();
 
     public void add(String vizId, VisualizationData visualizationData) {
         data.put(vizId, visualizationData);
+    }
+
+    boolean contains(String vizId) {
+        return data.containsKey(vizId);
+    }
+
+    VisualizationData.Progress getProgress(String vizId) {
+        return data.get(vizId).getProgress();
+    }
+
+    void remove(String vizId) {
+        data.remove(vizId);
     }
 
     public byte[] getLinks(String vizId) {
@@ -35,10 +48,9 @@ public class DataProvider {
     public ConfigurationResponse getConfiguration(String vizId) {
 
         if (!data.containsKey(vizId)) {
-            DataController.Instance.fetchVisualizations();
+            dataController.fetchVisualizations();
             throw new InvalidInputException("Viz id: " + vizId + " is not in data set");
         }
-
 
         VisualizationData viz = data.get(vizId);
 
@@ -51,10 +63,6 @@ public class DataProvider {
                     viz.getSimulationData().getTimestepSize(),
                     viz.getProgress()
             );
-    }
-
-    VisualizationData remove(String vizId) {
-        return data.remove(vizId);
     }
 
     private SimulationData find(String vizId) {

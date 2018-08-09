@@ -21,8 +21,13 @@ public class TestUtils {
     public static final String EVENTS_FILE = "src/test/data/test-events-100.xml.gz";
     public static final String POPULATION_FILE = "src/test/data/test-plans-100.xml";
 
-    private static SimulationData dataProvider = new SimulationData(NETWORK_FILE, EVENTS_FILE, POPULATION_FILE, 3);
+    private static SimulationData simulationData;
 
+    public static SimulationData getSimulationData() {
+        if (simulationData == null)
+            simulationData = new SimulationData(NETWORK_FILE, EVENTS_FILE, POPULATION_FILE, 4);
+        return simulationData;
+    }
     public static Network loadTestNetwork() {
         Network network = NetworkUtils.createNetwork();
         MatsimNetworkReader reader = new MatsimNetworkReader(network);
@@ -47,10 +52,6 @@ public class TestUtils {
         AgentSnapshotInfoFactory factory = new AgentSnapshotInfoFactory(calc);
         Id<Person> id = Id.createPersonId(key);
         return factory.createAgentSnapshotInfo(id, easting, northing, 0, 0);
-    }
-
-    public static SimulationData getDataProvider() {
-        return dataProvider;
     }
 
     public static void loadConfig() {

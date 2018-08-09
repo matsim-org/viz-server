@@ -3,6 +3,7 @@ package org.matsim.webvis.frameAnimation.entities;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.matsim.webvis.database.AbstractEntity;
 
 @Getter
@@ -10,6 +11,7 @@ import org.matsim.webvis.database.AbstractEntity;
 @NoArgsConstructor
 public class FileEntry extends AbstractEntity {
 
+    @Setter
     private String userFileName;
     private String contentType;
     private long sizeInBytes;
