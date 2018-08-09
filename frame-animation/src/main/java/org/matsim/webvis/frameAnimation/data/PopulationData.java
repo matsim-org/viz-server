@@ -39,7 +39,8 @@ class PopulationData {
             }
             if (element instanceof Activity) {
                 Activity activity = (Activity) element;
-                result.add(createActivityFeature(activity.getCoord()));
+                if (activity.getCoord() != null)
+                    result.add(createActivityFeature(activity.getCoord()));
             }
         }
         return result;

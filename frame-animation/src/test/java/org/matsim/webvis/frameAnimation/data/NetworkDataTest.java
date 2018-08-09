@@ -1,13 +1,11 @@
 package org.matsim.webvis.frameAnimation.data;
 
-import org.matsim.api.core.v01.network.Network;
-
 public class NetworkDataTest {
-
+/*
     private static Network network;
     private NetworkData testObject;
 
-   /* @BeforeClass
+    @BeforeClass
     public static void setUpClass() {
         network = TestUtils.loadTestNetwork();
     }

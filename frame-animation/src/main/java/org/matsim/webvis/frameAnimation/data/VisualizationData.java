@@ -14,5 +14,5 @@ public class VisualizationData {
         return progress == Progress.Done;
     }
 
-    public enum Progress {DownloadingInput, GeneratingData, Done}
+    public enum Progress {DownloadingInput, GeneratingData, Done, Failed}
 }
