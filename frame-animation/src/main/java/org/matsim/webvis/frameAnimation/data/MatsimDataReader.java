@@ -9,10 +9,9 @@ import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.events.algorithms.SnapshotGenerator;
-import org.matsim.core.network.MatsimNetworkReader;
 import org.matsim.core.network.NetworkUtils;
-import org.matsim.core.population.MatsimPopulationReader;
-import org.matsim.core.population.PopulationReader;
+import org.matsim.core.network.io.MatsimNetworkReader;
+import org.matsim.core.population.io.PopulationReader;
 import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.scenario.ScenarioUtils;
 
@@ -84,7 +83,7 @@ final class MatsimDataReader {
         return net;
     }
 
-    SnapshotData readEventsFile(double snapshotPeriod) {
+    private SnapshotData readEventsFile(double snapshotPeriod) {
 
         Config config = ConfigUtils.createConfig();
         config.qsim().setSnapshotStyle(QSimConfigGroup.SnapshotStyle.queue);
@@ -103,7 +102,7 @@ final class MatsimDataReader {
 
         MutableScenario scenario = (MutableScenario) ScenarioUtils.createScenario(ConfigUtils.createConfig());
         scenario.setNetwork(this.rawNetwork);
-        PopulationReader reader = new MatsimPopulationReader(scenario);
+        PopulationReader reader = new PopulationReader(scenario);
         reader.readFile(populationFilePath);
         return scenario.getPopulation();
     }
