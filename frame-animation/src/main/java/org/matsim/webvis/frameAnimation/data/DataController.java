@@ -29,7 +29,7 @@ public class DataController {
         scheduler.scheduleAtFixedRate(this::fetchVisualizationData, 0, 10, TimeUnit.HOURS);
     }
 
-    void fetchVisualizations() {
+    public void fetchVisualizations() {
 
         if (isFetchingNewData) {
             logger.info("already fetching data. Wait until operation has finished.");

@@ -16,6 +16,7 @@ import org.matsim.webvis.database.AbstractEntity;
 import org.matsim.webvis.frameAnimation.communication.ServiceCommunication;
 import org.matsim.webvis.frameAnimation.config.AppConfiguration;
 import org.matsim.webvis.frameAnimation.data.DataController;
+import org.matsim.webvis.frameAnimation.data.DataProvider;
 import org.matsim.webvis.frameAnimation.entities.AbstractEntityMixin;
 import org.matsim.webvis.frameAnimation.requestHandling.VisualizationResource;
 
@@ -96,6 +97,6 @@ public class App extends Application<AppConfiguration> {
 
     private void registerEndpoints(JerseyEnvironment jersey) {
 
-        jersey.register(new VisualizationResource());
+        jersey.register(new VisualizationResource(DataProvider.Instance, DataController.Instance));
     }
 }
