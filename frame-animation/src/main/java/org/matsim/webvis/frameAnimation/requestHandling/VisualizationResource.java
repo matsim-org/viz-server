@@ -3,6 +3,7 @@ package org.matsim.webvis.frameAnimation.requestHandling;
 import org.geojson.FeatureCollection;
 import org.matsim.webvis.error.InternalException;
 import org.matsim.webvis.frameAnimation.contracts.ConfigurationResponse;
+import org.matsim.webvis.frameAnimation.data.DataController;
 import org.matsim.webvis.frameAnimation.data.DataProvider;
 
 import javax.ws.rs.*;
@@ -15,7 +16,18 @@ import java.io.IOException;
 @Path("{id}")
 public class VisualizationResource {
 
-    private final DataProvider data = DataProvider.Instance;
+    private final DataProvider data;
+    private final DataController controller;
+
+    public VisualizationResource(DataProvider data, DataController controller) {
+        this.data = data;
+        this.controller = controller;
+    }
+
+    @PUT
+    public void initVisualization(@PathParam("id") String vizId) {
+        this.controller.fetchVisualizations();
+    }
 
     @GET
     @Path("/configuration")
