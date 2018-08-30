@@ -16,7 +16,6 @@ import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.matsim.webis.oauth.Credentials;
 import org.matsim.webis.oauth.OAuthAuthenticator;
 import org.matsim.webvis.database.AbstractEntity;
-import org.matsim.webvis.database.DbConfiguration;
 import org.matsim.webvis.database.PersistenceUnit;
 import org.matsim.webvis.error.CodedExceptionMapper;
 import org.matsim.webvis.files.agent.AgentService;
@@ -38,6 +37,7 @@ import org.matsim.webvis.files.visualization.VisualizationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.persistence.RollbackException;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
 import javax.ws.rs.client.Client;
@@ -124,7 +124,7 @@ public class App extends Application<AppConfiguration> {
 
     private void registerEndpoints(JerseyEnvironment jersey, AppConfiguration configuration) {
 
-        PersistenceUnit persistenceUnit = new PersistenceUnit("unit", new DbConfiguration());
+        PersistenceUnit persistenceUnit = new PersistenceUnit("org.matsim.viz.files", configuration.getDatabase());
         ProjectDAO projectDAO = new ProjectDAO(persistenceUnit);
         VisualizationDAO visualizationDAO = new VisualizationDAO(persistenceUnit);
         UserDAO userDAO = new UserDAO(persistenceUnit);
@@ -143,8 +143,12 @@ public class App extends Application<AppConfiguration> {
 
     private void loadVizTypes(VisualizationService visualizationService, AppConfiguration config) {
         for (VisualizationType type : config.getVizTypes()) {
-            logger.info("persisting viz type: " + type.getKey());
-            visualizationService.persistType(type);
+            logger.info("persisting viz type: " + type.getTypeName());
+            try {
+                visualizationService.persistType(type);
+            } catch (RollbackException e) {
+                logger.info("viz type: " + type.getTypeName() + " already exists");
+            }
         }
     }
 }

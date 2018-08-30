@@ -1,8 +1,10 @@
 package org.matsim.webis.oauth;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor
 public class IntrospectionResult {
 
     private boolean active;

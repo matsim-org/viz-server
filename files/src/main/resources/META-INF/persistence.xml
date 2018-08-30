@@ -5,8 +5,8 @@
 
     <persistence-unit name="org.matsim.viz.files">
         <description>
-            Persistence Unit for in-memory database of matsim-viz file server. It uses H2-in-memory database
-            to enable database access during unit testing
+            Persistence Unit for in-memory database of matsim-viz file server. Driver, url, user and password may
+            be overridden via config file
         </description>
         <properties>
             <property name="javax.persistence.jdbc.driver" value="org.h2.Driver"/>
@@ -14,7 +14,7 @@
             <property name="javax.persistence.jdbc.user" value="sa"/>
             <property name="javax.persistence.jdbc.password" value=""/>
             <property name="hibernate.show_sql" value="false"/>
-            <property name="hibernate.hbm2ddl.auto" value="create"/>
+            <property name="hibernate.format_sql" value="false"/>
         </properties>
     </persistence-unit>
 </persistence>
