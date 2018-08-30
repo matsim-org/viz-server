@@ -1,11 +1,20 @@
 package org.matsim.webvis.files.entities;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.matsim.webvis.files.permission.PermissionService;
+import org.matsim.webvis.files.util.TestUtils;
 
 import static org.junit.Assert.assertEquals;
 
 public class ResourceTest {
+
+    private PermissionService permissionService;
+
+    @Before
+    public void setUp() {
+        permissionService = TestUtils.getPermissionService();
+    }
 
     @Test
     public void addPermission_permissionWithEqualAgentIsPresent_ignored() {
@@ -13,8 +22,8 @@ public class ResourceTest {
         Resource resource = new FileEntry();
         User agent = new User();
 
-        Permission permission1 = PermissionService.Instance.createUserPermission(resource, agent, Permission.Type.Read);
-        Permission permission2 = PermissionService.Instance.createUserPermission(resource, agent, Permission.Type.Read);
+        Permission permission1 = permissionService.createUserPermission(resource, agent, Permission.Type.Read);
+        Permission permission2 = permissionService.createUserPermission(resource, agent, Permission.Type.Read);
 
         resource.addPermission(permission1);
         assertEquals(1, resource.getPermissions().size());
@@ -32,8 +41,8 @@ public class ResourceTest {
         User agent2 = new User();
         agent2.setId("other-id");
 
-        Permission permission1 = PermissionService.Instance.createUserPermission(resource, agent1, Permission.Type.Read);
-        Permission permission2 = PermissionService.Instance.createUserPermission(resource, agent2, Permission.Type.Read);
+        Permission permission1 = permissionService.createUserPermission(resource, agent1, Permission.Type.Read);
+        Permission permission2 = permissionService.createUserPermission(resource, agent2, Permission.Type.Read);
 
         resource.addPermission(permission1);
         assertEquals(1, resource.getPermissions().size());

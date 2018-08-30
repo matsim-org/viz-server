@@ -15,4 +15,10 @@ public class IntrospectionResult {
     private String sub;
     private String aud;
     private String iss;
+
+    public IntrospectionResult(boolean isActive, String scope, String subject) {
+        this.active = isActive;
+        this.scope = scope;
+        this.sub = subject;
+    }
 }

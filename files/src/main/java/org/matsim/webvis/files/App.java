@@ -16,13 +16,23 @@ import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.matsim.webis.oauth.Credentials;
 import org.matsim.webis.oauth.OAuthAuthenticator;
 import org.matsim.webvis.database.AbstractEntity;
+import org.matsim.webvis.database.DbConfiguration;
+import org.matsim.webvis.database.PersistenceUnit;
 import org.matsim.webvis.error.CodedExceptionMapper;
+import org.matsim.webvis.files.agent.AgentService;
+import org.matsim.webvis.files.agent.UserDAO;
 import org.matsim.webvis.files.config.AppConfiguration;
 import org.matsim.webvis.files.entities.Agent;
 import org.matsim.webvis.files.entities.VisualizationType;
-import org.matsim.webvis.files.permission.Subject;
+import org.matsim.webvis.files.file.RepositoryFactory;
+import org.matsim.webvis.files.permission.PermissionDAO;
+import org.matsim.webvis.files.permission.PermissionService;
+import org.matsim.webvis.files.permission.SubjectFactory;
+import org.matsim.webvis.files.project.ProjectDAO;
 import org.matsim.webvis.files.project.ProjectResource;
+import org.matsim.webvis.files.project.ProjectService;
 import org.matsim.webvis.files.serialization.AbstractEntityMixin;
+import org.matsim.webvis.files.visualization.VisualizationDAO;
 import org.matsim.webvis.files.visualization.VisualizationResource;
 import org.matsim.webvis.files.visualization.VisualizationService;
 import org.slf4j.Logger;
@@ -40,6 +50,8 @@ import java.util.EnumSet;
 public class App extends Application<AppConfiguration> {
 
     private Logger logger = LoggerFactory.getLogger(App.class);
+
+    private AgentService agentService;
 
 
     public static void main(String[] args) throws Exception {
@@ -61,21 +73,10 @@ public class App extends Application<AppConfiguration> {
         AppConfiguration.setInstance(configuration);
 
         createUploadDirectories(configuration);
-        loadVizTypes(configuration);
-
+        registerEndpoints(environment.jersey(), configuration);
         registerOAuth(configuration, environment);
         registerExceptionMappers(environment.jersey());
         registerCORSFilter(environment.servlets());
-        registerEndpoints(environment.jersey());
-    }
-
-    private void loadVizTypes(AppConfiguration config) {
-
-        VisualizationService service = new VisualizationService();
-        for (VisualizationType type : config.getVizTypes()) {
-            logger.info("persisting viz type: " + type.getKey());
-            service.persistType(type);
-        }
     }
 
     private void createUploadDirectories(AppConfiguration config) throws IOException {
@@ -92,8 +93,9 @@ public class App extends Application<AppConfiguration> {
         HttpAuthenticationFeature auth = HttpAuthenticationFeature.basicBuilder().build();
         final Client client = new JerseyClientBuilder(environment).using(config.getJerseyClient()).build("files");
         client.register(auth);
+        SubjectFactory subjectFactory = new SubjectFactory(agentService);
         final OAuthAuthenticator<Agent> authenticator = new OAuthAuthenticator<>(client, config.getIntrospectionEndpoint(),
-                Subject::createSubject, new Credentials(config.getRelyingPartyId(), config.getRelyingPartySecret()));
+                subjectFactory::createSubject, new Credentials(config.getRelyingPartyId(), config.getRelyingPartySecret()));
 
         environment.jersey().register(new AuthDynamicFeature(new OAuthCredentialAuthFilter.Builder<Agent>()
                 .setAuthenticator(authenticator)
@@ -120,9 +122,29 @@ public class App extends Application<AppConfiguration> {
         cors.setInitParameter(CrossOriginFilter.CHAIN_PREFLIGHT_PARAM, Boolean.FALSE.toString());
     }
 
-    private void registerEndpoints(JerseyEnvironment jersey) {
+    private void registerEndpoints(JerseyEnvironment jersey, AppConfiguration configuration) {
 
-        jersey.register(new ProjectResource());
-        jersey.register(new VisualizationResource());
+        PersistenceUnit persistenceUnit = new PersistenceUnit("unit", new DbConfiguration());
+        ProjectDAO projectDAO = new ProjectDAO(persistenceUnit);
+        VisualizationDAO visualizationDAO = new VisualizationDAO(persistenceUnit);
+        UserDAO userDAO = new UserDAO(persistenceUnit);
+        PermissionDAO permissionDAO = new PermissionDAO(persistenceUnit);
+
+        agentService = new AgentService(userDAO);
+        PermissionService permissionService = new PermissionService(agentService, permissionDAO);
+        ProjectService projectService = new ProjectService(projectDAO, permissionService, new RepositoryFactory());
+        VisualizationService visualizationService = new VisualizationService(visualizationDAO, projectService, permissionService);
+
+        jersey.register(new ProjectResource(projectService, visualizationService));
+        jersey.register(new VisualizationResource(visualizationService));
+
+        this.loadVizTypes(visualizationService, configuration);
+    }
+
+    private void loadVizTypes(VisualizationService visualizationService, AppConfiguration config) {
+        for (VisualizationType type : config.getVizTypes()) {
+            logger.info("persisting viz type: " + type.getKey());
+            visualizationService.persistType(type);
+        }
     }
 }

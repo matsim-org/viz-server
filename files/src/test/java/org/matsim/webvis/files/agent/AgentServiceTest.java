@@ -1,6 +1,7 @@
 package org.matsim.webvis.files.agent;
 
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.matsim.webvis.error.CodedException;
 import org.matsim.webvis.error.Error;
@@ -9,9 +10,15 @@ import org.matsim.webvis.files.util.TestUtils;
 
 import static junit.framework.TestCase.fail;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 public class AgentServiceTest {
+
+    private AgentService testObject;
+
+    @Before
+    public void setUp() {
+        this.testObject = new AgentService(new UserDAO(TestUtils.getPersistenceUnit()));
+    }
 
     @After
     public void tearDown() {
@@ -23,7 +30,7 @@ public class AgentServiceTest {
 
         final String authId = "some-id";
 
-        User result = AgentService.Instance.createUser(authId);
+        User result = testObject.createUser(authId);
 
         assertEquals(authId, result.getAuthId());
     }
@@ -32,10 +39,10 @@ public class AgentServiceTest {
     public void createUser_authIdPresent_exception() {
 
         final String authId = "some-id";
-        AgentService.Instance.createUser(authId);
+        testObject.createUser(authId);
 
         try {
-            AgentService.Instance.createUser(authId);
+            testObject.createUser(authId);
             fail("duplicate authId should cause exception");
         } catch (CodedException e) {
             assertEquals(Error.RESOURCE_EXISTS, e.getInternalErrorCode());
@@ -47,8 +54,8 @@ public class AgentServiceTest {
 
         User user = TestUtils.persistUser("some-id");
 
-        User result = AgentService.Instance.findByIdentityProviderId(user.getAuthId());
+        User result = testObject.findByIdentityProviderId(user.getAuthId());
 
-        assertTrue(user.equals(result));
+        assertEquals(user, result);
     }
 }

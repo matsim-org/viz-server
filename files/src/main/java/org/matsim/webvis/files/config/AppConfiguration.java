@@ -4,6 +4,7 @@ import io.dropwizard.Configuration;
 import io.dropwizard.client.JerseyClientConfiguration;
 import lombok.Getter;
 import lombok.Setter;
+import org.matsim.webvis.database.DbConfiguration;
 import org.matsim.webvis.files.entities.VisualizationType;
 
 import java.net.URI;
@@ -24,4 +25,5 @@ public class AppConfiguration extends Configuration {
     private String relyingPartySecret = "secret";
     private List<VisualizationType> vizTypes = new ArrayList<>();
     private JerseyClientConfiguration jerseyClient = new JerseyClientConfiguration();
+    private DbConfiguration database = new DbConfiguration();
 }

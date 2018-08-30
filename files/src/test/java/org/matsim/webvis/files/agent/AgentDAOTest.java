@@ -5,6 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.matsim.webvis.files.entities.PublicAgent;
 import org.matsim.webvis.files.entities.ServiceAgent;
+import org.matsim.webvis.files.util.TestUtils;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -17,12 +18,12 @@ public class AgentDAOTest {
     public static void tearDownFixture() {
 
         //the application relies on presence of Public- and ServiceAgent
-        AgentService.Instance.initializeSpecialAgents();
+        TestUtils.getAgentService().initializeSpecialAgents();
     }
 
     @Before
     public void setUp() {
-        testObject = new AgentDAO();
+        testObject = new AgentDAO(TestUtils.getPersistenceUnit());
         testObject.removeAllAgents();
     }
 

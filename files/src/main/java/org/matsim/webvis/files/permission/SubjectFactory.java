@@ -1,7 +1,6 @@
 package org.matsim.webvis.files.permission;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
 import org.matsim.webis.oauth.IntrospectionResult;
 import org.matsim.webvis.files.agent.AgentService;
 import org.matsim.webvis.files.entities.Agent;
@@ -9,22 +8,18 @@ import org.matsim.webvis.files.entities.User;
 
 import java.util.Optional;
 
-@Getter
 @AllArgsConstructor
-public class Subject {
+public class SubjectFactory {
 
-    public static final String USER = "user-client";
-    public static final String PUBLIC_USER = "public-client";
-    public static final String SERVICE = "service-client";
+    static final String USER = "user-client";
+    static final String PUBLIC_USER = "public-client";
+    static final String SERVICE = "service-client";
 
-    private Agent agent;
-    //this is public for unit testing
-    public static AgentService agentService = AgentService.Instance;
-    private IntrospectionResult authenticationResult;
+    private final AgentService agentService;
 
-    public static Optional<Agent> createSubject(IntrospectionResult authResult) {
+    public Optional<Agent> createSubject(IntrospectionResult authResult) {
 
-        switch(authResult.getScope()) {
+        switch (authResult.getScope()) {
             case USER:
                 return Optional.of(findOrCreateUser(authResult.getSub()));
             case SERVICE:
@@ -34,7 +29,7 @@ public class Subject {
         }
     }
 
-    private static User findOrCreateUser(String authId) {
+    private User findOrCreateUser(String authId) {
 
         User user = agentService.findByIdentityProviderId(authId);
         if (user == null)

@@ -8,6 +8,7 @@ import org.matsim.webvis.files.entities.PublicAgent;
 import org.matsim.webvis.files.entities.User;
 import org.matsim.webvis.files.file.FileResource;
 import org.matsim.webvis.files.visualization.ProjectVisualizationResource;
+import org.matsim.webvis.files.visualization.VisualizationService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,8 +25,7 @@ public class ProjectResourceTest {
 
     @Before
     public void setUp() {
-        testObject = new ProjectResource();
-        testObject.projectService = mock(ProjectService.class);
+        testObject = new ProjectResource(mock(ProjectService.class), mock(VisualizationService.class));
     }
 
     @Test(expected = UnauthorizedException.class)
@@ -43,7 +43,10 @@ public class ProjectResourceTest {
 
         Project project = new Project();
         ProjectResource.CreateProject request = new ProjectResource.CreateProject("name");
-        when(testObject.projectService.createNewProject(anyString(), any())).thenReturn(project);
+
+        ProjectService projectServiceMock = mock(ProjectService.class);
+        when(projectServiceMock.createNewProject(anyString(), any())).thenReturn(project);
+        testObject = new ProjectResource(projectServiceMock, mock(VisualizationService.class));
 
         Project result = testObject.createProject(new User(), request);
 
@@ -55,7 +58,10 @@ public class ProjectResourceTest {
 
         List<Project> projectList = new ArrayList<>();
         projectList.add(new Project());
-        when(testObject.projectService.findAllForUserFlat(any())).thenReturn(projectList);
+
+        ProjectService projectServiceMock = mock(ProjectService.class);
+        when(projectServiceMock.findAllForUserFlat(any())).thenReturn(projectList);
+        testObject = new ProjectResource(projectServiceMock, mock(VisualizationService.class));
 
         List<Project> result = testObject.findProjects(new User());
 
@@ -66,7 +72,10 @@ public class ProjectResourceTest {
     public void findProject() {
 
         Project project = new Project();
-        when(testObject.projectService.find(anyString(), any())).thenReturn(project);
+
+        ProjectService projectServiceMock = mock(ProjectService.class);
+        when(projectServiceMock.find(anyString(), any())).thenReturn(project);
+        testObject = new ProjectResource(projectServiceMock, mock(VisualizationService.class));
 
         Project result = testObject.findProject(new User(), "some-id");
 

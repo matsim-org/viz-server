@@ -9,15 +9,15 @@ import org.matsim.webvis.files.entities.User;
 
 public class AgentService {
 
-    public static final AgentService Instance = new AgentService();
-    private UserDAO userDAO = new UserDAO();
+    private UserDAO userDAO;
 
     @Getter
     private ServiceAgent serviceAgent;
     @Getter
     private PublicAgent publicAgent;
 
-    private AgentService() {
+    public AgentService(UserDAO dao) {
+        this.userDAO = dao;
         initializeSpecialAgents();
     }
 

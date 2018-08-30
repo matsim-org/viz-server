@@ -4,10 +4,7 @@ import org.junit.*;
 import org.matsim.webvis.error.CodedException;
 import org.matsim.webvis.error.Error;
 import org.matsim.webvis.error.ForbiddenException;
-import org.matsim.webvis.files.agent.AgentService;
 import org.matsim.webvis.files.entities.*;
-import org.matsim.webvis.files.permission.PermissionService;
-import org.matsim.webvis.files.project.ProjectDAO;
 import org.matsim.webvis.files.util.TestUtils;
 
 import java.time.Instant;
@@ -21,8 +18,7 @@ import static junit.framework.TestCase.*;
 public class VisualizationServiceTest {
 
     private static String typeKey = "test-key";
-    private static VisualizationDAO visualizationDAO = new VisualizationDAO();
-    private static ProjectDAO projectDAO = new ProjectDAO();
+    private static VisualizationDAO visualizationDAO = new VisualizationDAO(TestUtils.getPersistenceUnit());
     private VisualizationService testObject;
 
     @BeforeClass
@@ -38,7 +34,11 @@ public class VisualizationServiceTest {
 
     @Before
     public void setUp() {
-        testObject = new VisualizationService();
+        testObject = new VisualizationService(
+                visualizationDAO,
+                TestUtils.getProjectService(),
+                TestUtils.getPermissionService()
+        );
     }
 
     @After
@@ -98,7 +98,8 @@ public class VisualizationServiceTest {
 
         for (VisualizationInput vizInput : viz.getInputFiles().values()) {
 
-            Permission perm = PermissionService.Instance.findReadPermission(AgentService.Instance.getServiceAgent(),
+            Permission perm = TestUtils.getPermissionService().findReadPermission(
+                    TestUtils.getAgentService().getServiceAgent(),
                     vizInput.getFileEntry().getId());
             assertEquals(Permission.Type.Read, perm.getType());
         }
@@ -149,7 +150,7 @@ public class VisualizationServiceTest {
         Visualization viz = new Visualization();
         viz.setType(visualizationDAO.findType(typeKey));
         project.addVisualization(viz);
-        project = projectDAO.persist(project);
+        project = TestUtils.getProjectDAO().persist(project);
         viz = project.getVisualizations().iterator().next();
 
         Visualization result = testObject.find(viz.getId(), project.getCreator());
@@ -164,7 +165,7 @@ public class VisualizationServiceTest {
         Visualization viz = new Visualization();
         viz.setType(visualizationDAO.findType(typeKey));
         project.addVisualization(viz);
-        project = projectDAO.persist(project);
+        project = TestUtils.getProjectDAO().persist(project);
         viz = project.getVisualizations().iterator().next();
 
         User otherUser = TestUtils.persistUser("other-id");

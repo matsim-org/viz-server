@@ -17,14 +17,14 @@ public class ProjectService {
 
     private static Logger logger = LoggerFactory.getLogger(ProjectService.class);
 
-    public static ProjectService Instance = new ProjectService();
+    private final ProjectDAO projectDAO;
+    private final RepositoryFactory repositoryFactory;
+    private final PermissionService permissionService;
 
-    private ProjectDAO projectDAO = new ProjectDAO();
-    RepositoryFactory repositoryFactory = new RepositoryFactory();
-    private PermissionService permissionService = PermissionService.Instance;
-
-    ProjectService() {
-
+    public ProjectService(ProjectDAO projectDAO, PermissionService permissionService, RepositoryFactory repositoryFactory) {
+        this.projectDAO = projectDAO;
+        this.permissionService = permissionService;
+        this.repositoryFactory = repositoryFactory;
     }
 
     public Project createNewProject(String projectName, User creator) {

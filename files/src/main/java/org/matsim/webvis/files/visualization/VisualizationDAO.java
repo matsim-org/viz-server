@@ -1,11 +1,16 @@
 package org.matsim.webvis.files.visualization;
 
+import org.matsim.webvis.database.PersistenceUnit;
 import org.matsim.webvis.files.entities.*;
 
 import java.time.Instant;
 import java.util.List;
 
 public class VisualizationDAO extends DAO {
+
+    public VisualizationDAO(PersistenceUnit persistenceUnit) {
+        super(persistenceUnit);
+    }
 
     Visualization persist(Visualization viz) {
         return database.persist(viz);

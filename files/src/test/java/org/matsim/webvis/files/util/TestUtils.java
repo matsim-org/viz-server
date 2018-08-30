@@ -1,10 +1,15 @@
 package org.matsim.webvis.files.util;
 
+import org.matsim.webvis.database.PersistenceUnit;
+import org.matsim.webvis.files.agent.AgentService;
 import org.matsim.webvis.files.agent.UserDAO;
 import org.matsim.webvis.files.config.AppConfiguration;
 import org.matsim.webvis.files.entities.FileEntry;
 import org.matsim.webvis.files.entities.Project;
 import org.matsim.webvis.files.entities.User;
+import org.matsim.webvis.files.file.RepositoryFactory;
+import org.matsim.webvis.files.permission.PermissionDAO;
+import org.matsim.webvis.files.permission.PermissionService;
 import org.matsim.webvis.files.project.ProjectDAO;
 import org.matsim.webvis.files.project.ProjectService;
 
@@ -19,9 +24,32 @@ import static org.junit.Assert.fail;
 
 public class TestUtils {
 
-    private static UserDAO userDAO = new UserDAO();
-    private static ProjectDAO projectDAO = new ProjectDAO();
-    private static ProjectService projectService = ProjectService.Instance;
+    private static final PersistenceUnit persistenceUnit = new PersistenceUnit("org.matsim.viz.files");
+    private static final UserDAO userDAO = new UserDAO(persistenceUnit);
+    private static final ProjectDAO projectDAO = new ProjectDAO(persistenceUnit);
+    private static final AgentService agentService = new AgentService(userDAO);
+    private static final PermissionService permissionService = new PermissionService(agentService, new PermissionDAO(persistenceUnit));
+    private static final ProjectService projectService = new ProjectService(projectDAO, permissionService, new RepositoryFactory());
+
+    public static PersistenceUnit getPersistenceUnit() {
+        return persistenceUnit;
+    }
+
+    public static AgentService getAgentService() {
+        return agentService;
+    }
+
+    public static PermissionService getPermissionService() {
+        return permissionService;
+    }
+
+    public static ProjectService getProjectService() {
+        return projectService;
+    }
+
+    public static ProjectDAO getProjectDAO() {
+        return projectDAO;
+    }
 
     public static Project persistProjectWithCreator(String projectName, String creatorsAuthId) {
         User user = new User();
@@ -47,6 +75,10 @@ public class TestUtils {
         User user = new User();
         user.setAuthId(authId);
         return userDAO.persist(user);
+    }
+
+    public static User persistUser() {
+        return userDAO.persist(new User());
     }
 
     public static Project addFileEntry(Project project) {

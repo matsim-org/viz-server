@@ -19,12 +19,15 @@ public class VisualizationService {
 
     private static final Logger logger = LoggerFactory.getLogger(VisualizationService.class);
 
-    public static VisualizationService Instance = new VisualizationService();
+    private final ProjectService projectService;
+    private final VisualizationDAO visualizationDAO;
+    private final PermissionService permissionService;
 
-    private ProjectService projectService = ProjectService.Instance;
-    private VisualizationDAO visualizationDAO = new VisualizationDAO();
-    private PermissionService permissionService = PermissionService.Instance;
-
+    public VisualizationService(VisualizationDAO visualizationDAO, ProjectService projectService, PermissionService permissionService) {
+        this.visualizationDAO = visualizationDAO;
+        this.projectService = projectService;
+        this.permissionService = permissionService;
+    }
     public VisualizationType persistType(VisualizationType type) {
         return visualizationDAO.persistType(type);
     }

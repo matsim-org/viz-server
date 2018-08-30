@@ -10,12 +10,13 @@ import java.util.List;
 
 public class PermissionService {
 
-    public static final PermissionService Instance = new PermissionService();
+    private final PermissionDAO permissionDAO;
+    private final AgentService agentService;
 
-    private PermissionService() {
+    public PermissionService(AgentService agentService, PermissionDAO permissionDAO) {
+        this.permissionDAO = permissionDAO;
+        this.agentService = agentService;
     }
-
-    private PermissionDAO permissionDAO = new PermissionDAO();
 
     public Permission createUserPermission(Resource resource, Agent user, Permission.Type type) {
 
@@ -23,11 +24,11 @@ public class PermissionService {
     }
 
     public Permission createServicePermission(Resource resource) {
-        return new Permission(resource, AgentService.Instance.getServiceAgent(), Permission.Type.Read);
+        return new Permission(resource, agentService.getServiceAgent(), Permission.Type.Read);
     }
 
     Permission createPublicPermission(Resource resource) {
-        return new Permission(resource, AgentService.Instance.getPublicAgent(), Permission.Type.Read);
+        return new Permission(resource, agentService.getPublicAgent(), Permission.Type.Read);
     }
 
     public List<Permission> persist(List<Permission> permissions) {

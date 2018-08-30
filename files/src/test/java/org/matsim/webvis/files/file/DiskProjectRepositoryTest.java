@@ -15,6 +15,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -28,14 +29,18 @@ import static org.mockito.Mockito.verify;
 
 public class DiskProjectRepositoryTest {
 
+    private static ProjectDAO projectDAO;
+    private static UserDAO userDAO;
+
     private Project project;
-    private ProjectDAO projectDAO = new ProjectDAO();
-    private UserDAO userDAO = new UserDAO();
     private DiskProjectRepository testObject;
 
     @BeforeClass
     public static void setUpFixture() {
+
         TestUtils.loadTestConfig();
+        projectDAO = new ProjectDAO(TestUtils.getPersistenceUnit());
+        userDAO = new UserDAO(TestUtils.getPersistenceUnit());
     }
 
     @AfterClass
@@ -116,7 +121,7 @@ public class DiskProjectRepositoryTest {
         try (InputStream result = testObject.getFileStream(entry)) {
             assertNotNull(result);
             try (StringWriter writer = new StringWriter()) {
-                IOUtils.copy(result, writer);
+                IOUtils.copy(result, writer, Charset.defaultCharset());
                 String text = writer.toString();
                 assertEquals(testText, text);
             }

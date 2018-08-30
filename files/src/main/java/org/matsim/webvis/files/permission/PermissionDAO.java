@@ -1,5 +1,6 @@
 package org.matsim.webvis.files.permission;
 
+import org.matsim.webvis.database.PersistenceUnit;
 import org.matsim.webvis.files.entities.Agent;
 import org.matsim.webvis.files.entities.DAO;
 import org.matsim.webvis.files.entities.Permission;
@@ -7,7 +8,11 @@ import org.matsim.webvis.files.entities.QPermission;
 
 import java.util.List;
 
-class PermissionDAO extends DAO {
+public class PermissionDAO extends DAO {
+
+    public PermissionDAO(PersistenceUnit persistenceUnit) {
+        super(persistenceUnit);
+    }
 
     List<Permission> persist(List<Permission> permissions) {
         return database.persistMany(permissions);
