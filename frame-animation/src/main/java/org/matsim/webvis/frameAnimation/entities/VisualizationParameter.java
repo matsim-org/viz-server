@@ -10,6 +10,6 @@ import org.matsim.webvis.database.AbstractEntity;
 @NoArgsConstructor
 public class VisualizationParameter extends AbstractEntity {
 
-    private String key;
+    private String inputKey;
     private String value;
 }

@@ -25,11 +25,11 @@ public class Visualization extends Resource {
     private Map<String, VisualizationParameter> parameters = new HashMap<>();
 
     public void addInput(VisualizationInput input) {
-        this.inputFiles.put(input.getKey(), input);
+        this.inputFiles.put(input.getInputKey(), input);
         input.setVisualization(this);
     }
 
     public void addParameter(VisualizationParameter parameter) {
-        this.parameters.put(parameter.getKey(), parameter);
+        this.parameters.put(parameter.getParameterKey(), parameter);
     }
 }

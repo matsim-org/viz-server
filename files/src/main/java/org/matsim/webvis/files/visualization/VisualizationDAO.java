@@ -38,13 +38,13 @@ public class VisualizationDAO extends DAO {
                 .fetchOne());
     }
 
-    List<Visualization> findAllByTypeIfHasPermission(String key, Instant after, Agent agent) {
+    List<Visualization> findAllByTypeIfHasPermission(String typeName, Instant after, Agent agent) {
 
         QVisualization visualization = QVisualization.visualization;
         QPermission permission = QPermission.permission;
 
         return database.executeQuery(query -> query.selectFrom(visualization)
-                .where(visualization.type.key.eq(key).and(visualization.createdAt.after(after)))
+                .where(visualization.type.typeName.eq(typeName).and(visualization.createdAt.after(after)))
                 .innerJoin(visualization.permissions, permission).on(permission.agent.eq(agent))
                 .leftJoin(visualization.inputFiles).fetchJoin()
                 .leftJoin(visualization.parameters).fetchJoin()
@@ -53,11 +53,11 @@ public class VisualizationDAO extends DAO {
         );
     }
 
-    VisualizationType findType(String key) {
+    VisualizationType findType(String typeName) {
         QVisualizationType type = QVisualizationType.visualizationType;
 
         return database.executeQuery(query -> query.selectFrom(type)
-                .where(type.key.eq(key))
+                .where(type.typeName.eq(typeName))
                 .fetchOne());
     }
 
@@ -73,9 +73,9 @@ public class VisualizationDAO extends DAO {
         );
     }
 
-    void removeType(String key) {
+    void removeType(String typeName) {
 
         QVisualizationType type = QVisualizationType.visualizationType;
-        database.executeTransactionalQuery(query -> query.delete(type).where(type.key.eq(key)).execute());
+        database.executeTransactionalQuery(query -> query.delete(type).where(type.typeName.eq(typeName)).execute());
     }
 }

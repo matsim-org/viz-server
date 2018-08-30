@@ -131,6 +131,6 @@ class DataGenerator {
             Path inputFile = vizFolder.resolve(input.getFileEntry().getUserFileName());
         // assume that if any artifacts in that folder are present, they are from an interrupted fetch and are no longer needed.
         Files.copy(fileStream, inputFile, StandardCopyOption.REPLACE_EXISTING);
-            writtenFiles.put(input.getKey(), inputFile);
+        writtenFiles.put(input.getInputKey(), inputFile);
     }
 }

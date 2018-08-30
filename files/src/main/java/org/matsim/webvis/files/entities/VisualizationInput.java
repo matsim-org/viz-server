@@ -16,7 +16,7 @@ import javax.persistence.ManyToOne;
 @Entity
 public class VisualizationInput extends AbstractEntity {
 
-    private String key;
+    private String inputKey;
 
     @ManyToOne
     private FileEntry fileEntry;
