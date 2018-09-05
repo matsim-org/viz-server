@@ -1,9 +1,14 @@
 package org.matsim.webvis.files.agent;
 
 import com.querydsl.core.types.dsl.EntityPathBase;
+import org.matsim.webvis.database.PersistenceUnit;
 import org.matsim.webvis.files.entities.*;
 
 public class AgentDAO extends DAO {
+
+    AgentDAO(PersistenceUnit persistenceUnit) {
+        super(persistenceUnit);
+    }
 
     public <T extends Agent> T persist(T agent) {
 

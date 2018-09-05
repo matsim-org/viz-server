@@ -11,6 +11,7 @@ import org.matsim.webvis.files.entities.Project;
 import org.matsim.webvis.files.entities.User;
 import org.matsim.webvis.files.file.FileResource;
 import org.matsim.webvis.files.visualization.ProjectVisualizationResource;
+import org.matsim.webvis.files.visualization.VisualizationService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -18,11 +19,13 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.util.List;
 
+@AllArgsConstructor
 @Path("/projects")
 @Produces(MediaType.APPLICATION_JSON)
 public class ProjectResource {
 
-    ProjectService projectService = ProjectService.Instance;
+    private final ProjectService projectService;
+    private final VisualizationService visualizationService;
 
     @POST
     public Project createProject(
@@ -48,12 +51,12 @@ public class ProjectResource {
 
     @Path("{id}/files")
     public FileResource files(@PathParam("id") String projectId) {
-        return new FileResource(projectId);
+        return new FileResource(projectService, projectId);
     }
 
     @Path("{id}/visualizations")
     public ProjectVisualizationResource visualizations(@PathParam("id") String projectId) {
-        return new ProjectVisualizationResource();
+        return new ProjectVisualizationResource(visualizationService);
     }
 
     @Getter

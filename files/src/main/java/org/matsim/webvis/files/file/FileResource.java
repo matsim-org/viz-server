@@ -1,6 +1,7 @@
 package org.matsim.webvis.files.file;
 
 import io.dropwizard.auth.Auth;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -19,16 +20,13 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+@AllArgsConstructor
 @Path("/")
 public class FileResource {
 
-    ProjectService projectService = ProjectService.Instance;
+    private final ProjectService projectService;
     @Getter
     private String projectId;
-
-    public FileResource(String projectId) {
-        this.projectId = projectId;
-    }
 
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)

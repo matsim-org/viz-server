@@ -21,7 +21,7 @@ import java.util.Set;
 public class VisualizationType extends AbstractEntity {
 
     @Column(unique = true)
-    private String key;
+    private String typeName;
     private boolean requiresProcessing;
     private URI endpoint;
 

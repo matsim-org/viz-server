@@ -17,6 +17,11 @@ public class PersistenceUnit {
         entityManagerFactory = Persistence.createEntityManagerFactory(unitName);
     }
 
+    public PersistenceUnit(String unitName, DbConfiguration configuration) {
+
+        entityManagerFactory = Persistence.createEntityManagerFactory(unitName, configuration.getProperties());
+    }
+
     public EntityManager createEntityManager() {
         return entityManagerFactory.createEntityManager();
     }

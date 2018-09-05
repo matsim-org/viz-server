@@ -4,8 +4,7 @@ import org.matsim.webvis.error.InternalException;
 import org.matsim.webvis.files.entities.*;
 import org.matsim.webvis.files.file.FileDownload;
 import org.matsim.webvis.files.file.FileUpload;
-import org.matsim.webvis.files.file.ProjectRepository;
-import org.matsim.webvis.files.file.RepositoryFactory;
+import org.matsim.webvis.files.file.Repository;
 import org.matsim.webvis.files.permission.PermissionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,14 +16,14 @@ public class ProjectService {
 
     private static Logger logger = LoggerFactory.getLogger(ProjectService.class);
 
-    public static ProjectService Instance = new ProjectService();
+    private final ProjectDAO projectDAO;
+    private final Repository repository;
+    private final PermissionService permissionService;
 
-    private ProjectDAO projectDAO = new ProjectDAO();
-    RepositoryFactory repositoryFactory = new RepositoryFactory();
-    private PermissionService permissionService = PermissionService.Instance;
-
-    ProjectService() {
-
+    public ProjectService(ProjectDAO projectDAO, PermissionService permissionService, Repository repository) {
+        this.projectDAO = projectDAO;
+        this.permissionService = permissionService;
+        this.repository = repository;
     }
 
     public Project createNewProject(String projectName, User creator) {
@@ -69,7 +68,6 @@ public class ProjectService {
         permissionService.findWritePermission(agent, projectId);
 
         Project project = projectDAO.findWithFullGraph(projectId);
-        ProjectRepository repository = repositoryFactory.getRepository(project);
         List<FileEntry> entries = repository.addFiles(uploads);
         project.addFileEntries(entries);
 
@@ -86,7 +84,6 @@ public class ProjectService {
         permissionService.findReadPermission(agent, fileId);
 
         FileEntry entry = projectDAO.findFileEntry(projectId, fileId);
-        ProjectRepository repository = repositoryFactory.getRepository(entry.getProject());
         return new FileDownload(repository.getFileStream(entry), entry);
     }
 
@@ -100,9 +97,13 @@ public class ProjectService {
             throw new InternalException("fileId not present");
         }
 
-        ProjectRepository repository = this.repositoryFactory.getRepository(project);
-        repository.removeFile(optional.get());
+
         project.removeFileEntry(optional.get());
-        return projectDAO.persist(project);
+        Project result = projectDAO.persist(project); // remove entry from the database first to ensure consistent database
+        try {
+            repository.removeFile(optional.get());
+        } catch (Exception ignored) {
+        }
+        return result;
     }
 }

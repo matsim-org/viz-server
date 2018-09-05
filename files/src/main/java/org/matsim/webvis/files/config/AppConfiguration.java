@@ -1,5 +1,6 @@
 package org.matsim.webvis.files.config;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Configuration;
 import io.dropwizard.client.JerseyClientConfiguration;
 import lombok.Getter;
@@ -17,11 +18,13 @@ public class AppConfiguration extends Configuration {
     @Setter
     private static AppConfiguration instance;
 
-    private String uploadFilePath = "./files";
-    private String tmpFilePath = "./tmp";
     private URI introspectionEndpoint = URI.create("https://localhost:3000/introspect/");
     private String relyingPartyId = "relyingPartyId";
     private String relyingPartySecret = "secret";
     private List<VisualizationType> vizTypes = new ArrayList<>();
     private JerseyClientConfiguration jerseyClient = new JerseyClientConfiguration();
+    @JsonProperty("database")
+    private DbConfigurationFactory databaseFactory = new H2DbConfigurationFactory();
+    @JsonProperty("repository")
+    private RepositoryFactory repositoryFactory = new LocalRepositoryFactory();
 }

@@ -7,20 +7,20 @@ import lombok.Setter;
 import org.matsim.webvis.database.AbstractEntity;
 
 import javax.persistence.Entity;
-import javax.persistence.ManyToOne;
+import javax.persistence.FetchType;
+import javax.persistence.OneToOne;
 
+@Entity
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
-public class VisualizationInput extends AbstractEntity {
+public class PendingFileTransfer extends AbstractEntity {
 
-    private String inputKey;
-
-    @ManyToOne
+    private FileEntry.StorageType toStorage;
+    private Status status = Status.Pending;
+    @OneToOne(fetch = FetchType.LAZY)
     private FileEntry fileEntry;
 
-    @ManyToOne(optional = false)
-    private Visualization visualization;
+    public enum Status {Pending, Transferring, Failed}
 }

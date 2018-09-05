@@ -1,9 +1,14 @@
 package org.matsim.webvis.files.agent;
 
+import org.matsim.webvis.database.PersistenceUnit;
 import org.matsim.webvis.files.entities.QUser;
 import org.matsim.webvis.files.entities.User;
 
 public class UserDAO extends AgentDAO {
+
+    public UserDAO(PersistenceUnit persistenceUnit) {
+        super(persistenceUnit);
+    }
 
     User findByIdentityProviderId(String id) {
 

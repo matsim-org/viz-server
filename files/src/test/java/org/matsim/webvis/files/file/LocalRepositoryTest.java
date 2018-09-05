@@ -3,18 +3,14 @@ package org.matsim.webvis.files.file;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.junit.*;
-import org.matsim.webvis.files.agent.UserDAO;
-import org.matsim.webvis.files.config.AppConfiguration;
 import org.matsim.webvis.files.entities.FileEntry;
-import org.matsim.webvis.files.entities.Project;
-import org.matsim.webvis.files.entities.User;
-import org.matsim.webvis.files.project.ProjectDAO;
 import org.matsim.webvis.files.util.TestUtils;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -26,31 +22,28 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-public class DiskProjectRepositoryTest {
+public class LocalRepositoryTest {
 
-    private Project project;
-    private ProjectDAO projectDAO = new ProjectDAO();
-    private UserDAO userDAO = new UserDAO();
-    private DiskProjectRepository testObject;
+    private static final String uploadDirectory = "./testUploads";
+
+
+    private LocalRepository testObject;
 
     @BeforeClass
     public static void setUpFixture() {
+
         TestUtils.loadTestConfig();
     }
 
     @AfterClass
     public static void tearDownFixture() throws IOException {
-        Path start = Paths.get(AppConfiguration.getInstance().getUploadFilePath());
+        Path start = Paths.get(uploadDirectory);
         TestUtils.removeFileTree(start);
     }
 
     @Before
     public void setUp() {
-        User user = userDAO.persist(new User());
-        Project toPersist = new Project();
-        toPersist.setCreator(user);
-        project = projectDAO.persist(toPersist);
-        testObject = new DiskProjectRepository(project);
+        testObject = new LocalRepository(uploadDirectory);
     }
 
     @After
@@ -61,7 +54,7 @@ public class DiskProjectRepositoryTest {
     @Test
     public void constructor_object() {
 
-        DiskProjectRepository repository = new DiskProjectRepository(project);
+        LocalRepository repository = new LocalRepository(uploadDirectory);
         assertNotNull(repository);
     }
 
@@ -102,7 +95,7 @@ public class DiskProjectRepositoryTest {
 
         FileEntry entry = new FileEntry();
         entry.setPersistedFileName("test.txt");
-        Path directory = testObject.getProjectDirectory();
+        Path directory = Paths.get(uploadDirectory);
 
         //write a test file
         String testText = "this is a test file and should be removed after unit testing";
@@ -116,7 +109,7 @@ public class DiskProjectRepositoryTest {
         try (InputStream result = testObject.getFileStream(entry)) {
             assertNotNull(result);
             try (StringWriter writer = new StringWriter()) {
-                IOUtils.copy(result, writer);
+                IOUtils.copy(result, writer, Charset.defaultCharset());
                 String text = writer.toString();
                 assertEquals(testText, text);
             }

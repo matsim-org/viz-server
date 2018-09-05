@@ -1,6 +1,7 @@
 package org.matsim.webvis.files.visualization;
 
 import io.dropwizard.auth.Auth;
+import lombok.AllArgsConstructor;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.matsim.webvis.files.entities.Agent;
 import org.matsim.webvis.files.entities.Visualization;
@@ -15,13 +16,14 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 
+@AllArgsConstructor
 @Path("")
 @Produces(MediaType.APPLICATION_JSON)
 public class VisualizationResource {
 
     private static final Date minDate = new Date(Long.MIN_VALUE);
 
-    VisualizationService visualizationService = VisualizationService.Instance;
+    private final VisualizationService visualizationService;
 
     @GET
     @Path("/visualizations")

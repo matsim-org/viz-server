@@ -10,6 +10,7 @@ import org.matsim.webvis.files.entities.FileEntry;
 import org.matsim.webvis.files.entities.Project;
 import org.matsim.webvis.files.entities.User;
 import org.matsim.webvis.files.project.ProjectService;
+import org.matsim.webvis.files.util.TestUtils;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -27,7 +28,7 @@ public class FileResourceTest {
 
     @Before
     public void setUp() {
-        testObject = new FileResource("some-id");
+        testObject = new FileResource(TestUtils.getProjectService(), "some-id");
     }
 
     @Test(expected = InvalidInputException.class)
@@ -60,8 +61,9 @@ public class FileResourceTest {
     public void uploadFiles_allGood_invokeProjectService() {
 
         Project project = new Project();
-        testObject.projectService = mock(ProjectService.class);
-        when(testObject.projectService.addFilesToProject(any(), anyString(), any())).thenReturn(project);
+        ProjectService projectServiceMock = mock(ProjectService.class);
+        when(projectServiceMock.addFilesToProject(any(), anyString(), any())).thenReturn(project);
+        testObject = new FileResource(projectServiceMock, "some-id");
 
         ContentDisposition cd = mock(ContentDisposition.class);
         when(cd.getFileName()).thenReturn("filename");
@@ -86,9 +88,9 @@ public class FileResourceTest {
         entry.setSizeInBytes(10);
         entry.setContentType("application/json");
         FileDownload download = new FileDownload(mock(InputStream.class), entry);
-        testObject.projectService = mock(ProjectService.class);
-        when(testObject.projectService.getFileDownload(anyString(), anyString(), any()))
-                .thenReturn(download);
+        ProjectService projectServiceMock = mock(ProjectService.class);
+        when(projectServiceMock.getFileDownload(anyString(), anyString(), any())).thenReturn(download);
+        testObject = new FileResource(projectServiceMock, "any-id");
 
         Response response = testObject.downloadFile(new User(), "id");
 
@@ -102,8 +104,10 @@ public class FileResourceTest {
     public void deleteFile_invokeProjectService() {
 
         Project project = new Project();
-        testObject.projectService = mock(ProjectService.class);
-        when(testObject.projectService.removeFileFromProject(anyString(), anyString(), any())).thenReturn(project);
+
+        ProjectService projectServiceMock = mock(ProjectService.class);
+        when(projectServiceMock.removeFileFromProject(anyString(), anyString(), any())).thenReturn(project);
+        testObject = new FileResource(projectServiceMock, "any-id");
 
         Project response = testObject.deleteFile(new User(), "id");
 

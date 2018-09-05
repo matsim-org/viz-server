@@ -1,11 +1,16 @@
 package org.matsim.webvis.files.project;
 
+import org.matsim.webvis.database.PersistenceUnit;
 import org.matsim.webvis.files.entities.*;
 
 import javax.persistence.EntityManager;
 import java.util.List;
 
 public class ProjectDAO extends DAO {
+
+    public ProjectDAO(PersistenceUnit persistenceUnit) {
+        super(persistenceUnit);
+    }
 
     public Project persist(Project project) {
         return database.persist(project);

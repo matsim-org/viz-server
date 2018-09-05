@@ -1,6 +1,7 @@
 package org.matsim.webvis.files.visualization;
 
 import io.dropwizard.auth.Auth;
+import lombok.AllArgsConstructor;
 import org.matsim.webvis.files.entities.Agent;
 import org.matsim.webvis.files.entities.Visualization;
 
@@ -10,9 +11,10 @@ import javax.ws.rs.core.MediaType;
 
 @Path("/")
 @Produces(MediaType.APPLICATION_JSON)
+@AllArgsConstructor
 public class ProjectVisualizationResource {
 
-    VisualizationService visualizationService = VisualizationService.Instance;
+    private final VisualizationService visualizationService;
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)

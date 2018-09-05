@@ -1,6 +1,5 @@
 package org.matsim.webvis.files.visualization;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.matsim.webvis.files.entities.User;
 import org.matsim.webvis.files.entities.Visualization;
@@ -17,20 +16,15 @@ import static org.mockito.Mockito.when;
 
 public class VisualizationResourceTest {
 
-    private VisualizationResource testObject;
-
-    @Before
-    public void setUp() {
-        testObject = new VisualizationResource();
-        testObject.visualizationService = mock(VisualizationService.class);
-    }
-
     @Test
     public void findByType() {
 
         List<Visualization> vizes = new ArrayList<>();
         vizes.add(new Visualization());
-        when(testObject.visualizationService.findByType(anyString(), any(), any())).thenReturn(vizes);
+
+        VisualizationService visualizationServiceMock = mock(VisualizationService.class);
+        when(visualizationServiceMock.findByType(anyString(), any(), any())).thenReturn(vizes);
+        VisualizationResource testObject = new VisualizationResource(visualizationServiceMock);
 
         List<Visualization> result = testObject.findByType(new User(), "type", null);
 
@@ -42,7 +36,9 @@ public class VisualizationResourceTest {
 
         List<VisualizationType> types = new ArrayList<>();
         types.add(new VisualizationType());
-        when(testObject.visualizationService.findAllTypes()).thenReturn(types);
+        VisualizationService visualizationServiceMock = mock(VisualizationService.class);
+        when(visualizationServiceMock.findAllTypes()).thenReturn(types);
+        VisualizationResource testObject = new VisualizationResource(visualizationServiceMock);
 
         List<VisualizationType> result = testObject.types();
 

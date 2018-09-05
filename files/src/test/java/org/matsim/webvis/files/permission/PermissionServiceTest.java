@@ -1,9 +1,9 @@
 package org.matsim.webvis.files.permission;
 
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.matsim.webvis.error.ForbiddenException;
-import org.matsim.webvis.files.agent.AgentService;
 import org.matsim.webvis.files.entities.FileEntry;
 import org.matsim.webvis.files.entities.Permission;
 import org.matsim.webvis.files.entities.Project;
@@ -17,7 +17,12 @@ import static org.junit.Assert.assertTrue;
 @SuppressWarnings("ConstantConditions")
 public class PermissionServiceTest {
 
-    private PermissionService testObject = PermissionService.Instance;
+    private PermissionService testObject;
+
+    @Before
+    public void setUp() {
+        testObject = new PermissionService(TestUtils.getAgentService(), new PermissionDAO(TestUtils.getPersistenceUnit()));
+    }
 
     @After
     public void tearDown() {
@@ -45,7 +50,7 @@ public class PermissionServiceTest {
         Permission permission = testObject.createServicePermission(entry);
 
         assertEquals(entry, permission.getResource());
-        assertEquals(AgentService.Instance.getServiceAgent(), permission.getAgent());
+        assertEquals(TestUtils.getAgentService().getServiceAgent(), permission.getAgent());
         assertEquals(Permission.Type.Read, permission.getType());
     }
 
@@ -57,7 +62,7 @@ public class PermissionServiceTest {
         Permission permission = testObject.createPublicPermission(entry);
 
         assertEquals(entry, permission.getResource());
-        assertEquals(AgentService.Instance.getPublicAgent(), permission.getAgent());
+        assertEquals(TestUtils.getAgentService().getPublicAgent(), permission.getAgent());
         assertEquals(Permission.Type.Read, permission.getType());
     }
 

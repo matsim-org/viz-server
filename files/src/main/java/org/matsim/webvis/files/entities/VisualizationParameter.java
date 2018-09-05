@@ -15,6 +15,6 @@ import javax.persistence.Entity;
 @Entity
 public class VisualizationParameter extends AbstractEntity {
 
-    private String key;
+    private String parameterKey;
     private String value;
 }
