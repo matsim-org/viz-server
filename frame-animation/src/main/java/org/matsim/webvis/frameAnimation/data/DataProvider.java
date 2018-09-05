@@ -48,7 +48,6 @@ public class DataProvider {
     public ConfigurationResponse getConfiguration(String vizId) {
 
         if (!data.containsKey(vizId)) {
-            dataController.fetchVisualizations();
             throw new InvalidInputException("Viz id: " + vizId + " is not in data set");
         }
 
