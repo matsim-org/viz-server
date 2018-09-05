@@ -29,6 +29,11 @@ public class DbConfiguration {
     public void setHbm2ddl(String value) {
         properties.put("hibernate.hbm2ddl.auto", value);
     }
+
+    public void setPrintSql(boolean value) {
+        properties.put("hibernate.show_sql", Boolean.toString(value));
+        properties.put("hibernate.format_sql", Boolean.toString(value));
+    }
 }
 
 

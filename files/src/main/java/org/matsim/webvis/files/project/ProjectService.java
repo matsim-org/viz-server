@@ -100,7 +100,10 @@ public class ProjectService {
 
         project.removeFileEntry(optional.get());
         Project result = projectDAO.persist(project); // remove entry from the database first to ensure consistent database
-        repository.removeFile(optional.get());
+        try {
+            repository.removeFile(optional.get());
+        } catch (Exception ignored) {
+        }
         return result;
     }
 }

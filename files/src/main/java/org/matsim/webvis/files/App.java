@@ -40,10 +40,6 @@ import javax.persistence.RollbackException;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
 import javax.ws.rs.client.Client;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.EnumSet;
 
 public class App extends Application<AppConfiguration> {
@@ -67,24 +63,14 @@ public class App extends Application<AppConfiguration> {
     }
 
     @Override
-    public void run(AppConfiguration configuration, Environment environment) throws IOException {
+    public void run(AppConfiguration configuration, Environment environment) {
 
         AppConfiguration.setInstance(configuration);
 
-        createUploadDirectories(configuration);
         registerEndpoints(environment.jersey(), configuration);
         registerOAuth(configuration, environment);
         registerExceptionMappers(environment.jersey());
         registerCORSFilter(environment.servlets());
-    }
-
-    private void createUploadDirectories(AppConfiguration config) throws IOException {
-
-        Path tmpUploadDirectory = Paths.get(config.getTmpFilePath());
-        Files.createDirectories(tmpUploadDirectory);
-
-        Path uploadDirectory = Paths.get(config.getUploadFilePath());
-        Files.createDirectories(uploadDirectory);
     }
 
     private void registerOAuth(AppConfiguration config, Environment environment) {
@@ -123,7 +109,8 @@ public class App extends Application<AppConfiguration> {
 
     private void registerEndpoints(JerseyEnvironment jersey, AppConfiguration configuration) {
 
-        PersistenceUnit persistenceUnit = new PersistenceUnit("org.matsim.viz.files", configuration.getDatabase());
+        PersistenceUnit persistenceUnit = new PersistenceUnit("org.matsim.viz.files",
+                configuration.getDatabaseFactory().createConfiguration());
         ProjectDAO projectDAO = new ProjectDAO(persistenceUnit);
         VisualizationDAO visualizationDAO = new VisualizationDAO(persistenceUnit);
         UserDAO userDAO = new UserDAO(persistenceUnit);
