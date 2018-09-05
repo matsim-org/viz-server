@@ -2,9 +2,7 @@ package org.matsim.webvis.files.file;
 
 import org.apache.commons.io.FilenameUtils;
 import org.matsim.webvis.error.InternalException;
-import org.matsim.webvis.files.config.AppConfiguration;
 import org.matsim.webvis.files.entities.FileEntry;
-import org.matsim.webvis.files.entities.Project;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,23 +12,20 @@ import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-public class DiskProjectRepository implements ProjectRepository {
+public class LocalRepository implements Repository {
 
-    private static Logger logger = LoggerFactory.getLogger(DiskProjectRepository.class);
+    private static Logger logger = LoggerFactory.getLogger(LocalRepository.class);
 
-    private Project project;
-    private Path projectDirectory;
+    Path uploadDirectory;
 
-    public DiskProjectRepository(Project project) {
+    public LocalRepository(String uploadDirectory) {
 
-        this.project = project;
-        this.projectDirectory = getProjectDirectory();
+        this.uploadDirectory = getUploadDirectory(uploadDirectory);
     }
 
     public List<FileEntry> addFiles(Collection<FileUpload> uploads) {
@@ -40,8 +35,33 @@ public class DiskProjectRepository implements ProjectRepository {
 
     public FileEntry addFile(FileUpload upload) {
 
+        return writeFileToDisk(upload);
+    }
+
+    public InputStream getFileStream(FileEntry entry) {
+        try {
+            Path filePath = uploadDirectory.resolve(entry.getPersistedFileName());
+            return Files.newInputStream(filePath);
+        } catch (IOException | InvalidPathException e) {
+            logger.error("could not get file stream.", e);
+            throw new InternalException("could not get file stream");
+        }
+    }
+
+    public void removeFile(FileEntry entry) {
+        removeFile(entry, uploadDirectory);
+    }
+
+    public void removeFiles(Collection<FileEntry> entries) {
+
+        for (FileEntry entry : entries) {
+            removeFile(entry);
+        }
+    }
+
+    FileEntry writeFileToDisk(FileUpload upload) {
         String diskFileName = UUID.randomUUID().toString() + "." + FilenameUtils.getExtension(upload.getFileName());
-        Path file = projectDirectory.resolve(diskFileName);
+        Path file = uploadDirectory.resolve(diskFileName);
         FileEntry entry = new FileEntry();
         try {
             long bytes = Files.copy(upload.getFile(), file);
@@ -54,34 +74,8 @@ public class DiskProjectRepository implements ProjectRepository {
         entry.setUserFileName(upload.getFileName());
         entry.setPersistedFileName(diskFileName);
         entry.setContentType(upload.getContentType());
+        entry.setStorageType(FileEntry.StorageType.Local);
         return entry;
-    }
-
-    public InputStream getFileStream(FileEntry entry) {
-        try {
-            Path filePath = getProjectDirectory().resolve(entry.getPersistedFileName());
-            return Files.newInputStream(filePath);
-        } catch (IOException | InvalidPathException e) {
-            logger.error("could not get file stream.", e);
-            throw new InternalException("could not get file stream");
-        }
-    }
-
-    public void removeFile(FileEntry entry) {
-        removeFile(entry, getProjectDirectory());
-    }
-
-    public void removeFiles(Collection<FileEntry> entries) {
-
-        Path directory = getProjectDirectory();
-        for (FileEntry entry : entries) {
-            removeFile(entry, directory);
-        }
-    }
-
-    void removeAllFiles() {
-
-        removeFiles(new ArrayList<>(project.getFiles()));
     }
 
     private void removeFile(FileEntry entry, Path directory) {
@@ -94,9 +88,9 @@ public class DiskProjectRepository implements ProjectRepository {
         }
     }
 
-    Path getProjectDirectory() {
+    private Path getUploadDirectory(String path) {
         try {
-            Path directory = Paths.get(AppConfiguration.getInstance().getUploadFilePath(), project.getCreator().getId(), project.getId());
+            Path directory = Paths.get(path);
             return Files.createDirectories(directory);
         } catch (IOException e) {
             logger.error("Error while creating project directory.", e);

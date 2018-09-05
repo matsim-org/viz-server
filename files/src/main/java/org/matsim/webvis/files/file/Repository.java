@@ -6,7 +6,7 @@ import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
 
-public interface ProjectRepository {
+public interface Repository {
 
     List<FileEntry> addFiles(Collection<FileUpload> uploads);
 

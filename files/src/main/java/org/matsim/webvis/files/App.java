@@ -23,7 +23,6 @@ import org.matsim.webvis.files.agent.UserDAO;
 import org.matsim.webvis.files.config.AppConfiguration;
 import org.matsim.webvis.files.entities.Agent;
 import org.matsim.webvis.files.entities.VisualizationType;
-import org.matsim.webvis.files.file.RepositoryFactory;
 import org.matsim.webvis.files.permission.PermissionDAO;
 import org.matsim.webvis.files.permission.PermissionService;
 import org.matsim.webvis.files.permission.SubjectFactory;
@@ -132,7 +131,8 @@ public class App extends Application<AppConfiguration> {
 
         agentService = new AgentService(userDAO);
         PermissionService permissionService = new PermissionService(agentService, permissionDAO);
-        ProjectService projectService = new ProjectService(projectDAO, permissionService, new RepositoryFactory());
+        ProjectService projectService = new ProjectService(projectDAO, permissionService,
+                configuration.getRepositoryFactory().createRepository(persistenceUnit));
         VisualizationService visualizationService = new VisualizationService(visualizationDAO, projectService, permissionService);
 
         jersey.register(new ProjectResource(projectService, visualizationService));

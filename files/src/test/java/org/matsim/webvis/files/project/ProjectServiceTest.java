@@ -1,23 +1,22 @@
 package org.matsim.webvis.files.project;
 
-import org.junit.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.matsim.webvis.error.CodedException;
 import org.matsim.webvis.error.ForbiddenException;
-import org.matsim.webvis.error.InternalException;
-import org.matsim.webvis.files.config.AppConfiguration;
 import org.matsim.webvis.files.entities.FileEntry;
 import org.matsim.webvis.files.entities.Permission;
 import org.matsim.webvis.files.entities.Project;
 import org.matsim.webvis.files.entities.User;
-import org.matsim.webvis.files.file.DiskProjectRepository;
 import org.matsim.webvis.files.file.FileDownload;
 import org.matsim.webvis.files.file.FileUpload;
-import org.matsim.webvis.files.file.RepositoryFactory;
+import org.matsim.webvis.files.file.LocalRepository;
+import org.matsim.webvis.files.file.Repository;
 import org.matsim.webvis.files.util.TestUtils;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -41,7 +40,7 @@ public class ProjectServiceTest {
         testObject = new ProjectService(
                 new ProjectDAO(TestUtils.getPersistenceUnit()),
                 TestUtils.getPermissionService(),
-                new RepositoryFactory());
+                mock(Repository.class));
     }
 
     @After
@@ -49,10 +48,10 @@ public class ProjectServiceTest {
         TestUtils.removeAllEntities();
     }
 
-    @AfterClass
+   /* @AfterClass
     public static void tearDownFixture() throws IOException {
         TestUtils.removeFileTree(Paths.get(AppConfiguration.getInstance().getUploadFilePath()));
-    }
+    }*/
 
     @Test(expected = CodedException.class)
     public void createNewProject_projectNameExists_exception() {
@@ -185,6 +184,16 @@ public class ProjectServiceTest {
     @Test
     public void addFilesToProject() {
 
+        LocalRepository repository = spy(new LocalRepository("some-directory"));
+        doAnswer(args -> {
+            FileUpload upload = args.getArgument(0);
+            FileEntry result = new FileEntry();
+            result.setPersistedFileName(upload.getFileName());
+            result.setUserFileName(upload.getFileName());
+            return result;
+        }).when(repository).addFile(any(FileUpload.class));
+        testObject = new ProjectService(new ProjectDAO(TestUtils.getPersistenceUnit()),
+                TestUtils.getPermissionService(), repository);
         Project project = TestUtils.persistProjectWithCreator("test");
         List<FileUpload> uploads = new ArrayList<>();
         uploads.add(new FileUpload("first.txt", "plain/text", mock(InputStream.class)));
@@ -215,20 +224,18 @@ public class ProjectServiceTest {
         uploads.add(new FileUpload("same-name.txt", "plain/text", mock(InputStream.class)));
         uploads.add(new FileUpload("same-name.txt", "plain/text", mock(InputStream.class)));
 
-        DiskProjectRepository repository = spy(new DiskProjectRepository(project));
-        //spy(repository);
-        RepositoryFactory factory = mock(RepositoryFactory.class);
-        when(factory.getRepository(project)).thenReturn(repository);
-        testObject = new ProjectService(
-                new ProjectDAO(TestUtils.getPersistenceUnit()),
-                TestUtils.getPermissionService(),
-                factory
-        );
+        LocalRepository repository = spy(new LocalRepository("some-directory"));
+        doReturn(new FileEntry()).when(repository).addFile(any(FileUpload.class));
+        doNothing().when(repository).removeFile(any(FileEntry.class));
+        ProjectDAO mockedDao = mock(ProjectDAO.class);
+        when(mockedDao.findWithFullGraph(anyString())).thenReturn(project);
+        when(mockedDao.persist(any(Project.class))).thenThrow(new RuntimeException("persisting error"));
 
+        testObject = new ProjectService(mockedDao, TestUtils.getPermissionService(), repository);
         try {
             testObject.addFilesToProject(uploads, project.getId(), project.getCreator());
             fail("exception while persisting project should raise exception and delete written files");
-        } catch (InternalException e) {
+        } catch (RuntimeException e) {
             verify(repository).removeFiles(any());
         }
     }
@@ -251,17 +258,12 @@ public class ProjectServiceTest {
         project = addFileEntry(project);
         FileEntry entry = project.getFiles().iterator().next();
 
-        DiskProjectRepository repository = mock(DiskProjectRepository.class);
+        LocalRepository repository = mock(LocalRepository.class);
         InputStream stream = mock(InputStream.class);
         when(repository.getFileStream(any())).thenReturn(stream);
 
-        RepositoryFactory factory = mock(RepositoryFactory.class);
-        when(factory.getRepository(project)).thenReturn(repository);
-        testObject = new ProjectService(
-                new ProjectDAO(TestUtils.getPersistenceUnit()),
-                TestUtils.getPermissionService(),
-                factory
-        );
+        testObject =
+                new ProjectService(new ProjectDAO(TestUtils.getPersistenceUnit()), TestUtils.getPermissionService(), repository);
 
         FileDownload result = testObject.getFileDownload(project.getId(), entry.getId(), project.getCreator());
 
@@ -288,15 +290,13 @@ public class ProjectServiceTest {
         // ensure file is added to project
         assertEquals(1, project.getFiles().size());
 
-        RepositoryFactory factory = mock(RepositoryFactory.class);
-        DiskProjectRepository repository = mock(DiskProjectRepository.class);
+        LocalRepository repository = mock(LocalRepository.class);
         doNothing().when(repository).removeFile(any());
-        when(factory.getRepository(any())).thenReturn(repository);
 
         testObject = new ProjectService(
                 new ProjectDAO(TestUtils.getPersistenceUnit()),
                 TestUtils.getPermissionService(),
-                factory
+                repository
         );
 
         Project updated = testObject.removeFileFromProject(project.getId(), entry.getId(), project.getCreator());
@@ -311,5 +311,4 @@ public class ProjectServiceTest {
         project.addFileEntry(entry);
         return TestUtils.getProjectDAO().persist(project);
     }
-
 }

@@ -7,12 +7,12 @@ import org.matsim.webvis.files.config.AppConfiguration;
 import org.matsim.webvis.files.entities.FileEntry;
 import org.matsim.webvis.files.entities.Project;
 import org.matsim.webvis.files.entities.User;
-import org.matsim.webvis.files.file.RepositoryFactory;
 import org.matsim.webvis.files.permission.PermissionDAO;
 import org.matsim.webvis.files.permission.PermissionService;
 import org.matsim.webvis.files.project.ProjectDAO;
 import org.matsim.webvis.files.project.ProjectService;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -29,7 +29,7 @@ public class TestUtils {
     private static final ProjectDAO projectDAO = new ProjectDAO(persistenceUnit);
     private static final AgentService agentService = new AgentService(userDAO);
     private static final PermissionService permissionService = new PermissionService(agentService, new PermissionDAO(persistenceUnit));
-    private static final ProjectService projectService = new ProjectService(projectDAO, permissionService, new RepositoryFactory());
+    private static final ProjectService projectService = new ProjectService(projectDAO, permissionService, null);
 
     public static PersistenceUnit getPersistenceUnit() {
         return persistenceUnit;
@@ -96,6 +96,15 @@ public class TestUtils {
     public static void loadTestConfig() {
         if (AppConfiguration.getInstance() == null)
             AppConfiguration.setInstance(new AppConfiguration());
+    }
+
+    public static void writeTextFile(Path file, String content) {
+
+        try (BufferedWriter writer = Files.newBufferedWriter(file)) {
+            writer.write(content, 0, content.length());
+        } catch (IOException e) {
+            throw new RuntimeException("Couldn't write file " + file.toString());
+        }
     }
 
     /**
