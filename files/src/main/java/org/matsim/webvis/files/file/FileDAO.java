@@ -11,7 +11,7 @@ public class FileDAO extends DAO {
         super(persistenceUnit);
     }
 
-    public PendingFileTransfer persistPendingFileTransfer(PendingFileTransfer transfer) {
+    PendingFileTransfer persistPendingFileTransfer(PendingFileTransfer transfer) {
         return database.persist(transfer);
     }
 
@@ -22,8 +22,12 @@ public class FileDAO extends DAO {
     FileEntry findFileEntryById(String id) {
 
         QFileEntry fileEntry = QFileEntry.fileEntry;
+        QPendingFileTransfer fileTransfer = QPendingFileTransfer.pendingFileTransfer;
+
         return database.executeQuery(query -> query.selectFrom(fileEntry)
-                .where(fileEntry.id.eq(id)).fetchOne()
+                .where(fileEntry.id.eq(id))
+                .leftJoin(fileEntry.pendingFileTransfer, fileTransfer).fetchJoin()
+                .fetchOne()
         );
     }
 

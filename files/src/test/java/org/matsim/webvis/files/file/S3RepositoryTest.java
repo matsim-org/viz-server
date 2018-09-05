@@ -10,6 +10,7 @@ import org.junit.AfterClass;
 import org.junit.Test;
 import org.matsim.webvis.error.InternalException;
 import org.matsim.webvis.files.entities.FileEntry;
+import org.matsim.webvis.files.entities.PendingFileTransfer;
 import org.matsim.webvis.files.entities.Project;
 import org.matsim.webvis.files.util.TestUtils;
 
@@ -109,6 +110,7 @@ public class S3RepositoryTest {
         FileEntry transferred = new FileDAO(TestUtils.getPersistenceUnit()).findFileEntryById(fileEntry.getId());
         assertEquals(FileEntry.StorageType.Local, transferred.getStorageType());
         assertNotNull(transferred.getPendingFileTransfer());
+        assertEquals(PendingFileTransfer.Status.Failed, transferred.getPendingFileTransfer().getStatus());
     }
 
     @Test

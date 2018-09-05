@@ -1,8 +1,6 @@
 package org.matsim.webvis.files.file;
 
 import com.amazonaws.AmazonClientException;
-import com.amazonaws.AmazonServiceException;
-import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.S3Object;
 import org.matsim.webvis.error.InternalException;
@@ -103,6 +101,8 @@ public class S3Repository extends LocalRepository {
         FileEntry entry = transfer.getFileEntry();
 
         try {
+            transfer.setStatus(PendingFileTransfer.Status.Transferring);
+            fileDAO.persistPendingFileTransfer(transfer);
             File file = uploadDirectory.resolve(entry.getPersistedFileName()).toFile();
             s3.putObject(this.bucketName, entry.getPersistedFileName(), file);
             entry.setStorageType(FileEntry.StorageType.S3);
@@ -110,10 +110,10 @@ public class S3Repository extends LocalRepository {
             fileDAO.persistFileEntry(entry);
 
             super.removeFile(entry);
-        } catch (AmazonServiceException e) {
-            logger.error("S3 couldn't process request.");
-        } catch (SdkClientException e) {
-            logger.error("Error while contacting S3 bucket.", e);
+        } catch (AmazonClientException e) {
+            logger.error("S3 couldn't process request or could not connect to s3");
+            transfer.setStatus(PendingFileTransfer.Status.Failed);
+            fileDAO.persistPendingFileTransfer(transfer);
         }
     }
 }
