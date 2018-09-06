@@ -1,7 +1,7 @@
 package org.matsim.webvis.files.config;
 
 import com.amazonaws.SdkClientException;
-import com.amazonaws.auth.profile.ProfileCredentialsProvider;
+import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
@@ -28,7 +28,7 @@ public class S3RepositoryFactory implements RepositoryFactory {
     public Repository createRepository(PersistenceUnit persistenceUnit) {
 
         AmazonS3 client = AmazonS3ClientBuilder.standard().withRegion(region)
-                .withCredentials(new ProfileCredentialsProvider()).build();
+                .withCredentials(new DefaultAWSCredentialsProviderChain()).build();
         checkPermissions(client, bucketName);
 
         logger.info("Creating S3 repository at bucketName: " + bucketName);
