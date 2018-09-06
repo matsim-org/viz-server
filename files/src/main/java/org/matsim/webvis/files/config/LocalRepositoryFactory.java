@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import org.matsim.webvis.database.PersistenceUnit;
 import org.matsim.webvis.files.file.LocalRepository;
 import org.matsim.webvis.files.file.Repository;
+import org.slf4j.LoggerFactory;
 
 @Getter
 @AllArgsConstructor
@@ -19,6 +20,7 @@ public class LocalRepositoryFactory implements RepositoryFactory {
     @Override
     public Repository createRepository(PersistenceUnit persistenceUnit) {
 
+        LoggerFactory.getLogger(LocalRepositoryFactory.class).info("Creating local repository at: " + uploadDirectory);
         return new LocalRepository(uploadDirectory);
     }
 }

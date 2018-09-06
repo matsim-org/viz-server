@@ -90,7 +90,10 @@ public class S3Repository extends LocalRepository {
     }
 
     private void transferPendingFiles() {
+
+        logger.info("starting pending file transfer.");
         List<PendingFileTransfer> transfers = fileDAO.findAllPendingFileTransfersToS3();
+        logger.info(transfers.size() + "file transfers found.");
         for (PendingFileTransfer transfer : transfers) {
             transferFile(transfer);
         }
@@ -99,12 +102,15 @@ public class S3Repository extends LocalRepository {
     private void transferFile(PendingFileTransfer transfer) {
 
         FileEntry entry = transfer.getFileEntry();
+        logger.info("Starting file transfer s3 for file: " + entry.getPersistedFileName());
 
         try {
             transfer.setStatus(PendingFileTransfer.Status.Transferring);
             fileDAO.persistPendingFileTransfer(transfer);
             File file = uploadDirectory.resolve(entry.getPersistedFileName()).toFile();
+            logger.info("Trying to connect to amazon s3");
             s3.putObject(this.bucketName, entry.getPersistedFileName(), file);
+            logger.info("Upload succeeded. Deleting local file and pending file transfer. Also setting storage location so s3");
             entry.setStorageType(FileEntry.StorageType.S3);
             entry.setPendingFileTransfer(null); //deletes pending transfer
             fileDAO.persistFileEntry(entry);
@@ -114,6 +120,8 @@ public class S3Repository extends LocalRepository {
             logger.error("S3 couldn't process request or could not connect to s3");
             transfer.setStatus(PendingFileTransfer.Status.Failed);
             fileDAO.persistPendingFileTransfer(transfer);
+        } catch (Exception e) {
+            logger.error("Unexpected exception!", e);
         }
     }
 }

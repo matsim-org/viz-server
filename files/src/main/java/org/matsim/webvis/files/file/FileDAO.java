@@ -38,12 +38,9 @@ public class FileDAO extends DAO {
 
         return database.executeQuery(query -> query.selectFrom(transfer)
                 .where(transfer.toStorage.eq(FileEntry.StorageType.S3)
-                        .and(transfer.status.eq(PendingFileTransfer.Status.Pending)))
+                        .and(transfer.status.eq(PendingFileTransfer.Status.Pending))
+                        .or(transfer.status.eq(PendingFileTransfer.Status.Failed)))
                 .leftJoin(transfer.fileEntry, fileEntry).fetchJoin()
                 .fetch());
-    }
-
-    public void removePendingFileTransfer(PendingFileTransfer transfer) {
-        database.remove(transfer);
     }
 }
