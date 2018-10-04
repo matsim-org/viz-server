@@ -7,6 +7,7 @@ import org.matsim.webvis.files.config.AppConfiguration;
 import org.matsim.webvis.files.entities.FileEntry;
 import org.matsim.webvis.files.entities.Project;
 import org.matsim.webvis.files.entities.User;
+import org.matsim.webvis.files.notifications.NotificationDAO;
 import org.matsim.webvis.files.permission.PermissionDAO;
 import org.matsim.webvis.files.permission.PermissionService;
 import org.matsim.webvis.files.project.ProjectDAO;
@@ -27,6 +28,7 @@ public class TestUtils {
     private static final PersistenceUnit persistenceUnit = new PersistenceUnit("org.matsim.viz.files");
     private static final UserDAO userDAO = new UserDAO(persistenceUnit);
     private static final ProjectDAO projectDAO = new ProjectDAO(persistenceUnit);
+    private static final NotificationDAO notificationDAO = new NotificationDAO(persistenceUnit);
     private static final AgentService agentService = new AgentService(userDAO);
     private static final PermissionService permissionService = new PermissionService(agentService, new PermissionDAO(persistenceUnit));
     private static final ProjectService projectService = new ProjectService(projectDAO, permissionService, null);
@@ -49,6 +51,10 @@ public class TestUtils {
 
     public static ProjectDAO getProjectDAO() {
         return projectDAO;
+    }
+
+    public static NotificationDAO getNotificationDAO() {
+        return notificationDAO;
     }
 
     public static Project persistProjectWithCreator(String projectName, String creatorsAuthId) {
@@ -135,5 +141,13 @@ public class TestUtils {
                 }
             }
         });
+    }
+
+    public static void removeNotificationTypes() {
+        notificationDAO.removeAllNotificationTypes();
+    }
+
+    public static void removeSubscriptions() {
+        notificationDAO.removeAllSubscriptions();
     }
 }
