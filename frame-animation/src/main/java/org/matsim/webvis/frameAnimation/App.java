@@ -18,6 +18,7 @@ import org.matsim.webvis.frameAnimation.config.AppConfiguration;
 import org.matsim.webvis.frameAnimation.data.DataController;
 import org.matsim.webvis.frameAnimation.data.DataProvider;
 import org.matsim.webvis.frameAnimation.entities.AbstractEntityMixin;
+import org.matsim.webvis.frameAnimation.requestHandling.NotificationResource;
 import org.matsim.webvis.frameAnimation.requestHandling.VisualizationResource;
 
 import javax.servlet.DispatcherType;
@@ -25,6 +26,7 @@ import javax.servlet.FilterRegistration;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.core.Feature;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -98,5 +100,6 @@ public class App extends Application<AppConfiguration> {
     private void registerEndpoints(JerseyEnvironment jersey) {
 
         jersey.register(new VisualizationResource(DataProvider.Instance, DataController.Instance));
+        jersey.register(new NotificationResource(DataController.Instance, ServiceCommunication.getClient(), URI.create("http://some.uri")));
     }
 }
