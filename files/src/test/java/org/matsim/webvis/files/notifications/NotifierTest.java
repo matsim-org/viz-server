@@ -36,7 +36,7 @@ public class NotifierTest {
     @Before
     public void setUp() {
         this.testObject = new Notifier(jerseyClient, new NotificationDAO(TestUtils.getPersistenceUnit()));
-        TestUtils.getNotificationDAO().persistTypes(getSomeTypes());
+        TestUtils.getNotificationDAO().persistType(new NotificationType("first"));
     }
 
     @After

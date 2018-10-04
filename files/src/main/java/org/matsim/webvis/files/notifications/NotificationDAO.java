@@ -18,8 +18,8 @@ public class NotificationDAO extends DAO {
         return database.persist(subscription);
     }
 
-    List<NotificationType> persistTypes(List<NotificationType> types) {
-        return database.persistMany(types);
+    NotificationType persistType(NotificationType type) {
+        return database.persist(type);
     }
 
     public List<Subscription> findSubscriptionsForNotificationType(NotificationType notificationType) {
