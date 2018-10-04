@@ -23,6 +23,9 @@ import org.matsim.webvis.files.agent.UserDAO;
 import org.matsim.webvis.files.config.AppConfiguration;
 import org.matsim.webvis.files.entities.Agent;
 import org.matsim.webvis.files.entities.VisualizationType;
+import org.matsim.webvis.files.notifications.NotificationDAO;
+import org.matsim.webvis.files.notifications.NotificationResource;
+import org.matsim.webvis.files.notifications.Notifier;
 import org.matsim.webvis.files.permission.PermissionDAO;
 import org.matsim.webvis.files.permission.PermissionService;
 import org.matsim.webvis.files.permission.SubjectFactory;
@@ -67,7 +70,7 @@ public class App extends Application<AppConfiguration> {
 
         AppConfiguration.setInstance(configuration);
 
-        registerEndpoints(environment.jersey(), configuration);
+        registerEndpoints(environment, configuration);
         registerOAuth(configuration, environment);
         registerExceptionMappers(environment.jersey());
         registerCORSFilter(environment.servlets());
@@ -95,6 +98,7 @@ public class App extends Application<AppConfiguration> {
         jersey.register(new CodedExceptionMapper());
     }
 
+    @SuppressWarnings("Duplicates")
     private void registerCORSFilter(ServletEnvironment servlet) {
 
         final FilterRegistration.Dynamic cors = servlet.addFilter("CORS", CrossOriginFilter.class);
@@ -107,10 +111,11 @@ public class App extends Application<AppConfiguration> {
         cors.setInitParameter(CrossOriginFilter.CHAIN_PREFLIGHT_PARAM, Boolean.FALSE.toString());
     }
 
-    private void registerEndpoints(JerseyEnvironment jersey, AppConfiguration configuration) {
+    private void registerEndpoints(Environment environment, AppConfiguration configuration) {
 
         PersistenceUnit persistenceUnit = new PersistenceUnit("org.matsim.viz.files",
                 configuration.getDatabaseFactory().createConfiguration());
+        Notifier notifier = new Notifier(new JerseyClientBuilder(environment).build("notification-client"), new NotificationDAO(persistenceUnit));
         ProjectDAO projectDAO = new ProjectDAO(persistenceUnit);
         VisualizationDAO visualizationDAO = new VisualizationDAO(persistenceUnit);
         UserDAO userDAO = new UserDAO(persistenceUnit);
@@ -119,11 +124,12 @@ public class App extends Application<AppConfiguration> {
         agentService = new AgentService(userDAO);
         PermissionService permissionService = new PermissionService(agentService, permissionDAO);
         ProjectService projectService = new ProjectService(projectDAO, permissionService,
-                configuration.getRepositoryFactory().createRepository(persistenceUnit));
-        VisualizationService visualizationService = new VisualizationService(visualizationDAO, projectService, permissionService);
+                configuration.getRepositoryFactory().createRepository(persistenceUnit), notifier);
+        VisualizationService visualizationService = new VisualizationService(visualizationDAO, projectService, permissionService, notifier);
 
-        jersey.register(new ProjectResource(projectService, visualizationService));
-        jersey.register(new VisualizationResource(visualizationService));
+        environment.jersey().register(new ProjectResource(projectService, visualizationService));
+        environment.jersey().register(new VisualizationResource(visualizationService));
+        environment.jersey().register(new NotificationResource(notifier));
 
         this.loadVizTypes(visualizationService, configuration);
     }

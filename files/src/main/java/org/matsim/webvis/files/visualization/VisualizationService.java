@@ -1,9 +1,14 @@
 package org.matsim.webvis.files.visualization;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.matsim.webvis.error.CodedException;
 import org.matsim.webvis.error.Error;
 import org.matsim.webvis.error.InvalidInputException;
 import org.matsim.webvis.files.entities.*;
+import org.matsim.webvis.files.notifications.Notification;
+import org.matsim.webvis.files.notifications.NotificationType;
+import org.matsim.webvis.files.notifications.Notifier;
 import org.matsim.webvis.files.permission.PermissionService;
 import org.matsim.webvis.files.project.ProjectService;
 import org.slf4j.Logger;
@@ -22,11 +27,15 @@ public class VisualizationService {
     private final ProjectService projectService;
     private final VisualizationDAO visualizationDAO;
     private final PermissionService permissionService;
+    private final Notifier notifier;
 
-    public VisualizationService(VisualizationDAO visualizationDAO, ProjectService projectService, PermissionService permissionService) {
+    public VisualizationService(VisualizationDAO visualizationDAO, ProjectService projectService, PermissionService permissionService,
+                                Notifier notifier) {
         this.visualizationDAO = visualizationDAO;
         this.projectService = projectService;
         this.permissionService = permissionService;
+        this.notifier = notifier;
+        this.createNotificationTypes();
     }
     public VisualizationType persistType(VisualizationType type) {
         return visualizationDAO.persistType(type);
@@ -62,9 +71,11 @@ public class VisualizationService {
         addParameters(viz, request);
 
         try {
-            return visualizationDAO.persist(viz);
+            viz = visualizationDAO.persist(viz);
+            notifier.dispatchAsync(new VisualizationCreatedNotification(viz.getId()));
+            return viz;
         } catch (PersistenceException e) {
-            logger.error("Could not perist", e);
+            logger.error("Could not persist", e);
             throw new CodedException(409, Error.RESOURCE_EXISTS, "Visualization already exists");
         }
     }
@@ -105,5 +116,46 @@ public class VisualizationService {
 
     List<Visualization> findByType(String vizType, Instant after, Agent agent) {
         return visualizationDAO.findAllByTypeIfHasPermission(vizType, after, agent);
+    }
+
+    private void createNotificationTypes() {
+        List<NotificationType> types = new ArrayList<>();
+        types.add(VisualizationCreatedNotification.getNotificationType());
+        types.add(VisualizationDeletedNotification.getNotificationType());
+        this.notifier.createNotificationTypes(types);
+    }
+
+    @Getter
+    @AllArgsConstructor
+    private static class VisualizationCreatedNotification implements Notification {
+
+        private static final String type = "visualization_created";
+        private String message;
+
+        static NotificationType getNotificationType() {
+            return new NotificationType(type);
+        }
+
+        @Override
+        public String getType() {
+            return type;
+        }
+    }
+
+    @Getter
+    @AllArgsConstructor
+    private static class VisualizationDeletedNotification implements Notification {
+
+        private static final String type = "visualization_deleted";
+        private String message;
+
+        static NotificationType getNotificationType() {
+            return new NotificationType(type);
+        }
+
+        @Override
+        public String getType() {
+            return type;
+        }
     }
 }
