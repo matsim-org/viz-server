@@ -12,15 +12,18 @@ import io.dropwizard.jetty.setup.ServletEnvironment;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
+import org.flywaydb.core.Flyway;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.matsim.webis.oauth.Credentials;
 import org.matsim.webis.oauth.OAuthAuthenticator;
 import org.matsim.webvis.database.AbstractEntity;
+import org.matsim.webvis.database.DbConfiguration;
 import org.matsim.webvis.database.PersistenceUnit;
 import org.matsim.webvis.error.CodedExceptionMapper;
 import org.matsim.webvis.files.agent.AgentService;
 import org.matsim.webvis.files.agent.UserDAO;
 import org.matsim.webvis.files.config.AppConfiguration;
+import org.matsim.webvis.files.config.H2DbConfigurationFactory;
 import org.matsim.webvis.files.entities.Agent;
 import org.matsim.webvis.files.entities.VisualizationType;
 import org.matsim.webvis.files.notifications.NotificationDAO;
@@ -70,10 +73,27 @@ public class App extends Application<AppConfiguration> {
 
         AppConfiguration.setInstance(configuration);
 
-        registerEndpoints(environment, configuration);
+        PersistenceUnit persistenceUnit = establishDatabaseConnection(configuration);
+        registerEndpoints(environment, configuration, persistenceUnit);
         registerOAuth(configuration, environment);
         registerExceptionMappers(environment.jersey());
         registerCORSFilter(environment.servlets());
+    }
+
+    private PersistenceUnit establishDatabaseConnection(AppConfiguration configuration) {
+
+        DbConfiguration dbConfiguration = configuration.getDatabaseFactory().createConfiguration();
+
+        if (!(configuration.getDatabaseFactory() instanceof H2DbConfigurationFactory)) {
+            // execute schema migration with flyway before connecting to the database
+            // if H2 in memory database is used, this is not necessary
+            Flyway flyway = new Flyway();
+            flyway.setDataSource(dbConfiguration.getJdbcUrl(), dbConfiguration.getUser(), dbConfiguration.getPassword());
+            flyway.migrate();
+        }
+
+        // create the actual connection to the database
+        return new PersistenceUnit("org.matsim.viz.files", dbConfiguration);
     }
 
     private void registerOAuth(AppConfiguration config, Environment environment) {
