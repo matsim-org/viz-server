@@ -4,7 +4,7 @@ import org.matsim.webvis.database.PersistenceUnit;
 import org.matsim.webvis.files.entities.DAO;
 
 import java.net.URI;
-import java.util.ArrayList;
+import java.time.Instant;
 import java.util.List;
 
 public class NotificationDAO extends DAO {
@@ -22,10 +22,6 @@ public class NotificationDAO extends DAO {
         return database.persist(type);
     }
 
-    public List<Subscription> findSubscriptionsForNotificationType(NotificationType notificationType) {
-        return new ArrayList<>();
-    }
-
     Subscription findSubscription(NotificationType type, URI callback) {
         return database.executeQuery(query -> query.selectFrom(QSubscription.subscription)
                 .where(QSubscription.subscription.type.eq(type)
@@ -36,7 +32,9 @@ public class NotificationDAO extends DAO {
 
     List<Subscription> findAllSubscriptionsForType(NotificationType type) {
         return database.executeQuery(query -> query.selectFrom(QSubscription.subscription)
-                .where(QSubscription.subscription.type.eq(type)).fetch()
+                .where(QSubscription.subscription.type.eq(type)
+                        .and(QSubscription.subscription.expiresAt.after(Instant.now()))
+                ).fetch()
         );
     }
 
@@ -55,5 +53,12 @@ public class NotificationDAO extends DAO {
         QSubscription subscriptions = QSubscription.subscription;
 
         database.executeTransactionalQuery(query -> query.delete(subscriptions).execute());
+    }
+
+    void removeExpiredSubscriptions() {
+        QSubscription subscriptions = QSubscription.subscription;
+        database.executeTransactionalQuery(query -> query.delete(subscriptions)
+                .where(subscriptions.expiresAt.before(Instant.now()))
+                .execute());
     }
 }

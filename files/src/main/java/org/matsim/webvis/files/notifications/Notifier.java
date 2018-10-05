@@ -14,12 +14,15 @@ import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class Notifier {
 
     private static Logger logger = LoggerFactory.getLogger(Notifier.class);
-    private static ExecutorService scheduler = Executors.newSingleThreadExecutor();
+    private static ExecutorService executor = Executors.newSingleThreadExecutor();
+    private static ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
     private final Client client;
     private final NotificationDAO dao;
@@ -27,6 +30,7 @@ public class Notifier {
     public Notifier(Client client, NotificationDAO dao) {
         this.client = client;
         this.dao = dao;
+        scheduler.scheduleAtFixedRate(this::removeExpiredSubscriptions, 1, 1, TimeUnit.DAYS);
     }
 
     public List<NotificationType> createNotificationTypes(List<NotificationType> possibleTypes) {
@@ -64,7 +68,7 @@ public class Notifier {
 
     public void dispatchAsync(Notification notification) {
 
-        scheduler.execute(() -> this.dispatch(notification));
+        executor.execute(() -> this.dispatch(notification));
     }
 
     void dispatch(Notification notification) {
@@ -78,5 +82,13 @@ public class Notifier {
                 logger.info("Failed to dispatch notification to " + sub.getCallback().toString() + " with message: " + e.getMessage());
             }
         });
+    }
+
+    void removeExpiredSubscriptions() {
+        try {
+            dao.removeExpiredSubscriptions();
+        } catch (Exception e) {
+            logger.error("Failed to delete expired subscriptions. " + e);
+        }
     }
 }

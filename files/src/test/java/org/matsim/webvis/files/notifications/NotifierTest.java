@@ -12,6 +12,7 @@ import org.matsim.webvis.files.util.TestUtils;
 
 import javax.ws.rs.client.Client;
 import java.net.URI;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -111,10 +112,13 @@ public class NotifierTest {
         final String type = "first";
         final URI callback = URI.create("http://localhost:" + wireMockRule.port() + "/callback");
         final URI otherCallback = URI.create("http://localhost:" + wireMockRule.port() + "/other-callback");
+        final URI expiredCallback = URI.create("http://localhost:" + wireMockRule.port() + "/expired-callback");
 
         wireMockRule.stubFor(post(WireMock.anyUrl()));
         testObject.createSubscription(type, callback);
-        testObject.createSubscription(type, otherCallback);
+        Subscription subscription = testObject.createSubscription(type, otherCallback);
+        // put one expired subscription into the database
+        TestUtils.getNotificationDAO().peristSubscription(new Subscription(subscription.getType(), expiredCallback, Instant.now().minus(Duration.ofMinutes(1))));
 
         testObject.dispatch(new Notification() {
             @Override
@@ -130,6 +134,32 @@ public class NotifierTest {
 
         wireMockRule.verify(postRequestedFor(urlEqualTo(callback.getPath())));
         wireMockRule.verify(postRequestedFor(urlEqualTo(otherCallback.getPath())));
+
+        // verify that the expired subscription was not called
+        wireMockRule.verify(0, postRequestedFor(urlEqualTo(expiredCallback.getPath())));
+    }
+
+    @Test
+    public void removeExpiredSubscriptions() {
+
+        List<NotificationType> types = new ArrayList<>();
+        types.add(new NotificationType("some-type"));
+        types = testObject.createNotificationTypes(types);
+        final NotificationType type = types.get(0);
+        final URI expiredCallback = URI.create("http://some.uri");
+        final URI notExpiredCallback = URI.create("http://some-other.uri");
+
+        Subscription expired = new Subscription(type, expiredCallback, Instant.now().minus(Duration.ofMinutes(1)));
+        Subscription notExpired = new Subscription(type, notExpiredCallback, Instant.now().plus(Duration.ofMinutes(1)));
+        TestUtils.getNotificationDAO().peristSubscription(expired);
+        TestUtils.getNotificationDAO().peristSubscription(notExpired);
+
+        testObject.removeExpiredSubscriptions();
+
+        List<Subscription> unexpired = TestUtils.getNotificationDAO().findAllSubscriptionsForType(type);
+
+        assertEquals(1, unexpired.size());
+        assertEquals(notExpired, unexpired.get(0));
     }
 
 }
