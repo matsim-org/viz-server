@@ -131,10 +131,8 @@ public class App extends Application<AppConfiguration> {
         cors.setInitParameter(CrossOriginFilter.CHAIN_PREFLIGHT_PARAM, Boolean.FALSE.toString());
     }
 
-    private void registerEndpoints(Environment environment, AppConfiguration configuration) {
+    private void registerEndpoints(Environment environment, AppConfiguration configuration, PersistenceUnit persistenceUnit) {
 
-        PersistenceUnit persistenceUnit = new PersistenceUnit("org.matsim.viz.files",
-                configuration.getDatabaseFactory().createConfiguration());
         Notifier notifier = new Notifier(new JerseyClientBuilder(environment).using(configuration.getJerseyClient()).build("notification-client"), new NotificationDAO(persistenceUnit));
         ProjectDAO projectDAO = new ProjectDAO(persistenceUnit);
         VisualizationDAO visualizationDAO = new VisualizationDAO(persistenceUnit);
