@@ -115,7 +115,7 @@ public class App extends Application<AppConfiguration> {
 
         PersistenceUnit persistenceUnit = new PersistenceUnit("org.matsim.viz.files",
                 configuration.getDatabaseFactory().createConfiguration());
-        Notifier notifier = new Notifier(new JerseyClientBuilder(environment).build("notification-client"), new NotificationDAO(persistenceUnit));
+        Notifier notifier = new Notifier(new JerseyClientBuilder(environment).using(configuration.getJerseyClient()).build("notification-client"), new NotificationDAO(persistenceUnit));
         ProjectDAO projectDAO = new ProjectDAO(persistenceUnit);
         VisualizationDAO visualizationDAO = new VisualizationDAO(persistenceUnit);
         UserDAO userDAO = new UserDAO(persistenceUnit);
