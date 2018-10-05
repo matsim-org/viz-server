@@ -78,4 +78,9 @@ public class VisualizationDAO extends DAO {
         QVisualizationType type = QVisualizationType.visualizationType;
         database.executeTransactionalQuery(query -> query.delete(type).where(type.typeName.eq(typeName)).execute());
     }
+
+    void removeVisualization(Visualization viz) {
+
+        database.remove(viz);
+    }
 }

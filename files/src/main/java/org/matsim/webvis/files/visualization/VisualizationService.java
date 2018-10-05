@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.matsim.webvis.error.CodedException;
 import org.matsim.webvis.error.Error;
+import org.matsim.webvis.error.InternalException;
 import org.matsim.webvis.error.InvalidInputException;
 import org.matsim.webvis.files.entities.*;
 import org.matsim.webvis.files.notifications.Notification;
@@ -77,6 +78,19 @@ public class VisualizationService {
         } catch (PersistenceException e) {
             logger.error("Could not persist", e);
             throw new CodedException(409, Error.RESOURCE_EXISTS, "Visualization already exists");
+        }
+    }
+
+    void removeVisualization(String vizId, Agent user) {
+
+        Permission permission = permissionService.findDeletePermission(user, vizId);
+
+        try {
+            Visualization viz = (Visualization) permission.getResource();
+            visualizationDAO.removeVisualization(viz);
+        } catch (Exception e) {
+            logger.error("Failed to delete visualization: ", e);
+            throw new InternalException("Failed to delete visualization");
         }
     }
 
