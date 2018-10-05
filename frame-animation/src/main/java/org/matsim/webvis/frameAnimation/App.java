@@ -2,6 +2,7 @@ package org.matsim.webvis.frameAnimation;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.dropwizard.Application;
 import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.jersey.setup.JerseyEnvironment;
@@ -13,12 +14,12 @@ import org.glassfish.jersey.client.oauth2.OAuth2ClientSupport;
 import org.matsim.webis.oauth.ClientAuthentication;
 import org.matsim.webis.oauth.Credentials;
 import org.matsim.webvis.database.AbstractEntity;
+import org.matsim.webvis.frameAnimation.communication.NotificationHandler;
 import org.matsim.webvis.frameAnimation.communication.ServiceCommunication;
 import org.matsim.webvis.frameAnimation.config.AppConfiguration;
 import org.matsim.webvis.frameAnimation.data.DataController;
 import org.matsim.webvis.frameAnimation.data.DataProvider;
 import org.matsim.webvis.frameAnimation.entities.AbstractEntityMixin;
-import org.matsim.webvis.frameAnimation.requestHandling.NotificationResource;
 import org.matsim.webvis.frameAnimation.requestHandling.VisualizationResource;
 
 import javax.servlet.DispatcherType;
@@ -26,7 +27,6 @@ import javax.servlet.FilterRegistration;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.core.Feature;
 import java.io.IOException;
-import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -47,7 +47,7 @@ public class App extends Application<AppConfiguration> {
         createUploadDirectory(configuration);
         registerOauth(configuration, environment);
         registerCORSFilter(environment.servlets());
-        registerEndpoints(environment.jersey());
+        registerEndpoints(environment.jersey(), configuration);
 
         DataController.Instance.scheduleFetching();
     }
@@ -65,6 +65,7 @@ public class App extends Application<AppConfiguration> {
         ObjectMapper mapper = new ObjectMapper();
         mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         mapper.addMixIn(AbstractEntity.class, AbstractEntityMixin.class);
+        mapper.registerModule(new JavaTimeModule());
 
         final Client client = new JerseyClientBuilder(environment)
                 .using(config.getJerseyClient())
@@ -97,9 +98,9 @@ public class App extends Application<AppConfiguration> {
         cors.setInitParameter(CrossOriginFilter.CHAIN_PREFLIGHT_PARAM, Boolean.FALSE.toString());
     }
 
-    private void registerEndpoints(JerseyEnvironment jersey) {
+    private void registerEndpoints(JerseyEnvironment jersey, AppConfiguration configuration) {
 
         jersey.register(new VisualizationResource(DataProvider.Instance, DataController.Instance));
-        jersey.register(new NotificationResource(DataController.Instance, ServiceCommunication.getClient(), URI.create("http://some.uri")));
+        jersey.register(new NotificationHandler(DataController.Instance, configuration.getOwnHostname()));
     }
 }
