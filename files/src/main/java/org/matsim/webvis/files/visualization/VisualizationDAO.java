@@ -80,7 +80,6 @@ public class VisualizationDAO extends DAO {
     }
 
     void removeVisualization(Visualization viz) {
-
         database.remove(viz);
     }
 }
