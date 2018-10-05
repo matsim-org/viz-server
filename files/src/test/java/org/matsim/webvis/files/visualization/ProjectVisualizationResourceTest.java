@@ -4,6 +4,8 @@ import org.junit.Test;
 import org.matsim.webvis.files.entities.User;
 import org.matsim.webvis.files.entities.Visualization;
 
+import javax.ws.rs.core.Response;
+
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -37,5 +39,16 @@ public class ProjectVisualizationResourceTest {
         Visualization result = testObject.getVisualization(new User(), "some-id");
 
         assertEquals(visualization, result);
+    }
+
+    @Test
+    public void removeVisualization() {
+
+        VisualizationService service = mock(VisualizationService.class);
+        ProjectVisualizationResource testObjet = new ProjectVisualizationResource(service);
+
+        Response response = testObjet.deleteVisualization(new User(), "some-id");
+
+        assertEquals(Response.Status.NO_CONTENT.getStatusCode(), response.getStatus());
     }
 }
