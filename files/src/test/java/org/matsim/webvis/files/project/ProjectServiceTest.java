@@ -14,6 +14,7 @@ import org.matsim.webvis.files.file.FileDownload;
 import org.matsim.webvis.files.file.FileUpload;
 import org.matsim.webvis.files.file.LocalRepository;
 import org.matsim.webvis.files.file.Repository;
+import org.matsim.webvis.files.notifications.Notifier;
 import org.matsim.webvis.files.util.TestUtils;
 
 import java.io.InputStream;
@@ -40,7 +41,8 @@ public class ProjectServiceTest {
         testObject = new ProjectService(
                 new ProjectDAO(TestUtils.getPersistenceUnit()),
                 TestUtils.getPermissionService(),
-                mock(Repository.class));
+                mock(Repository.class),
+                mock(Notifier.class));
     }
 
     @After
@@ -193,7 +195,7 @@ public class ProjectServiceTest {
             return result;
         }).when(repository).addFile(any(FileUpload.class));
         testObject = new ProjectService(new ProjectDAO(TestUtils.getPersistenceUnit()),
-                TestUtils.getPermissionService(), repository);
+                TestUtils.getPermissionService(), repository, mock(Notifier.class));
         Project project = TestUtils.persistProjectWithCreator("test");
         List<FileUpload> uploads = new ArrayList<>();
         uploads.add(new FileUpload("first.txt", "plain/text", mock(InputStream.class)));
@@ -231,7 +233,7 @@ public class ProjectServiceTest {
         when(mockedDao.findWithFullGraph(anyString())).thenReturn(project);
         when(mockedDao.persist(any(Project.class))).thenThrow(new RuntimeException("persisting error"));
 
-        testObject = new ProjectService(mockedDao, TestUtils.getPermissionService(), repository);
+        testObject = new ProjectService(mockedDao, TestUtils.getPermissionService(), repository, mock(Notifier.class));
         try {
             testObject.addFilesToProject(uploads, project.getId(), project.getCreator());
             fail("exception while persisting project should raise exception and delete written files");
@@ -263,7 +265,7 @@ public class ProjectServiceTest {
         when(repository.getFileStream(any())).thenReturn(stream);
 
         testObject =
-                new ProjectService(new ProjectDAO(TestUtils.getPersistenceUnit()), TestUtils.getPermissionService(), repository);
+                new ProjectService(new ProjectDAO(TestUtils.getPersistenceUnit()), TestUtils.getPermissionService(), repository, mock(Notifier.class));
 
         FileDownload result = testObject.getFileDownload(project.getId(), entry.getId(), project.getCreator());
 
@@ -296,7 +298,7 @@ public class ProjectServiceTest {
         testObject = new ProjectService(
                 new ProjectDAO(TestUtils.getPersistenceUnit()),
                 TestUtils.getPermissionService(),
-                repository
+                repository, mock(Notifier.class)
         );
 
         Project updated = testObject.removeFileFromProject(project.getId(), entry.getId(), project.getCreator());

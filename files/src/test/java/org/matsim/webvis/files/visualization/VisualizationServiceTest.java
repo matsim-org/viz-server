@@ -5,6 +5,7 @@ import org.matsim.webvis.error.CodedException;
 import org.matsim.webvis.error.Error;
 import org.matsim.webvis.error.ForbiddenException;
 import org.matsim.webvis.files.entities.*;
+import org.matsim.webvis.files.notifications.Notifier;
 import org.matsim.webvis.files.util.TestUtils;
 
 import java.time.Instant;
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 import static junit.framework.TestCase.*;
+import static org.mockito.Mockito.mock;
 
 @SuppressWarnings("ConstantConditions")
 public class VisualizationServiceTest {
@@ -37,7 +39,8 @@ public class VisualizationServiceTest {
         testObject = new VisualizationService(
                 visualizationDAO,
                 TestUtils.getProjectService(),
-                TestUtils.getPermissionService()
+                TestUtils.getPermissionService(),
+                mock(Notifier.class)
         );
     }
 

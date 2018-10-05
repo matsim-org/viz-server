@@ -5,10 +5,13 @@ import org.matsim.webvis.files.entities.*;
 import org.matsim.webvis.files.file.FileDownload;
 import org.matsim.webvis.files.file.FileUpload;
 import org.matsim.webvis.files.file.Repository;
+import org.matsim.webvis.files.notifications.NotificationType;
+import org.matsim.webvis.files.notifications.Notifier;
 import org.matsim.webvis.files.permission.PermissionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,11 +22,14 @@ public class ProjectService {
     private final ProjectDAO projectDAO;
     private final Repository repository;
     private final PermissionService permissionService;
+    private final Notifier notifier;
 
-    public ProjectService(ProjectDAO projectDAO, PermissionService permissionService, Repository repository) {
+    public ProjectService(ProjectDAO projectDAO, PermissionService permissionService, Repository repository, Notifier notifier) {
         this.projectDAO = projectDAO;
         this.permissionService = permissionService;
         this.repository = repository;
+        this.notifier = notifier;
+        this.createNotificationTypes();
     }
 
     public Project createNewProject(String projectName, User creator) {
@@ -105,5 +111,14 @@ public class ProjectService {
         } catch (Exception ignored) {
         }
         return result;
+    }
+
+    private void createNotificationTypes() {
+        List<NotificationType> types = new ArrayList<>();
+        types.add(new NotificationType("project_created"));
+        types.add(new NotificationType("project_deleted"));
+        types.add(new NotificationType("file_created"));
+        types.add(new NotificationType("file_deleted"));
+        this.notifier.createNotificationTypes(types);
     }
 }

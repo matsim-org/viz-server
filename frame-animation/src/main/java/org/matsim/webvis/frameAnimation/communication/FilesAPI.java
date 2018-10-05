@@ -1,18 +1,23 @@
 package org.matsim.webvis.frameAnimation.communication;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.glassfish.jersey.client.oauth2.OAuth2ClientSupport;
 import org.matsim.webvis.error.UnauthorizedException;
 import org.matsim.webvis.frameAnimation.config.AppConfiguration;
+import org.matsim.webvis.frameAnimation.entities.Subscription;
 import org.matsim.webvis.frameAnimation.entities.Visualization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.NotAuthorizedException;
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.core.UriBuilder;
 import java.io.InputStream;
 import java.net.URI;
 import java.time.Instant;
+import java.util.function.Function;
 
 public class FilesAPI {
 
@@ -28,7 +33,8 @@ public class FilesAPI {
                 .queryParam("after", after.toString())
                 .request();
 
-        return get(builder, Visualization[].class);
+        // return get(builder, Visualization[].class);
+        return authenticatedRequest(builder, request -> request.get(Visualization[].class));
     }
 
     public InputStream fetchFile(String projectId, String fileId) {
@@ -39,7 +45,20 @@ public class FilesAPI {
         Invocation.Builder builder = ServiceCommunication.getClient().target(endpoint)
                 .request();
 
-        return get(builder, InputStream.class);
+        //return get(builder, InputStream.class);
+        return authenticatedRequest(builder, request -> request.get(InputStream.class));
+    }
+
+    Subscription registerNotfication(String type, URI callback) {
+
+        URI endpoint = UriBuilder.fromUri(AppConfiguration.getInstance().getFileServer())
+                .path("notifications").path("subscribe").build();
+
+        Invocation.Builder builder = ServiceCommunication.getClient().target(endpoint)
+                .request();
+
+        Entity<SubscriptionRequest> entity = Entity.json(new SubscriptionRequest(type, callback));
+        return authenticatedRequest(builder, request -> request.post(entity, Subscription.class));
     }
 
     private <T> T get(Invocation.Builder requestBuilder, Class<T> responseType) {
@@ -53,5 +72,25 @@ public class FilesAPI {
             ServiceCommunication.getAuthentication().requestAccessToken();
             throw new UnauthorizedException("Could not authenticate at endpoint");
         }
+    }
+
+    private <T> T authenticatedRequest(Invocation.Builder requestBuilder, Function<Invocation.Builder, T> requestInvokation) {
+
+        try {
+            requestBuilder = requestBuilder.property(OAuth2ClientSupport.OAUTH2_PROPERTY_ACCESS_TOKEN, ServiceCommunication.getAuthentication().getAccessToken());
+            return requestInvokation.apply(requestBuilder);
+        } catch (NotAuthorizedException e) {
+            logger.error("Not authorized! Attempting to refresh access_token");
+            ServiceCommunication.getAuthentication().requestAccessToken();
+            throw new UnauthorizedException("Could not authenticate at endpoint");
+        }
+    }
+
+    @AllArgsConstructor
+    @Getter
+    private static class SubscriptionRequest {
+
+        private String type;
+        private URI callback;
     }
 }
