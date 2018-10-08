@@ -86,6 +86,7 @@ public class App extends Application<AppConfiguration> {
         client.register(oauthFeature);
     }
 
+    @SuppressWarnings("Duplicates")
     private void registerCORSFilter(ServletEnvironment servlet) {
 
         final FilterRegistration.Dynamic cors = servlet.addFilter("CORS", CrossOriginFilter.class);
@@ -101,6 +102,6 @@ public class App extends Application<AppConfiguration> {
     private void registerEndpoints(JerseyEnvironment jersey, AppConfiguration configuration) {
 
         jersey.register(new VisualizationResource(DataProvider.Instance, DataController.Instance));
-        jersey.register(new NotificationHandler(DataController.Instance, configuration.getOwnHostname()));
+        jersey.register(new NotificationHandler(DataController.Instance, DataProvider.Instance, configuration.getOwnHostname()));
     }
 }
