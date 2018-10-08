@@ -115,13 +115,17 @@ public class ProjectServiceTest {
         Visualization viz = new Visualization();
         viz.setType(type);
         project.addVisualization(viz);
-        TestUtils.getProjectDAO().persist(project);
+        project = TestUtils.getProjectDAO().persist(project);
 
         testObject.removeProject(project.getId(), project.getCreator());
 
         Project shouldNotBeFound = TestUtils.getProjectDAO().find(project.getId());
 
         assertNull(shouldNotBeFound);
+        Visualization shouldAlsoNotBeFound = TestUtils.getVisualizationDAO().find(project.getVisualizations().iterator().next().getId());
+        assertNull(shouldAlsoNotBeFound);
+        FileEntry fileShouldAlsoBeDeleted = TestUtils.getProjectDAO().findFileEntry(project.getId(), project.getFiles().iterator().next().getId());
+        assertNull(fileShouldAlsoBeDeleted);
     }
 
     @Test(expected = ForbiddenException.class)
