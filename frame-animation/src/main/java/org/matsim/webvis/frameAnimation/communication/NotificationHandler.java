@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.matsim.webvis.error.InternalException;
 import org.matsim.webvis.frameAnimation.data.DataController;
+import org.matsim.webvis.frameAnimation.data.DataProvider;
 import org.matsim.webvis.frameAnimation.entities.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,10 +27,12 @@ public class NotificationHandler {
     private static final Logger logger = LoggerFactory.getLogger(NotificationHandler.class);
 
     private final DataController dataController;
+    private final DataProvider dataProvider;
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
-    public NotificationHandler(DataController dataController, URI selfHostname) {
+    public NotificationHandler(DataController dataController, DataProvider dataProvider, URI selfHostname) {
         this.dataController = dataController;
+        this.dataProvider = dataProvider;
         this.registerCallback(selfHostname);
     }
 
@@ -39,6 +42,9 @@ public class NotificationHandler {
         switch (notification.getType()) {
             case "visualization_created":
                 this.dataController.fetchVisualizations();
+                break;
+            case "visualization_deleted":
+                this.dataProvider.remove(notification.getMessage());
                 break;
             default:
                 throw new InternalException("Unknown notification type: " + notification.getType());
@@ -70,7 +76,7 @@ public class NotificationHandler {
     @Getter
     @AllArgsConstructor
     @NoArgsConstructor
-    private static class Notification {
+    static class Notification {
 
         @NotNull
         private String type;
