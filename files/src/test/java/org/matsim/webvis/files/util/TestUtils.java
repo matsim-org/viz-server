@@ -13,6 +13,7 @@ import org.matsim.webvis.files.permission.PermissionDAO;
 import org.matsim.webvis.files.permission.PermissionService;
 import org.matsim.webvis.files.project.ProjectDAO;
 import org.matsim.webvis.files.project.ProjectService;
+import org.matsim.webvis.files.visualization.VisualizationDAO;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -30,6 +31,7 @@ public class TestUtils {
     private static final PersistenceUnit persistenceUnit = new PersistenceUnit("org.matsim.viz.files");
     private static final UserDAO userDAO = new UserDAO(persistenceUnit);
     private static final ProjectDAO projectDAO = new ProjectDAO(persistenceUnit);
+    private static final VisualizationDAO visualizationDao = new VisualizationDAO(persistenceUnit);
     private static final NotificationDAO notificationDAO = new NotificationDAO(persistenceUnit);
     private static final AgentService agentService = new AgentService(userDAO);
     private static final PermissionService permissionService = new PermissionService(agentService, new PermissionDAO(persistenceUnit));
@@ -57,6 +59,10 @@ public class TestUtils {
 
     public static NotificationDAO getNotificationDAO() {
         return notificationDAO;
+    }
+
+    public static VisualizationDAO getVisualizationDAO() {
+        return visualizationDao;
     }
 
     public static Project persistProjectWithCreator(String projectName, String creatorsAuthId) {

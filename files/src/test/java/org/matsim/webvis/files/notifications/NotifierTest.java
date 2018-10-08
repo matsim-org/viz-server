@@ -60,12 +60,13 @@ public class NotifierTest {
     }
 
     @Test
-    public void createSubscription_alreadySubscribed_newExpiryDate() {
+    public void createSubscription_alreadySubscribed_newExpiryDate() throws InterruptedException {
 
         final String type = "first";
         final URI callback = URI.create("http://some.uri");
 
         Subscription firstAttempt = testObject.createSubscription(type, callback);
+        Thread.sleep(100);
         Subscription secondAttempt = testObject.createSubscription(type, callback);
 
         assertTrue(secondAttempt.getExpiresAt().isAfter(firstAttempt.getExpiresAt()));

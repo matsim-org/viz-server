@@ -10,6 +10,7 @@ import org.matsim.webvis.files.file.FileResource;
 import org.matsim.webvis.files.visualization.ProjectVisualizationResource;
 import org.matsim.webvis.files.visualization.VisualizationService;
 
+import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,6 +52,15 @@ public class ProjectResourceTest {
         Project result = testObject.createProject(new User(), request);
 
         assertEquals(project, result);
+    }
+
+    @Test
+    public void removeProject_serviceInvoked_status204() {
+
+        testObject = new ProjectResource(mock(ProjectService.class), mock(VisualizationService.class));
+        Response response = testObject.removeProject(new User(), "some-id");
+
+        assertEquals(Response.Status.NO_CONTENT.getStatusCode(), response.getStatus());
     }
 
     @Test
