@@ -165,6 +165,9 @@ public class VisualizationServiceTest {
 
         Visualization shouldBeDeleted = visualizationDAO.find(viz.getId());
         assertNull(shouldBeDeleted);
+
+        Project withoutViz = TestUtils.getProjectService().find(project.getId(), project.getCreator());
+        assertEquals(0, withoutViz.getVisualizations().size());
     }
 
     @Test
@@ -250,7 +253,7 @@ public class VisualizationServiceTest {
     }
 
     @Test
-    public void findByType_afterInstant_listOfVisualizations() {
+    public void findByType_afterInstant_listOfVisualizations() throws InterruptedException {
 
         Project project = TestUtils.persistProjectWithCreator("first project");
 
@@ -258,6 +261,7 @@ public class VisualizationServiceTest {
         Visualization viz = testObject.createVisualizationFromRequest(create, project.getCreator());
 
         Instant afterFirst = Instant.now();
+        Thread.sleep(100);
 
         CreateVisualizationRequest secondCreate = new CreateVisualizationRequest(project.getId(), typeKey, new HashMap<>(), new HashMap<>());
         Visualization secondViz = testObject.createVisualizationFromRequest(secondCreate, project.getCreator());

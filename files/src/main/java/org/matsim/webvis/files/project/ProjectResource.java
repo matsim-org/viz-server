@@ -17,6 +17,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.util.List;
 
 @AllArgsConstructor
@@ -36,6 +37,14 @@ public class ProjectResource {
             throw new UnauthorizedException("Only real people can create Projects");
 
         return projectService.createNewProject(request.getName(), (User) subject);
+    }
+
+    @DELETE
+    @Path("/{id}")
+    public Response removeProject(@Auth Agent subject, @NotNull @PathParam("id") String id) {
+
+        projectService.removeProject(id, subject);
+        return Response.status(Response.Status.NO_CONTENT).build();
     }
 
     @GET

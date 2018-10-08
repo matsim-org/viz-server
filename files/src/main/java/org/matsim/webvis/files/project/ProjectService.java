@@ -5,9 +5,11 @@ import org.matsim.webvis.files.entities.*;
 import org.matsim.webvis.files.file.FileDownload;
 import org.matsim.webvis.files.file.FileUpload;
 import org.matsim.webvis.files.file.Repository;
+import org.matsim.webvis.files.notifications.AbstractNotification;
 import org.matsim.webvis.files.notifications.NotificationType;
 import org.matsim.webvis.files.notifications.Notifier;
 import org.matsim.webvis.files.permission.PermissionService;
+import org.matsim.webvis.files.visualization.VisualizationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,10 +43,31 @@ public class ProjectService {
         project.addPermission(permission);
         project.addPermission(permissionService.createServicePermission(project));
         try {
-            return projectDAO.persist(project);
+            project = projectDAO.persist(project);
+            logger.info("persisted new project with id: " + project.getId());
+            notifier.dispatchAsync(new ProjectCreatedNotification(project));
+            return project;
         } catch (Exception e) {
             throw new InternalException("project already exists");
         }
+    }
+
+    void removeProject(String projectId, Agent agent) {
+
+        permissionService.findDeletePermission(agent, projectId);
+        Project project = projectDAO.find(projectId);
+
+        logger.info("Attempting to delete project with id " + project.getId());
+        projectDAO.removeProject(project);
+        repository.removeFiles(project.getFiles());
+
+        logger.info("Project removed. Sending notifications for deleted vizes, files and project");
+        project.getVisualizations().forEach(viz ->
+                notifier.dispatchAsync(new VisualizationService.VisualizationDeletedNotification(viz.getId())));
+        project.getFiles().forEach(file ->
+                notifier.dispatchAsync(new FileDeletedNotification(file)));
+        notifier.dispatchAsync(new ProjectDeletedNotification(project));
+
     }
 
     Project findFlat(String projectId, User creator) {
@@ -78,7 +101,9 @@ public class ProjectService {
         project.addFileEntries(entries);
 
         try {
-            return projectDAO.persist(project);
+            project = projectDAO.persist(project);
+            project.getFiles().forEach(file -> notifier.dispatchAsync(new FileCreatedNotification(file)));
+            return project;
         } catch (Exception e) {
             repository.removeFiles(entries);
             throw new InternalException("Error while persisting project");
@@ -103,22 +128,66 @@ public class ProjectService {
             throw new InternalException("fileId not present");
         }
 
-
         project.removeFileEntry(optional.get());
         Project result = projectDAO.persist(project); // remove entry from the database first to ensure consistent database
         try {
             repository.removeFile(optional.get());
         } catch (Exception ignored) {
         }
+        notifier.dispatchAsync(new FileDeletedNotification(optional.get()));
         return result;
     }
 
     private void createNotificationTypes() {
         List<NotificationType> types = new ArrayList<>();
-        types.add(new NotificationType("project_created"));
-        types.add(new NotificationType("project_deleted"));
-        types.add(new NotificationType("file_created"));
-        types.add(new NotificationType("file_deleted"));
+        types.add(ProjectCreatedNotification.getNotificationType());
+        types.add(ProjectDeletedNotification.getNotificationType());
+        types.add(FileCreatedNotification.getNotificationType());
+        types.add(FileDeletedNotification.getNotificationType());
         this.notifier.createNotificationTypes(types);
+    }
+
+    private static class ProjectCreatedNotification extends AbstractNotification {
+
+        ProjectCreatedNotification(Project project) {
+            super(getNotificationType().getName(), project.getId());
+        }
+
+        static NotificationType getNotificationType() {
+            return new NotificationType("project_created");
+        }
+    }
+
+    private static class ProjectDeletedNotification extends AbstractNotification {
+
+        ProjectDeletedNotification(Project project) {
+            super(getNotificationType().getName(), project.getId());
+        }
+
+        static NotificationType getNotificationType() {
+            return new NotificationType("project_deleted");
+        }
+    }
+
+    private static class FileCreatedNotification extends AbstractNotification {
+
+        FileCreatedNotification(FileEntry file) {
+            super(getNotificationType().getName(), file.getId());
+        }
+
+        static NotificationType getNotificationType() {
+            return new NotificationType("file_created");
+        }
+    }
+
+    private static class FileDeletedNotification extends AbstractNotification {
+
+        FileDeletedNotification(FileEntry file) {
+            super(getNotificationType().getName(), file.getId());
+        }
+
+        static NotificationType getNotificationType() {
+            return new NotificationType("file_deleted");
+        }
     }
 }

@@ -88,6 +88,7 @@ public class VisualizationService {
         try {
             Visualization viz = (Visualization) permission.getResource();
             visualizationDAO.removeVisualization(viz);
+            notifier.dispatchAsync(new VisualizationDeletedNotification(viz.getId()));
         } catch (Exception e) {
             logger.error("Failed to delete visualization: ", e);
             throw new InternalException("Failed to delete visualization");
@@ -158,7 +159,7 @@ public class VisualizationService {
 
     @Getter
     @AllArgsConstructor
-    private static class VisualizationDeletedNotification implements Notification {
+    public static class VisualizationDeletedNotification implements Notification {
 
         private static final String type = "visualization_deleted";
         private String message;

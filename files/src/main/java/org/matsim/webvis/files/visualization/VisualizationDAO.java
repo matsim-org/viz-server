@@ -16,7 +16,7 @@ public class VisualizationDAO extends DAO {
         return database.persist(viz);
     }
 
-    VisualizationType persistType(VisualizationType type) {
+    public VisualizationType persistType(VisualizationType type) {
         return database.persist(type);
     }
 
