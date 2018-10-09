@@ -7,10 +7,13 @@ import org.matsim.webvis.files.config.AppConfiguration;
 import org.matsim.webvis.files.entities.FileEntry;
 import org.matsim.webvis.files.entities.Project;
 import org.matsim.webvis.files.entities.User;
+import org.matsim.webvis.files.notifications.NotificationDAO;
+import org.matsim.webvis.files.notifications.Notifier;
 import org.matsim.webvis.files.permission.PermissionDAO;
 import org.matsim.webvis.files.permission.PermissionService;
 import org.matsim.webvis.files.project.ProjectDAO;
 import org.matsim.webvis.files.project.ProjectService;
+import org.matsim.webvis.files.visualization.VisualizationDAO;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -21,15 +24,18 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
 
 public class TestUtils {
 
     private static final PersistenceUnit persistenceUnit = new PersistenceUnit("org.matsim.viz.files");
     private static final UserDAO userDAO = new UserDAO(persistenceUnit);
     private static final ProjectDAO projectDAO = new ProjectDAO(persistenceUnit);
+    private static final VisualizationDAO visualizationDao = new VisualizationDAO(persistenceUnit);
+    private static final NotificationDAO notificationDAO = new NotificationDAO(persistenceUnit);
     private static final AgentService agentService = new AgentService(userDAO);
     private static final PermissionService permissionService = new PermissionService(agentService, new PermissionDAO(persistenceUnit));
-    private static final ProjectService projectService = new ProjectService(projectDAO, permissionService, null);
+    private static final ProjectService projectService = new ProjectService(projectDAO, permissionService, null, mock(Notifier.class));
 
     public static PersistenceUnit getPersistenceUnit() {
         return persistenceUnit;
@@ -49,6 +55,14 @@ public class TestUtils {
 
     public static ProjectDAO getProjectDAO() {
         return projectDAO;
+    }
+
+    public static NotificationDAO getNotificationDAO() {
+        return notificationDAO;
+    }
+
+    public static VisualizationDAO getVisualizationDAO() {
+        return visualizationDao;
     }
 
     public static Project persistProjectWithCreator(String projectName, String creatorsAuthId) {
@@ -135,5 +149,13 @@ public class TestUtils {
                 }
             }
         });
+    }
+
+    public static void removeNotificationTypes() {
+        notificationDAO.removeAllNotificationTypes();
+    }
+
+    public static void removeSubscriptions() {
+        notificationDAO.removeAllSubscriptions();
     }
 }

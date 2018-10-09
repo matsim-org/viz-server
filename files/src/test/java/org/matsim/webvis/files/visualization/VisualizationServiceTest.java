@@ -5,6 +5,7 @@ import org.matsim.webvis.error.CodedException;
 import org.matsim.webvis.error.Error;
 import org.matsim.webvis.error.ForbiddenException;
 import org.matsim.webvis.files.entities.*;
+import org.matsim.webvis.files.notifications.Notifier;
 import org.matsim.webvis.files.util.TestUtils;
 
 import java.time.Instant;
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 import static junit.framework.TestCase.*;
+import static org.mockito.Mockito.mock;
 
 @SuppressWarnings("ConstantConditions")
 public class VisualizationServiceTest {
@@ -37,7 +39,8 @@ public class VisualizationServiceTest {
         testObject = new VisualizationService(
                 visualizationDAO,
                 TestUtils.getProjectService(),
-                TestUtils.getPermissionService()
+                TestUtils.getPermissionService(),
+                mock(Notifier.class)
         );
     }
 
@@ -142,6 +145,31 @@ public class VisualizationServiceTest {
         }
     }
 
+    @Test(expected = ForbiddenException.class)
+    public void removeVisualization_noPermission_exception() {
+
+        testObject.removeVisualization("anyId", TestUtils.getAgentService().getPublicAgent());
+    }
+
+    @Test
+    public void removeVisualization_success_ok() {
+        Project project = TestUtils.persistProjectWithCreator("bla");
+
+        Visualization viz = new Visualization();
+        viz.setType(visualizationDAO.findType(typeKey));
+        project.addVisualization(viz);
+        project = TestUtils.getProjectDAO().persist(project);
+        viz = project.getVisualizations().iterator().next();
+
+        testObject.removeVisualization(viz.getId(), project.getCreator());
+
+        Visualization shouldBeDeleted = visualizationDAO.find(viz.getId());
+        assertNull(shouldBeDeleted);
+
+        Project withoutViz = TestUtils.getProjectService().find(project.getId(), project.getCreator());
+        assertEquals(0, withoutViz.getVisualizations().size());
+    }
+
     @Test
     public void find_allGood_visualization() throws CodedException {
 
@@ -225,7 +253,7 @@ public class VisualizationServiceTest {
     }
 
     @Test
-    public void findByType_afterInstant_listOfVisualizations() {
+    public void findByType_afterInstant_listOfVisualizations() throws InterruptedException {
 
         Project project = TestUtils.persistProjectWithCreator("first project");
 
@@ -233,6 +261,7 @@ public class VisualizationServiceTest {
         Visualization viz = testObject.createVisualizationFromRequest(create, project.getCreator());
 
         Instant afterFirst = Instant.now();
+        Thread.sleep(100);
 
         CreateVisualizationRequest secondCreate = new CreateVisualizationRequest(project.getId(), typeKey, new HashMap<>(), new HashMap<>());
         Visualization secondViz = testObject.createVisualizationFromRequest(secondCreate, project.getCreator());

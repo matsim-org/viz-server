@@ -77,6 +77,17 @@ public class ProjectDAO extends DAO {
         );
     }
 
+    void removeProject(Project project) {
+
+        EntityManager em = database.createEntityManager();
+        em.getTransaction().begin();
+        project = em.merge(project);
+        project.getCreator().getProjects().remove(project);
+        project.setCreator(null);
+        em.getTransaction().commit();
+        em.close();
+    }
+
     public void removeAllProjects() {
 
         EntityManager em = database.createEntityManager();

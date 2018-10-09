@@ -6,14 +6,12 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.matsim.webvis.error.CodedException;
 import org.matsim.webvis.error.ForbiddenException;
-import org.matsim.webvis.files.entities.FileEntry;
-import org.matsim.webvis.files.entities.Permission;
-import org.matsim.webvis.files.entities.Project;
-import org.matsim.webvis.files.entities.User;
+import org.matsim.webvis.files.entities.*;
 import org.matsim.webvis.files.file.FileDownload;
 import org.matsim.webvis.files.file.FileUpload;
 import org.matsim.webvis.files.file.LocalRepository;
 import org.matsim.webvis.files.file.Repository;
+import org.matsim.webvis.files.notifications.Notifier;
 import org.matsim.webvis.files.util.TestUtils;
 
 import java.io.InputStream;
@@ -40,7 +38,8 @@ public class ProjectServiceTest {
         testObject = new ProjectService(
                 new ProjectDAO(TestUtils.getPersistenceUnit()),
                 TestUtils.getPermissionService(),
-                mock(Repository.class));
+                mock(Repository.class),
+                mock(Notifier.class));
     }
 
     @After
@@ -91,6 +90,42 @@ public class ProjectServiceTest {
         Optional<Permission> optional = project.getPermissions().stream().filter(p -> p.getAgent().equals(user)).findFirst();
         assertTrue(optional.isPresent());
         assertEquals(user, optional.get().getAgent());
+    }
+
+    @Test(expected = ForbiddenException.class)
+    public void removeProject_noPermission_exception() {
+
+        final String id = "user has no permission";
+        final User user = TestUtils.persistUser();
+
+        testObject.removeProject(id, user);
+
+        fail("invalid permission should cause forbidden exception");
+    }
+
+    @Test
+    public void removeProject_allGood() {
+
+        VisualizationType type = new VisualizationType("test-type", false, null, null, null);
+        type = TestUtils.getVisualizationDAO().persistType(type);
+
+        Project project = TestUtils.persistProjectWithCreator("test name");
+        FileEntry fileEntry = new FileEntry();
+        project.addFileEntry(fileEntry);
+        Visualization viz = new Visualization();
+        viz.setType(type);
+        project.addVisualization(viz);
+        project = TestUtils.getProjectDAO().persist(project);
+
+        testObject.removeProject(project.getId(), project.getCreator());
+
+        Project shouldNotBeFound = TestUtils.getProjectDAO().find(project.getId());
+
+        assertNull(shouldNotBeFound);
+        Visualization shouldAlsoNotBeFound = TestUtils.getVisualizationDAO().find(project.getVisualizations().iterator().next().getId());
+        assertNull(shouldAlsoNotBeFound);
+        FileEntry fileShouldAlsoBeDeleted = TestUtils.getProjectDAO().findFileEntry(project.getId(), project.getFiles().iterator().next().getId());
+        assertNull(fileShouldAlsoBeDeleted);
     }
 
     @Test(expected = ForbiddenException.class)
@@ -193,7 +228,7 @@ public class ProjectServiceTest {
             return result;
         }).when(repository).addFile(any(FileUpload.class));
         testObject = new ProjectService(new ProjectDAO(TestUtils.getPersistenceUnit()),
-                TestUtils.getPermissionService(), repository);
+                TestUtils.getPermissionService(), repository, mock(Notifier.class));
         Project project = TestUtils.persistProjectWithCreator("test");
         List<FileUpload> uploads = new ArrayList<>();
         uploads.add(new FileUpload("first.txt", "plain/text", mock(InputStream.class)));
@@ -231,7 +266,7 @@ public class ProjectServiceTest {
         when(mockedDao.findWithFullGraph(anyString())).thenReturn(project);
         when(mockedDao.persist(any(Project.class))).thenThrow(new RuntimeException("persisting error"));
 
-        testObject = new ProjectService(mockedDao, TestUtils.getPermissionService(), repository);
+        testObject = new ProjectService(mockedDao, TestUtils.getPermissionService(), repository, mock(Notifier.class));
         try {
             testObject.addFilesToProject(uploads, project.getId(), project.getCreator());
             fail("exception while persisting project should raise exception and delete written files");
@@ -263,7 +298,7 @@ public class ProjectServiceTest {
         when(repository.getFileStream(any())).thenReturn(stream);
 
         testObject =
-                new ProjectService(new ProjectDAO(TestUtils.getPersistenceUnit()), TestUtils.getPermissionService(), repository);
+                new ProjectService(new ProjectDAO(TestUtils.getPersistenceUnit()), TestUtils.getPermissionService(), repository, mock(Notifier.class));
 
         FileDownload result = testObject.getFileDownload(project.getId(), entry.getId(), project.getCreator());
 
@@ -296,7 +331,7 @@ public class ProjectServiceTest {
         testObject = new ProjectService(
                 new ProjectDAO(TestUtils.getPersistenceUnit()),
                 TestUtils.getPermissionService(),
-                repository
+                repository, mock(Notifier.class)
         );
 
         Project updated = testObject.removeFileFromProject(project.getId(), entry.getId(), project.getCreator());
