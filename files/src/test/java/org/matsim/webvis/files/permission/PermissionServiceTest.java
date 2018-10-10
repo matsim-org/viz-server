@@ -87,6 +87,21 @@ public class PermissionServiceTest {
         assertTrue(permission.canRead());
     }
 
+    @Test
+    public void findReadPermission_noPermissionButPublicPermission_permission() {
+
+        Project project = TestUtils.persistProjectWithCreator("project-name", "some-auth-id");
+        project.addPermission(testObject.createPublicPermission(project));
+        TestUtils.getProjectDAO().persist(project);
+        User otherUser = TestUtils.persistUser("other-auth-id");
+
+        Permission permission = testObject.findReadPermission(otherUser, project.getId());
+
+        assertEquals(TestUtils.getAgentService().getPublicAgent(), permission.getAgent());
+        assertEquals(project, permission.getResource());
+        assertTrue(permission.canRead());
+    }
+
     @Test(expected = ForbiddenException.class)
     public void findDeletePermission_noPermission_forbiddenException() {
 

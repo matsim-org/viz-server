@@ -16,11 +16,11 @@ public class AgentDAO extends DAO {
     }
 
     ServiceAgent findOrCreateServiceAgent() {
-        return findOrCreateAgent(new ServiceAgent(), QServiceAgent.serviceAgent);
+        return findOrCreateAgent(ServiceAgent.create(), QServiceAgent.serviceAgent);
     }
 
     PublicAgent findOrCreatePublicAgent() {
-        return findOrCreateAgent(new PublicAgent(), QPublicAgent.publicAgent);
+        return findOrCreateAgent(PublicAgent.create(), QPublicAgent.publicAgent);
     }
 
     private <T extends Agent> T findOrCreateAgent(T emptyInstance, EntityPathBase<T> entityPath) {
