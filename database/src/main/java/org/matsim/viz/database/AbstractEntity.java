@@ -16,7 +16,7 @@ public abstract class AbstractEntity {
 
     @Id
     @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "UUIDGenerator")
+    @GenericGenerator(name = "uuid", strategy = "org.matsim.viz.database.UUIDGenerator")
     private String id;
 
     @Override

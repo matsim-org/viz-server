@@ -6,18 +6,17 @@
 
     <parent>
         <groupId>org.matsim</groupId>
-        <artifactId>matsim-webvis</artifactId>
+        <artifactId>matsim-viz</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>files</artifactId>
-    <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <dependencies>
         <dependency>
             <groupId>org.matsim</groupId>
-            <artifactId>oauth</artifactId>
+            <artifactId>client-auth</artifactId>
             <version>1.0-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
