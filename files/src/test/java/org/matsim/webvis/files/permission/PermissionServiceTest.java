@@ -4,10 +4,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.matsim.webvis.error.ForbiddenException;
-import org.matsim.webvis.files.entities.FileEntry;
-import org.matsim.webvis.files.entities.Permission;
-import org.matsim.webvis.files.entities.Project;
-import org.matsim.webvis.files.entities.User;
+import org.matsim.webvis.files.entities.*;
 import org.matsim.webvis.files.util.TestUtils;
 
 import static junit.framework.TestCase.fail;
@@ -40,6 +37,19 @@ public class PermissionServiceTest {
         assertEquals(entry, permission.getResource());
         assertEquals(user, permission.getAgent());
         assertEquals(Permission.Type.Delete, permission.getType());
+    }
+
+    @Test
+    public void createUserPermission_agentIsPublicAgent_permissionIsRead() {
+
+        FileEntry fileEntry = new FileEntry();
+        PublicAgent publicAgent = PublicAgent.create();
+
+        Permission permission = testObject.createUserPermission(fileEntry, publicAgent, Permission.Type.Delete);
+
+        assertEquals(publicAgent, permission.getAgent());
+        assertEquals(Permission.Type.Read, permission.getType());
+        assertEquals(fileEntry, permission.getResource());
     }
 
     @Test
@@ -83,6 +93,21 @@ public class PermissionServiceTest {
         Permission permission = testObject.findReadPermission(project.getCreator(), project.getId());
 
         assertEquals(project.getCreator(), permission.getAgent());
+        assertEquals(project, permission.getResource());
+        assertTrue(permission.canRead());
+    }
+
+    @Test
+    public void findReadPermission_noPermissionButPublicPermission_permission() {
+
+        Project project = TestUtils.persistProjectWithCreator("project-name", "some-auth-id");
+        project.addPermission(testObject.createPublicPermission(project));
+        TestUtils.getProjectDAO().persist(project);
+        User otherUser = TestUtils.persistUser("other-auth-id");
+
+        Permission permission = testObject.findReadPermission(otherUser, project.getId());
+
+        assertEquals(TestUtils.getAgentService().getPublicAgent(), permission.getAgent());
         assertEquals(project, permission.getResource());
         assertTrue(permission.canRead());
     }

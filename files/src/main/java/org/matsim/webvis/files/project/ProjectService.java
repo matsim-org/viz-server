@@ -1,6 +1,7 @@
 package org.matsim.webvis.files.project;
 
 import org.matsim.webvis.error.InternalException;
+import org.matsim.webvis.error.InvalidInputException;
 import org.matsim.webvis.files.entities.*;
 import org.matsim.webvis.files.file.FileDownload;
 import org.matsim.webvis.files.file.FileUpload;
@@ -39,7 +40,7 @@ public class ProjectService {
         Project project = new Project();
         project.setName(projectName);
         project.setCreator(creator);
-        Permission permission = permissionService.createUserPermission(project, creator, Permission.Type.Delete);
+        Permission permission = permissionService.createUserPermission(project, creator, Permission.Type.Owner);
         project.addPermission(permission);
         project.addPermission(permissionService.createServicePermission(project));
         try {
@@ -54,7 +55,7 @@ public class ProjectService {
 
     void removeProject(String projectId, Agent agent) {
 
-        permissionService.findDeletePermission(agent, projectId);
+        permissionService.findOwnerPermission(agent, projectId);
         Project project = projectDAO.find(projectId);
 
         logger.info("Attempting to delete project with id " + project.getId());
@@ -136,6 +137,32 @@ public class ProjectService {
         }
         notifier.dispatchAsync(new FileDeletedNotification(optional.get()));
         return result;
+    }
+
+    Project addPermission(String projectId, User permissionUser, Permission.Type type, Agent subject) {
+
+        Permission ownerPermission = permissionService.findOwnerPermission(subject, projectId);
+
+        try {
+            Project project = (Project) ownerPermission.getResource();
+            return projectDAO.addPermission(project, permissionService.createUserPermission(
+                    project, permissionUser, type
+            ));
+        } catch (ClassCastException e) {
+            throw new InvalidInputException("id was not a project id");
+        }
+    }
+
+    Project removePermission(String projectId, Agent permissionAgent, Agent subject) {
+
+        Permission ownerPermission = permissionService.findOwnerPermission(subject, projectId);
+
+        try {
+            Project project = (Project) ownerPermission.getResource();
+            return projectDAO.removePermission(project, permissionAgent);
+        } catch (ClassCastException e) {
+            throw new InvalidInputException("id was not a project id");
+        }
     }
 
     private void createNotificationTypes() {

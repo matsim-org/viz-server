@@ -7,7 +7,6 @@ import org.matsim.webvis.database.AbstractEntity;
 
 import javax.persistence.*;
 import java.time.Instant;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -36,7 +35,11 @@ public abstract class Resource extends AbstractEntity {
         return permissions.add(permission);
     }
 
-    public void addPermissions(Collection<Permission> permissions) {
-        permissions.forEach(this::addPermission);
+    private boolean removePermission(Permission permission) {
+        return permissions.remove(permission);
+    }
+
+    public boolean removePermission(Agent forAgent) {
+        return removePermission(permissions.stream().filter(p -> p.getAgent().equals(forAgent)).findFirst().get());
     }
 }

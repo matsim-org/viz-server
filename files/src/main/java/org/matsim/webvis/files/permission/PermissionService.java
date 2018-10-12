@@ -20,6 +20,8 @@ public class PermissionService {
 
     public Permission createUserPermission(Resource resource, Agent user, Permission.Type type) {
 
+        if (agentService.getPublicAgent().equals(user))
+            return createPublicPermission(resource);
         return new Permission(resource, user, type);
     }
 
@@ -35,17 +37,13 @@ public class PermissionService {
         return permissionDAO.persist(permissions);
     }
 
-    public Permission find(Agent agent, String resourceId) {
-        return permissionDAO.find(agent, resourceId);
-    }
-
-    public List<Permission> find(Agent agent, List<String> resourceIds) {
-        return permissionDAO.find(agent, resourceIds);
+    public Permission find(String resourceId, Agent... agent) {
+        return permissionDAO.find(resourceId, agent);
     }
 
     public Permission findReadPermission(Agent agent, String resourceId) throws ForbiddenException {
 
-        Permission permission = find(agent, resourceId);
+        Permission permission = find(resourceId, agent, agentService.getPublicAgent());
         if (permission == null || !permission.canRead())
             throw new ForbiddenException("agent does not have permission");
         return permission;
@@ -53,7 +51,7 @@ public class PermissionService {
 
     public Permission findWritePermission(Agent agent, String resourceId) {
 
-        Permission permission = find(agent, resourceId);
+        Permission permission = find(resourceId, agent);
         if (permission == null || !permission.canWrite())
             throw new ForbiddenException("agent does not have write permission");
         return permission;
@@ -61,9 +59,17 @@ public class PermissionService {
 
     public Permission findDeletePermission(Agent agent, String resourceId) {
 
-        Permission permission = find(agent, resourceId);
+        Permission permission = find(resourceId, agent);
         if (permission == null || !permission.canDelete())
             throw new ForbiddenException("agent does not have delete permission");
+        return permission;
+    }
+
+    public Permission findOwnerPermission(Agent agent, String resourceId) {
+
+        Permission permission = find(resourceId, agent);
+        if (permission == null || !permission.isOwner())
+            throw new ForbiddenException("agent is not owner of the resource");
         return permission;
     }
 }

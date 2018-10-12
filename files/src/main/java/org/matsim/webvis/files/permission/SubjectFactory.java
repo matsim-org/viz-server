@@ -29,6 +29,10 @@ public class SubjectFactory {
         }
     }
 
+    public Optional<Agent> createPublicAgent() {
+        return Optional.of(agentService.getPublicAgent());
+    }
+
     private User findOrCreateUser(String authId) {
 
         User user = agentService.findByIdentityProviderId(authId);

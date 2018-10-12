@@ -31,16 +31,20 @@ public class Permission extends AbstractEntity {
     private Type type;
 
     public boolean canRead() {
-        return type == Type.Read || type == Type.Write || type == Type.Delete;
+        return type == Type.Read || this.canWrite();
     }
 
     public boolean canWrite() {
-        return type == Type.Write || type == Type.Delete;
+        return type == Type.Write || this.canDelete();
     }
 
     public boolean canDelete() {
-        return type == Type.Delete;
+        return type == Type.Delete || this.isOwner();
     }
 
-    public enum Type {Read, Write, Delete}
+    public boolean isOwner() {
+        return type == Type.Owner;
+    }
+
+    public enum Type {Read, Write, Delete, Owner}
 }

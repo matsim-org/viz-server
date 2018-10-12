@@ -5,8 +5,11 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.NotEmpty;
+import org.matsim.webvis.error.InvalidInputException;
 import org.matsim.webvis.error.UnauthorizedException;
+import org.matsim.webvis.files.agent.AgentService;
 import org.matsim.webvis.files.entities.Agent;
+import org.matsim.webvis.files.entities.Permission;
 import org.matsim.webvis.files.entities.Project;
 import org.matsim.webvis.files.entities.User;
 import org.matsim.webvis.files.file.FileResource;
@@ -27,6 +30,7 @@ public class ProjectResource {
 
     private final ProjectService projectService;
     private final VisualizationService visualizationService;
+    private final AgentService agentService;
 
     @POST
     public Project createProject(
@@ -68,6 +72,28 @@ public class ProjectResource {
         return new ProjectVisualizationResource(visualizationService);
     }
 
+    @Path("{id}/permissions")
+    @POST
+    public Project addPermission(@Auth Agent subject, @Valid AddPermissionRequest request) {
+
+        User user = agentService.findByIdentityProviderId(request.getUserAuthId());
+        if (user == null)
+            throw new InvalidInputException("could not find user");
+
+        return projectService.addPermission(request.getResourceId(), user, request.getType(), subject);
+    }
+
+    @Path("{id}/permissions")
+    @DELETE
+    public Project removePermission(@Auth Agent subject, @QueryParam("userAuthId") String userId, @QueryParam("projectId") String forProject) {
+
+        User forUser = agentService.findByIdentityProviderId(userId);
+        if (forUser == null) {
+            throw new InvalidInputException("could not find user");
+        }
+        return projectService.removePermission(forProject, forUser, subject);
+    }
+
     @Getter
     @AllArgsConstructor
     @NoArgsConstructor
@@ -75,5 +101,18 @@ public class ProjectResource {
 
         @NotEmpty
         private String name;
+    }
+
+    @Getter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    static class AddPermissionRequest {
+
+        @NotEmpty
+        private String resourceId;
+        @NotEmpty
+        private String userAuthId;
+        @NotNull
+        private Permission.Type type;
     }
 }

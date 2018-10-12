@@ -18,21 +18,13 @@ public class PermissionDAO extends DAO {
         return database.persistMany(permissions);
     }
 
-    Permission find(Agent agent, String resourceId) {
+    Permission find(String resourceId, Agent... agent) {
 
         QPermission permission = QPermission.permission;
         return database.executeQuery(query -> query.selectFrom(permission)
-                .where(permission.agent.eq(agent).and(permission.resource.id.eq(resourceId)))
+                .where(permission.agent.in(agent)
+                        .and(permission.resource.id.eq(resourceId)))
                 .fetchOne()
-        );
-    }
-
-    List<Permission> find(Agent agent, List<String> resourceIds) {
-
-        QPermission permission = QPermission.permission;
-        return database.executeQuery(query -> query.selectFrom(permission)
-                .where(permission.agent.eq(agent).and(permission.resource.id.in(resourceIds)))
-                .fetch()
         );
     }
 }
