@@ -14,6 +14,7 @@ import org.matsim.webvis.files.visualization.VisualizationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.persistence.RollbackException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -130,12 +131,16 @@ public class ProjectService {
         }
 
         project.removeFileEntry(optional.get());
-        Project result = projectDAO.persist(project); // remove entry from the database first to ensure consistent database
+
+        Project result = null;
         try {
+            result = projectDAO.persist(project); // remove entry from the database first to ensure consistent database
             repository.removeFile(optional.get());
+            notifier.dispatchAsync(new FileDeletedNotification(optional.get()));
+        } catch (RollbackException e) {
+            throw new InternalException("could not remove file. Make sure it is not used by any visualization.");
         } catch (Exception ignored) {
         }
-        notifier.dispatchAsync(new FileDeletedNotification(optional.get()));
         return result;
     }
 

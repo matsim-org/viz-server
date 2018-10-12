@@ -47,11 +47,6 @@ public class ProjectServiceTest {
         TestUtils.removeAllEntities();
     }
 
-   /* @AfterClass
-    public static void tearDownFixture() throws IOException {
-        TestUtils.removeFileTree(Paths.get(AppConfiguration.getInstance().getUploadFilePath()));
-    }*/
-
     @Test(expected = CodedException.class)
     public void createNewProject_projectNameExists_exception() {
 
