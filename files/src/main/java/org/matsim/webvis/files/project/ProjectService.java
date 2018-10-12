@@ -39,7 +39,7 @@ public class ProjectService {
         Project project = new Project();
         project.setName(projectName);
         project.setCreator(creator);
-        Permission permission = permissionService.createUserPermission(project, creator, Permission.Type.Delete);
+        Permission permission = permissionService.createUserPermission(project, creator, Permission.Type.Owner);
         project.addPermission(permission);
         project.addPermission(permissionService.createServicePermission(project));
         try {
@@ -54,7 +54,7 @@ public class ProjectService {
 
     void removeProject(String projectId, Agent agent) {
 
-        permissionService.findDeletePermission(agent, projectId);
+        permissionService.findOwnerPermission(agent, projectId);
         Project project = projectDAO.find(projectId);
 
         logger.info("Attempting to delete project with id " + project.getId());
@@ -136,6 +136,15 @@ public class ProjectService {
         }
         notifier.dispatchAsync(new FileDeletedNotification(optional.get()));
         return result;
+    }
+
+    Project addPermission(String projectId, User permissionUser, Permission.Type type, Agent subject) {
+
+        permissionService.findOwnerPermission(subject, projectId);
+
+        Project project = projectDAO.find(projectId);
+        project.addPermission(permissionService.createUserPermission(project, permissionUser, type));
+        return projectDAO.persist(project);
     }
 
     private void createNotificationTypes() {

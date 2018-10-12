@@ -159,7 +159,7 @@ public class App extends Application<AppConfiguration> {
                 configuration.getRepositoryFactory().createRepository(persistenceUnit), notifier);
         VisualizationService visualizationService = new VisualizationService(visualizationDAO, projectService, permissionService, notifier);
 
-        environment.jersey().register(new ProjectResource(projectService, visualizationService));
+        environment.jersey().register(new ProjectResource(projectService, visualizationService, agentService));
         environment.jersey().register(new VisualizationResource(visualizationService));
         environment.jersey().register(new NotificationResource(notifier));
 

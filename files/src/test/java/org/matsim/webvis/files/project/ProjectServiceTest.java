@@ -341,6 +341,31 @@ public class ProjectServiceTest {
         verify(repository).removeFile(any());
     }
 
+    @Test(expected = ForbiddenException.class)
+    public void addPermission_subjectIsNotOwner_exception() {
+
+        Project project = TestUtils.persistProjectWithCreator("some-name");
+        User otherUser = TestUtils.getAgentService().createUser("some-other-auth-id");
+
+        testObject.addPermission(project.getId(), otherUser, Permission.Type.Owner, otherUser);
+
+        fail("user without owner permission should cause exception");
+    }
+
+    @Test
+    public void addPermission_allGood_permissionAdded() {
+
+        Project project = TestUtils.persistProjectWithCreator("some-name");
+        User otherUser = TestUtils.getAgentService().createUser("some-other-auth-id");
+        Permission.Type permissionType = Permission.Type.Owner;
+
+        Project result = testObject.addPermission(project.getId(), otherUser, permissionType, project.getCreator());
+
+        assertTrue(result.getPermissions().stream().anyMatch(permission -> permission.getAgent().equals(otherUser) &&
+                permission.getType().equals(permissionType)));
+
+    }
+
     private Project addFileEntry(Project project) {
         FileEntry entry = new FileEntry();
         project.addFileEntry(entry);

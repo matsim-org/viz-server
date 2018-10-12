@@ -1,6 +1,7 @@
 package org.matsim.webvis.files.permission;
 
 import org.matsim.webvis.error.ForbiddenException;
+import org.matsim.webvis.error.InvalidInputException;
 import org.matsim.webvis.files.agent.AgentService;
 import org.matsim.webvis.files.entities.Agent;
 import org.matsim.webvis.files.entities.Permission;
@@ -20,6 +21,10 @@ public class PermissionService {
 
     public Permission createUserPermission(Resource resource, Agent user, Permission.Type type) {
 
+        if (agentService.getServiceAgent().equals(user))
+            throw new InvalidInputException("users can not set service permissions.");
+        if (agentService.getPublicAgent().equals(user))
+            return createPublicPermission(resource);
         return new Permission(resource, user, type);
     }
 
@@ -60,6 +65,14 @@ public class PermissionService {
         Permission permission = find(resourceId, agent);
         if (permission == null || !permission.canDelete())
             throw new ForbiddenException("agent does not have delete permission");
+        return permission;
+    }
+
+    public Permission findOwnerPermission(Agent agent, String resourceId) {
+
+        Permission permission = find(resourceId, agent);
+        if (permission == null || !permission.isOwner())
+            throw new ForbiddenException("agent is not owner of the resource");
         return permission;
     }
 }
