@@ -83,6 +83,17 @@ public class ProjectResource {
         return projectService.addPermission(request.getResourceId(), user, request.getType(), subject);
     }
 
+    @Path("{id}/permissions")
+    @DELETE
+    public Project removePermission(@Auth Agent subject, @QueryParam("userAuthId") String userId, @QueryParam("projectId") String forProject) {
+
+        User forUser = agentService.findByIdentityProviderId(userId);
+        if (forUser == null) {
+            throw new InvalidInputException("could not find user");
+        }
+        return projectService.removePermission(forProject, forUser, subject);
+    }
+
     @Getter
     @AllArgsConstructor
     @NoArgsConstructor

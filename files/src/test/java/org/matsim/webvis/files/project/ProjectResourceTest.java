@@ -149,4 +149,36 @@ public class ProjectResourceTest {
 
         assertNotNull(result);
     }
+
+    @Test(expected = InvalidInputException.class)
+    public void removePermission_invalidAgentId_exception() {
+
+        AgentService agentService = mock(AgentService.class);
+        when(agentService.findByIdentityProviderId(anyString())).thenReturn(null);
+
+        testObject = new ProjectResource(mock(ProjectService.class), mock(VisualizationService.class), agentService);
+
+        testObject.removePermission(new User(), "invalid-id", "some-resource-id");
+
+        fail("invalid agent id should cause exception");
+    }
+
+    @Test
+    public void removePermission_permissionRemoved() {
+
+        final String agentId = "some-auth-id";
+        final String resourceId = "some-resource-id";
+        final User permissionUser = new User();
+        permissionUser.setAuthId(agentId);
+        AgentService agentService = mock(AgentService.class);
+        when(agentService.findByIdentityProviderId(agentId)).thenReturn(permissionUser);
+        ProjectService projectService = mock(ProjectService.class);
+        when(projectService.removePermission(eq(resourceId), eq(permissionUser), any())).thenReturn(new Project());
+
+        testObject = new ProjectResource(projectService, mock(VisualizationService.class), agentService);
+
+        Project result = testObject.removePermission(new User(), agentId, resourceId);
+
+        assertNotNull(result);
+    }
 }

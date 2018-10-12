@@ -356,6 +356,12 @@ public class ProjectServiceTest {
     public void addPermission_allGood_permissionAdded() {
 
         Project project = TestUtils.persistProjectWithCreator("some-name");
+        FileEntry entry = new FileEntry();
+        entry.setUserFileName("filename.file");
+        entry.setPersistedFileName("persisted.file");
+        project.addFileEntry(entry);
+        TestUtils.getProjectDAO().persist(project);
+
         User otherUser = TestUtils.getAgentService().createUser("some-other-auth-id");
         Permission.Type permissionType = Permission.Type.Owner;
 
@@ -364,6 +370,47 @@ public class ProjectServiceTest {
         assertTrue(result.getPermissions().stream().anyMatch(permission -> permission.getAgent().equals(otherUser) &&
                 permission.getType().equals(permissionType)));
 
+        // check whether permissions are also set for resources contained in project
+        result.getFiles().forEach(file -> assertTrue(file.getPermissions().stream().anyMatch(
+                permission -> permission.getAgent().equals(otherUser) &&
+                        permission.getType().equals(permissionType))));
+
+    }
+
+    @Test(expected = ForbiddenException.class)
+    public void removePermission_subjectIsNotOwner_excpetion() {
+
+        Project project = TestUtils.persistProjectWithCreator("some-name");
+        User otherUser = TestUtils.getAgentService().createUser("some-other-auth-id");
+
+        testObject.removePermission(project.getId(), otherUser, otherUser);
+
+        fail("user without owner permission should cause exception");
+    }
+
+    @Test
+    public void removePermission_allGood_permissionRemoved() {
+
+        Project project = TestUtils.persistProjectWithCreator("some-name");
+        FileEntry entry = new FileEntry();
+        entry.setUserFileName("filename.file");
+        entry.setPersistedFileName("persisted.file");
+        project.addFileEntry(entry);
+        TestUtils.getProjectDAO().persist(project);
+        User otherUser = TestUtils.getAgentService().createUser("some-other-auth-id");
+        Permission.Type permissionType = Permission.Type.Owner;
+
+        testObject.addPermission(project.getId(), otherUser, permissionType, project.getCreator());
+
+        Project result = testObject.removePermission(project.getId(), otherUser, project.getCreator());
+
+        assertTrue(result.getPermissions().stream().noneMatch(permission -> permission.getAgent().equals(otherUser) &&
+                permission.getType().equals(permissionType)));
+
+        // check whether permissions are also set for resources contained in project
+        result.getFiles().forEach(file -> assertTrue(file.getPermissions().stream().noneMatch(
+                permission -> permission.getAgent().equals(otherUser) &&
+                        permission.getType().equals(permissionType))));
     }
 
     private Project addFileEntry(Project project) {

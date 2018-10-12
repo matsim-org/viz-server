@@ -16,6 +16,33 @@ public class ProjectDAO extends DAO {
         return database.persist(project);
     }
 
+    public Project addPermission(Project project, Permission permission) {
+
+        EntityManager em = database.createEntityManager();
+        em.getTransaction().begin();
+        project = em.merge(project);
+        project.addPermission(permission);
+        project.getFiles().forEach(file -> file.addPermission(new Permission(file, permission.getAgent(), permission.getType())));
+        project.getVisualizations().forEach(viz -> viz.addPermission(new Permission(viz, permission.getAgent(), permission.getType())));
+        em.getTransaction().commit();
+        em.close();
+        return project;
+    }
+
+    Project removePermission(Project project, Agent permissionAgent) {
+
+        EntityManager em = database.createEntityManager();
+
+        em.getTransaction().begin();
+        project = em.merge(project);
+        project.removePermission(permissionAgent);
+        project.getFiles().forEach(file -> file.removePermission(permissionAgent));
+        project.getVisualizations().forEach(viz -> viz.removePermission(permissionAgent));
+        em.getTransaction().commit();
+        em.close();
+        return project;
+    }
+
     Project find(String projectId) {
 
         QProject project = QProject.project;

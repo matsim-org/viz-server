@@ -1,6 +1,7 @@
 package org.matsim.webvis.files.project;
 
 import org.matsim.webvis.error.InternalException;
+import org.matsim.webvis.error.InvalidInputException;
 import org.matsim.webvis.files.entities.*;
 import org.matsim.webvis.files.file.FileDownload;
 import org.matsim.webvis.files.file.FileUpload;
@@ -140,11 +141,28 @@ public class ProjectService {
 
     Project addPermission(String projectId, User permissionUser, Permission.Type type, Agent subject) {
 
-        permissionService.findOwnerPermission(subject, projectId);
+        Permission ownerPermission = permissionService.findOwnerPermission(subject, projectId);
 
-        Project project = projectDAO.find(projectId);
-        project.addPermission(permissionService.createUserPermission(project, permissionUser, type));
-        return projectDAO.persist(project);
+        try {
+            Project project = (Project) ownerPermission.getResource();
+            return projectDAO.addPermission(project, permissionService.createUserPermission(
+                    project, permissionUser, type
+            ));
+        } catch (ClassCastException e) {
+            throw new InvalidInputException("id was not a project id");
+        }
+    }
+
+    Project removePermission(String projectId, Agent permissionAgent, Agent subject) {
+
+        Permission ownerPermission = permissionService.findOwnerPermission(subject, projectId);
+
+        try {
+            Project project = (Project) ownerPermission.getResource();
+            return projectDAO.removePermission(project, permissionAgent);
+        } catch (ClassCastException e) {
+            throw new InvalidInputException("id was not a project id");
+        }
     }
 
     private void createNotificationTypes() {
