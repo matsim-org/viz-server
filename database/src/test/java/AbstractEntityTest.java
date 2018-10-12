@@ -1,6 +1,6 @@
 import org.junit.Before;
 import org.junit.Test;
-import org.matsim.webvis.database.AbstractEntity;
+import org.matsim.viz.database.AbstractEntity;
 
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.*;

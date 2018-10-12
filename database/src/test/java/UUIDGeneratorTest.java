@@ -1,8 +1,8 @@
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.junit.Before;
 import org.junit.Test;
-import org.matsim.webvis.database.AbstractEntity;
-import org.matsim.webvis.database.UUIDGenerator;
+import org.matsim.viz.database.AbstractEntity;
+import org.matsim.viz.database.UUIDGenerator;
 
 import java.io.Serializable;
 import java.util.UUID;

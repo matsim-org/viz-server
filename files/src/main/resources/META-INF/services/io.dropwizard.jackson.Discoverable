@@ -1,2 +1,2 @@
-org.matsim.webvis.files.config.RepositoryFactory
-org.matsim.webvis.files.config.DbConfigurationFactory
+org.matsim.viz.files.config.RepositoryFactory
+org.matsim.viz.files.config.DbConfigurationFactory
