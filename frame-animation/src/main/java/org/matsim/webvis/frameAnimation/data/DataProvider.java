@@ -29,7 +29,7 @@ public class DataProvider {
         return data.get(vizId).getProgress();
     }
 
-    void remove(String vizId) {
+    public void remove(String vizId) {
         data.remove(vizId);
     }
 
