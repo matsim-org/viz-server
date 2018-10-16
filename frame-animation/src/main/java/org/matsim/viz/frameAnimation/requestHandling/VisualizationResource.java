@@ -1,10 +1,11 @@
 package org.matsim.viz.frameAnimation.requestHandling;
 
+import io.dropwizard.auth.Auth;
 import org.geojson.FeatureCollection;
 import org.matsim.viz.error.InternalException;
 import org.matsim.viz.frameAnimation.contracts.ConfigurationResponse;
-import org.matsim.viz.frameAnimation.data.DataController;
 import org.matsim.viz.frameAnimation.data.DataProvider;
+import org.matsim.viz.frameAnimation.entities.Permission;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -17,43 +18,37 @@ import java.io.IOException;
 public class VisualizationResource {
 
     private final DataProvider data;
-    private final DataController controller;
 
-    public VisualizationResource(DataProvider data, DataController controller) {
+    public VisualizationResource(DataProvider data) {
         this.data = data;
-        this.controller = controller;
-    }
-
-    @PUT
-    public void initVisualization(@PathParam("id") String vizId) {
-        this.controller.fetchVisualizations();
     }
 
     @GET
     @Path("/configuration")
     @Produces(MediaType.APPLICATION_JSON)
-    public ConfigurationResponse configuration(@PathParam("id") String vizId) {
+    public ConfigurationResponse configuration(@Auth Permission permission, @PathParam("id") String vizId) {
 
-        return data.getConfiguration(vizId);
+        return data.getConfiguration(vizId, permission);
     }
 
     @GET
     @Path("/network")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    public byte[] network(@PathParam("id") String vizId) {
-        return data.getLinks(vizId);
+    public byte[] network(@Auth Permission permission, @PathParam("id") String vizId) {
+        return data.getLinks(vizId, permission);
     }
 
     @GET
     @Path("/snapshots")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    public Response snapshots(@PathParam("id") String vizId,
+    public Response snapshots(@Auth Permission permission,
+                              @PathParam("id") String vizId,
                               @QueryParam("fromTimestep") double fromTimestep,
                               @QueryParam("numberOfTimesteps") int numberOfTimesteps,
                               @QueryParam("speedFactor") double speedFactor) {
         try {
 
-            ByteArrayOutputStream snapshots = data.getSnapshots(vizId, fromTimestep, numberOfTimesteps, speedFactor);
+            ByteArrayOutputStream snapshots = data.getSnapshots(vizId, fromTimestep, numberOfTimesteps, speedFactor, permission);
 
             return Response.ok((StreamingOutput) outputStream -> {
                 snapshots.writeTo(outputStream);
@@ -70,9 +65,10 @@ public class VisualizationResource {
     @GET
     @Path("/plan")
     @Produces(MediaType.APPLICATION_JSON)
-    public FeatureCollection plan(@PathParam("id") String vizId,
+    public FeatureCollection plan(@Auth Permission permission,
+                                  @PathParam("id") String vizId,
                                   @QueryParam("index") int index) {
 
-        return data.getPlan(vizId, index);
+        return data.getPlan(vizId, index, permission);
     }
 }

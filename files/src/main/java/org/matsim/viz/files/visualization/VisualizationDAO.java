@@ -41,13 +41,15 @@ public class VisualizationDAO extends DAO {
     List<Visualization> findAllByTypeIfHasPermission(String typeName, Instant after, Agent agent) {
 
         QVisualization visualization = QVisualization.visualization;
-        QPermission permission = QPermission.permission;
 
         return database.executeQuery(query -> query.selectFrom(visualization)
-                .where(visualization.type.typeName.eq(typeName).and(visualization.createdAt.after(after)))
-                .innerJoin(visualization.permissions, permission).on(permission.agent.eq(agent))
+                .where(visualization.type.typeName.eq(typeName)
+                        .and(visualization.createdAt.after(after))
+                        .and(visualization.permissions.any().agent.eq(agent)
+                        ))
                 .leftJoin(visualization.inputFiles).fetchJoin()
                 .leftJoin(visualization.parameters).fetchJoin()
+                .leftJoin(visualization.permissions).fetchJoin()
                 .distinct()
                 .fetch()
         );
