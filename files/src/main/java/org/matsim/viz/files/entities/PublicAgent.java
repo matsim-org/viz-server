@@ -10,7 +10,7 @@ import javax.persistence.Entity;
 @Entity
 public class PublicAgent extends Agent {
 
-    private static final String PublicAgentId = "org.matsim.viz.PublicAgent";
+    private static final String PublicAgentId = "allUsers";
 
     /**
      * Use static Method 'create' for a new instance of PublicAgent. This constructor is used by Hibernate when
