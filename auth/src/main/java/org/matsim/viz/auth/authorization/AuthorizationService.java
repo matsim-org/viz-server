@@ -1,5 +1,6 @@
 package org.matsim.viz.auth.authorization;
 
+import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.matsim.viz.auth.entities.Client;
 import org.matsim.viz.auth.entities.Token;
@@ -13,13 +14,12 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLEncoder;
 
-class AuthorizationService {
+@AllArgsConstructor
+public class AuthorizationService {
 
-    static final AuthorizationService Instance = new AuthorizationService();
-    TokenService tokenService = TokenService.Instance;
-    UserService userService = UserService.Instance;
-
-    RelyingPartyService relyingPartyService = RelyingPartyService.Instance;
+    private TokenService tokenService;
+    private UserService userService;
+    private RelyingPartyService relyingPartyService;
 
     Client validateClient(AuthenticationRequest request) {
         return relyingPartyService.validateClient(

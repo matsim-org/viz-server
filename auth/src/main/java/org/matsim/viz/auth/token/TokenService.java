@@ -21,15 +21,14 @@ import java.util.Map;
 
 public class TokenService {
 
-    public static final TokenService Instance = new TokenService();
+    private final Algorithm algorithm;
+    private final TokenDAO tokenDAO;
+    private final RelyingPartyService relyingPartyService;
 
-    Algorithm algorithm;
-    TokenDAO tokenDAO = new TokenDAO();
-    private RelyingPartyService relyingPartyService = RelyingPartyService.Instance;
-
-    private TokenService() {
-        TokenSigningKeyProvider provider = new TokenSigningKeyProvider();
-        algorithm = Algorithm.RSA512(provider.getPublicKey(), provider.getPrivateKey());
+    public TokenService(TokenDAO tokenDAO, TokenSigningKeyProvider keyProvider, RelyingPartyService relyingPartyService) {
+        algorithm = Algorithm.RSA512(keyProvider.getPublicKey(), keyProvider.getPrivateKey());
+        this.tokenDAO = tokenDAO;
+        this.relyingPartyService = relyingPartyService;
     }
 
     Token grantForScope(RelyingParty relyingParty, String scope) {

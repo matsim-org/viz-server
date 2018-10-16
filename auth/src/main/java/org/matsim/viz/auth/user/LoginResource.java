@@ -1,6 +1,7 @@
 package org.matsim.viz.auth.user;
 
 import io.dropwizard.views.View;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.matsim.viz.auth.entities.Token;
@@ -16,10 +17,11 @@ import java.net.URI;
 
 @Path("/login")
 @Produces(MediaType.TEXT_HTML)
+@AllArgsConstructor
 public class LoginResource {
 
-    UserService userService = UserService.Instance;
-    TokenService tokenService = TokenService.Instance;
+    UserService userService;
+    TokenService tokenService;
 
     @POST
     public Response login(@FormParam("username") String username, @FormParam("password") String password) {

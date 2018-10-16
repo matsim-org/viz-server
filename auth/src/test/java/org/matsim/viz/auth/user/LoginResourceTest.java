@@ -1,12 +1,10 @@
 package org.matsim.viz.auth.user;
 
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.matsim.viz.auth.entities.Token;
 import org.matsim.viz.auth.entities.User;
 import org.matsim.viz.auth.token.TokenService;
-import org.matsim.viz.auth.util.TestUtils;
 import org.matsim.viz.error.UnauthorizedException;
 
 import javax.ws.rs.core.MediaType;
@@ -22,17 +20,10 @@ public class LoginResourceTest {
 
     private LoginResource testObject;
 
-    @BeforeClass
-    public static void setUpFixture() {
-        TestUtils.loadTestConfigIfNecessary();
-    }
-
     @Before
     public void setUp() {
 
-        testObject = new LoginResource();
-        testObject.userService = mock(UserService.class);
-        testObject.tokenService = mock(TokenService.class);
+        testObject = new LoginResource(mock(UserService.class), mock(TokenService.class));
     }
 
     @Test

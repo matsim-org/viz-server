@@ -1,5 +1,6 @@
 package org.matsim.viz.auth.relyingParty;
 
+import lombok.AllArgsConstructor;
 import org.matsim.viz.auth.config.ConfigClient;
 import org.matsim.viz.auth.config.ConfigRelyingParty;
 import org.matsim.viz.auth.entities.Client;
@@ -16,17 +17,12 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Set;
 
+@AllArgsConstructor
 public class RelyingPartyService {
 
     private static Logger logger = LoggerFactory.getLogger(RelyingPartyService.class);
 
-    public static final RelyingPartyService Instance = new RelyingPartyService();
-
-    private RelyingPartyService() {
-    }
-
-
-    private RelyingPartyDAO relyingPartyDAO = new RelyingPartyDAO();
+    private RelyingPartyDAO relyingPartyDAO;
 
     Client createClient(String name, Iterable<URI> redirectUris) {
         return createClient(name, null, redirectUris, null);

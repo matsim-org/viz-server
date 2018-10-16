@@ -1,11 +1,8 @@
 package org.matsim.viz.auth.token;
 
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.matsim.viz.auth.entities.RelyingParty;
 import org.matsim.viz.auth.entities.Token;
-import org.matsim.viz.auth.util.TestUtils;
 import org.matsim.viz.error.InvalidInputException;
 
 import java.time.Instant;
@@ -18,21 +15,10 @@ import static org.mockito.Mockito.when;
 
 public class TokenResourceTest {
 
-    private TokenResource testObject;
-
-    @BeforeClass
-    public static void setUpFixture() {
-        TestUtils.loadTestConfigIfNecessary();
-    }
-
-    @Before
-    public void setUp() {
-        testObject = new TokenResource();
-        testObject.tokenService = mock(TokenService.class);
-    }
-
     @Test(expected = InvalidInputException.class)
     public void token_grantTypeNotClientCredentials_exception() {
+
+        TokenResource testObject = new TokenResource(mock(TokenService.class));
 
         testObject.token(null, "invalid-type", "some-scope");
 
@@ -46,7 +32,10 @@ public class TokenResourceTest {
         token.setTokenValue("value");
         token.setScope("scope");
         token.setExpiresAt(Instant.now());
-        when(testObject.tokenService.grantForScope(any(), any())).thenReturn(token);
+
+        TokenService tokenService = mock(TokenService.class);
+        when(tokenService.grantForScope(any(), any())).thenReturn(token);
+        TokenResource testObject = new TokenResource(tokenService);
 
         AccessTokenResponse response = testObject.token(new RelyingParty(), "client_credentials", "scope");
 

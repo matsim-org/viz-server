@@ -1,5 +1,6 @@
 package org.matsim.viz.auth.user;
 
+import lombok.AllArgsConstructor;
 import org.matsim.viz.auth.config.ConfigUser;
 import org.matsim.viz.auth.entities.User;
 import org.matsim.viz.auth.entities.UserCredentials;
@@ -11,18 +12,14 @@ import org.slf4j.LoggerFactory;
 
 import javax.persistence.RollbackException;
 
+@AllArgsConstructor
 public class UserService {
 
     private static Logger logger = LoggerFactory.getLogger(UserService.class);
 
-    public static final UserService Instance = new UserService();
-
-    private UserService() {
-    }
-
     private static final int minPasswordLength = 10;
 
-    private UserDAO userDAO = new UserDAO();
+    private UserDAO userDAO;
 
     public User createUser(ConfigUser user) {
         return createUser(user.getUsername(), user.getId(), user.getPassword().toCharArray(), user.getPassword().toCharArray());

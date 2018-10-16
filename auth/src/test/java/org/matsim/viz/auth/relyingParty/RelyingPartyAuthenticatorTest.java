@@ -1,7 +1,6 @@
 package org.matsim.viz.auth.relyingParty;
 
 import io.dropwizard.auth.basic.BasicCredentials;
-import org.junit.Before;
 import org.junit.Test;
 import org.matsim.viz.auth.entities.RelyingParty;
 import org.matsim.viz.error.UnauthorizedException;
@@ -16,18 +15,13 @@ import static org.mockito.Mockito.when;
 
 public class RelyingPartyAuthenticatorTest {
 
-    private RelyingPartyAuthenticator testObject;
-
-    @Before
-    public void setUp() {
-        testObject = new RelyingPartyAuthenticator();
-        testObject.rpService = mock(RelyingPartyService.class);
-    }
-
     @Test
     public void authenticate_success() {
 
-        when(testObject.rpService.validateRelyingParty(anyString(), anyString())).thenReturn(new RelyingParty());
+        RelyingPartyService rpService = mock(RelyingPartyService.class);
+        when(rpService.validateRelyingParty(anyString(), anyString())).thenReturn(new RelyingParty());
+        RelyingPartyAuthenticator testObject = new RelyingPartyAuthenticator(rpService);
+
         BasicCredentials credentials = new BasicCredentials("username", "password");
 
         Optional<RelyingParty> result = testObject.authenticate(credentials);
@@ -38,7 +32,10 @@ public class RelyingPartyAuthenticatorTest {
     @Test(expected = UnauthorizedException.class)
     public void authenticate_noSucess() {
 
-        when(testObject.rpService.validateRelyingParty(anyString(), anyString())).thenThrow(new UnauthorizedException("no"));
+        RelyingPartyService rpService = mock(RelyingPartyService.class);
+        when(rpService.validateRelyingParty(anyString(), anyString())).thenThrow(new UnauthorizedException("no"));
+        RelyingPartyAuthenticator testObject = new RelyingPartyAuthenticator(rpService);
+
         BasicCredentials credentials = new BasicCredentials("username", "password");
 
         Optional<RelyingParty> result = testObject.authenticate(credentials);

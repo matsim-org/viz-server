@@ -1,8 +1,6 @@
 package org.matsim.viz.auth.authorization;
 
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.matsim.viz.auth.entities.Client;
 import org.matsim.viz.auth.entities.Token;
@@ -23,20 +21,6 @@ import static org.mockito.Mockito.*;
 
 public class AuthorizationResourceTest {
 
-    private AuthorizationResource testObject;
-
-    @BeforeClass
-    public static void setUpFixture() {
-        TestUtils.loadTestConfigIfNecessary();
-    }
-
-    @Before
-    public void setUp() {
-        testObject = new AuthorizationResource();
-        testObject.tokenService = mock(TokenService.class);
-        testObject.authService = mock(AuthorizationService.class);
-    }
-
     @Test(expected = InvalidInputException.class)
     public void doAuthorization_invalidRequest_exception() {
 
@@ -47,6 +31,8 @@ public class AuthorizationResourceTest {
         HttpSession session = TestUtils.mockSession("id");
         String token = "some-token";
 
+        AuthorizationResource testObject = new AuthorizationResource(mock(TokenService.class), mock(AuthorizationService.class));
+
         testObject.doAuthorization(request, session, token);
 
         fail("invalid auth request should cause exception");
@@ -55,7 +41,10 @@ public class AuthorizationResourceTest {
     @Test(expected = UnauthorizedException.class)
     public void doAuthorization_invalidClient_exception() {
 
-        when(testObject.authService.validateClient(any())).thenThrow(new UnauthorizedException("bla"));
+        AuthorizationService authService = mock(AuthorizationService.class);
+        when(authService.validateClient(any())).thenThrow(new UnauthorizedException("bla"));
+        AuthorizationResource testObject = new AuthorizationResource(mock(TokenService.class), authService);
+
         AuthenticationRequest request = new AuthenticationGetRequest(
                 "openid", "token", URI.create("http://uri.com"),
                 "invalid-client", "state", "nonce"
@@ -71,8 +60,12 @@ public class AuthorizationResourceTest {
     @Test
     public void doAuthorization_invalidToken_redirectToLogin() {
 
-        when(testObject.tokenService.validateToken(anyString())).thenThrow(new UnauthorizedException("no"));
-        when(testObject.authService.validateClient(any())).thenReturn(new Client());
+        TokenService tokenService = mock(TokenService.class);
+        AuthorizationService authService = mock(AuthorizationService.class);
+        when(tokenService.validateToken(anyString())).thenThrow(new UnauthorizedException("no"));
+        when(authService.validateClient(any())).thenReturn(new Client());
+        AuthorizationResource testObject = new AuthorizationResource(tokenService, authService);
+
         AuthenticationRequest request = new AuthenticationPostRequest(
                 "openid", "token", URI.create("http://uri.com"),
                 "client-id", "state", "nonce"
@@ -95,9 +88,14 @@ public class AuthorizationResourceTest {
         URI callback = URI.create("http://some.callback");
         String errorCode = "code";
         String errorMessage = "message";
-        when(testObject.tokenService.validateToken(anyString())).thenReturn(token);
-        when(testObject.authService.validateClient(any())).thenReturn(new Client());
-        when(testObject.authService.generateAuthenticationResponse(any(), anyString())).thenThrow(new CodedException(1, errorCode, errorMessage));
+
+        TokenService tokenService = mock(TokenService.class);
+        AuthorizationService authService = mock(AuthorizationService.class);
+        when(tokenService.validateToken(anyString())).thenReturn(token);
+        when(authService.validateClient(any())).thenReturn(new Client());
+        when(authService.generateAuthenticationResponse(any(), anyString())).thenThrow(new CodedException(1, errorCode, errorMessage));
+        AuthorizationResource testObject = new AuthorizationResource(tokenService, authService);
+
         AuthenticationRequest request = new AuthenticationPostRequest(
                 "openid", "token", callback,
                 "client-id", "state", "nonce"
@@ -118,9 +116,13 @@ public class AuthorizationResourceTest {
         token.setSubjectId("some-id");
         token.setTokenValue("some-value");
         URI callback = URI.create("http://some.callback");
-        when(testObject.tokenService.validateToken(token.getTokenValue())).thenReturn(token);
-        when(testObject.authService.validateClient(any())).thenReturn(new Client());
-        when(testObject.authService.generateAuthenticationResponse(any(), anyString())).thenReturn(callback);
+
+        TokenService tokenService = mock(TokenService.class);
+        AuthorizationService authService = mock(AuthorizationService.class);
+        when(tokenService.validateToken(token.getTokenValue())).thenReturn(token);
+        when(authService.validateClient(any())).thenReturn(new Client());
+        when(authService.generateAuthenticationResponse(any(), anyString())).thenReturn(callback);
+        AuthorizationResource testObject = new AuthorizationResource(tokenService, authService);
 
         AuthenticationRequest request = new AuthenticationPostRequest(
                 "openid", "token", callback,
@@ -142,9 +144,13 @@ public class AuthorizationResourceTest {
         token.setSubjectId("some-id");
         token.setTokenValue("some-value");
         URI callback = URI.create("http://some.callback");
-        when(testObject.tokenService.validateToken(token.getTokenValue())).thenReturn(token);
-        when(testObject.authService.validateClient(any())).thenReturn(new Client());
-        when(testObject.authService.generateAuthenticationResponse(any(), anyString())).thenReturn(callback);
+
+        TokenService tokenService = mock(TokenService.class);
+        AuthorizationService authService = mock(AuthorizationService.class);
+        when(tokenService.validateToken(token.getTokenValue())).thenReturn(token);
+        when(authService.validateClient(any())).thenReturn(new Client());
+        when(authService.generateAuthenticationResponse(any(), anyString())).thenReturn(callback);
+        AuthorizationResource testObject = new AuthorizationResource(tokenService, authService);
 
         AuthenticationPostRequest request = new AuthenticationPostRequest(
                 "openid", "token", callback,
@@ -166,9 +172,13 @@ public class AuthorizationResourceTest {
         token.setSubjectId("some-id");
         token.setTokenValue("some-value");
         URI callback = URI.create("http://some.callback");
-        when(testObject.tokenService.validateToken(token.getTokenValue())).thenReturn(token);
-        when(testObject.authService.validateClient(any())).thenReturn(new Client());
-        when(testObject.authService.generateAuthenticationResponse(any(), anyString())).thenReturn(callback);
+
+        TokenService tokenService = mock(TokenService.class);
+        AuthorizationService authService = mock(AuthorizationService.class);
+        when(tokenService.validateToken(token.getTokenValue())).thenReturn(token);
+        when(authService.validateClient(any())).thenReturn(new Client());
+        when(authService.generateAuthenticationResponse(any(), anyString())).thenReturn(callback);
+        AuthorizationResource testObject = new AuthorizationResource(tokenService, authService);
 
         AuthenticationGetRequest request = new AuthenticationGetRequest(
                 "openid", "token", callback,
@@ -186,6 +196,7 @@ public class AuthorizationResourceTest {
     @Test(expected = InvalidInputException.class)
     public void afterLogin_noRequest_exception() {
 
+        AuthorizationResource testObject = new AuthorizationResource(mock(TokenService.class), mock(AuthorizationService.class));
         HttpSession session = TestUtils.mockSession("id");
 
         testObject.afterLogin(session, "some-token");
@@ -207,9 +218,12 @@ public class AuthorizationResourceTest {
         HttpSession session = TestUtils.mockSession("id");
         AuthorizationResource.loginSession.put(session.getId(), request);
 
-        when(testObject.tokenService.validateToken(token.getTokenValue())).thenReturn(token);
-        when(testObject.authService.validateClient(any())).thenReturn(new Client());
-        when(testObject.authService.generateAuthenticationResponse(any(), anyString())).thenReturn(callback);
+        TokenService tokenService = mock(TokenService.class);
+        AuthorizationService authService = mock(AuthorizationService.class);
+        when(tokenService.validateToken(token.getTokenValue())).thenReturn(token);
+        when(authService.validateClient(any())).thenReturn(new Client());
+        when(authService.generateAuthenticationResponse(any(), anyString())).thenReturn(callback);
+        AuthorizationResource testObject = new AuthorizationResource(tokenService, authService);
 
         Response response = testObject.afterLogin(session, token.getTokenValue());
 

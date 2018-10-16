@@ -1,10 +1,14 @@
 package org.matsim.viz.auth.token;
 
-import org.matsim.viz.auth.entities.DAO;
+import lombok.AllArgsConstructor;
 import org.matsim.viz.auth.entities.QToken;
 import org.matsim.viz.auth.entities.Token;
+import org.matsim.viz.database.PersistenceUnit;
 
-class TokenDAO extends DAO {
+@AllArgsConstructor
+public class TokenDAO {
+
+    private PersistenceUnit database;
 
     Token persist(Token token) {
         return database.persist(token);
@@ -25,7 +29,7 @@ class TokenDAO extends DAO {
                 .where(token.tokenValue.eq(tokenValue)).fetchOne());
     }
 
-    void removeAllTokens() {
+    public void removeAllTokens() {
         QToken token = QToken.token;
         database.executeTransactionalQuery(query -> query.delete(token).execute());
     }
