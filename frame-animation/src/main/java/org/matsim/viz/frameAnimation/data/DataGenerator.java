@@ -47,6 +47,7 @@ class DataGenerator {
             throw new InvalidInputException("visualization did not contain required input");
         this.visualization = visualization;
         visualizationData = new VisualizationData();
+        visualizationData.setPermissions(visualization.getPermissions());
     }
 
     private static Path createVizFolder(String vizId) {
@@ -86,7 +87,8 @@ class DataGenerator {
                 && visualization.getInputFiles().containsKey(EVENTS_KEY)
                 && visualization.getInputFiles().containsKey(PLANS_KEY)
                 && visualization.getParameters().size() == 1
-                && visualization.getParameters().containsKey(SNAPSHOT_INTERVAL_KEY);
+                && visualization.getParameters().containsKey(SNAPSHOT_INTERVAL_KEY)
+                && !visualization.getPermissions().isEmpty();
     }
 
     void generate() {

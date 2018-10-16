@@ -3,7 +3,12 @@ package org.matsim.viz.frameAnimation;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.google.common.collect.Lists;
 import io.dropwizard.Application;
+import io.dropwizard.auth.AuthDynamicFeature;
+import io.dropwizard.auth.AuthValueFactoryProvider;
+import io.dropwizard.auth.chained.ChainedAuthFilter;
+import io.dropwizard.auth.oauth.OAuthCredentialAuthFilter;
 import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.jersey.setup.JerseyEnvironment;
 import io.dropwizard.jetty.setup.ServletEnvironment;
@@ -11,8 +16,7 @@ import io.dropwizard.setup.Environment;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.glassfish.jersey.client.oauth2.OAuth2ClientSupport;
-import org.matsim.viz.clientAuth.ClientAuthentication;
-import org.matsim.viz.clientAuth.Credentials;
+import org.matsim.viz.clientAuth.*;
 import org.matsim.viz.database.AbstractEntity;
 import org.matsim.viz.frameAnimation.communication.NotificationHandler;
 import org.matsim.viz.frameAnimation.communication.ServiceCommunication;
@@ -20,6 +24,7 @@ import org.matsim.viz.frameAnimation.config.AppConfiguration;
 import org.matsim.viz.frameAnimation.data.DataController;
 import org.matsim.viz.frameAnimation.data.DataProvider;
 import org.matsim.viz.frameAnimation.entities.AbstractEntityMixin;
+import org.matsim.viz.frameAnimation.entities.Permission;
 import org.matsim.viz.frameAnimation.requestHandling.VisualizationResource;
 
 import javax.servlet.DispatcherType;
@@ -31,6 +36,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.EnumSet;
+import java.util.Optional;
 
 public class App extends Application<AppConfiguration> {
 
@@ -45,7 +51,8 @@ public class App extends Application<AppConfiguration> {
         AppConfiguration.setInstance(configuration);
 
         createUploadDirectory(configuration);
-        registerOauth(configuration, environment);
+        createJerseyClient(configuration, environment);
+        registerAuthFilter(configuration, ServiceCommunication.getClient(), environment);
         registerCORSFilter(environment.servlets());
         registerEndpoints(environment.jersey(), configuration);
 
@@ -58,7 +65,7 @@ public class App extends Application<AppConfiguration> {
         Files.createDirectories(directory);
     }
 
-    private void registerOauth(AppConfiguration config, Environment environment) {
+    private void createJerseyClient(AppConfiguration config, Environment environment) {
 
         // register a new objectMapper for jersey client because we are using jsonIdentityInfo for serializing out
         // object graph and the default object mapper by dropwizard does not support this.
@@ -86,6 +93,26 @@ public class App extends Application<AppConfiguration> {
         client.register(oauthFeature);
     }
 
+    private void registerAuthFilter(AppConfiguration configuration, Client client, Environment environment) {
+
+        // register oauth filters for request handling
+        final OAuthAuthenticator<Permission> authenticator = new OAuthAuthenticator<>(client, configuration.getIntrospectionEndpoint(),
+                introspectionResult -> Optional.of(Permission.createFromAuthId(introspectionResult.getSub())), new Credentials(configuration.getRelyingPartyId(), configuration.getRelyingPartySecret()));
+
+        final OAuthCredentialAuthFilter oauthFilter = new OAuthCredentialAuthFilter.Builder<Permission>()
+                .setAuthenticator(authenticator)
+                .setPrefix("Bearer")
+                .buildAuthFilter();
+        final NoAuthFilter noAuthFilter = new NoAuthFilter.Builder<Permission>()
+                .setAuthenticator(new NoAuthAuthenticator<>(() -> Optional.of(Permission.getPublicPermission())))
+                .setPrefix("")
+                .buildAuthFilter();
+
+        ChainedAuthFilter chainedAuthFilter = new ChainedAuthFilter(Lists.newArrayList(oauthFilter, noAuthFilter));
+        environment.jersey().register(new AuthDynamicFeature(chainedAuthFilter));
+        environment.jersey().register(new AuthValueFactoryProvider.Binder<>(Permission.class));
+    }
+
     @SuppressWarnings("Duplicates")
     private void registerCORSFilter(ServletEnvironment servlet) {
 
@@ -101,7 +128,7 @@ public class App extends Application<AppConfiguration> {
 
     private void registerEndpoints(JerseyEnvironment jersey, AppConfiguration configuration) {
 
-        jersey.register(new VisualizationResource(DataProvider.Instance, DataController.Instance));
+        jersey.register(new VisualizationResource(DataProvider.Instance));
         jersey.register(new NotificationHandler(DataController.Instance, DataProvider.Instance, configuration.getOwnHostname()));
     }
 }

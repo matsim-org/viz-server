@@ -10,10 +10,7 @@ import org.matsim.viz.frameAnimation.entities.*;
 import org.matsim.viz.frameAnimation.utils.TestUtils;
 
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -117,7 +114,11 @@ public class DataGeneratorTest {
         Project project = new Project("name");
         project.setId("project-id");
 
+        Set<Permission> permissions = new HashSet<>();
+        permissions.add(new Permission("some-auth-id"));
+        permissions.add(new Permission("some-other-id"));
+
         return new Visualization(
-                project, new HashSet<>(), input, params);
+                project, permissions, input, params);
     }
 }
