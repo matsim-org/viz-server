@@ -1,6 +1,7 @@
 package org.matsim.viz.auth.token;
 
 import io.dropwizard.auth.Auth;
+import lombok.AllArgsConstructor;
 import org.matsim.viz.auth.entities.RelyingParty;
 import org.matsim.viz.auth.entities.Token;
 
@@ -12,9 +13,10 @@ import javax.ws.rs.core.MediaType;
 
 @Path("/introspect")
 @Produces(MediaType.APPLICATION_JSON)
+@AllArgsConstructor
 public class IntrospectResource {
 
-    TokenService tokenService = TokenService.Instance;
+    private TokenService tokenService;
 
     @GET
     public IntrospectionResponse introspect(@Auth RelyingParty rp, @QueryParam("token") String token) {

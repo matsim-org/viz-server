@@ -10,9 +10,9 @@ public class TokenSigningKeyProviderTest {
     @Test
     public void initialization_allPresent_rsaKeys() {
 
-        TestUtils.loadTestConfigIfNecessary();
-
-        TokenSigningKeyProvider provider = new TokenSigningKeyProvider();
+        TokenSigningKeyProvider provider = new TokenSigningKeyProvider(
+                TestUtils.getResourcePath("keystore.jks"),
+                "selfsigned", "chocopause");
 
         assertNotNull(provider.getPrivateKey());
         assertNotNull(provider.getPublicKey());

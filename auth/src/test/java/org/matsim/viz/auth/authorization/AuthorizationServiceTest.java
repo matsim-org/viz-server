@@ -1,7 +1,5 @@
 package org.matsim.viz.auth.authorization;
 
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.matsim.viz.auth.entities.Client;
 import org.matsim.viz.auth.entities.Token;
@@ -9,7 +7,6 @@ import org.matsim.viz.auth.entities.User;
 import org.matsim.viz.auth.relyingParty.RelyingPartyService;
 import org.matsim.viz.auth.token.TokenService;
 import org.matsim.viz.auth.user.UserService;
-import org.matsim.viz.auth.util.TestUtils;
 import org.matsim.viz.error.CodedException;
 import org.matsim.viz.error.InternalException;
 
@@ -24,25 +21,12 @@ import static org.mockito.Mockito.when;
 
 public class AuthorizationServiceTest {
 
-    private AuthorizationService testObject;
-
-    @BeforeClass
-    public static void setUpFixture() {
-        TestUtils.loadTestConfigIfNecessary();
-    }
-
-    @Before
-    public void setUp() {
-        testObject = AuthorizationService.Instance;
-        testObject.userService = mock(UserService.class);
-        testObject.relyingPartyService = mock(RelyingPartyService.class);
-        testObject.tokenService = mock(TokenService.class);
-    }
-
     @Test(expected = CodedException.class)
     public void isValidClient_clientInvalid_invalid() {
 
-        when(testObject.relyingPartyService.validateClient(any(), any(), any())).thenThrow(new CodedException(1, "bla", "bla"));
+        RelyingPartyService relyingPartyService = mock(RelyingPartyService.class);
+        when(relyingPartyService.validateClient(any(), any(), any())).thenThrow(new CodedException(1, "bla", "bla"));
+        AuthorizationService testObject = new AuthorizationService(mock(TokenService.class), mock(UserService.class), relyingPartyService);
 
         testObject.validateClient(createAuthRequest());
 
@@ -53,18 +37,21 @@ public class AuthorizationServiceTest {
     public void isValidClient_clientValid_client() {
 
         Client client = new Client();
-        when(testObject.relyingPartyService.validateClient(any(), any(), any())).thenReturn(client);
+        RelyingPartyService relyingPartyService = mock(RelyingPartyService.class);
+        when(relyingPartyService.validateClient(any(), any(), any())).thenReturn(client);
+        AuthorizationService testObject = new AuthorizationService(mock(TokenService.class), mock(UserService.class), relyingPartyService);
 
         Client result = testObject.validateClient(createAuthRequest());
 
         assertEquals(client, result);
-
     }
 
     @Test(expected = InternalException.class)
     public void generateAuthenticationResponse_userNotFound_exception() {
 
-        when(testObject.userService.findUser(anyString())).thenReturn(null);
+        UserService userService = mock(UserService.class);
+        when(userService.findUser(anyString())).thenReturn(null);
+        AuthorizationService testObject = new AuthorizationService(mock(TokenService.class), userService, mock(RelyingPartyService.class));
 
         testObject.generateAuthenticationResponse(createAuthRequest(), "invalid-id");
 
@@ -78,8 +65,13 @@ public class AuthorizationServiceTest {
         user.setId("some-id");
         Token accessToken = new Token();
         accessToken.setTokenValue("token-value");
-        when(testObject.userService.findUser(anyString())).thenReturn(user);
-        when(testObject.tokenService.createAccessToken(any(), anyString())).thenReturn(accessToken);
+
+        UserService userService = mock(UserService.class);
+        TokenService tokenService = mock(TokenService.class);
+        when(userService.findUser(anyString())).thenReturn(user);
+        when(tokenService.createAccessToken(any(), anyString())).thenReturn(accessToken);
+        AuthorizationService testObject = new AuthorizationService(tokenService, userService, mock(RelyingPartyService.class));
+
         AuthenticationRequest request = new AuthenticationPostRequest(
                 "openid", "token", URI.create("http://some.uri"),
                 "client-id", "", "nonce"
@@ -108,8 +100,11 @@ public class AuthorizationServiceTest {
                 + "&access_token=" + accessToken.getTokenValue()
         );
 
-        when(testObject.userService.findUser(anyString())).thenReturn(user);
-        when(testObject.tokenService.createAccessToken(any(), anyString())).thenReturn(accessToken);
+        UserService userService = mock(UserService.class);
+        TokenService tokenService = mock(TokenService.class);
+        when(userService.findUser(anyString())).thenReturn(user);
+        when(tokenService.createAccessToken(any(), anyString())).thenReturn(accessToken);
+        AuthorizationService testObject = new AuthorizationService(tokenService, userService, mock(RelyingPartyService.class));
 
         URI uri = testObject.generateAuthenticationResponse(request, "any-id");
 
@@ -134,8 +129,11 @@ public class AuthorizationServiceTest {
                 + "&id_token=" + idToken.getTokenValue()
         );
 
-        when(testObject.userService.findUser(anyString())).thenReturn(user);
-        when(testObject.tokenService.createIdToken(any(), anyString())).thenReturn(idToken);
+        UserService userService = mock(UserService.class);
+        TokenService tokenService = mock(TokenService.class);
+        when(userService.findUser(anyString())).thenReturn(user);
+        when(tokenService.createIdToken(any(), anyString())).thenReturn(idToken);
+        AuthorizationService testObject = new AuthorizationService(tokenService, userService, mock(RelyingPartyService.class));
 
         URI uri = testObject.generateAuthenticationResponse(request, "any-id");
 
@@ -163,9 +161,12 @@ public class AuthorizationServiceTest {
                 + "&access_token=" + accessToken.getTokenValue()
         );
 
-        when(testObject.userService.findUser(anyString())).thenReturn(user);
-        when(testObject.tokenService.createAccessToken(any(), anyString())).thenReturn(accessToken);
-        when(testObject.tokenService.createIdToken(any(), anyString())).thenReturn(idToken);
+        UserService userService = mock(UserService.class);
+        TokenService tokenService = mock(TokenService.class);
+        when(userService.findUser(anyString())).thenReturn(user);
+        when(tokenService.createAccessToken(any(), anyString())).thenReturn(accessToken);
+        when(tokenService.createIdToken(any(), anyString())).thenReturn(idToken);
+        AuthorizationService testObject = new AuthorizationService(tokenService, userService, mock(RelyingPartyService.class));
 
         URI uri = testObject.generateAuthenticationResponse(request, "any-id");
 
@@ -176,7 +177,10 @@ public class AuthorizationServiceTest {
     public void generateAuthenticationResponse_userNotFound_internalException() {
 
         AuthenticationRequest request = createAuthRequest();
-        when(testObject.userService.findUser(anyString())).thenReturn(null);
+
+        UserService userService = mock(UserService.class);
+        when(userService.findUser(anyString())).thenReturn(null);
+        AuthorizationService testObject = new AuthorizationService(mock(TokenService.class), userService, mock(RelyingPartyService.class));
 
         testObject.generateAuthenticationResponse(request, "any-id");
 
@@ -189,5 +193,4 @@ public class AuthorizationServiceTest {
                 "client-id", "state", "nonce"
         );
     }
-
 }

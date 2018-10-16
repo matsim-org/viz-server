@@ -1,6 +1,7 @@
 package org.matsim.viz.auth.token;
 
 import io.dropwizard.auth.Auth;
+import lombok.AllArgsConstructor;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.matsim.viz.auth.entities.RelyingParty;
 import org.matsim.viz.auth.entities.Token;
@@ -14,13 +15,14 @@ import javax.ws.rs.core.MediaType;
 
 @Path("token")
 @Produces(MediaType.APPLICATION_JSON)
+@AllArgsConstructor
 public class TokenResource {
 
     private final static String GRANT_TYPE = "grant_type";
     private final static String SCOPE = "scope";
     private final static String CLIENT_CREDENTIALS = "client_credentials";
 
-    TokenService tokenService = TokenService.Instance;
+    private TokenService tokenService;
 
     @POST
     public AccessTokenResponse token(

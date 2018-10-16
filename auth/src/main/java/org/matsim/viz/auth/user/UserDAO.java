@@ -1,12 +1,20 @@
 package org.matsim.viz.auth.user;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import org.matsim.viz.auth.entities.*;
+import lombok.AllArgsConstructor;
+import org.matsim.viz.auth.entities.QUser;
+import org.matsim.viz.auth.entities.QUserCredentials;
+import org.matsim.viz.auth.entities.User;
+import org.matsim.viz.auth.entities.UserCredentials;
+import org.matsim.viz.database.PersistenceUnit;
 
 import javax.persistence.EntityManager;
 import java.util.List;
 
-public class UserDAO extends DAO {
+@AllArgsConstructor
+public class UserDAO {
+
+    private PersistenceUnit database;
 
     UserCredentials persistCredentials(UserCredentials credentials) {
 

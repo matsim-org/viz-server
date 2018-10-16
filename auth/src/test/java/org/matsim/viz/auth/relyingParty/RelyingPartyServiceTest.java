@@ -9,6 +9,7 @@ import org.matsim.viz.auth.entities.Client;
 import org.matsim.viz.auth.entities.RedirectUri;
 import org.matsim.viz.auth.entities.RelyingParty;
 import org.matsim.viz.auth.entities.RelyingPartyCredential;
+import org.matsim.viz.auth.util.TestUtils;
 import org.matsim.viz.error.UnauthorizedException;
 
 import java.net.URI;
@@ -19,16 +20,15 @@ import static org.junit.Assert.*;
 public class RelyingPartyServiceTest {
 
     private RelyingPartyService testObject;
-    private RelyingPartyDAO relyingPartyDAO = new RelyingPartyDAO();
 
     @Before
     public void setUp() {
-        testObject = RelyingPartyService.Instance;
+        testObject = new RelyingPartyService(new RelyingPartyDAO(TestUtils.getPersistenceUnit()));
     }
 
     @After
     public void tearDown() {
-        relyingPartyDAO.removeAllRelyingParties();
+        TestUtils.removeAllRelyingParties();
     }
 
     @Test
@@ -128,7 +128,7 @@ public class RelyingPartyServiceTest {
         RelyingPartyCredential credential = new RelyingPartyCredential();
         credential.setRelyingParty(party);
 
-        relyingPartyDAO.persistCredential(credential);
+        TestUtils.getRelyingPartyDAO().persistCredential(credential);
 
         testObject.validateRelyingParty(party.getId(), "wrong secret");
 
@@ -144,7 +144,7 @@ public class RelyingPartyServiceTest {
         RelyingPartyCredential credential = new RelyingPartyCredential();
         credential.setRelyingParty(party);
 
-        RelyingPartyCredential persisted = relyingPartyDAO.persistCredential(credential);
+        RelyingPartyCredential persisted = TestUtils.getRelyingPartyDAO().persistCredential(credential);
 
         testObject.validateRelyingParty(party.getId(), persisted.getSecret(), scope);
 
@@ -158,7 +158,7 @@ public class RelyingPartyServiceTest {
         RelyingPartyCredential credential = new RelyingPartyCredential();
         credential.setRelyingParty(party);
 
-        RelyingPartyCredential persisted = relyingPartyDAO.persistCredential(credential);
+        RelyingPartyCredential persisted = TestUtils.getRelyingPartyDAO().persistCredential(credential);
 
         RelyingParty result = testObject.validateRelyingParty(party.getId(), persisted.getSecret());
 
@@ -175,7 +175,7 @@ public class RelyingPartyServiceTest {
         RelyingPartyCredential credential = new RelyingPartyCredential();
         credential.setRelyingParty(party);
 
-        RelyingPartyCredential persisted = relyingPartyDAO.persistCredential(credential);
+        RelyingPartyCredential persisted = TestUtils.getRelyingPartyDAO().persistCredential(credential);
 
         RelyingParty result = testObject.validateRelyingParty(party.getId(), persisted.getSecret(), scope);
 
@@ -241,6 +241,6 @@ public class RelyingPartyServiceTest {
         RelyingPartyCredential credential = new RelyingPartyCredential();
         credential.setRelyingParty(client);
 
-        return relyingPartyDAO.persistCredential(credential);
+        return TestUtils.getRelyingPartyDAO().persistCredential(credential);
     }
 }

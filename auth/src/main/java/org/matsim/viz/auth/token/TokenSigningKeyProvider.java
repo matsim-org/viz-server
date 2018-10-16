@@ -1,7 +1,6 @@
 package org.matsim.viz.auth.token;
 
 import lombok.Getter;
-import org.matsim.viz.auth.config.AppConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,26 +15,26 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 
 @Getter
-class TokenSigningKeyProvider {
+public class TokenSigningKeyProvider {
 
     private static Logger logger = LoggerFactory.getLogger(TokenSigningKeyProvider.class);
 
     private RSAPublicKey publicKey;
     private RSAPrivateKey privateKey;
 
-    TokenSigningKeyProvider() {
-        KeyStore store = loadKeyStore(AppConfiguration.getInstance().getTokenSigningKeyStore());
-            publicKey = loadPublicKey(store);
-            privateKey = loadPrivateKey(store);
+    public TokenSigningKeyProvider(String keyStorePath, String keyAlias, String keyStorePassword) {
+        KeyStore store = loadKeyStore(keyStorePath, keyStorePassword);
+        publicKey = loadPublicKey(store, keyAlias);
+        privateKey = loadPrivateKey(store, keyAlias, keyStorePassword);
 
     }
 
-    private KeyStore loadKeyStore(String keyStorePath) {
+    private KeyStore loadKeyStore(String keyStorePath, String keyStorePassword) {
 
         File keyStoreFile = new File(keyStorePath);
         try (FileInputStream stream = new FileInputStream(keyStoreFile)) {
             KeyStore store = KeyStore.getInstance(KeyStore.getDefaultType());
-            store.load(stream, AppConfiguration.getInstance().getTokenSigningKeyStorePassword().toCharArray());
+            store.load(stream, keyStorePassword.toCharArray());
             return store;
         } catch (Exception e) {
             logger.error("Failed to load keystore!", e);
@@ -43,10 +42,10 @@ class TokenSigningKeyProvider {
         }
     }
 
-    private RSAPublicKey loadPublicKey(KeyStore store) {
+    private RSAPublicKey loadPublicKey(KeyStore store, String keyAlias) {
 
         try {
-            Certificate cert = store.getCertificate(AppConfiguration.getInstance().getTokenSigningKeyAlias());
+            Certificate cert = store.getCertificate(keyAlias);
             PublicKey publicKey = cert.getPublicKey();
             return (RSAPublicKey) publicKey;
 
@@ -59,10 +58,9 @@ class TokenSigningKeyProvider {
         }
     }
 
-    private RSAPrivateKey loadPrivateKey(KeyStore store) {
+    private RSAPrivateKey loadPrivateKey(KeyStore store, String keyAlias, String keyStorePassword) {
         try {
-            Key key = store.getKey(AppConfiguration.getInstance().getTokenSigningKeyAlias(),
-                    AppConfiguration.getInstance().getTokenSigningKeyStorePassword().toCharArray());
+            Key key = store.getKey(keyAlias, keyStorePassword.toCharArray());
             return (RSAPrivateKey) key;
         } catch (ClassCastException e) {
             throw new RuntimeException("Private signing key is not an RSA key.");

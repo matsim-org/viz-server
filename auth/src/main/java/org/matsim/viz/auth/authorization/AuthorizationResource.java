@@ -1,6 +1,7 @@
 package org.matsim.viz.auth.authorization;
 
 import io.dropwizard.jersey.sessions.Session;
+import lombok.AllArgsConstructor;
 import org.matsim.viz.auth.entities.Token;
 import org.matsim.viz.auth.token.TokenService;
 import org.matsim.viz.error.CodedException;
@@ -17,12 +18,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Path("/authorize")
 @Produces(MediaType.APPLICATION_JSON)
+@AllArgsConstructor
 public class AuthorizationResource {
 
     static Map<String, AuthenticationRequest> loginSession = new ConcurrentHashMap<>();
 
-    TokenService tokenService = TokenService.Instance;
-    AuthorizationService authService = AuthorizationService.Instance;
+    private TokenService tokenService;
+    private AuthorizationService authService;
 
     @GET
     public Response authorize(

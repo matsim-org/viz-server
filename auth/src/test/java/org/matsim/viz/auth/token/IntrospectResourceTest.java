@@ -1,10 +1,7 @@
 package org.matsim.viz.auth.token;
 
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.matsim.viz.auth.entities.Token;
-import org.matsim.viz.auth.util.TestUtils;
 
 import java.time.Instant;
 
@@ -15,23 +12,12 @@ import static org.mockito.Mockito.when;
 
 public class IntrospectResourceTest {
 
-    private IntrospectResource testObject;
-
-    @BeforeClass
-    public static void setUpFixture() {
-        TestUtils.loadTestConfigIfNecessary();
-    }
-
-    @Before
-    public void setUp() {
-        testObject = new IntrospectResource();
-        testObject.tokenService = mock(TokenService.class);
-    }
-
     @Test
     public void introspect_invalidToken_inactiveResponse() {
 
-        when(testObject.tokenService.validateToken(anyString())).thenThrow(new RuntimeException(""));
+        TokenService tokenService = mock(TokenService.class);
+        when(tokenService.validateToken(anyString())).thenThrow(new RuntimeException(""));
+        IntrospectResource testObject = new IntrospectResource(tokenService);
 
         IntrospectionResponse response = testObject.introspect(null, "some-token");
 
@@ -51,7 +37,10 @@ public class IntrospectResourceTest {
         token.setCreatedAt(Instant.now());
         token.setExpiresAt(Instant.now());
 
-        when(testObject.tokenService.validateToken(anyString())).thenReturn(token);
+
+        TokenService tokenService = mock(TokenService.class);
+        when(tokenService.validateToken(anyString())).thenReturn(token);
+        IntrospectResource testObject = new IntrospectResource(tokenService);
 
         IntrospectionResponse response = testObject.introspect(null, "some-value");
 
@@ -63,6 +52,4 @@ public class IntrospectResourceTest {
         assertEquals(token.getCreatedAt().toEpochMilli(), response.getIat());
         assertEquals(token.getExpiresAt().toEpochMilli(), response.getExp());
     }
-
-
 }

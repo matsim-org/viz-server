@@ -1,12 +1,17 @@
 package org.matsim.viz.auth.relyingParty;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import lombok.AllArgsConstructor;
 import org.matsim.viz.auth.entities.*;
+import org.matsim.viz.database.PersistenceUnit;
 
 import javax.persistence.EntityManager;
 import java.util.List;
 
-public class RelyingPartyDAO extends DAO {
+@AllArgsConstructor
+public class RelyingPartyDAO {
+
+    private PersistenceUnit database;
 
     RelyingPartyCredential persistCredential(RelyingPartyCredential credential) {
 

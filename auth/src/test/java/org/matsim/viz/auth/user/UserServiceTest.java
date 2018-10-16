@@ -15,16 +15,15 @@ import static org.junit.Assert.fail;
 public class UserServiceTest {
 
     private UserService testObject;
-    private UserDAO userDAO = new UserDAO();
 
     @Before
     public void setUp() {
-        testObject = UserService.Instance;
+        testObject = new UserService(new UserDAO(TestUtils.getPersistenceUnit()));
     }
 
     @After
     public void tearDown() {
-        userDAO.removeAllUsers();
+        TestUtils.removeAllUser();
     }
 
     @Test(expected = InvalidInputException.class)

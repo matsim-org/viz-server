@@ -1,9 +1,9 @@
 package org.matsim.viz.auth.token;
 
 import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.matsim.viz.auth.entities.Token;
 import org.matsim.viz.auth.entities.User;
@@ -18,23 +18,16 @@ import static org.mockito.Mockito.*;
 
 public class TokenServiceTest {
 
-    private static TokenDAO tokenDAO = new TokenDAO();
     private TokenService testObject;
-
-    @BeforeClass
-    public static void setUpFixture() {
-        TestUtils.loadTestConfigIfNecessary();
-    }
 
     @Before
     public void setUp() {
-        testObject = TokenService.Instance;
-        testObject.tokenDAO = spy(new TokenDAO());
+        testObject = new TokenService(new TokenDAO(TestUtils.getPersistenceUnit()), TestUtils.getKeyProvider(), TestUtils.getRelyingPartyService());
     }
 
     @After
     public void tearDown() {
-        tokenDAO.removeAllTokens();
+        TestUtils.removeAllTokens();
         TestUtils.removeAllRelyingParties();
         TestUtils.removeAllUser();
     }
@@ -43,22 +36,26 @@ public class TokenServiceTest {
     public void createIdToken_withNonce_idToken() {
 
         User user = TestUtils.persistUser("mail", "longpassword");
+        TokenDAO tokenDAO = spy(new TokenDAO(TestUtils.getPersistenceUnit()));
+        testObject = new TokenService(tokenDAO, TestUtils.getKeyProvider(), TestUtils.getRelyingPartyService());
 
         Token token = testObject.createIdToken(user, "somenonce");
 
         assertEquals(user.getId(), token.getSubjectId());
-        verify(testObject.tokenDAO, atLeastOnce()).persist(eq(token));
+        verify(tokenDAO, atLeastOnce()).persist(eq(token));
     }
 
     @Test
     public void createIdToken_withoutNonce_idToken() {
 
         User user = TestUtils.persistUser("mail", "longpassword");
+        TokenDAO tokenDAO = spy(new TokenDAO(TestUtils.getPersistenceUnit()));
+        testObject = new TokenService(tokenDAO, TestUtils.getKeyProvider(), TestUtils.getRelyingPartyService());
 
         Token token = testObject.createIdToken(user);
 
         assertEquals(user.getId(), token.getSubjectId());
-        verify(testObject.tokenDAO, atLeastOnce()).persist(eq(token));
+        verify(tokenDAO, atLeastOnce()).persist(eq(token));
     }
 
     @Test
@@ -66,6 +63,8 @@ public class TokenServiceTest {
 
         User user = TestUtils.persistUser("mail", "longpassword");
         String scope = "some-scope";
+        TokenDAO tokenDAO = spy(new TokenDAO(TestUtils.getPersistenceUnit()));
+        testObject = new TokenService(tokenDAO, TestUtils.getKeyProvider(), TestUtils.getRelyingPartyService());
 
         Token token = testObject.createAccessToken(user, scope);
 
@@ -91,7 +90,7 @@ public class TokenServiceTest {
         String token = JWT.create()
                 .withSubject(user.getId())
                 .withExpiresAt(Date.from(Instant.now().minus(Duration.ofHours(1))))
-                .sign(TokenService.Instance.algorithm);
+                .sign(Algorithm.RSA512(TestUtils.getKeyProvider().getPublicKey(), TestUtils.getKeyProvider().getPrivateKey()));
 
         testObject.validateToken(token);
 
@@ -105,7 +104,7 @@ public class TokenServiceTest {
         String token = JWT.create()
                 .withSubject(user.getId())
                 .withExpiresAt(Date.from(Instant.now().plus(Duration.ofHours(1))))
-                .sign(TokenService.Instance.algorithm);
+                .sign(Algorithm.RSA512(TestUtils.getKeyProvider().getPublicKey(), TestUtils.getKeyProvider().getPrivateKey()));
 
         testObject.validateToken(token);
 
@@ -120,7 +119,7 @@ public class TokenServiceTest {
                 .withSubject(user.getId())
                 .withExpiresAt(Date.from(Instant.now().plus(Duration.ofHours(1))))
                 .withJWTId("invalidJWTId")
-                .sign(TokenService.Instance.algorithm);
+                .sign(Algorithm.RSA512(TestUtils.getKeyProvider().getPublicKey(), TestUtils.getKeyProvider().getPrivateKey()));
 
         testObject.validateToken(token);
 
