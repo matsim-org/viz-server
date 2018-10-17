@@ -19,9 +19,6 @@ public class AppConfiguration extends Configuration {
     private List<ConfigClient> clients = new ArrayList<>();
     private List<ConfigRelyingParty> protectedResources = new ArrayList<>();
 
-    protected String tokenSigningKeyStore = "";
-    protected String tokenSigningKeyStorePassword = "";
-    protected String tokenSigningKeyAlias = "";
-
+    private int keyRenewalInterval = 24;
     private URI hostURI = URI.create("https://localhost:3000");
 }

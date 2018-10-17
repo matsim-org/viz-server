@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.matsim.viz.error.InvalidInputException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -14,6 +16,9 @@ import java.util.Base64;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class TokenSigningKeyProvider {
@@ -22,6 +27,9 @@ public class TokenSigningKeyProvider {
     private static final String algorithmType = "RSA";
     private static final int keysize = 2048;
     private static final String algorithmName = "RS512";
+    private static final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+    private static final Logger logger = LoggerFactory.getLogger(TokenSigningKeyProvider.class);
+
     private final KeyPairGenerator generator;
     private LinkedList<RSAKeyPair> keys = new LinkedList<>();
 
@@ -35,11 +43,16 @@ public class TokenSigningKeyProvider {
         }
     }
 
+    public void scheduleKeyRenewal(int intervalInHours) {
+        logger.info("scheduling key renewal for every " + intervalInHours + " hours");
+        scheduler.scheduleAtFixedRate(this::generateNewKey, intervalInHours, intervalInHours, TimeUnit.HOURS);
+    }
+
     RSAKeyPair generateNewKey() {
 
         KeyPair keyPair = generator.generateKeyPair();
-
         String keyId = UUID.randomUUID().toString();
+        logger.info("Generating new RSA key with id " + keyId);
         RSAKeyPair result = new RSAKeyPair(keyId, (RSAPrivateKey) keyPair.getPrivate(), (RSAPublicKey) keyPair.getPublic());
         keys.addFirst(result);
         this.removeOldKeys();
@@ -48,6 +61,7 @@ public class TokenSigningKeyProvider {
 
     private void removeOldKeys() {
         while (keys.size() > maxNumberOfValidKeys) {
+            logger.info("Removing oldest key");
             keys.removeLast();
         }
     }

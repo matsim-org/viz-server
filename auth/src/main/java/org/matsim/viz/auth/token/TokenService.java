@@ -5,6 +5,7 @@ import com.auth0.jwt.JWTCreator;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import org.apache.commons.lang3.StringUtils;
+import org.matsim.viz.auth.config.AppConfiguration;
 import org.matsim.viz.auth.entities.RelyingParty;
 import org.matsim.viz.auth.entities.Token;
 import org.matsim.viz.auth.entities.User;
@@ -12,7 +13,6 @@ import org.matsim.viz.auth.relyingParty.RelyingPartyService;
 import org.matsim.viz.database.AbstractEntity;
 import org.matsim.viz.error.UnauthorizedException;
 
-import java.net.URI;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
@@ -22,7 +22,6 @@ import java.util.Map;
 public class TokenService {
 
     private final TokenSigningKeyProvider tokenSigningKeyProvider;
-    private final URI hostURI = URI.create("https://auth.viz.matsim.org");
     private final TokenDAO tokenDAO;
     private final RelyingPartyService relyingPartyService;
 
@@ -71,12 +70,11 @@ public class TokenService {
         TokenSigningKeyProvider.RSAKeyPair currentSigningKey = tokenSigningKeyProvider.getCurrentKey();
 
         JWTCreator.Builder jwt = JWT.create().withSubject(subjectId)
-                .withIssuer(hostURI.toString())
+                .withIssuer(AppConfiguration.getInstance().getHostURI().toString())
                 .withIssuedAt(Date.from(token.getCreatedAt()))
                 .withExpiresAt(Date.from(token.getExpiresAt()))
                 .withJWTId(token.getId())
-                .withKeyId(currentSigningKey.getId()
-                );
+                .withKeyId(currentSigningKey.getId());
 
         if (claims != null) {
             claims.forEach(jwt::withClaim);
@@ -84,6 +82,7 @@ public class TokenService {
 
         String tokenValue = jwt.sign(Algorithm.RSA512(currentSigningKey.getPublicKey(), currentSigningKey.getPrivateKey()));
         token.setTokenValue(tokenValue);
+
         return tokenDAO.persist(token);
     }
 

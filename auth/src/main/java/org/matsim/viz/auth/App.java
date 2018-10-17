@@ -40,6 +40,7 @@ public class App extends Application<AppConfiguration> {
     private RelyingPartyService relyingPartyService;
     private TokenService tokenService;
     private AuthorizationService authorizationService;
+    private TokenSigningKeyProvider keyProvider;
 
     public static void main(String[] args) throws Exception {
         new App().run(args);
@@ -71,8 +72,11 @@ public class App extends Application<AppConfiguration> {
         TokenDAO tokenDAO = new TokenDAO(persistenceUnit);
         UserDAO userDAO = new UserDAO(persistenceUnit);
 
+        keyProvider = new TokenSigningKeyProvider();
+        keyProvider.scheduleKeyRenewal(configuration.getKeyRenewalInterval());
+
         relyingPartyService = new RelyingPartyService(relyingPartyDAO);
-        tokenService = new TokenService(tokenDAO, new TokenSigningKeyProvider(), relyingPartyService);
+        tokenService = new TokenService(tokenDAO, keyProvider, relyingPartyService);
         userService = new UserService(userDAO);
         authorizationService = new AuthorizationService(tokenService, userService, relyingPartyService);
     }
@@ -118,5 +122,6 @@ public class App extends Application<AppConfiguration> {
         jersey.register(new AuthorizationResource(tokenService, authorizationService));
         jersey.register(new LoginResource(userService, tokenService));
         jersey.register(new DiscoveryResource(configuration.getHostURI()));
+        jersey.register(new TokenSigningKeyResource(keyProvider));
     }
 }
