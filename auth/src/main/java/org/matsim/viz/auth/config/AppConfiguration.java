@@ -4,6 +4,7 @@ import io.dropwizard.Configuration;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,4 +22,6 @@ public class AppConfiguration extends Configuration {
     protected String tokenSigningKeyStore = "";
     protected String tokenSigningKeyStorePassword = "";
     protected String tokenSigningKeyAlias = "";
+
+    private URI hostURI = URI.create("https://localhost:3000");
 }

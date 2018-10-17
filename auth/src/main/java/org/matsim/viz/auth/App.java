@@ -17,6 +17,7 @@ import org.matsim.viz.auth.config.AppConfiguration;
 import org.matsim.viz.auth.config.ConfigClient;
 import org.matsim.viz.auth.config.ConfigRelyingParty;
 import org.matsim.viz.auth.config.ConfigUser;
+import org.matsim.viz.auth.discovery.DiscoveryResource;
 import org.matsim.viz.auth.entities.RelyingParty;
 import org.matsim.viz.auth.entities.User;
 import org.matsim.viz.auth.relyingParty.RelyingPartyAuthenticator;
@@ -58,7 +59,7 @@ public class App extends Application<AppConfiguration> {
 
         registerBasicAuth(environment.jersey());
         registerSessionHandling(environment.jersey(), environment.servlets());
-        registerEndpoints(environment.jersey());
+        registerEndpoints(environment.jersey(), appConfiguration);
 
         environment.jersey().register(new CodedExceptionMapper());
     }
@@ -114,11 +115,12 @@ public class App extends Application<AppConfiguration> {
         servlet.setSessionHandler(new SessionHandler());
     }
 
-    private void registerEndpoints(JerseyEnvironment jersey) {
+    private void registerEndpoints(JerseyEnvironment jersey, AppConfiguration configuration) {
 
         jersey.register(new IntrospectResource(tokenService));
         jersey.register(new TokenResource(tokenService));
         jersey.register(new AuthorizationResource(tokenService, authorizationService));
         jersey.register(new LoginResource(userService, tokenService));
+        jersey.register(new DiscoveryResource(configuration.getHostURI()));
     }
 }
