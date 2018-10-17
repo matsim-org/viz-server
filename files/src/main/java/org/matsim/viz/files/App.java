@@ -19,7 +19,7 @@ import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.matsim.viz.clientAuth.Credentials;
 import org.matsim.viz.clientAuth.NoAuthAuthenticator;
 import org.matsim.viz.clientAuth.NoAuthFilter;
-import org.matsim.viz.clientAuth.OAuthAuthenticator;
+import org.matsim.viz.clientAuth.OAuthIntrospectionAuthenticator;
 import org.matsim.viz.database.AbstractEntity;
 import org.matsim.viz.database.DbConfiguration;
 import org.matsim.viz.database.PersistenceUnit;
@@ -109,7 +109,7 @@ public class App extends Application<AppConfiguration> {
 
         // register oauth authentication for other clients making requests to this server
         SubjectFactory subjectFactory = new SubjectFactory(agentService);
-        final OAuthAuthenticator<Agent> authenticator = new OAuthAuthenticator<>(client, config.getIntrospectionEndpoint(),
+        final OAuthIntrospectionAuthenticator<Agent> authenticator = new OAuthIntrospectionAuthenticator<>(client, config.getIntrospectionEndpoint(),
                 subjectFactory::createSubject, new Credentials(config.getRelyingPartyId(), config.getRelyingPartySecret()));
         OAuthCredentialAuthFilter oauthFilter = new OAuthCredentialAuthFilter.Builder<Agent>()
                 .setAuthenticator(authenticator)

@@ -73,6 +73,7 @@ public class TokenService {
                 .withIssuer(AppConfiguration.getInstance().getHostURI().toString())
                 .withIssuedAt(Date.from(token.getCreatedAt()))
                 .withExpiresAt(Date.from(token.getExpiresAt()))
+                .withClaim("scope", scope)
                 .withJWTId(token.getId())
                 .withKeyId(currentSigningKey.getId());
 

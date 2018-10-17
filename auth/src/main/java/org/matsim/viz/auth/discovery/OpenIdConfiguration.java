@@ -21,6 +21,9 @@ class OpenIdConfiguration {
     private final String[] id_token_signing_alg_values_supported = new String[]{"RS256", "RS512"};
     private final String[] scopes_supported = new String[]{"openid", "user-client", "service-client"};
     private final String[] token_endpoint_auth_methods_supported = new String[]{"client_secret_basic"};
+    private final String[] claims_supported = new String[]{
+            "iss", "sub", "iat", "exp", "kid", "scope"
+    };
 
     OpenIdConfiguration(URI host) {
         this.issuer = host;
