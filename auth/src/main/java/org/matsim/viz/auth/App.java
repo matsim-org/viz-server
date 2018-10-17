@@ -65,18 +65,14 @@ public class App extends Application<AppConfiguration> {
     }
 
     private void initializeServices(AppConfiguration configuration) {
-        TokenSigningKeyProvider keyProvider = new TokenSigningKeyProvider(
-                configuration.getTokenSigningKeyStore(),
-                configuration.getTokenSigningKeyAlias(),
-                configuration.getTokenSigningKeyStorePassword()
-        );
+
         PersistenceUnit persistenceUnit = new PersistenceUnit("org.matsim.viz.auth");
         RelyingPartyDAO relyingPartyDAO = new RelyingPartyDAO(persistenceUnit);
         TokenDAO tokenDAO = new TokenDAO(persistenceUnit);
         UserDAO userDAO = new UserDAO(persistenceUnit);
 
         relyingPartyService = new RelyingPartyService(relyingPartyDAO);
-        tokenService = new TokenService(tokenDAO, keyProvider, relyingPartyService);
+        tokenService = new TokenService(tokenDAO, new TokenSigningKeyProvider(), relyingPartyService);
         userService = new UserService(userDAO);
         authorizationService = new AuthorizationService(tokenService, userService, relyingPartyService);
     }

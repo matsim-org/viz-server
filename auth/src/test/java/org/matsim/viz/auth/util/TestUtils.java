@@ -4,7 +4,6 @@ import org.matsim.viz.auth.entities.User;
 import org.matsim.viz.auth.relyingParty.RelyingPartyDAO;
 import org.matsim.viz.auth.relyingParty.RelyingPartyService;
 import org.matsim.viz.auth.token.TokenDAO;
-import org.matsim.viz.auth.token.TokenSigningKeyProvider;
 import org.matsim.viz.auth.user.UserDAO;
 import org.matsim.viz.auth.user.UserService;
 import org.matsim.viz.database.PersistenceUnit;
@@ -24,7 +23,6 @@ public class TestUtils {
 
     private static UserService userService = new UserService(userDAO);
     private static RelyingPartyService rpService = new RelyingPartyService(relyingPartyDAO);
-    private static TokenSigningKeyProvider keyProvider = new TokenSigningKeyProvider(getResourcePath("keystore.jks"), "selfsigned", "chocopause");
 
     public static RelyingPartyService getRelyingPartyService() {
         return rpService;
@@ -36,10 +34,6 @@ public class TestUtils {
 
     public static RelyingPartyDAO getRelyingPartyDAO() {
         return relyingPartyDAO;
-    }
-
-    public static TokenSigningKeyProvider getKeyProvider() {
-        return keyProvider;
     }
 
     public static HttpSession mockSession(String id) {
@@ -63,10 +57,5 @@ public class TestUtils {
 
     public static void removeAllTokens() {
         tokenDAO.removeAllTokens();
-    }
-
-    @SuppressWarnings("ConstantConditions")
-    public static String getResourcePath(String resource) {
-        return TestUtils.class.getClassLoader().getResource(resource).getFile();
     }
 }

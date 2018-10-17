@@ -1,72 +1,88 @@
 package org.matsim.viz.auth.token;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.RequiredArgsConstructor;
+import org.matsim.viz.error.InvalidInputException;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.security.Key;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.PublicKey;
-import java.security.cert.Certificate;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.util.Base64;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
-@Getter
 public class TokenSigningKeyProvider {
 
-    private static Logger logger = LoggerFactory.getLogger(TokenSigningKeyProvider.class);
+    private static final int maxNumberOfValidKeys = 2;
+    private static final String algorithmType = "RSA";
+    private static final int keysize = 2048;
+    private static final String algorithmName = "RS512";
+    private final KeyPairGenerator generator;
+    private LinkedList<RSAKeyPair> keys = new LinkedList<>();
 
-    private RSAPublicKey publicKey;
-    private RSAPrivateKey privateKey;
-
-    public TokenSigningKeyProvider(String keyStorePath, String keyAlias, String keyStorePassword) {
-        KeyStore store = loadKeyStore(keyStorePath, keyStorePassword);
-        publicKey = loadPublicKey(store, keyAlias);
-        privateKey = loadPrivateKey(store, keyAlias, keyStorePassword);
-
-    }
-
-    private KeyStore loadKeyStore(String keyStorePath, String keyStorePassword) {
-
-        File keyStoreFile = new File(keyStorePath);
-        try (FileInputStream stream = new FileInputStream(keyStoreFile)) {
-            KeyStore store = KeyStore.getInstance(KeyStore.getDefaultType());
-            store.load(stream, keyStorePassword.toCharArray());
-            return store;
-        } catch (Exception e) {
-            logger.error("Failed to load keystore!", e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    private RSAPublicKey loadPublicKey(KeyStore store, String keyAlias) {
-
+    public TokenSigningKeyProvider() {
         try {
-            Certificate cert = store.getCertificate(keyAlias);
-            PublicKey publicKey = cert.getPublicKey();
-            return (RSAPublicKey) publicKey;
-
-        } catch (KeyStoreException e) {
-            logger.error("Failed to load public token signing key.");
-            throw new RuntimeException(e);
-        } catch (ClassCastException e) {
-            logger.error("public signing key was not an RSA key.");
+            generator = KeyPairGenerator.getInstance(algorithmType);
+            generator.initialize(keysize);
+            this.generateNewKey();
+        } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private RSAPrivateKey loadPrivateKey(KeyStore store, String keyAlias, String keyStorePassword) {
-        try {
-            Key key = store.getKey(keyAlias, keyStorePassword.toCharArray());
-            return (RSAPrivateKey) key;
-        } catch (ClassCastException e) {
-            throw new RuntimeException("Private signing key is not an RSA key.");
-        } catch (Exception e) {
-            logger.error("failed to load private token signing key", e);
-            throw new RuntimeException(e);
+    RSAKeyPair generateNewKey() {
+
+        KeyPair keyPair = generator.generateKeyPair();
+
+        String keyId = UUID.randomUUID().toString();
+        RSAKeyPair result = new RSAKeyPair(keyId, (RSAPrivateKey) keyPair.getPrivate(), (RSAPublicKey) keyPair.getPublic());
+        keys.addFirst(result);
+        this.removeOldKeys();
+        return result;
+    }
+
+    private void removeOldKeys() {
+        while (keys.size() > maxNumberOfValidKeys) {
+            keys.removeLast();
         }
+    }
+
+    RSAKeyPair getCurrentKey() {
+        return keys.getFirst();
+    }
+
+    RSAKeyPair getKeyById(String id) {
+        return keys.stream().filter(key -> key.id.equals(id))
+                .findFirst().orElseThrow(() -> new InvalidInputException("unknown key id"));
+    }
+
+    List<KeyInformation> getKeyInformation() {
+        return keys.stream()
+                .map(key -> new KeyInformation(key.id, Base64.getEncoder().encodeToString(key.getPublicKey().getEncoded())))
+                .collect(Collectors.toList());
+    }
+
+    @Getter
+    @AllArgsConstructor
+    static class RSAKeyPair {
+        private String id;
+        private RSAPrivateKey privateKey;
+        private RSAPublicKey publicKey;
+    }
+
+    @RequiredArgsConstructor
+    @Getter
+    static class KeyInformation {
+
+        private final String kid;
+        private final String n;
+        private final String alg = algorithmName;
+        private final String use = "sig";
+        private final String kty = algorithmType;
     }
 }
