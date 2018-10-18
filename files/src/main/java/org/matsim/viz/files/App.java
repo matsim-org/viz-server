@@ -1,12 +1,9 @@
 package org.matsim.viz.files;
 
 import com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module;
-import com.google.common.collect.Lists;
 import io.dropwizard.Application;
 import io.dropwizard.auth.AuthDynamicFeature;
 import io.dropwizard.auth.AuthValueFactoryProvider;
-import io.dropwizard.auth.chained.ChainedAuthFilter;
-import io.dropwizard.auth.oauth.OAuthCredentialAuthFilter;
 import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.forms.MultiPartBundle;
 import io.dropwizard.jersey.setup.JerseyEnvironment;
@@ -15,10 +12,8 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
 import org.flywaydb.core.Flyway;
-import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
-import org.matsim.viz.clientAuth.NoAuthAuthenticator;
-import org.matsim.viz.clientAuth.NoAuthFilter;
 import org.matsim.viz.clientAuth.OAuthAuthenticator;
+import org.matsim.viz.clientAuth.OAuthNoAuthFilter;
 import org.matsim.viz.database.AbstractEntity;
 import org.matsim.viz.database.DbConfiguration;
 import org.matsim.viz.database.PersistenceUnit;
@@ -101,28 +96,21 @@ public class App extends Application<AppConfiguration> {
 
     private void registerOAuth(AppConfiguration config, Environment environment) {
 
-        // register oauth authentication when making requests to other servers
-        HttpAuthenticationFeature auth = HttpAuthenticationFeature.basicBuilder().build();
+        // create client to make requests to other servers
         final Client client = new JerseyClientBuilder(environment).using(config.getJerseyClient()).build("files");
-        // client.register(auth);
 
         // register oauth authentication for other clients making requests to this server
         SubjectFactory subjectFactory = new SubjectFactory(agentService);
         final OAuthAuthenticator<Agent> authenticator = new OAuthAuthenticator<>(client, config.getIdProvider(),
                 subjectFactory::createSubject);
-        OAuthCredentialAuthFilter oauthFilter = new OAuthCredentialAuthFilter.Builder<Agent>()
+
+        OAuthNoAuthFilter filter = new OAuthNoAuthFilter.Builder<Agent>()
+                .setNoAuthPrincipalProvider(subjectFactory::createPublicAgent)
                 .setAuthenticator(authenticator)
                 .setPrefix("Bearer")
                 .buildAuthFilter();
 
-        // register default auth-filter for unauthorized requests
-        NoAuthFilter noAuthFilter = new NoAuthFilter.Builder<Agent>()
-                .setAuthenticator(new NoAuthAuthenticator<>(subjectFactory::createPublicAgent))
-                .setPrefix("")
-                .buildAuthFilter();
-
-        ChainedAuthFilter chainedAuthFilter = new ChainedAuthFilter(Lists.newArrayList(oauthFilter, noAuthFilter));
-        environment.jersey().register(new AuthDynamicFeature(chainedAuthFilter));
+        environment.jersey().register(new AuthDynamicFeature(filter));
         environment.jersey().register(new AuthValueFactoryProvider.Binder<>(Agent.class));
     }
 
