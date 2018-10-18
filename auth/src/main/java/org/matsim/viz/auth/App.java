@@ -76,7 +76,7 @@ public class App extends Application<AppConfiguration> {
         keyProvider.scheduleKeyRenewal(configuration.getKeyRenewalInterval());
 
         relyingPartyService = new RelyingPartyService(relyingPartyDAO);
-        tokenService = new TokenService(tokenDAO, keyProvider, relyingPartyService);
+        tokenService = new TokenService(tokenDAO, keyProvider, relyingPartyService, configuration.getHostURI());
         userService = new UserService(userDAO);
         authorizationService = new AuthorizationService(tokenService, userService, relyingPartyService);
     }

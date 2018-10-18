@@ -5,7 +5,6 @@ import com.auth0.jwt.JWTCreator;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import org.apache.commons.lang3.StringUtils;
-import org.matsim.viz.auth.config.AppConfiguration;
 import org.matsim.viz.auth.entities.RelyingParty;
 import org.matsim.viz.auth.entities.Token;
 import org.matsim.viz.auth.entities.User;
@@ -13,6 +12,7 @@ import org.matsim.viz.auth.relyingParty.RelyingPartyService;
 import org.matsim.viz.database.AbstractEntity;
 import org.matsim.viz.error.UnauthorizedException;
 
+import java.net.URI;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
@@ -21,14 +21,17 @@ import java.util.Map;
 
 public class TokenService {
 
-    private final TokenSigningKeyProvider tokenSigningKeyProvider;
     private final TokenDAO tokenDAO;
     private final RelyingPartyService relyingPartyService;
+    private final Algorithm signingAlgorithm;
+    private final URI host;
 
-    public TokenService(TokenDAO tokenDAO, TokenSigningKeyProvider tokenSigningKeyProvider, RelyingPartyService relyingPartyService) {
+    public TokenService(TokenDAO tokenDAO, TokenSigningKeyProvider tokenSigningKeyProvider, RelyingPartyService relyingPartyService,
+                        URI host) {
         this.tokenDAO = tokenDAO;
         this.relyingPartyService = relyingPartyService;
-        this.tokenSigningKeyProvider = tokenSigningKeyProvider;
+        this.signingAlgorithm = Algorithm.RSA512(tokenSigningKeyProvider);
+        this.host = host;
     }
 
     Token grantForScope(RelyingParty relyingParty, String scope) {
@@ -67,21 +70,18 @@ public class TokenService {
         token.setScope(scope);
         token = tokenDAO.persist(token);
 
-        TokenSigningKeyProvider.RSAKeyPair currentSigningKey = tokenSigningKeyProvider.getCurrentKey();
-
         JWTCreator.Builder jwt = JWT.create().withSubject(subjectId)
-                .withIssuer(AppConfiguration.getInstance().getHostURI().toString())
+                .withIssuer(host.toString())
                 .withIssuedAt(Date.from(token.getCreatedAt()))
                 .withExpiresAt(Date.from(token.getExpiresAt()))
                 .withClaim("scope", scope)
-                .withJWTId(token.getId())
-                .withKeyId(currentSigningKey.getId());
+                .withJWTId(token.getId());
 
         if (claims != null) {
             claims.forEach(jwt::withClaim);
         }
 
-        String tokenValue = jwt.sign(Algorithm.RSA512(currentSigningKey.getPublicKey(), currentSigningKey.getPrivateKey()));
+        String tokenValue = jwt.sign(signingAlgorithm);
         token.setTokenValue(tokenValue);
 
         return tokenDAO.persist(token);
@@ -92,8 +92,7 @@ public class TokenService {
         DecodedJWT decodedToken;
         try {
             decodedToken = JWT.decode(encodedToken);
-            TokenSigningKeyProvider.RSAKeyPair key = tokenSigningKeyProvider.getKeyById(decodedToken.getKeyId());
-            JWT.require(Algorithm.RSA512(key.getPublicKey(), key.getPrivateKey())).build().verify(encodedToken);
+            JWT.require(signingAlgorithm).build().verify(encodedToken);
         } catch (RuntimeException e) {
             throw new UnauthorizedException("invalid token");
         }

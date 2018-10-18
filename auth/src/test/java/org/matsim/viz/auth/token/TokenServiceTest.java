@@ -9,6 +9,7 @@ import org.matsim.viz.auth.entities.Token;
 import org.matsim.viz.auth.entities.User;
 import org.matsim.viz.auth.util.TestUtils;
 
+import java.net.URI;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
@@ -18,11 +19,12 @@ import static org.mockito.Mockito.*;
 
 public class TokenServiceTest {
 
+    private static final URI host = URI.create("https://host.uri");
     private TokenService testObject;
 
     @Before
     public void setUp() {
-        testObject = new TokenService(new TokenDAO(TestUtils.getPersistenceUnit()), new TokenSigningKeyProvider(), TestUtils.getRelyingPartyService());
+        testObject = new TokenService(new TokenDAO(TestUtils.getPersistenceUnit()), new TokenSigningKeyProvider(), TestUtils.getRelyingPartyService(), host);
     }
 
     @After
@@ -37,7 +39,7 @@ public class TokenServiceTest {
 
         User user = TestUtils.persistUser("mail", "longpassword");
         TokenDAO tokenDAO = spy(new TokenDAO(TestUtils.getPersistenceUnit()));
-        testObject = new TokenService(tokenDAO, new TokenSigningKeyProvider(), TestUtils.getRelyingPartyService());
+        testObject = new TokenService(tokenDAO, new TokenSigningKeyProvider(), TestUtils.getRelyingPartyService(), host);
 
         Token token = testObject.createIdToken(user, "somenonce");
 
@@ -50,7 +52,7 @@ public class TokenServiceTest {
 
         User user = TestUtils.persistUser("mail", "longpassword");
         TokenDAO tokenDAO = spy(new TokenDAO(TestUtils.getPersistenceUnit()));
-        testObject = new TokenService(tokenDAO, new TokenSigningKeyProvider(), TestUtils.getRelyingPartyService());
+        testObject = new TokenService(tokenDAO, new TokenSigningKeyProvider(), TestUtils.getRelyingPartyService(), host);
 
         Token token = testObject.createIdToken(user);
 
@@ -64,7 +66,7 @@ public class TokenServiceTest {
         User user = TestUtils.persistUser("mail", "longpassword");
         String scope = "some-scope";
         TokenDAO tokenDAO = spy(new TokenDAO(TestUtils.getPersistenceUnit()));
-        testObject = new TokenService(tokenDAO, new TokenSigningKeyProvider(), TestUtils.getRelyingPartyService());
+        testObject = new TokenService(tokenDAO, new TokenSigningKeyProvider(), TestUtils.getRelyingPartyService(), host);
 
         Token token = testObject.createAccessToken(user, scope);
 
@@ -88,13 +90,12 @@ public class TokenServiceTest {
 
         User user = TestUtils.persistUser("some", "longpassword");
         TokenSigningKeyProvider tokenSigningKeyProvider = new TokenSigningKeyProvider();
-        new TokenService(new TokenDAO(TestUtils.getPersistenceUnit()), tokenSigningKeyProvider, TestUtils.getRelyingPartyService());
+        new TokenService(new TokenDAO(TestUtils.getPersistenceUnit()), tokenSigningKeyProvider, TestUtils.getRelyingPartyService(), host);
 
         String token = JWT.create()
                 .withSubject(user.getId())
                 .withExpiresAt(Date.from(Instant.now().minus(Duration.ofHours(1))))
-                .withKeyId(tokenSigningKeyProvider.getCurrentKey().getId())
-                .sign(Algorithm.RSA512(tokenSigningKeyProvider.getCurrentKey().getPublicKey(), tokenSigningKeyProvider.getCurrentKey().getPrivateKey()));
+                .sign(Algorithm.RSA512(tokenSigningKeyProvider));
 
         testObject.validateToken(token);
 
@@ -106,12 +107,11 @@ public class TokenServiceTest {
 
         User user = TestUtils.persistUser("some", "longpassword");
         TokenSigningKeyProvider tokenSigningKeyProvider = new TokenSigningKeyProvider();
-        new TokenService(new TokenDAO(TestUtils.getPersistenceUnit()), tokenSigningKeyProvider, TestUtils.getRelyingPartyService());
+        new TokenService(new TokenDAO(TestUtils.getPersistenceUnit()), tokenSigningKeyProvider, TestUtils.getRelyingPartyService(), host);
         String token = JWT.create()
                 .withSubject(user.getId())
                 .withExpiresAt(Date.from(Instant.now().plus(Duration.ofHours(1))))
-                .withKeyId(tokenSigningKeyProvider.getCurrentKey().getId())
-                .sign(Algorithm.RSA512(tokenSigningKeyProvider.getCurrentKey().getPublicKey(), tokenSigningKeyProvider.getCurrentKey().getPrivateKey()));
+                .sign(Algorithm.RSA512(tokenSigningKeyProvider));
 
         testObject.validateToken(token);
 
@@ -123,13 +123,12 @@ public class TokenServiceTest {
 
         User user = TestUtils.persistUser("some", "longpassword");
         TokenSigningKeyProvider tokenSigningKeyProvider = new TokenSigningKeyProvider();
-        new TokenService(new TokenDAO(TestUtils.getPersistenceUnit()), tokenSigningKeyProvider, TestUtils.getRelyingPartyService());
+        new TokenService(new TokenDAO(TestUtils.getPersistenceUnit()), tokenSigningKeyProvider, TestUtils.getRelyingPartyService(), host);
         String token = JWT.create()
                 .withSubject(user.getId())
                 .withExpiresAt(Date.from(Instant.now().plus(Duration.ofHours(1))))
                 .withJWTId("invalidJWTId")
-                .withKeyId(tokenSigningKeyProvider.getCurrentKey().getId())
-                .sign(Algorithm.RSA512(tokenSigningKeyProvider.getCurrentKey().getPublicKey(), tokenSigningKeyProvider.getCurrentKey().getPrivateKey()));
+                .sign(Algorithm.RSA512(tokenSigningKeyProvider));
 
         testObject.validateToken(token);
 

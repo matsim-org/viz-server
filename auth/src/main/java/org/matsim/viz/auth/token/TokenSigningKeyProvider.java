@@ -1,5 +1,6 @@
 package org.matsim.viz.auth.token;
 
+import com.auth0.jwt.interfaces.RSAKeyProvider;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +22,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-public class TokenSigningKeyProvider {
+public class TokenSigningKeyProvider implements RSAKeyProvider {
 
     private static final int maxNumberOfValidKeys = 2;
     private static final String algorithmType = "RSA";
@@ -66,19 +67,28 @@ public class TokenSigningKeyProvider {
         }
     }
 
-    RSAKeyPair getCurrentKey() {
-        return keys.getFirst();
-    }
-
-    RSAKeyPair getKeyById(String id) {
-        return keys.stream().filter(key -> key.id.equals(id))
-                .findFirst().orElseThrow(() -> new InvalidInputException("unknown key id"));
-    }
-
     List<KeyInformation> getKeyInformation() {
         return keys.stream()
                 .map(key -> new KeyInformation(key.id, Base64.getEncoder().encodeToString(key.getPublicKey().getEncoded())))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public RSAPublicKey getPublicKeyById(String keyId) {
+        return keys.stream().filter(key -> key.id.equals(keyId))
+                .findFirst()
+                .orElseThrow(() -> new InvalidInputException("unknown key id"))
+                .getPublicKey();
+    }
+
+    @Override
+    public RSAPrivateKey getPrivateKey() {
+        return keys.getFirst().getPrivateKey();
+    }
+
+    @Override
+    public String getPrivateKeyId() {
+        return keys.getFirst().getId();
     }
 
     @Getter

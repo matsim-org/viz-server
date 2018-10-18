@@ -3,6 +3,9 @@ package org.matsim.viz.auth.token;
 import org.junit.Test;
 import org.matsim.viz.error.InvalidInputException;
 
+import java.security.PublicKey;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
 import java.util.List;
 import java.util.UUID;
 
@@ -16,7 +19,7 @@ public class TokenSigningKeyProviderTest {
         TokenSigningKeyProvider provider = new TokenSigningKeyProvider();
 
         assertNotNull(provider);
-        assertNotNull(provider.getCurrentKey());
+        assertNotNull(provider.getPrivateKey());
     }
 
     @Test
@@ -45,13 +48,13 @@ public class TokenSigningKeyProviderTest {
         TokenSigningKeyProvider.RSAKeyPair second = provider.generateNewKey();
         TokenSigningKeyProvider.RSAKeyPair third = provider.generateNewKey();
 
-        TokenSigningKeyProvider.RSAKeyPair shouldBePresent = provider.getKeyById(second.getId());
-        TokenSigningKeyProvider.RSAKeyPair shouldalsoBePresent = provider.getKeyById(third.getId());
-        assertEquals(second, shouldBePresent);
-        assertEquals(third, shouldalsoBePresent);
+        PublicKey shouldBePresent = provider.getPublicKeyById(second.getId());
+        PublicKey shouldalsoBePresent = provider.getPublicKeyById(third.getId());
+        assertEquals(second.getPublicKey(), shouldBePresent);
+        assertEquals(third.getPublicKey(), shouldalsoBePresent);
 
         try {
-            TokenSigningKeyProvider.RSAKeyPair shouldCauseException = provider.getKeyById(first.getId());
+            PublicKey shouldCauseException = provider.getPublicKeyById(first.getId());
             fail("first keyPair should have been removed");
         } catch (Exception e) {
             // fine. first keyPair should have been removed an retreiving it should cause exception
@@ -65,10 +68,10 @@ public class TokenSigningKeyProviderTest {
         TokenSigningKeyProvider.RSAKeyPair first = provider.generateNewKey();
         TokenSigningKeyProvider.RSAKeyPair second = provider.generateNewKey();
 
-        TokenSigningKeyProvider.RSAKeyPair result = provider.getCurrentKey();
+        RSAPrivateKey result = provider.getPrivateKey();
 
-        assertEquals(second.getId(), result.getId());
-        assertNotSame(first, result);
+        assertEquals(second.getPrivateKey(), result);
+        assertNotSame(first.getPrivateKey(), result);
     }
 
     @Test
@@ -90,9 +93,9 @@ public class TokenSigningKeyProviderTest {
         TokenSigningKeyProvider provider = new TokenSigningKeyProvider();
         TokenSigningKeyProvider.RSAKeyPair first = provider.generateNewKey();
 
-        TokenSigningKeyProvider.RSAKeyPair result = provider.getKeyById(first.getId());
+        RSAPublicKey result = provider.getPublicKeyById(first.getId());
 
-        assertEquals(first.getId(), result.getId());
+        assertEquals(first.getPublicKey(), result);
 
     }
 
@@ -102,7 +105,7 @@ public class TokenSigningKeyProviderTest {
         TokenSigningKeyProvider provider = new TokenSigningKeyProvider();
         TokenSigningKeyProvider.RSAKeyPair first = provider.generateNewKey();
 
-        provider.getKeyById("invalid-id");
+        provider.getPublicKeyById("invalid-id");
 
         fail("invalid keyPair id should cause exception");
 
