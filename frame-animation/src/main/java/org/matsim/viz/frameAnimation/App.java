@@ -3,12 +3,9 @@ package org.matsim.viz.frameAnimation;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.google.common.collect.Lists;
 import io.dropwizard.Application;
 import io.dropwizard.auth.AuthDynamicFeature;
 import io.dropwizard.auth.AuthValueFactoryProvider;
-import io.dropwizard.auth.chained.ChainedAuthFilter;
-import io.dropwizard.auth.oauth.OAuthCredentialAuthFilter;
 import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.jersey.setup.JerseyEnvironment;
 import io.dropwizard.jetty.setup.ServletEnvironment;
@@ -16,7 +13,10 @@ import io.dropwizard.setup.Environment;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.glassfish.jersey.client.oauth2.OAuth2ClientSupport;
-import org.matsim.viz.clientAuth.*;
+import org.matsim.viz.clientAuth.ClientAuthentication;
+import org.matsim.viz.clientAuth.Credentials;
+import org.matsim.viz.clientAuth.OAuthAuthenticator;
+import org.matsim.viz.clientAuth.OAuthNoAuthFilter;
 import org.matsim.viz.database.AbstractEntity;
 import org.matsim.viz.frameAnimation.communication.NotificationHandler;
 import org.matsim.viz.frameAnimation.communication.ServiceCommunication;
@@ -99,17 +99,13 @@ public class App extends Application<AppConfiguration> {
         final OAuthAuthenticator<Permission> authenticator = new OAuthAuthenticator<>(client, configuration.getIdProvider(),
                 result -> Optional.of(Permission.createFromAuthId(result.getSubjectId())));
 
-        final OAuthCredentialAuthFilter oauthFilter = new OAuthCredentialAuthFilter.Builder<Permission>()
+        OAuthNoAuthFilter filter = new OAuthNoAuthFilter.Builder<Permission>()
+                .setNoAuthPrincipalProvider(() -> Optional.of(Permission.getPublicPermission()))
                 .setAuthenticator(authenticator)
                 .setPrefix("Bearer")
                 .buildAuthFilter();
-        final NoAuthFilter noAuthFilter = new NoAuthFilter.Builder<Permission>()
-                .setAuthenticator(new NoAuthAuthenticator<>(() -> Optional.of(Permission.getPublicPermission())))
-                .setPrefix("")
-                .buildAuthFilter();
 
-        ChainedAuthFilter chainedAuthFilter = new ChainedAuthFilter(Lists.newArrayList(oauthFilter, noAuthFilter));
-        environment.jersey().register(new AuthDynamicFeature(chainedAuthFilter));
+        environment.jersey().register(new AuthDynamicFeature(filter));
         environment.jersey().register(new AuthValueFactoryProvider.Binder<>(Permission.class));
     }
 

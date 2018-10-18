@@ -41,6 +41,7 @@ public class OAuthAuthenticator<P extends Principal> implements Authenticator<St
         } catch (RuntimeException e) {
             // if anything fails, deny authentication
             logger.info("Denying authentication for token: " + token);
+            //throw new AuthenticationException("Could not validate token");
             return Optional.empty();
         }
     }
