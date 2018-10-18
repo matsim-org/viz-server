@@ -49,7 +49,7 @@ org.matsim.viz.files.config.AppConfiguration
 org.matsim.viz.frameAnimation.config.AppConfiguration
 ```
 
-Refer to example configurations in the wiki
+Refer to example configurations in the [wiki](https://github.com/matsim-org/viz-server/wiki)
 
 Since OAuth and OpenID-Connect are used for authentication all server components must be configured to use TLS! If run as standalone Jetty-Servers (dropwizard comes with a jetty server) all application connectors must be of type 'https'. Since, https-connectors require TLS-certificates whithin a JKS-Keystore it might be easier to run a reverse proxy server which terminates TLS-connections and forwards requests to the corresponding components. This way the management and renewal of TLS-certificates becomes easier.
 
