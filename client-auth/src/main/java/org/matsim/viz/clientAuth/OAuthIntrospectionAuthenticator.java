@@ -15,8 +15,8 @@ import java.util.function.Function;
 public class OAuthIntrospectionAuthenticator<P extends Principal> implements Authenticator<String, P> {
 
     Client client;
-    URI introspectionEndpoint;
-    Function<IntrospectionResult, Optional<P>> principalProvider;
+    URI idProvider;
+    Function<AuthenticationResult, Optional<P>> principalProvider;
     Credentials credentials;
 
     @Override
@@ -24,7 +24,7 @@ public class OAuthIntrospectionAuthenticator<P extends Principal> implements Aut
 
         IntrospectionResult result = introspectToken(token);
         if (result.isActive())
-            return principalProvider.apply(result);
+            return principalProvider.apply(new AuthenticationResult(result.getSub(), result.getScope()));
 
         return Optional.empty();
     }
@@ -32,7 +32,7 @@ public class OAuthIntrospectionAuthenticator<P extends Principal> implements Aut
     private IntrospectionResult introspectToken(String token) throws AuthenticationException {
 
         try {
-            return client.target(introspectionEndpoint)
+            return client.target(idProvider.resolve("/introspect"))
                     .queryParam("token", token)
                     .request()
                     .property(HttpAuthenticationFeature.HTTP_AUTHENTICATION_BASIC_USERNAME, credentials.getPrincipal())
