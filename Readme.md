@@ -20,42 +20,38 @@ well, needs to be generated before the first run. To do so, simply execute
 mvn clean compile
 ```
 
-### 3. Generate Keys for TLS-Communication and Token-Signing
+### 3. Build the project for deployment
 
-Since we are using OAuth for Authorization the use of TLS (https) is required. 
-For development the use of self signed keys is sufficient. The Java SDK comes 
-with the [keytool] (https://docs.oracle.com/javase/8/docs/technotes/tools/unix/keytool.html) 
-for that purpose. To generate RSA-Keys for TLS-communication execute the following
-command:
+To build deployable artifacts simply run the maven install command
 
 ```
-keytool -genkeypair -keyalg RSA -keysize 2048 -keystore keystore.jks -storetype JKS -alias selfsigned -validity 180 -dname "cn=Janek Laudan ou=VSP o=TU Berlin c=DE" -ext SAN=URI:https://localhost
+mvn clean install
 ```
 
-This command generates a keystore file named 'keystore.jks' which can be used by 
-the auth-server component to encrypt its communication with clients. To consume
-this key as a client, the client needs to trust the public key of the generated
-RSA-Key. A client could be the file-server component when doing token introspection.
-To make the file-server trust the auth-server certificate it must be exported into
-a truststore. Execute the following commmands to create a truststore:
+This will build fat jars for all server-modules. (Currently, there are three server-components, auth, files, frame-animation) To run one of the built components find the fat jar in the component's target folder and execute 
 
 ```
-keytool -keystore keystore.jks -alias selfsigned -export -file selfsigned.cert
-keytool -keystore truststore.jks -alias selfsigned -import -file selfsigned.cert
+java -jar <jar-name>.jar server <path/to/config/file>
 ```
+NOTE: Jre8 or newer is required.
 
-The public part of the RSA key is first exported as a certificate and then imported
-into a truststore file named 'truststore.jks'.
+This will start the component as a server as configured in the config file.
 
 ### 4. Start the servers with a config file
 
-All server components can be configured with a configuration file in JSON-Format.
-To load a configuration file you can add the following parameter when starting the
-program:
+All server components use the dropwizard server framework which also defines a configuration file format. All possible options are documented [here] (https://www.dropwizard.io/1.3.5/docs/manual/configuration.html#man-configuration) 
+
+Additionally, each component defines its own configuration properties. They can be found within the following classes. 
 
 ```
--config /path/to/your/config/file.json
+org.matsim.viz.auth.config.AppConfiguration
+org.matsim.viz.files.config.AppConfiguration
+org.matsim.viz.frameAnimation.config.AppConfiguration
 ```
+Refer to example configurations in the wiki
+
+Since OAuth and OpenID-Connect are used for authentication all server components must be configured to use TLS! If run as standalone Jetty-Servers (dropwizard comes with a jetty server) all application connectors must be of type 'https'. Since, https-connectors require TLS-certificates whithin a JKS-Keystore it might be easier to run a reverse proxy server which terminates TLS-connections and forwards requests to the corresponding components. This way the management and renewal of TLS-certificates becomes easier. 
+
 
 ### 5. Build for deployment
 
