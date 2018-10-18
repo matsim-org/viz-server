@@ -20,7 +20,7 @@ public class AppConfiguration extends Configuration {
     private String relyingPartySecret = "secret";
 
     private URI ownHostname = URI.create("http://dumm-hostname.com");
-    private URI introspectionEndpoint = URI.create("http://dummy-endpoint.com");
+    private URI idProvider = URI.create("http://dummy-endpoint.com");
     private URI tokenEndpoint = URI.create("http://dummy-endpoint.com");
     private URI fileServer = URI.create("http://dummy-endpoint.com");
 

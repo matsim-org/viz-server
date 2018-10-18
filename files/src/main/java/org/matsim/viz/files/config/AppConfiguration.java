@@ -18,7 +18,7 @@ public class AppConfiguration extends Configuration {
     @Setter
     private static AppConfiguration instance;
 
-    private URI introspectionEndpoint = URI.create("https://localhost:3000/introspect/");
+    private URI idProvider = URI.create("https://localhost:3000");
     private String relyingPartyId = "relyingPartyId";
     private String relyingPartySecret = "secret";
     private List<VisualizationType> vizTypes = new ArrayList<>();

@@ -96,8 +96,8 @@ public class App extends Application<AppConfiguration> {
     private void registerAuthFilter(AppConfiguration configuration, Client client, Environment environment) {
 
         // register oauth filters for request handling
-        final OAuthIntrospectionAuthenticator<Permission> authenticator = new OAuthIntrospectionAuthenticator<>(client, configuration.getIntrospectionEndpoint(),
-                introspectionResult -> Optional.of(Permission.createFromAuthId(introspectionResult.getSub())), new Credentials(configuration.getRelyingPartyId(), configuration.getRelyingPartySecret()));
+        final OAuthAuthenticator<Permission> authenticator = new OAuthAuthenticator<>(client, configuration.getIdProvider(),
+                result -> Optional.of(Permission.createFromAuthId(result.getSubjectId())));
 
         final OAuthCredentialAuthFilter oauthFilter = new OAuthCredentialAuthFilter.Builder<Permission>()
                 .setAuthenticator(authenticator)
