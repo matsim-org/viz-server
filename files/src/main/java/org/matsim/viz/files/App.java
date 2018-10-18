@@ -16,7 +16,6 @@ import io.dropwizard.setup.Environment;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
 import org.flywaydb.core.Flyway;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
-import org.matsim.viz.clientAuth.Credentials;
 import org.matsim.viz.clientAuth.NoAuthAuthenticator;
 import org.matsim.viz.clientAuth.NoAuthFilter;
 import org.matsim.viz.clientAuth.OAuthAuthenticator;
@@ -105,12 +104,12 @@ public class App extends Application<AppConfiguration> {
         // register oauth authentication when making requests to other servers
         HttpAuthenticationFeature auth = HttpAuthenticationFeature.basicBuilder().build();
         final Client client = new JerseyClientBuilder(environment).using(config.getJerseyClient()).build("files");
-        client.register(auth);
+        // client.register(auth);
 
         // register oauth authentication for other clients making requests to this server
         SubjectFactory subjectFactory = new SubjectFactory(agentService);
-        final OAuthAuthenticator<Agent> authenticator = new OAuthAuthenticator<>(client, config.getIntrospectionEndpoint(),
-                subjectFactory::createSubject, new Credentials(config.getRelyingPartyId(), config.getRelyingPartySecret()));
+        final OAuthAuthenticator<Agent> authenticator = new OAuthAuthenticator<>(client, config.getIdProvider(),
+                subjectFactory::createSubject);
         OAuthCredentialAuthFilter oauthFilter = new OAuthCredentialAuthFilter.Builder<Agent>()
                 .setAuthenticator(authenticator)
                 .setPrefix("Bearer")

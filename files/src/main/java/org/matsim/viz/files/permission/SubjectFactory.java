@@ -1,7 +1,7 @@
 package org.matsim.viz.files.permission;
 
 import lombok.AllArgsConstructor;
-import org.matsim.viz.clientAuth.IntrospectionResult;
+import org.matsim.viz.clientAuth.AuthenticationResult;
 import org.matsim.viz.files.agent.AgentService;
 import org.matsim.viz.files.entities.Agent;
 import org.matsim.viz.files.entities.User;
@@ -17,11 +17,11 @@ public class SubjectFactory {
 
     private final AgentService agentService;
 
-    public Optional<Agent> createSubject(IntrospectionResult authResult) {
+    public Optional<Agent> createSubject(AuthenticationResult authResult) {
 
         switch (authResult.getScope()) {
             case USER:
-                return Optional.of(findOrCreateUser(authResult.getSub()));
+                return Optional.of(findOrCreateUser(authResult.getSubjectId()));
             case SERVICE:
                 return Optional.of(agentService.getServiceAgent());
             default:

@@ -27,13 +27,6 @@ public class NotifierTest {
     public WireMockRule wireMockRule = new WireMockRule();
     private Notifier testObject;
 
-    private static List<NotificationType> getSomeTypes() {
-        List<NotificationType> result = new ArrayList<>();
-        result.add(new NotificationType("first"));
-        result.add(new NotificationType("second"));
-        return result;
-    }
-
     @Before
     public void setUp() {
         this.testObject = new Notifier(jerseyClient, new NotificationDAO(TestUtils.getPersistenceUnit()));

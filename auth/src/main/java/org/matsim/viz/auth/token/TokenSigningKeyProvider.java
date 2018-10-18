@@ -1,72 +1,112 @@
 package org.matsim.viz.auth.token;
 
+import com.auth0.jwt.interfaces.RSAKeyProvider;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import org.matsim.viz.error.InvalidInputException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.security.Key;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.PublicKey;
-import java.security.cert.Certificate;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.util.Base64;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
-@Getter
-public class TokenSigningKeyProvider {
+public class TokenSigningKeyProvider implements RSAKeyProvider {
 
-    private static Logger logger = LoggerFactory.getLogger(TokenSigningKeyProvider.class);
+    private static final int maxNumberOfValidKeys = 2;
+    private static final String algorithmType = "RSA";
+    private static final int keysize = 2048;
+    private static final String algorithmName = "RS512";
+    private static final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+    private static final Logger logger = LoggerFactory.getLogger(TokenSigningKeyProvider.class);
 
-    private RSAPublicKey publicKey;
-    private RSAPrivateKey privateKey;
+    private final KeyPairGenerator generator;
+    private LinkedList<RSAKeyPair> keys = new LinkedList<>();
 
-    public TokenSigningKeyProvider(String keyStorePath, String keyAlias, String keyStorePassword) {
-        KeyStore store = loadKeyStore(keyStorePath, keyStorePassword);
-        publicKey = loadPublicKey(store, keyAlias);
-        privateKey = loadPrivateKey(store, keyAlias, keyStorePassword);
-
-    }
-
-    private KeyStore loadKeyStore(String keyStorePath, String keyStorePassword) {
-
-        File keyStoreFile = new File(keyStorePath);
-        try (FileInputStream stream = new FileInputStream(keyStoreFile)) {
-            KeyStore store = KeyStore.getInstance(KeyStore.getDefaultType());
-            store.load(stream, keyStorePassword.toCharArray());
-            return store;
-        } catch (Exception e) {
-            logger.error("Failed to load keystore!", e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    private RSAPublicKey loadPublicKey(KeyStore store, String keyAlias) {
-
+    public TokenSigningKeyProvider() {
         try {
-            Certificate cert = store.getCertificate(keyAlias);
-            PublicKey publicKey = cert.getPublicKey();
-            return (RSAPublicKey) publicKey;
-
-        } catch (KeyStoreException e) {
-            logger.error("Failed to load public token signing key.");
-            throw new RuntimeException(e);
-        } catch (ClassCastException e) {
-            logger.error("public signing key was not an RSA key.");
+            generator = KeyPairGenerator.getInstance(algorithmType);
+            generator.initialize(keysize);
+            this.generateNewKey();
+        } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private RSAPrivateKey loadPrivateKey(KeyStore store, String keyAlias, String keyStorePassword) {
-        try {
-            Key key = store.getKey(keyAlias, keyStorePassword.toCharArray());
-            return (RSAPrivateKey) key;
-        } catch (ClassCastException e) {
-            throw new RuntimeException("Private signing key is not an RSA key.");
-        } catch (Exception e) {
-            logger.error("failed to load private token signing key", e);
-            throw new RuntimeException(e);
+    public void scheduleKeyRenewal(int intervalInHours) {
+        logger.info("scheduling key renewal for every " + intervalInHours + " hours");
+        scheduler.scheduleAtFixedRate(this::generateNewKey, intervalInHours, intervalInHours, TimeUnit.HOURS);
+    }
+
+    RSAKeyPair generateNewKey() {
+
+        KeyPair keyPair = generator.generateKeyPair();
+        String keyId = UUID.randomUUID().toString();
+        logger.info("Generating new RSA key with id " + keyId);
+        RSAKeyPair result = new RSAKeyPair(keyId, (RSAPrivateKey) keyPair.getPrivate(), (RSAPublicKey) keyPair.getPublic());
+        keys.addFirst(result);
+        this.removeOldKeys();
+        return result;
+    }
+
+    private void removeOldKeys() {
+        while (keys.size() > maxNumberOfValidKeys) {
+            logger.info("Removing oldest key");
+            keys.removeLast();
         }
+    }
+
+    List<KeyInformation> getKeyInformation() {
+        return keys.stream()
+                .map(key -> new KeyInformation(key.id, Base64.getEncoder().encodeToString(key.getPublicKey().getEncoded())))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public RSAPublicKey getPublicKeyById(String keyId) {
+        return keys.stream().filter(key -> key.id.equals(keyId))
+                .findFirst()
+                .orElseThrow(() -> new InvalidInputException("unknown key id"))
+                .getPublicKey();
+    }
+
+    @Override
+    public RSAPrivateKey getPrivateKey() {
+        return keys.getFirst().getPrivateKey();
+    }
+
+    @Override
+    public String getPrivateKeyId() {
+        return keys.getFirst().getId();
+    }
+
+    @Getter
+    @AllArgsConstructor
+    static class RSAKeyPair {
+        private String id;
+        private RSAPrivateKey privateKey;
+        private RSAPublicKey publicKey;
+    }
+
+    @RequiredArgsConstructor
+    @Getter
+    static class KeyInformation {
+
+        private final String kid;
+        private final String n;
+        private final String alg = algorithmName;
+        private final String use = "sig";
+        private final String kty = algorithmType;
     }
 }

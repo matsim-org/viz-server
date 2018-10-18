@@ -17,6 +17,7 @@ import org.matsim.viz.auth.config.AppConfiguration;
 import org.matsim.viz.auth.config.ConfigClient;
 import org.matsim.viz.auth.config.ConfigRelyingParty;
 import org.matsim.viz.auth.config.ConfigUser;
+import org.matsim.viz.auth.discovery.DiscoveryResource;
 import org.matsim.viz.auth.entities.RelyingParty;
 import org.matsim.viz.auth.entities.User;
 import org.matsim.viz.auth.relyingParty.RelyingPartyAuthenticator;
@@ -39,6 +40,7 @@ public class App extends Application<AppConfiguration> {
     private RelyingPartyService relyingPartyService;
     private TokenService tokenService;
     private AuthorizationService authorizationService;
+    private TokenSigningKeyProvider keyProvider;
 
     public static void main(String[] args) throws Exception {
         new App().run(args);
@@ -58,24 +60,23 @@ public class App extends Application<AppConfiguration> {
 
         registerBasicAuth(environment.jersey());
         registerSessionHandling(environment.jersey(), environment.servlets());
-        registerEndpoints(environment.jersey());
+        registerEndpoints(environment.jersey(), appConfiguration);
 
         environment.jersey().register(new CodedExceptionMapper());
     }
 
     private void initializeServices(AppConfiguration configuration) {
-        TokenSigningKeyProvider keyProvider = new TokenSigningKeyProvider(
-                configuration.getTokenSigningKeyStore(),
-                configuration.getTokenSigningKeyAlias(),
-                configuration.getTokenSigningKeyStorePassword()
-        );
+
         PersistenceUnit persistenceUnit = new PersistenceUnit("org.matsim.viz.auth");
         RelyingPartyDAO relyingPartyDAO = new RelyingPartyDAO(persistenceUnit);
         TokenDAO tokenDAO = new TokenDAO(persistenceUnit);
         UserDAO userDAO = new UserDAO(persistenceUnit);
 
+        keyProvider = new TokenSigningKeyProvider();
+        keyProvider.scheduleKeyRenewal(configuration.getKeyRenewalInterval());
+
         relyingPartyService = new RelyingPartyService(relyingPartyDAO);
-        tokenService = new TokenService(tokenDAO, keyProvider, relyingPartyService);
+        tokenService = new TokenService(tokenDAO, keyProvider, relyingPartyService, configuration.getHostURI());
         userService = new UserService(userDAO);
         authorizationService = new AuthorizationService(tokenService, userService, relyingPartyService);
     }
@@ -114,11 +115,13 @@ public class App extends Application<AppConfiguration> {
         servlet.setSessionHandler(new SessionHandler());
     }
 
-    private void registerEndpoints(JerseyEnvironment jersey) {
+    private void registerEndpoints(JerseyEnvironment jersey, AppConfiguration configuration) {
 
         jersey.register(new IntrospectResource(tokenService));
         jersey.register(new TokenResource(tokenService));
         jersey.register(new AuthorizationResource(tokenService, authorizationService));
         jersey.register(new LoginResource(userService, tokenService));
+        jersey.register(new DiscoveryResource(configuration.getHostURI()));
+        jersey.register(new TokenSigningKeyResource(keyProvider));
     }
 }

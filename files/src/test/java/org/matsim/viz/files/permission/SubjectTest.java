@@ -3,7 +3,7 @@ package org.matsim.viz.files.permission;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.matsim.viz.clientAuth.IntrospectionResult;
+import org.matsim.viz.clientAuth.AuthenticationResult;
 import org.matsim.viz.files.agent.AgentService;
 import org.matsim.viz.files.entities.Agent;
 import org.matsim.viz.files.entities.User;
@@ -34,7 +34,7 @@ public class SubjectTest {
     public void createSubject_userScope_subjectWithUser() {
 
         User user = TestUtils.persistUser("some-id");
-        IntrospectionResult result = new IntrospectionResult(true, SubjectFactory.USER, user.getAuthId());
+        AuthenticationResult result = new AuthenticationResult(user.getAuthId(), SubjectFactory.USER);
 
         Optional<Agent> subject = testObject.createSubject(result);
 
@@ -45,7 +45,7 @@ public class SubjectTest {
     @Test
     public void createSubject_serviceScope_subjectWithServiceAgent() {
 
-        IntrospectionResult result = new IntrospectionResult(true, SubjectFactory.SERVICE, "any-id");
+        AuthenticationResult result = new AuthenticationResult("any-id", SubjectFactory.SERVICE);
 
         Optional<Agent> subject = testObject.createSubject(result);
 
@@ -56,7 +56,7 @@ public class SubjectTest {
     @Test
     public void createSubject_publicUserScope_subjectWithPublicUserAgent() {
 
-        IntrospectionResult result = new IntrospectionResult(true, SubjectFactory.PUBLIC_USER, "any-id");
+        AuthenticationResult result = new AuthenticationResult("any-id", SubjectFactory.PUBLIC_USER);
 
         Optional<Agent> subject = testObject.createSubject(result);
 
@@ -67,7 +67,7 @@ public class SubjectTest {
     @Test
     public void createSubject_unknownScope_subjectWithPublicUserAgent() {
 
-        IntrospectionResult result = new IntrospectionResult(true, "unknown-scope", "any-id");
+        AuthenticationResult result = new AuthenticationResult("any-id", "unknown-scope");
 
         Optional<Agent> subject = testObject.createSubject(result);
 
