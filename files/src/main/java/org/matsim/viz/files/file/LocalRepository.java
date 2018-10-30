@@ -64,6 +64,7 @@ public class LocalRepository implements Repository {
         Path file = uploadDirectory.resolve(diskFileName);
         FileEntry entry = new FileEntry();
         try {
+            Files.createDirectories(uploadDirectory);
             long bytes = Files.copy(upload.getFile(), file);
             entry.setSizeInBytes(bytes);
         } catch (IOException e) {
