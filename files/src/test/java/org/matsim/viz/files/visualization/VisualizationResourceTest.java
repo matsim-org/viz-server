@@ -3,7 +3,6 @@ package org.matsim.viz.files.visualization;
 import org.junit.Test;
 import org.matsim.viz.files.entities.User;
 import org.matsim.viz.files.entities.Visualization;
-import org.matsim.viz.files.entities.VisualizationType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,19 +28,5 @@ public class VisualizationResourceTest {
         List<Visualization> result = testObject.findByType(new User(), "type", null);
 
         assertEquals(vizes, result);
-    }
-
-    @Test
-    public void types() {
-
-        List<VisualizationType> types = new ArrayList<>();
-        types.add(new VisualizationType());
-        VisualizationService visualizationServiceMock = mock(VisualizationService.class);
-        when(visualizationServiceMock.findAllTypes()).thenReturn(types);
-        VisualizationResource testObject = new VisualizationResource(visualizationServiceMock);
-
-        List<VisualizationType> result = testObject.types();
-
-        assertEquals(types, result);
     }
 }

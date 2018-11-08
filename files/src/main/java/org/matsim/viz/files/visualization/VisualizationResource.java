@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.matsim.viz.files.entities.Agent;
 import org.matsim.viz.files.entities.Visualization;
-import org.matsim.viz.files.entities.VisualizationType;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -43,11 +42,4 @@ public class VisualizationResource {
 
         return visualizationService.findByType(type, afterInstant, agent);
     }
-
-    @GET
-    @Path("/visualization-types")
-    public List<VisualizationType> types() {
-        return visualizationService.findAllTypes();
-    }
-
 }

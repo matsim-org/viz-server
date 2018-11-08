@@ -12,8 +12,7 @@ import java.util.Map;
 @Entity
 public class Visualization extends Resource {
 
-    @ManyToOne(optional = false)
-    private VisualizationType type;
+    private String type;
 
     @ManyToOne(optional = false)
     private Project project;

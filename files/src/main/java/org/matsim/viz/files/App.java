@@ -23,7 +23,6 @@ import org.matsim.viz.files.agent.UserDAO;
 import org.matsim.viz.files.config.AppConfiguration;
 import org.matsim.viz.files.config.H2DbConfigurationFactory;
 import org.matsim.viz.files.entities.Agent;
-import org.matsim.viz.files.entities.VisualizationType;
 import org.matsim.viz.files.notifications.NotificationDAO;
 import org.matsim.viz.files.notifications.NotificationResource;
 import org.matsim.viz.files.notifications.Notifier;
@@ -40,7 +39,6 @@ import org.matsim.viz.files.visualization.VisualizationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.persistence.RollbackException;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
 import javax.ws.rs.client.Client;
@@ -149,18 +147,5 @@ public class App extends Application<AppConfiguration> {
         environment.jersey().register(new ProjectResource(projectService, visualizationService, agentService));
         environment.jersey().register(new VisualizationResource(visualizationService));
         environment.jersey().register(new NotificationResource(notifier));
-
-        this.loadVizTypes(visualizationService, configuration);
-    }
-
-    private void loadVizTypes(VisualizationService visualizationService, AppConfiguration config) {
-        for (VisualizationType type : config.getVizTypes()) {
-            logger.info("persisting viz type: " + type.getTypeName());
-            try {
-                visualizationService.persistType(type);
-            } catch (RollbackException e) {
-                logger.info("viz type: " + type.getTypeName() + " already exists");
-            }
-        }
     }
 }

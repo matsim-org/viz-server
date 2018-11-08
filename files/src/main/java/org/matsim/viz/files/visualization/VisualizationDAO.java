@@ -1,7 +1,10 @@
 package org.matsim.viz.files.visualization;
 
 import org.matsim.viz.database.PersistenceUnit;
-import org.matsim.viz.files.entities.*;
+import org.matsim.viz.files.entities.Agent;
+import org.matsim.viz.files.entities.DAO;
+import org.matsim.viz.files.entities.QVisualization;
+import org.matsim.viz.files.entities.Visualization;
 
 import java.time.Instant;
 import java.util.List;
@@ -14,10 +17,6 @@ public class VisualizationDAO extends DAO {
 
     Visualization persist(Visualization viz) {
         return database.persist(viz);
-    }
-
-    public VisualizationType persistType(VisualizationType type) {
-        return database.persist(type);
     }
 
     public Visualization findFlat(String vizId) {
@@ -43,7 +42,7 @@ public class VisualizationDAO extends DAO {
         QVisualization visualization = QVisualization.visualization;
 
         return database.executeQuery(query -> query.selectFrom(visualization)
-                .where(visualization.type.typeName.eq(typeName)
+                .where(visualization.type.eq(typeName)
                         .and(visualization.createdAt.after(after))
                         .and(visualization.permissions.any().agent.eq(agent)
                         ))
@@ -53,32 +52,6 @@ public class VisualizationDAO extends DAO {
                 .distinct()
                 .fetch()
         );
-    }
-
-    VisualizationType findType(String typeName) {
-        QVisualizationType type = QVisualizationType.visualizationType;
-
-        return database.executeQuery(query -> query.selectFrom(type)
-                .where(type.typeName.eq(typeName))
-                .fetchOne());
-    }
-
-
-    List<VisualizationType> findAllTypes() {
-        QVisualizationType type = QVisualizationType.visualizationType;
-
-        return database.executeQuery(query -> query.selectFrom(type)
-                .leftJoin(type.requiredFileKeys).fetchJoin()
-                .leftJoin(type.requiredParamKeys).fetchJoin()
-                .distinct()
-                .fetch()
-        );
-    }
-
-    void removeType(String typeName) {
-
-        QVisualizationType type = QVisualizationType.visualizationType;
-        database.executeTransactionalQuery(query -> query.delete(type).where(type.typeName.eq(typeName)).execute());
     }
 
     void removeVisualization(Visualization viz) {
