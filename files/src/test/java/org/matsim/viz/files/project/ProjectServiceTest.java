@@ -98,14 +98,11 @@ public class ProjectServiceTest {
     @Test
     public void removeProject_allGood() {
 
-        VisualizationType type = new VisualizationType("test-type", false, null, null, null);
-        type = TestUtils.getVisualizationDAO().persistType(type);
-
         Project project = TestUtils.persistProjectWithCreator("test name");
         FileEntry fileEntry = new FileEntry();
         project.addFileEntry(fileEntry);
         Visualization viz = new Visualization();
-        viz.setType(type);
+        viz.setType("some-type");
         project.addVisualization(viz);
         project = TestUtils.getProjectDAO().persist(project);
 

@@ -10,10 +10,10 @@ import java.util.Map;
 @Getter
 @Setter
 @Entity
+@Table(indexes = {@Index(columnList = "type")})
 public class Visualization extends Resource {
 
-    @ManyToOne(optional = false)
-    private VisualizationType type;
+    private String type;
 
     @ManyToOne(optional = false)
     private Project project;
