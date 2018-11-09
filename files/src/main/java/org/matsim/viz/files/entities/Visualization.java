@@ -10,6 +10,7 @@ import java.util.Map;
 @Getter
 @Setter
 @Entity
+@Table(indexes = {@Index(columnList = "type")})
 public class Visualization extends Resource {
 
     private String type;
