@@ -4,8 +4,7 @@
 SET NAMES 'utf8';
 
 --
--- Copy type values from visualization type table to visualization table
--- add column type
+-- add column type with an index
 --
 ALTER TABLE Visualization ADD COLUMN type VARCHAR(255);
 ALTER TABLE Visualization ADD INDEX Index_Visualization_Type (type);
