@@ -25,6 +25,9 @@ public class Project extends Resource {
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<Visualization> visualizations = new HashSet<>();
 
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private Set<Tag> tags = new HashSet<>();
+
     public void addFileEntries(Collection<FileEntry> entries) {
         entries.forEach(this::addFileEntry);
     }
@@ -50,8 +53,9 @@ public class Project extends Resource {
         copyAndAddPermissionsToAddedResource(visualization);
     }
 
-    public Visualization getVisualization(String id) {
-        return visualizations.stream().filter(v -> v.getId().equals(id)).findFirst().orElse(null);
+    public void addTag(Tag tag) {
+        this.tags.add(tag);
+        tag.setProject(this);
     }
 
     private void copyAndAddPermissionsToAddedResource(Resource resource) {

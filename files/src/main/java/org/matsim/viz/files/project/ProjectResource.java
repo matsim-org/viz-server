@@ -94,6 +94,12 @@ public class ProjectResource {
         return projectService.removePermission(forProject, forUser, subject);
     }
 
+    @Path("{id}/tags")
+    @POST
+    public Project addTag(@Auth Agent subject, @PathParam("id") String projectId, @Valid AddTagRequest request) {
+        return projectService.addTag(projectId, request.name, subject);
+    }
+
     @Getter
     @AllArgsConstructor
     @NoArgsConstructor
@@ -114,5 +120,11 @@ public class ProjectResource {
         private String userAuthId;
         @NotNull
         private Permission.Type type;
+    }
+
+    private static class AddTagRequest {
+
+        @NotEmpty
+        private String name;
     }
 }

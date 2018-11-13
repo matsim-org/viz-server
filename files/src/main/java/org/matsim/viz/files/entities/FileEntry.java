@@ -6,13 +6,16 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(uniqueConstraints =
-        {@UniqueConstraint(columnNames = {"project_id", "userFileName"}),
+        {@UniqueConstraint(columnNames = {"project_id", "tagSummary", "userFileName"}),
                 @UniqueConstraint(columnNames = {"project_id", "persistedFileName"})})
 public class FileEntry extends Resource {
 
@@ -29,5 +32,28 @@ public class FileEntry extends Resource {
     @ManyToOne(optional = false)
     private Project project;
 
+    @ManyToMany(fetch = FetchType.EAGER)
+    private Set<Tag> tags = new HashSet<>();
+
+    @JsonIgnore
+    private String tagSummary;
+
     public enum StorageType {Local, S3}
+
+    public void addTag(Tag tag) {
+        this.tags.add(tag);
+        updateTagSummary();
+    }
+
+    public void removeTag(Tag tag) {
+        this.tags.remove(tag);
+        updateTagSummary();
+    }
+
+    private void updateTagSummary() {
+        this.tagSummary = this.tags.stream()
+                .sorted((tag1, tag2) -> tag1.getName().compareToIgnoreCase(tag2.getName()))
+                .map(Tag::getName)
+                .collect(Collectors.joining("."));
+    }
 }

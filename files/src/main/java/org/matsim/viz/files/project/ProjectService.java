@@ -170,6 +170,18 @@ public class ProjectService {
         }
     }
 
+    Project addTag(String projectId, String tagName, Agent subject) {
+
+        permissionService.findWritePermission(subject, projectId);
+
+        Project project = projectDAO.findWithFullGraph(projectId);
+        Tag tag = new Tag();
+        tag.setName(tagName);
+        project.addTag(tag);
+
+        return projectDAO.persist(project);
+    }
+
     private void createNotificationTypes() {
         List<NotificationType> types = new ArrayList<>();
         types.add(ProjectCreatedNotification.getNotificationType());
