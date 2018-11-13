@@ -100,6 +100,12 @@ public class ProjectResource {
         return projectService.addTag(projectId, request.name, subject);
     }
 
+    @Path("{id}/tags/{tagId}")
+    @DELETE
+    public Project removeTag(@Auth Agent subject, @PathParam("id") String projectId, @PathParam("tagId") @NotEmpty String tagId) {
+        return projectService.removeTag(projectId, tagId, subject);
+    }
+
     @Getter
     @AllArgsConstructor
     @NoArgsConstructor

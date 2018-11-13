@@ -1,5 +1,7 @@
 package org.matsim.viz.files.project;
 
+import org.matsim.viz.error.CodedException;
+import org.matsim.viz.error.Error;
 import org.matsim.viz.error.InternalException;
 import org.matsim.viz.error.InvalidInputException;
 import org.matsim.viz.files.entities.*;
@@ -179,7 +181,24 @@ public class ProjectService {
         tag.setName(tagName);
         project.addTag(tag);
 
-        return projectDAO.persist(project);
+        try {
+            return projectDAO.persist(project);
+        } catch (Exception e) {
+            logger.error("Could not persist tag with name: " + tagName, e);
+            throw new CodedException(409, Error.RESOURCE_EXISTS, "tag with name: " + tagName + " already exists");
+        }
+    }
+
+    Project removeTag(String projectId, String tagId, Agent subject) {
+
+        permissionService.findDeletePermission(subject, projectId);
+
+        Project project = projectDAO.findWithFullGraph(projectId);
+        if (project.getTags().removeIf(tag -> tag.getId().equals(tagId))) {
+            return projectDAO.persist(project);
+        } else {
+            throw new InvalidInputException("could not find tag with id: " + tagId);
+        }
     }
 
     private void createNotificationTypes() {

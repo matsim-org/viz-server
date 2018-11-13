@@ -3,6 +3,7 @@ package org.matsim.viz.files.project;
 import org.junit.*;
 import org.matsim.viz.error.CodedException;
 import org.matsim.viz.error.ForbiddenException;
+import org.matsim.viz.error.InvalidInputException;
 import org.matsim.viz.files.entities.*;
 import org.matsim.viz.files.file.FileDownload;
 import org.matsim.viz.files.file.FileUpload;
@@ -400,6 +401,93 @@ public class ProjectServiceTest {
         result.getFiles().forEach(file -> assertTrue(file.getPermissions().stream().noneMatch(
                 permission -> permission.getAgent().equals(otherUser) &&
                         permission.getType().equals(permissionType))));
+    }
+
+    @Test(expected = CodedException.class)
+    public void addTag_duplicateTagName_exception() {
+
+        final Project project = TestUtils.persistProjectWithCreator("some-name");
+        final String tagName = "some-tag";
+
+        testObject.addTag(project.getId(), tagName, project.getCreator());
+        testObject.addTag(project.getId(), tagName, project.getCreator());
+
+        fail("second addTag should cause exception");
+    }
+
+    @Test(expected = ForbiddenException.class)
+    public void addTag_noPermission_exception() {
+
+        final Project project = TestUtils.persistProjectWithCreator("some-name");
+        final String tagName = "some-tag";
+        final User otherUser = TestUtils.persistUser("other-user");
+
+        testObject.addTag(project.getId(), tagName, otherUser);
+
+        fail("unauthorized user should cause exception");
+    }
+
+    @Test
+    public void addTag_tagIsAdded() {
+
+        final Project project = TestUtils.persistProjectWithCreator("some-name");
+        final String tagName = "tag-name";
+
+        Project persisted = testObject.addTag(project.getId(), tagName, project.getCreator());
+
+        assertEquals(1, persisted.getTags().size());
+        Tag tag = persisted.getTags().iterator().next(); // get the first tag
+        assertEquals(tagName, tag.getName());
+        assertNotNull(tag.getId());
+        assertEquals(project, tag.getProject());
+    }
+
+    @Test(expected = ForbiddenException.class)
+    public void removeTag_noPermission_exception() {
+
+        Project project = TestUtils.persistProjectWithCreator("some-name");
+        final User otherUser = TestUtils.persistUser("other-user");
+        final String tagName = "tag-name";
+        project = testObject.addTag(project.getId(), tagName, project.getCreator());
+
+        assertEquals(1, project.getTags().size());
+        Tag persistedTag = project.getTags().iterator().next();
+
+        testObject.removeTag(project.getId(), persistedTag.getId(), otherUser);
+
+        fail("unauthorized user should cause exception");
+    }
+
+    @Test(expected = InvalidInputException.class)
+    public void removeTag_noSuchTag_exception() {
+
+        Project project = TestUtils.persistProjectWithCreator("some-name");
+        final String tagName = "tag-name";
+        project = testObject.addTag(project.getId(), tagName, project.getCreator());
+        assertEquals(1, project.getTags().size());
+
+        testObject.removeTag(project.getId(), "some-other-tag-id", project.getCreator());
+
+        fail("invalid tag id should cause exception");
+    }
+
+    @Test
+    public void removeTag_tagIsRemoved() {
+
+        Project project = TestUtils.persistProjectWithCreator("some-name");
+        final String firstTagName = "first-tag-name";
+        final String secondTagName = "second-tag-name";
+        project = testObject.addTag(project.getId(), firstTagName, project.getCreator());
+        project = testObject.addTag(project.getId(), secondTagName, project.getCreator());
+
+        assertEquals(2, project.getTags().size());
+        Optional<Tag> firstTag = project.getTags().stream().filter(tag -> tag.getName().equals(firstTagName)).findFirst();
+
+        assertTrue(firstTag.isPresent());
+        project = testObject.removeTag(project.getId(), firstTag.get().getId(), project.getCreator());
+
+        assertEquals(1, project.getTags().size());
+        assertTrue(project.getTags().stream().noneMatch(tag -> tag.getName().equals(firstTagName)));
     }
 
     private Project addFileEntry(Project project) {
