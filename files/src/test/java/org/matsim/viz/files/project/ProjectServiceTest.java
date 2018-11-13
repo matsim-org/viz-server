@@ -1,5 +1,6 @@
 package org.matsim.viz.files.project;
 
+import lombok.val;
 import org.junit.*;
 import org.matsim.viz.error.CodedException;
 import org.matsim.viz.error.ForbiddenException;
@@ -13,7 +14,6 @@ import org.matsim.viz.files.notifications.Notifier;
 import org.matsim.viz.files.util.TestUtils;
 
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -207,7 +207,7 @@ public class ProjectServiceTest {
     }
 
     @Test
-    public void addFilesToProject() {
+    public void addFileToProject() {
 
         LocalRepository repository = spy(new LocalRepository("some-directory"));
         doAnswer(args -> {
@@ -220,34 +220,35 @@ public class ProjectServiceTest {
         testObject = new ProjectService(new ProjectDAO(TestUtils.getPersistenceUnit()),
                 TestUtils.getPermissionService(), repository, mock(Notifier.class));
         Project project = TestUtils.persistProjectWithCreator("test");
-        List<FileUpload> uploads = new ArrayList<>();
-        uploads.add(new FileUpload("first.txt", "plain/text", mock(InputStream.class)));
-        uploads.add(new FileUpload("second.txt", "plain/text", mock(InputStream.class)));
+        final String tagName = "some-tag-name";
 
-        Project result = testObject.addFilesToProject(uploads, project.getId(), project.getCreator());
+        val upload1 = new FileUpload("first.txt", "plain/text", mock(InputStream.class), new String[]{tagName});
+        val upload2 = new FileUpload("second.txt", "plain/text", mock(InputStream.class), new String[]{tagName});
+
+        testObject.addFileToProject(upload1, project.getId(), project.getCreator());
+        Project result = testObject.addFileToProject(upload2, project.getId(), project.getCreator());
 
         assertEquals(project, result);
-        assertEquals(uploads.size(), result.getFiles().size());
+        assertEquals(2, result.getFiles().size());
     }
 
     @Test(expected = ForbiddenException.class)
-    public void addFilesToProject_noPermission_exception() {
+    public void addFileToProject_noPermission_exception() {
 
         User user = TestUtils.persistUser("some-id");
         Project project = TestUtils.persistProjectWithCreator("project", "auth-id");
 
-        testObject.addFilesToProject(null, project.getId(), user);
+        testObject.addFileToProject(null, project.getId(), user);
 
         fail("user without permission should raise forbidden exception");
     }
 
     @Test
-    public void addFilesToProject_errorWhilePersisting_cleanupFiles() {
+    public void addFileToProject_errorWhilePersisting_cleanupFiles() {
 
         Project project = TestUtils.persistProjectWithCreator("test");
-        List<FileUpload> uploads = new ArrayList<>();
-        uploads.add(new FileUpload("same-name.txt", "plain/text", mock(InputStream.class)));
-        uploads.add(new FileUpload("same-name.txt", "plain/text", mock(InputStream.class)));
+        val upload1 = new FileUpload("same-name.txt", "plain/text", mock(InputStream.class), new String[0]);
+        val upload2 = new FileUpload("same-name.txt", "plain/text", mock(InputStream.class), new String[0]);
 
         LocalRepository repository = spy(new LocalRepository("some-directory"));
         doReturn(new FileEntry()).when(repository).addFile(any(FileUpload.class));
@@ -258,10 +259,11 @@ public class ProjectServiceTest {
 
         testObject = new ProjectService(mockedDao, TestUtils.getPermissionService(), repository, mock(Notifier.class));
         try {
-            testObject.addFilesToProject(uploads, project.getId(), project.getCreator());
+            testObject.addFileToProject(upload1, project.getId(), project.getCreator());
+            testObject.addFileToProject(upload2, project.getId(), project.getCreator());
             fail("exception while persisting project should raise exception and delete written files");
         } catch (RuntimeException e) {
-            verify(repository).removeFiles(any());
+            verify(repository).removeFile(any());
         }
     }
 

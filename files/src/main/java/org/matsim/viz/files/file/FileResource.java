@@ -3,22 +3,22 @@ package org.matsim.viz.files.file;
 import io.dropwizard.auth.Auth;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
-import org.glassfish.jersey.media.multipart.FormDataMultiPart;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.matsim.viz.error.InvalidInputException;
 import org.matsim.viz.files.entities.Agent;
 import org.matsim.viz.files.entities.Project;
 import org.matsim.viz.files.project.ProjectService;
 
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 @AllArgsConstructor
 @Path("/")
@@ -31,22 +31,24 @@ public class FileResource {
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
-    public Project uploadFiles(@Auth Agent agent, final FormDataMultiPart multiPart) {
+    public Project uploadFile(@Auth Agent agent,
+                              @FormDataParam("data") FormDataBodyPart jsonPart,
+                              @NotNull @FormDataParam("file") FormDataBodyPart file) {
 
-        List<FileUpload> uploads = new ArrayList<>();
-        for (List<FormDataBodyPart> bodyParts : multiPart.getFields().values()) {
-            for (FormDataBodyPart bodyPart : bodyParts) {
-                if (isValidFileUpload(bodyPart))
-                    uploads.add(new FileUpload(
-                            bodyPart.getContentDisposition().getFileName(),
-                            bodyPart.getMediaType().toString(),
-                            bodyPart.getValueAs(InputStream.class)));
-            }
+        if (isValidFileUpload(file) && jsonPart != null) {
+            // parse the metadata body part as json
+            jsonPart.setMediaType(MediaType.APPLICATION_JSON_TYPE);
+            UploadMetadata metadata = jsonPart.getValueAs(UploadMetadata.class);
+
+            // read the filename, media-type and actual file from the file body part
+            FileUpload upload = new FileUpload(file.getContentDisposition().getFileName(), file.getMediaType().toString(),
+                    file.getValueAs(InputStream.class), metadata.getTagIds());
+            return projectService.addFileToProject(upload, projectId, agent);
+        } else {
+            throw new InvalidInputException("upload must contain filename and media type. Also a body part with metadata must be present.");
         }
-        if (uploads.size() == 0)
-            throw new InvalidInputException("No files to upload");
-        return projectService.addFilesToProject(uploads, projectId, agent);
     }
+
 
     @GET
     @Path("{fileId}")
@@ -71,8 +73,15 @@ public class FileResource {
     }
 
     private boolean isValidFileUpload(FormDataBodyPart bodyPart) {
-        return !bodyPart.isSimple() &&
-                StringUtils.isNotBlank(bodyPart.getContentDisposition().getFileName());
-        // a test for valid content types could make sense once we've settled for allowed content
+        return StringUtils.isNotBlank(bodyPart.getContentDisposition().getFileName()) &&
+                StringUtils.isNotBlank(bodyPart.getMediaType().toString());
+    }
+
+    @Getter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    static class UploadMetadata {
+
+        String[] tagIds = new String[0];
     }
 }

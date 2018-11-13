@@ -128,6 +128,9 @@ public class ProjectResource {
         private Permission.Type type;
     }
 
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Getter
     private static class AddTagRequest {
 
         @NotEmpty

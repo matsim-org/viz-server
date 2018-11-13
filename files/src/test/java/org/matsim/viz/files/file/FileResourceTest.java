@@ -1,8 +1,8 @@
 package org.matsim.viz.files.file;
 
+import lombok.val;
 import org.glassfish.jersey.media.multipart.ContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
-import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.junit.Before;
 import org.junit.Test;
 import org.matsim.viz.error.InvalidInputException;
@@ -31,52 +31,76 @@ public class FileResourceTest {
         testObject = new FileResource(TestUtils.getProjectService(), "some-id");
     }
 
-    @Test(expected = InvalidInputException.class)
-    public void uploadFiles_onlyTextFields_exception() {
-
-        FormDataMultiPart multiPart = new FormDataMultiPart();
-        multiPart.field("key", "value");
-
-        testObject.uploadFiles(null, multiPart);
-
-        fail("no file uploads should cause exception");
-    }
 
     @Test(expected = InvalidInputException.class)
-    public void uploadFiles_noFileName_exception() {
+    public void uploadFile_noFileName_exception() {
 
         ContentDisposition cd = mock(ContentDisposition.class);
         when(cd.getFileName()).thenReturn("");
-        FormDataBodyPart formDataBodyPart = mock(FormDataBodyPart.class);
-        when(formDataBodyPart.getContentDisposition()).thenReturn(cd);
-        FormDataMultiPart multiPart = new FormDataMultiPart();
-        multiPart.getBodyParts().add(formDataBodyPart);
+        val bodyPart = mock(FormDataBodyPart.class);
+        when(bodyPart.getContentDisposition()).thenReturn(cd);
+        when(bodyPart.getMediaType()).thenReturn(MediaType.APPLICATION_JSON_TYPE);
+        bodyPart.setContentDisposition(cd);
+        val jsonPart = mock(FormDataBodyPart.class);
+        when(jsonPart.getValueAs(FileResource.UploadMetadata.class)).thenReturn(new FileResource.UploadMetadata());
 
-        testObject.uploadFiles(null, multiPart);
+        testObject.uploadFile(null, jsonPart, bodyPart);
+
+        fail("no filename should not be accepted");
+    }
+
+    @Test(expected = InvalidInputException.class)
+    public void uploadFile_noMetadata_exception() {
+
+        ContentDisposition cd = mock(ContentDisposition.class);
+        when(cd.getFileName()).thenReturn("some-name.txt");
+        val bodyPart = mock(FormDataBodyPart.class);
+        when(bodyPart.getContentDisposition()).thenReturn(cd);
+        when(bodyPart.getMediaType()).thenReturn(MediaType.APPLICATION_JSON_TYPE);
+        bodyPart.setContentDisposition(cd);
+
+        testObject.uploadFile(null, null, bodyPart);
+
+        fail("no metadata should not be accepted");
+    }
+
+    @Test(expected = InvalidInputException.class)
+    public void uploadFile_noMediaType_exception() {
+
+        ContentDisposition cd = mock(ContentDisposition.class);
+        when(cd.getFileName()).thenReturn("");
+        val bodyPart = mock(FormDataBodyPart.class);
+        when(bodyPart.getContentDisposition()).thenReturn(cd);
+        bodyPart.setContentDisposition(cd);
+        val jsonPart = mock(FormDataBodyPart.class);
+        when(jsonPart.getValueAs(FileResource.UploadMetadata.class)).thenReturn(new FileResource.UploadMetadata());
+
+        testObject.uploadFile(null, jsonPart, bodyPart);
 
         fail("no filename should not be accepted");
     }
 
     @Test
-    public void uploadFiles_allGood_invokeProjectService() {
+    public void uploadFile_allGood_invokeProjectService() {
 
         Project project = new Project();
         ProjectService projectServiceMock = mock(ProjectService.class);
-        when(projectServiceMock.addFilesToProject(any(), anyString(), any())).thenReturn(project);
+        when(projectServiceMock.addFileToProject(any(), anyString(), any())).thenReturn(project);
         testObject = new FileResource(projectServiceMock, "some-id");
 
         ContentDisposition cd = mock(ContentDisposition.class);
-        when(cd.getFileName()).thenReturn("filename");
-        FormDataBodyPart formDataBodyPart = mock(FormDataBodyPart.class);
-        when(formDataBodyPart.getContentDisposition()).thenReturn(cd);
-        when(formDataBodyPart.getMediaType()).thenReturn(MediaType.WILDCARD_TYPE);
+        when(cd.getFileName()).thenReturn("some-name.txt");
+        val bodyPart = mock(FormDataBodyPart.class);
+        when(bodyPart.getContentDisposition()).thenReturn(cd);
+        when(bodyPart.getMediaType()).thenReturn(MediaType.WILDCARD_TYPE);
 
         InputStream stream = mock(InputStream.class);
-        when(formDataBodyPart.getValueAs(InputStream.class)).thenReturn(stream);
-        FormDataMultiPart multiPart = new FormDataMultiPart();
-        multiPart.getBodyParts().add(formDataBodyPart);
+        when(bodyPart.getValueAs(InputStream.class)).thenReturn(stream);
 
-        Project result = testObject.uploadFiles(new User(), multiPart);
+        val jsonPart = mock(FormDataBodyPart.class);
+        when(jsonPart.getValueAs(FileResource.UploadMetadata.class)).thenReturn(new FileResource.UploadMetadata());
+
+        Project result = testObject.uploadFile(new User(), jsonPart, bodyPart);
 
         assertEquals(project, result);
     }

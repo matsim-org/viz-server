@@ -96,21 +96,21 @@ public class ProjectService {
     }
 
 
-    public Project addFilesToProject(List<FileUpload> uploads, String projectId, Agent agent) {
+    public Project addFileToProject(FileUpload upload, String projectId, Agent agent) {
 
         permissionService.findWritePermission(agent, projectId);
 
         Project project = projectDAO.findWithFullGraph(projectId);
-        List<FileEntry> entries = repository.addFiles(uploads);
-        project.addFileEntries(entries);
+        FileEntry fileEntry = repository.addFile(upload);
+        project.addFileEntry(fileEntry);
 
         try {
             project = projectDAO.persist(project);
-            project.getFiles().forEach(file -> notifier.dispatchAsync(new FileCreatedNotification(file)));
+            notifier.dispatchAsync(new FileCreatedNotification(fileEntry));
             return project;
         } catch (Exception e) {
-            repository.removeFiles(entries);
-            throw new InternalException("Error while persisting project");
+            repository.removeFile(fileEntry);
+            throw new InternalException("Error while adding files to project.");
         }
     }
 
