@@ -19,14 +19,17 @@ import java.util.stream.Collectors;
                 @UniqueConstraint(columnNames = {"project_id", "persistedFileName"})})
 public class FileEntry extends Resource {
 
-    private StorageType storageType = StorageType.Local;
-
+    @Column(nullable = false)
     private String userFileName;
     private String contentType;
     private long sizeInBytes;
 
     @JsonIgnore
+    @Column(nullable = false)
     private String persistedFileName;
+
+    @JsonIgnore
+    private StorageType storageType = StorageType.Local;
 
     @JsonIgnore
     @OneToOne(mappedBy = "fileEntry", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
@@ -39,7 +42,8 @@ public class FileEntry extends Resource {
     private Set<Tag> tags = new HashSet<>();
 
     @JsonIgnore
-    private String tagSummary;
+    @Column(nullable = false)
+    private String tagSummary = "";
 
     public enum StorageType {Local, S3}
 

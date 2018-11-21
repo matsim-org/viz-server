@@ -10,7 +10,7 @@ import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.matsim.viz.error.InvalidInputException;
 import org.matsim.viz.files.entities.Agent;
-import org.matsim.viz.files.entities.Project;
+import org.matsim.viz.files.entities.FileEntry;
 import org.matsim.viz.files.project.ProjectService;
 
 import javax.validation.constraints.NotNull;
@@ -31,9 +31,9 @@ public class FileResource {
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
-    public Project uploadFile(@Auth Agent agent,
-                              @FormDataParam("data") FormDataBodyPart jsonPart,
-                              @NotNull @FormDataParam("file") FormDataBodyPart file) {
+    public FileEntry uploadFile(@Auth Agent agent,
+                                @FormDataParam("data") FormDataBodyPart jsonPart,
+                                @NotNull @FormDataParam("file") FormDataBodyPart file) {
 
         if (isValidFileUpload(file) && jsonPart != null) {
             // parse the metadata body part as json
@@ -67,9 +67,10 @@ public class FileResource {
     @DELETE
     @Path("{fileId}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Project deleteFile(@Auth Agent agent, @PathParam("fileId") String fileId) {
+    public Response deleteFile(@Auth Agent agent, @PathParam("fileId") String fileId) {
 
-        return projectService.removeFileFromProject(projectId, fileId, agent);
+        projectService.removeFileFromProject(projectId, fileId, agent);
+        return Response.status(Response.Status.NO_CONTENT).build();
     }
 
     private boolean isValidFileUpload(FormDataBodyPart bodyPart) {

@@ -7,7 +7,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.matsim.viz.error.InvalidInputException;
 import org.matsim.viz.files.entities.FileEntry;
-import org.matsim.viz.files.entities.Project;
 import org.matsim.viz.files.entities.User;
 import org.matsim.viz.files.project.ProjectService;
 import org.matsim.viz.files.util.TestUtils;
@@ -83,9 +82,10 @@ public class FileResourceTest {
     @Test
     public void uploadFile_allGood_invokeProjectService() {
 
-        Project project = new Project();
+        FileEntry entry = new FileEntry();
+        entry.setId("some-id");
         ProjectService projectServiceMock = mock(ProjectService.class);
-        when(projectServiceMock.addFileToProject(any(), anyString(), any())).thenReturn(project);
+        when(projectServiceMock.addFileToProject(any(), anyString(), any())).thenReturn(entry);
         testObject = new FileResource(projectServiceMock, "some-id");
 
         ContentDisposition cd = mock(ContentDisposition.class);
@@ -100,9 +100,9 @@ public class FileResourceTest {
         val jsonPart = mock(FormDataBodyPart.class);
         when(jsonPart.getValueAs(FileResource.UploadMetadata.class)).thenReturn(new FileResource.UploadMetadata());
 
-        Project result = testObject.uploadFile(new User(), jsonPart, bodyPart);
+        FileEntry result = testObject.uploadFile(new User(), jsonPart, bodyPart);
 
-        assertEquals(project, result);
+        assertEquals(entry, result);
     }
 
     @Test
@@ -127,14 +127,11 @@ public class FileResourceTest {
     @Test
     public void deleteFile_invokeProjectService() {
 
-        Project project = new Project();
-
         ProjectService projectServiceMock = mock(ProjectService.class);
-        when(projectServiceMock.removeFileFromProject(anyString(), anyString(), any())).thenReturn(project);
         testObject = new FileResource(projectServiceMock, "any-id");
 
-        Project response = testObject.deleteFile(new User(), "id");
+        Response response = testObject.deleteFile(new User(), "id");
 
-        assertEquals(project, response);
+        assertEquals(Response.Status.NO_CONTENT.getStatusCode(), response.getStatus());
     }
 }

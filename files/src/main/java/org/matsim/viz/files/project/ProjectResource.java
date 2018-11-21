@@ -8,10 +8,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 import org.matsim.viz.error.InvalidInputException;
 import org.matsim.viz.error.UnauthorizedException;
 import org.matsim.viz.files.agent.AgentService;
-import org.matsim.viz.files.entities.Agent;
-import org.matsim.viz.files.entities.Permission;
-import org.matsim.viz.files.entities.Project;
-import org.matsim.viz.files.entities.User;
+import org.matsim.viz.files.entities.*;
 import org.matsim.viz.files.file.FileResource;
 import org.matsim.viz.files.visualization.ProjectVisualizationResource;
 import org.matsim.viz.files.visualization.VisualizationService;
@@ -96,8 +93,8 @@ public class ProjectResource {
 
     @Path("{id}/tags")
     @POST
-    public Project addTag(@Auth Agent subject, @PathParam("id") String projectId, @Valid AddTagRequest request) {
-        return projectService.addTag(projectId, request.name, subject);
+    public Tag addTag(@Auth Agent subject, @PathParam("id") String projectId, @Valid AddTagRequest request) {
+        return projectService.addTag(projectId, request.name, request.type, subject);
     }
 
     @Path("{id}/tags/{tagId}")
@@ -135,5 +132,8 @@ public class ProjectResource {
 
         @NotEmpty
         private String name;
+
+        @NotEmpty
+        private String type;
     }
 }

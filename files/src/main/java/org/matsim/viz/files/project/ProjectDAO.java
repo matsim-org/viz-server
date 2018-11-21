@@ -54,6 +54,7 @@ public class ProjectDAO extends DAO {
                 .leftJoin(project.files, fileEntry).fetchJoin()
                 .leftJoin(project.visualizations, visualization).fetchJoin()
                 .leftJoin(project.permissions).fetchJoin()
+                .leftJoin(project.tags).fetchJoin()
                 .fetchOne());
     }
 

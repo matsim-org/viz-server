@@ -95,8 +95,10 @@ public class TestUtils {
         return userDAO.persist(new User());
     }
 
-    public static Project addFileEntry(Project project) {
+    public static Project addFileEntry(Project project, String filename) {
         FileEntry entry = new FileEntry();
+        entry.setUserFileName(filename);
+        entry.setPersistedFileName(filename);
         project.getFiles().add(entry);
         entry.setProject(project);
         return projectDAO.persist(project);

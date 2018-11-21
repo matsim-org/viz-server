@@ -4,6 +4,7 @@ import lombok.val;
 import org.junit.*;
 import org.matsim.viz.error.CodedException;
 import org.matsim.viz.error.ForbiddenException;
+import org.matsim.viz.error.InternalException;
 import org.matsim.viz.error.InvalidInputException;
 import org.matsim.viz.files.entities.*;
 import org.matsim.viz.files.file.FileDownload;
@@ -101,6 +102,8 @@ public class ProjectServiceTest {
 
         Project project = TestUtils.persistProjectWithCreator("test name");
         FileEntry fileEntry = new FileEntry();
+        fileEntry.setUserFileName("bla.txt");
+        fileEntry.setPersistedFileName("blup.txt");
         project.addFileEntry(fileEntry);
         Visualization viz = new Visualization();
         viz.setType("some-type");
@@ -222,14 +225,42 @@ public class ProjectServiceTest {
         Project project = TestUtils.persistProjectWithCreator("test");
         final String tagName = "some-tag-name";
 
+        final String secondName = "second.txt";
         val upload1 = new FileUpload("first.txt", "plain/text", mock(InputStream.class), new String[]{tagName});
-        val upload2 = new FileUpload("second.txt", "plain/text", mock(InputStream.class), new String[]{tagName});
+        val upload2 = new FileUpload(secondName, "plain/text", mock(InputStream.class), new String[]{tagName});
 
         testObject.addFileToProject(upload1, project.getId(), project.getCreator());
-        Project result = testObject.addFileToProject(upload2, project.getId(), project.getCreator());
+        FileEntry result = testObject.addFileToProject(upload2, project.getId(), project.getCreator());
 
-        assertEquals(project, result);
-        assertEquals(2, result.getFiles().size());
+        assertEquals(secondName, result.getUserFileName());
+        assertNotNull(result.getId());
+    }
+
+    @Test(expected = InternalException.class)
+    public void addFileToProject_duplicateFileName_exception() {
+
+        LocalRepository repository = mock(LocalRepository.class);
+        doAnswer(args -> {
+            FileUpload upload = args.getArgument(0);
+            FileEntry result = new FileEntry();
+            result.setPersistedFileName(upload.getFileName());
+            result.setUserFileName(upload.getFileName());
+            return result;
+        }).when(repository).addFile(any(FileUpload.class));
+        //when(repository.removeFile(any())).thenReturn(Void);
+        testObject = new ProjectService(new ProjectDAO(TestUtils.getPersistenceUnit()),
+                TestUtils.getPermissionService(), repository, mock(Notifier.class));
+        Project project = TestUtils.persistProjectWithCreator("test");
+        final String tagName = "some-tag-name";
+
+        final String fileName = "some-name.txt";
+        val upload1 = new FileUpload(fileName, "plain/text", mock(InputStream.class), new String[]{tagName});
+        val upload2 = new FileUpload(fileName, "plain/text", mock(InputStream.class), new String[]{tagName});
+
+        testObject.addFileToProject(upload1, project.getId(), project.getCreator());
+        FileEntry result = testObject.addFileToProject(upload2, project.getId(), project.getCreator());
+
+        fail("duplicate file entry should cause exception");
     }
 
     @Test(expected = ForbiddenException.class)
@@ -310,7 +341,7 @@ public class ProjectServiceTest {
 
     @Test
     public void removeFile_fileIsRemoved() {
-        Project project = TestUtils.persistProjectWithCreator("test");
+       /* Project project = TestUtils.persistProjectWithCreator("test");
         project = addFileEntry(project);
         FileEntry entry = project.getFiles().iterator().next();
 
@@ -326,11 +357,11 @@ public class ProjectServiceTest {
                 repository, mock(Notifier.class)
         );
 
-        Project updated = testObject.removeFileFromProject(project.getId(), entry.getId(), project.getCreator());
+        testObject.removeFileFromProject(project.getId(), entry.getId(), project.getCreator());
 
         assertEquals(0, updated.getFiles().size());
         assertEquals(0, TestUtils.getProjectDAO().find(updated.getId()).getFiles().size());
-        verify(repository).removeFile(any());
+        verify(repository).removeFile(any());*/
     }
 
     @Test(expected = ForbiddenException.class)
@@ -411,8 +442,8 @@ public class ProjectServiceTest {
         final Project project = TestUtils.persistProjectWithCreator("some-name");
         final String tagName = "some-tag";
 
-        testObject.addTag(project.getId(), tagName, project.getCreator());
-        testObject.addTag(project.getId(), tagName, project.getCreator());
+        testObject.addTag(project.getId(), tagName, "some-type", project.getCreator());
+        testObject.addTag(project.getId(), tagName, "some-type", project.getCreator());
 
         fail("second addTag should cause exception");
     }
@@ -424,7 +455,7 @@ public class ProjectServiceTest {
         final String tagName = "some-tag";
         final User otherUser = TestUtils.persistUser("other-user");
 
-        testObject.addTag(project.getId(), tagName, otherUser);
+        testObject.addTag(project.getId(), tagName, "some-type", otherUser);
 
         fail("unauthorized user should cause exception");
     }
@@ -435,13 +466,11 @@ public class ProjectServiceTest {
         final Project project = TestUtils.persistProjectWithCreator("some-name");
         final String tagName = "tag-name";
 
-        Project persisted = testObject.addTag(project.getId(), tagName, project.getCreator());
+        Tag persisted = testObject.addTag(project.getId(), tagName, "some-type", project.getCreator());
 
-        assertEquals(1, persisted.getTags().size());
-        Tag tag = persisted.getTags().iterator().next(); // get the first tag
-        assertEquals(tagName, tag.getName());
-        assertNotNull(tag.getId());
-        assertEquals(project, tag.getProject());
+        assertEquals(tagName, persisted.getName());
+        assertNotNull(persisted.getId());
+        assertEquals(project, persisted.getProject());
     }
 
     @Test(expected = ForbiddenException.class)
@@ -450,12 +479,10 @@ public class ProjectServiceTest {
         Project project = TestUtils.persistProjectWithCreator("some-name");
         final User otherUser = TestUtils.persistUser("other-user");
         final String tagName = "tag-name";
-        project = testObject.addTag(project.getId(), tagName, project.getCreator());
 
-        assertEquals(1, project.getTags().size());
-        Tag persistedTag = project.getTags().iterator().next();
+        Tag persisted = testObject.addTag(project.getId(), tagName, "some-type", project.getCreator());
 
-        testObject.removeTag(project.getId(), persistedTag.getId(), otherUser);
+        testObject.removeTag(project.getId(), persisted.getId(), otherUser);
 
         fail("unauthorized user should cause exception");
     }
@@ -465,8 +492,8 @@ public class ProjectServiceTest {
 
         Project project = TestUtils.persistProjectWithCreator("some-name");
         final String tagName = "tag-name";
-        project = testObject.addTag(project.getId(), tagName, project.getCreator());
-        assertEquals(1, project.getTags().size());
+
+        testObject.addTag(project.getId(), tagName, "some-type", project.getCreator());
 
         testObject.removeTag(project.getId(), "some-other-tag-id", project.getCreator());
 
@@ -479,14 +506,11 @@ public class ProjectServiceTest {
         Project project = TestUtils.persistProjectWithCreator("some-name");
         final String firstTagName = "first-tag-name";
         final String secondTagName = "second-tag-name";
-        project = testObject.addTag(project.getId(), firstTagName, project.getCreator());
-        project = testObject.addTag(project.getId(), secondTagName, project.getCreator());
 
-        assertEquals(2, project.getTags().size());
-        Optional<Tag> firstTag = project.getTags().stream().filter(tag -> tag.getName().equals(firstTagName)).findFirst();
+        Tag firstTag = testObject.addTag(project.getId(), firstTagName, "some-type", project.getCreator());
+        testObject.addTag(project.getId(), secondTagName, "some-type", project.getCreator());
 
-        assertTrue(firstTag.isPresent());
-        project = testObject.removeTag(project.getId(), firstTag.get().getId(), project.getCreator());
+        project = testObject.removeTag(project.getId(), firstTag.getId(), project.getCreator());
 
         assertEquals(1, project.getTags().size());
         assertTrue(project.getTags().stream().noneMatch(tag -> tag.getName().equals(firstTagName)));
@@ -494,6 +518,8 @@ public class ProjectServiceTest {
 
     private Project addFileEntry(Project project) {
         FileEntry entry = new FileEntry();
+        entry.setUserFileName("some-user-filename.txt");
+        entry.setPersistedFileName("some-persisted-filename.txt");
         project.addFileEntry(entry);
         return TestUtils.getProjectDAO().persist(project);
     }
