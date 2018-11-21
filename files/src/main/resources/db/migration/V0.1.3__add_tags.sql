@@ -4,16 +4,23 @@
 SET NAMES 'utf8';
 
 --
--- Implement stricter constraints on FileEntry Table
+-- Add Column tagSummary and fill it with empty strings, so that we can
+-- add a NOT NULL constraint later
 --
 ALTER TABLE FileEntry
    ADD COLUMN tagSummary VARCHAR(1000);
 
+UPDATE INTO FileEntry(tagSummary)
+  SET tagSummary='';
+
+--
+-- Implement stricter constraints on FileEntry Table
+--
 ALTER TABLE FileEntry
-   MODIFY userFileName VARCHAR(255) NOT NULL;
+   MODIFY tagSummary VARCHAR(1000) NOT NULL;
 
 ALTER TABLE FileEntry
-   MODIFY tagSummary VARCHAR(255) NOT NULL;
+   MODIFY userFileName VARCHAR(255) NOT NULL;
 
 ALTER TABLE FileEntry
    MODIFY persistedFileName VARCHAR(255) NOT NULL;
