@@ -76,6 +76,7 @@ public class LocalRepository implements Repository {
         entry.setPersistedFileName(diskFileName);
         entry.setContentType(upload.getContentType());
         entry.setStorageType(FileEntry.StorageType.Local);
+        entry.addTags(upload.getTagIds());
         return entry;
     }
 

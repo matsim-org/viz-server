@@ -8,10 +8,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 import org.matsim.viz.error.InvalidInputException;
 import org.matsim.viz.error.UnauthorizedException;
 import org.matsim.viz.files.agent.AgentService;
-import org.matsim.viz.files.entities.Agent;
-import org.matsim.viz.files.entities.Permission;
-import org.matsim.viz.files.entities.Project;
-import org.matsim.viz.files.entities.User;
+import org.matsim.viz.files.entities.*;
 import org.matsim.viz.files.file.FileResource;
 import org.matsim.viz.files.visualization.ProjectVisualizationResource;
 import org.matsim.viz.files.visualization.VisualizationService;
@@ -94,6 +91,18 @@ public class ProjectResource {
         return projectService.removePermission(forProject, forUser, subject);
     }
 
+    @Path("{id}/tags")
+    @POST
+    public Tag addTag(@Auth Agent subject, @PathParam("id") String projectId, @Valid AddTagRequest request) {
+        return projectService.addTag(projectId, request.name, request.type, subject);
+    }
+
+    @Path("{id}/tags/{tagId}")
+    @DELETE
+    public Project removeTag(@Auth Agent subject, @PathParam("id") String projectId, @PathParam("tagId") @NotEmpty String tagId) {
+        return projectService.removeTag(projectId, tagId, subject);
+    }
+
     @Getter
     @AllArgsConstructor
     @NoArgsConstructor
@@ -114,5 +123,17 @@ public class ProjectResource {
         private String userAuthId;
         @NotNull
         private Permission.Type type;
+    }
+
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Getter
+    private static class AddTagRequest {
+
+        @NotEmpty
+        private String name;
+
+        @NotEmpty
+        private String type;
     }
 }

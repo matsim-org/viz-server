@@ -44,8 +44,8 @@ public class VisualizationServiceTest {
     public void createVisualizationFromRequest_visualization() throws CodedException {
 
         Project project = TestUtils.persistProjectWithCreator("some-project");
-        project = TestUtils.addFileEntry(project);
-        project = TestUtils.addFileEntry(project);
+        project = TestUtils.addFileEntry(project, "some-file.txt");
+        project = TestUtils.addFileEntry(project, "some-other-file.txt");
 
         Map<String, String> input = new HashMap<>();
         input.put("network", project.getFiles().iterator().next().getId());
@@ -80,8 +80,8 @@ public class VisualizationServiceTest {
     public void createVisualizationFromRequest_sameInputTwice_correctPermissions() {
 
         Project project = TestUtils.persistProjectWithCreator("some-project");
-        project = TestUtils.addFileEntry(project);
-        project = TestUtils.addFileEntry(project);
+        project = TestUtils.addFileEntry(project, "some-file.txt");
+        project = TestUtils.addFileEntry(project, "some-other-file.abc");
 
         FileEntry[] entries = project.getFiles().toArray(new FileEntry[0]);
         Map<String, String> input = new HashMap<>();

@@ -1,5 +1,7 @@
 package org.matsim.viz.files.project;
 
+import org.matsim.viz.error.CodedException;
+import org.matsim.viz.error.Error;
 import org.matsim.viz.error.InternalException;
 import org.matsim.viz.error.InvalidInputException;
 import org.matsim.viz.files.entities.*;
@@ -94,21 +96,23 @@ public class ProjectService {
     }
 
 
-    public Project addFilesToProject(List<FileUpload> uploads, String projectId, Agent agent) {
+    public FileEntry addFileToProject(FileUpload upload, String projectId, Agent agent) {
 
         permissionService.findWritePermission(agent, projectId);
 
         Project project = projectDAO.findWithFullGraph(projectId);
-        List<FileEntry> entries = repository.addFiles(uploads);
-        project.addFileEntries(entries);
+        FileEntry fileEntry = repository.addFile(upload);
+        project.addFileEntry(fileEntry);
 
         try {
             project = projectDAO.persist(project);
-            project.getFiles().forEach(file -> notifier.dispatchAsync(new FileCreatedNotification(file)));
-            return project;
+            FileEntry persistedFileEntry = project.getFiles().stream()
+                    .filter(entry -> entry.getPersistedFileName().equals(fileEntry.getPersistedFileName())).findFirst().get();
+            notifier.dispatchAsync(new FileCreatedNotification(persistedFileEntry));
+            return persistedFileEntry;
         } catch (Exception e) {
-            repository.removeFiles(entries);
-            throw new InternalException("Error while persisting project");
+            repository.removeFile(fileEntry);
+            throw new InternalException("Error while adding files to project.");
         }
     }
 
@@ -120,7 +124,7 @@ public class ProjectService {
         return new FileDownload(repository.getFileStream(entry), entry);
     }
 
-    public Project removeFileFromProject(String projectId, String fileId, Agent creator) {
+    public void removeFileFromProject(String projectId, String fileId, Agent creator) {
 
         permissionService.findDeletePermission(creator, fileId);
 
@@ -132,16 +136,14 @@ public class ProjectService {
 
         project.removeFileEntry(optional.get());
 
-        Project result = null;
         try {
-            result = projectDAO.persist(project); // remove entry from the database first to ensure consistent database
+            projectDAO.persist(project); // remove entry from the database first to ensure consistent database
             repository.removeFile(optional.get());
             notifier.dispatchAsync(new FileDeletedNotification(optional.get()));
         } catch (RollbackException e) {
             throw new InternalException("could not remove file. Make sure it is not used by any visualization.");
         } catch (Exception ignored) {
         }
-        return result;
     }
 
     Project addPermission(String projectId, User permissionUser, Permission.Type type, Agent subject) {
@@ -167,6 +169,37 @@ public class ProjectService {
             return projectDAO.removePermission(project, permissionAgent);
         } catch (ClassCastException e) {
             throw new InvalidInputException("id was not a project id");
+        }
+    }
+
+    Tag addTag(String projectId, String tagName, String tagType, Agent subject) {
+
+        permissionService.findWritePermission(subject, projectId);
+
+        Project project = projectDAO.findWithFullGraph(projectId);
+        Tag tag = new Tag();
+        tag.setName(tagName);
+        tag.setType(tagType);
+        project.addTag(tag);
+
+        try {
+            project = projectDAO.persist(project);
+            return project.getTags().stream().filter(t -> t.getName().equals(tag.getName()) && t.getType().equals(tag.getType())).findFirst().get();
+        } catch (Exception e) {
+            logger.error("Could not persist tag with name: " + tagName, e);
+            throw new CodedException(409, Error.RESOURCE_EXISTS, "tag with name: " + tagName + " already exists");
+        }
+    }
+
+    Project removeTag(String projectId, String tagId, Agent subject) {
+
+        permissionService.findDeletePermission(subject, projectId);
+
+        Project project = projectDAO.findWithFullGraph(projectId);
+        if (project.getTags().removeIf(tag -> tag.getId().equals(tagId))) {
+            return projectDAO.persist(project);
+        } else {
+            throw new InvalidInputException("could not find tag with id: " + tagId);
         }
     }
 
