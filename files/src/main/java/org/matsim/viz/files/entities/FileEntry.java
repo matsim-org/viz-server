@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.codec.digest.MessageDigestAlgorithms;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -42,7 +44,7 @@ public class FileEntry extends Resource {
     private Set<Tag> tags = new HashSet<>();
 
     @JsonIgnore
-    @Column(nullable = false)
+    @Column(nullable = false, length = 64)
     private String tagSummary = "";
 
     public enum StorageType {Local, S3}
@@ -66,9 +68,10 @@ public class FileEntry extends Resource {
     }
 
     private void updateTagSummary() {
-        this.tagSummary = this.tags.stream()
+        final String allTags = this.tags.stream()
                 .sorted((tag1, tag2) -> tag1.getId().compareToIgnoreCase(tag2.getId()))
                 .map(Tag::getId)
                 .collect(Collectors.joining("."));
+        this.tagSummary = new DigestUtils(MessageDigestAlgorithms.SHA_256).digestAsHex(allTags);
     }
 }
