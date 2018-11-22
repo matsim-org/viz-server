@@ -8,17 +8,14 @@ SET NAMES 'utf8';
 -- add a NOT NULL constraint later
 --
 ALTER TABLE FileEntry
-   ADD COLUMN tagSummary VARCHAR(1000);
+   ADD COLUMN tagSummary VARCHAR(64);
 
-UPDATE INTO FileEntry(tagSummary)
+UPDATE FileEntry
   SET tagSummary='';
 
 --
 -- Implement stricter constraints on FileEntry Table
 --
-ALTER TABLE FileEntry
-   MODIFY tagSummary VARCHAR(1000) NOT NULL;
-
 ALTER TABLE FileEntry
    MODIFY userFileName VARCHAR(255) NOT NULL;
 
@@ -29,7 +26,7 @@ ALTER TABLE FileEntry
 -- Add unique index which takes tags into account and drop the old one which just had project and filename
 --
 ALTER TABLE FileEntry
-  DROP INDEX UK7hxy3ulmjevc84428a6ecvs39;
+  DROP INDEX IF EXISTS UK7hxy3ulmjevc84428a6ecvs39;
 
 ALTER TABLE FileEntry
   ADD UNIQUE INDEX projectId_tagSummary_userFileName(project_id, tagSummary, userFileName);
