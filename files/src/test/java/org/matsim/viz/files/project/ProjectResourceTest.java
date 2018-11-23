@@ -1,5 +1,6 @@
 package org.matsim.viz.files.project;
 
+import lombok.val;
 import org.junit.Before;
 import org.junit.Test;
 import org.matsim.viz.error.InvalidInputException;
@@ -34,7 +35,7 @@ public class ProjectResourceTest {
     @Test(expected = UnauthorizedException.class)
     public void createProject_invalidAgent_exception() {
 
-        ProjectResource.CreateProject request = new ProjectResource.CreateProject("name");
+        ProjectResource.ProjectProperties request = new ProjectResource.ProjectProperties("name");
 
         testObject.createProject(new PublicAgent(), request);
 
@@ -45,7 +46,7 @@ public class ProjectResourceTest {
     public void createProject_serviceInvoked() {
 
         Project project = new Project();
-        ProjectResource.CreateProject request = new ProjectResource.CreateProject("name");
+        ProjectResource.ProjectProperties request = new ProjectResource.ProjectProperties("name");
 
         ProjectService projectServiceMock = mock(ProjectService.class);
         when(projectServiceMock.createNewProject(anyString(), any())).thenReturn(project);
@@ -115,7 +116,7 @@ public class ProjectResourceTest {
     public void addPermission_invalidAgentId_exception() {
 
         AgentService agentService = mock(AgentService.class);
-        when(agentService.findByIdentityProviderId(anyString())).thenReturn(null);
+        when(agentService.findAgentByIdentityProviderId(anyString())).thenReturn(null);
         ProjectResource.AddPermissionRequest request = new ProjectResource.AddPermissionRequest(
                 "some-resource-id", "some-auth-id", Permission.Type.Read
         );
@@ -135,9 +136,11 @@ public class ProjectResourceTest {
         final User permissionUser = new User();
         permissionUser.setAuthId(agentId);
         AgentService agentService = mock(AgentService.class);
-        when(agentService.findByIdentityProviderId(agentId)).thenReturn(permissionUser);
+        when(agentService.findAgentByIdentityProviderId(agentId)).thenReturn(permissionUser);
         ProjectService projectService = mock(ProjectService.class);
-        when(projectService.addPermission(eq(resourceId), eq(permissionUser), any(), any())).thenReturn(new Project());
+        val permission = new Permission();
+        permission.setAgent(permissionUser);
+        when(projectService.addPermission(eq(resourceId), eq(permissionUser), any(), any())).thenReturn(permission);
 
         ProjectResource.AddPermissionRequest request = new ProjectResource.AddPermissionRequest(
                 resourceId, agentId, Permission.Type.Read
@@ -145,16 +148,17 @@ public class ProjectResourceTest {
 
         testObject = new ProjectResource(projectService, mock(VisualizationService.class), agentService);
 
-        Project result = testObject.addPermission(new User(), request);
+        Permission result = testObject.addPermission(new User(), request);
 
         assertNotNull(result);
+        assertEquals(agentId, result.getAgent().getAuthId());
     }
 
     @Test(expected = InvalidInputException.class)
     public void removePermission_invalidAgentId_exception() {
 
         AgentService agentService = mock(AgentService.class);
-        when(agentService.findByIdentityProviderId(anyString())).thenReturn(null);
+        when(agentService.findAgentByIdentityProviderId(anyString())).thenReturn(null);
 
         testObject = new ProjectResource(mock(ProjectService.class), mock(VisualizationService.class), agentService);
 
@@ -171,7 +175,7 @@ public class ProjectResourceTest {
         final User permissionUser = new User();
         permissionUser.setAuthId(agentId);
         AgentService agentService = mock(AgentService.class);
-        when(agentService.findByIdentityProviderId(agentId)).thenReturn(permissionUser);
+        when(agentService.findAgentByIdentityProviderId(agentId)).thenReturn(permissionUser);
         ProjectService projectService = mock(ProjectService.class);
         when(projectService.removePermission(eq(resourceId), eq(permissionUser), any())).thenReturn(new Project());
 

@@ -24,7 +24,7 @@ public class PermissionDAO extends DAO {
         return database.executeQuery(query -> query.selectFrom(permission)
                 .where(permission.agent.in(agent)
                         .and(permission.resource.id.eq(resourceId)))
-                .fetchOne()
+                .fetchFirst() //TODO: this requires more thought is it sufficient to find any permission or is it sometimes used to find something more specific
         );
     }
 }

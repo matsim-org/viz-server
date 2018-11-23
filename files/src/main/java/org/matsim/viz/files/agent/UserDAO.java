@@ -10,7 +10,7 @@ public class UserDAO extends AgentDAO {
         super(persistenceUnit);
     }
 
-    User findByIdentityProviderId(String id) {
+    User findUserByIdentityProviderId(String id) {
 
         QUser user = QUser.user;
         return database.executeQuery(query -> query.selectFrom(user)
