@@ -21,7 +21,7 @@ public class ProjectVisualizationResourceTest {
 
         VisualizationService visualizationServiceMock = mock(VisualizationService.class);
         when(visualizationServiceMock.createVisualizationFromRequest(any(), any())).thenReturn(visualization);
-        ProjectVisualizationResource testObject = new ProjectVisualizationResource(visualizationServiceMock);
+        ProjectVisualizationResource testObject = new ProjectVisualizationResource(visualizationServiceMock, "project-id");
 
         Visualization result = testObject.createVisualization(new User(), new CreateVisualizationRequest());
 
@@ -34,7 +34,7 @@ public class ProjectVisualizationResourceTest {
         Visualization visualization = new Visualization();
         VisualizationService visualizationServiceMock = mock(VisualizationService.class);
         when(visualizationServiceMock.find(anyString(), any())).thenReturn(visualization);
-        ProjectVisualizationResource testObject = new ProjectVisualizationResource(visualizationServiceMock);
+        ProjectVisualizationResource testObject = new ProjectVisualizationResource(visualizationServiceMock, "project-id");
 
         Visualization result = testObject.getVisualization(new User(), "some-id");
 
@@ -45,7 +45,7 @@ public class ProjectVisualizationResourceTest {
     public void removeVisualization() {
 
         VisualizationService service = mock(VisualizationService.class);
-        ProjectVisualizationResource testObjet = new ProjectVisualizationResource(service);
+        ProjectVisualizationResource testObjet = new ProjectVisualizationResource(service, "project-id");
 
         Response response = testObjet.deleteVisualization(new User(), "some-id");
 

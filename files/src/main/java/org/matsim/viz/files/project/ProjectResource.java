@@ -73,7 +73,7 @@ public class ProjectResource {
 
     @Path("{id}/visualizations")
     public ProjectVisualizationResource visualizations(@PathParam("id") String projectId) {
-        return new ProjectVisualizationResource(visualizationService);
+        return new ProjectVisualizationResource(visualizationService, projectId);
     }
 
     @Path("{id}/permissions")

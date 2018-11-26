@@ -89,6 +89,10 @@ public class VisualizationService {
         return viz;
     }
 
+    List<Visualization> findAllForProject(String projectId, Agent agent) {
+        return visualizationDAO.findAllForProject(projectId, agent);
+    }
+
     private void addInputFilesAndPersistPermissions(Visualization viz, Project project, CreateVisualizationRequest request) {
 
         List<Permission> addedPermissions = new ArrayList<>();

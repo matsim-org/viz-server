@@ -9,6 +9,7 @@ import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.List;
 
 @Path("/")
 @Produces(MediaType.APPLICATION_JSON)
@@ -16,6 +17,12 @@ import javax.ws.rs.core.Response;
 public class ProjectVisualizationResource {
 
     private final VisualizationService visualizationService;
+    private final String projectId;
+
+    @GET
+    public List<Visualization> getVisualizations(@Auth Agent agent) {
+        return visualizationService.findAllForProject(projectId, agent);
+    }
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
