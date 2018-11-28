@@ -339,15 +339,41 @@ public class ProjectServiceTest {
         fail("should have thrown exception");
     }
 
-    @Test
-    public void removeFile_fileIsRemoved() {
-        //TODO fix
-       /* Project project = TestUtils.persistProjectWithCreator("test");
+    @Test(expected = InternalException.class)
+    public void removeFile_fileUsedByVisualization_exception() {
+
+        Project project = TestUtils.persistProjectWithCreator("test");
         project = addFileEntry(project);
         FileEntry entry = project.getFiles().iterator().next();
 
+        Visualization visualization = new Visualization();
+        VisualizationInput input = new VisualizationInput();
+        input.setFileEntry(entry);
+        input.setInputKey("test-input");
+        visualization.addInput(input);
+        project.addVisualization(visualization);
+        TestUtils.getProjectDAO().persist(project);
+
+        LocalRepository repository = mock(LocalRepository.class);
+        doNothing().when(repository).removeFile(any());
+
+        testObject = new ProjectService(
+                new ProjectDAO(TestUtils.getPersistenceUnit()),
+                TestUtils.getPermissionService(),
+                repository, mock(Notifier.class)
+        );
+
+        testObject.removeFileFromProject(project.getId(), entry.getId(), project.getCreator());
+    }
+
+    @Test
+    public void removeFile_fileIsRemoved() {
+        Project project = TestUtils.persistProjectWithCreator("test");
+        project = addFileEntry(project);
+
         // ensure file is added to project
         assertEquals(1, project.getFiles().size());
+        FileEntry entry = project.getFiles().iterator().next();
 
         LocalRepository repository = mock(LocalRepository.class);
         doNothing().when(repository).removeFile(any());
@@ -360,9 +386,9 @@ public class ProjectServiceTest {
 
         testObject.removeFileFromProject(project.getId(), entry.getId(), project.getCreator());
 
-        assertEquals(0, updated.getFiles().size());
-        assertEquals(0, TestUtils.getProjectDAO().find(updated.getId()).getFiles().size());
-        verify(repository).removeFile(any());*/
+        Project updatedProject = TestUtils.getProjectDAO().find(project.getId());
+        assertEquals(0, updatedProject.getFiles().size());
+        verify(repository).removeFile(any());
     }
 
     @Test(expected = ForbiddenException.class)
@@ -379,11 +405,15 @@ public class ProjectServiceTest {
     @Test
     public void addPermission_allGood_permissionAdded() {
 
-      /*  Project project = TestUtils.persistProjectWithCreator("some-name");
+        Project project = TestUtils.persistProjectWithCreator("some-name");
         FileEntry entry = new FileEntry();
         entry.setUserFileName("filename.file");
         entry.setPersistedFileName("persisted.file");
         project.addFileEntry(entry);
+
+        Visualization visualization = new Visualization();
+        visualization.setType("some-type");
+        project.addVisualization(visualization);
         TestUtils.getProjectDAO().persist(project);
 
         User otherUser = TestUtils.getAgentService().createUser("some-other-auth-id");
@@ -391,14 +421,15 @@ public class ProjectServiceTest {
 
         Permission result = testObject.addPermission(project.getId(), otherUser, permissionType, project.getCreator());
 
-        assertTrue(result.getPermissions().stream().anyMatch(permission -> permission.getAgent().equals(otherUser) &&
-                permission.getType().equals(permissionType)));
+        assertEquals(otherUser, result.getAgent());
+        assertEquals(permissionType, result.getType());
+        assertEquals(project, result.getResource());
 
-        // check whether permissions are also set for resources contained in project
-        result.getFiles().forEach(file -> assertTrue(file.getPermissions().stream().anyMatch(
-                permission -> permission.getAgent().equals(otherUser) &&
-                        permission.getType().equals(permissionType))));
-*/ //TODO fix unit test
+        Project updatedProject = TestUtils.getProjectDAO().find(project.getId());
+
+        TestUtils.getPermissionService().findOwnerPermission(otherUser, updatedProject.getId());
+        updatedProject.getFiles().forEach(file -> TestUtils.getPermissionService().findOwnerPermission(otherUser, file.getId()));
+        updatedProject.getVisualizations().forEach(viz -> TestUtils.getPermissionService().findOwnerPermission(otherUser, viz.getId()));
     }
 
     @Test(expected = ForbiddenException.class)

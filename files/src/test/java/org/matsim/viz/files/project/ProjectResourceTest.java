@@ -58,6 +58,14 @@ public class ProjectResourceTest {
     }
 
     @Test
+    public void patchProject_serviceInvoked_status204() {
+        testObject = new ProjectResource(mock(ProjectService.class), mock(VisualizationService.class), mock(AgentService.class));
+        Response response = testObject.patchProject(new User(), "project-id", new ProjectResource.ProjectProperties("newName"));
+
+        assertEquals(Response.Status.NO_CONTENT.getStatusCode(), response.getStatus());
+    }
+
+    @Test
     public void removeProject_serviceInvoked_status204() {
 
         testObject = new ProjectResource(mock(ProjectService.class), mock(VisualizationService.class), mock(AgentService.class));

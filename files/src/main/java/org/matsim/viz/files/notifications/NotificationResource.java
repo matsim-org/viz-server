@@ -39,7 +39,7 @@ public class NotificationResource {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    private static class SubscriptionRequest {
+    static class SubscriptionRequest {
 
         @NotNull
         private String type;
