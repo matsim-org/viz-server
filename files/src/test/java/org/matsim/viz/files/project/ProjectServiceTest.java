@@ -86,6 +86,44 @@ public class ProjectServiceTest {
         assertEquals(user, optional.get().getAgent());
     }
 
+    @Test
+    public void patchProject_allGood_projectRenamed() {
+
+        Project project = TestUtils.persistProjectWithCreator("some-project");
+        final String newName = "new-name";
+
+        Project result = testObject.patchProject(project.getId(), newName, project.getCreator());
+
+        assertEquals(newName, result.getName());
+    }
+
+    @Test(expected = ForbiddenException.class)
+    public void patchProject_noPermission_exception() {
+
+        Project project = TestUtils.persistProjectWithCreator("some-project");
+        final String newName = "new-name";
+        User otherUser = TestUtils.persistUser();
+
+        testObject.patchProject(project.getId(), newName, otherUser);
+
+        fail("no permission should cause exception");
+    }
+
+    @Test(expected = CodedException.class)
+    public void patchProject_nameExists_exception() {
+
+        Project project = TestUtils.persistProjectWithCreator("some-project");
+        final String newName = "new-name";
+        Project otherProject = new Project();
+        otherProject.setName(newName);
+        otherProject.setCreator(project.getCreator());
+        TestUtils.getProjectDAO().persist(otherProject);
+
+        testObject.patchProject(project.getId(), newName, project.getCreator());
+
+        fail("duplicate project name shoud cause exception");
+    }
+
     @Test(expected = ForbiddenException.class)
     public void removeProject_noPermission_exception() {
 
