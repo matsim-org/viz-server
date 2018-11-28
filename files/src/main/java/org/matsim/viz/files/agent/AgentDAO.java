@@ -30,6 +30,14 @@ public class AgentDAO extends DAO {
         return agent;
     }
 
+    Agent findAgentByIdentityProviderId(String id) {
+
+        QAgent agent = QAgent.agent;
+        return database.executeQuery(query -> query.selectFrom(agent)
+                .where(agent.authId.eq(id))
+                .fetchOne());
+    }
+
     void removeAllAgents() {
         database.executeTransactionalQuery(query ->
                 query.delete(QAgent.agent).execute()

@@ -57,4 +57,15 @@ public class VisualizationDAO extends DAO {
     void removeVisualization(Visualization viz) {
         database.remove(viz);
     }
+
+    public List<Visualization> findAllForProject(String projectId, Agent agent) {
+
+        QVisualization visualization = QVisualization.visualization;
+        return database.executeQuery(query -> query.selectFrom(visualization)
+                .where(visualization.project.id.eq(projectId)
+                        .and(visualization.permissions.any().agent.eq(agent)))
+                .distinct()
+                .fetch()
+        );
+    }
 }

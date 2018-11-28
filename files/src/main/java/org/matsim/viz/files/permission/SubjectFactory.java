@@ -35,7 +35,7 @@ public class SubjectFactory {
 
     private User findOrCreateUser(String authId) {
 
-        User user = agentService.findByIdentityProviderId(authId);
+        User user = agentService.findUserByIdentityProviderId(authId);
         if (user == null)
             user = agentService.createUser(authId);
         return user;

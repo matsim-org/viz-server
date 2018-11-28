@@ -32,7 +32,7 @@ public class ProjectResource {
     @POST
     public Project createProject(
             @Auth Agent subject,
-            @NotNull @Valid CreateProject request) {
+            @NotNull @Valid ProjectProperties request) {
 
         if (!(subject instanceof User))
             throw new UnauthorizedException("Only real people can create Projects");
@@ -45,6 +45,13 @@ public class ProjectResource {
     public Response removeProject(@Auth Agent subject, @NotNull @PathParam("id") String id) {
 
         projectService.removeProject(id, subject);
+        return Response.status(Response.Status.NO_CONTENT).build();
+    }
+
+    @PATCH
+    @Path("/{id}")
+    public Response patchProject(@Auth Agent subject, @PathParam("id") String id, @Valid ProjectProperties props) {
+        projectService.patchProject(id, props.getName(), subject);
         return Response.status(Response.Status.NO_CONTENT).build();
     }
 
@@ -66,29 +73,29 @@ public class ProjectResource {
 
     @Path("{id}/visualizations")
     public ProjectVisualizationResource visualizations(@PathParam("id") String projectId) {
-        return new ProjectVisualizationResource(visualizationService);
+        return new ProjectVisualizationResource(visualizationService, projectId);
     }
 
     @Path("{id}/permissions")
     @POST
-    public Project addPermission(@Auth Agent subject, @Valid AddPermissionRequest request) {
+    public Permission addPermission(@Auth Agent subject, @Valid AddPermissionRequest request) {
 
-        User user = agentService.findByIdentityProviderId(request.getUserAuthId());
-        if (user == null)
+        Agent agent = agentService.findAgentByIdentityProviderId(request.getUserAuthId());
+        if (agent == null)
             throw new InvalidInputException("could not find user");
 
-        return projectService.addPermission(request.getResourceId(), user, request.getType(), subject);
+        return projectService.addPermission(request.getResourceId(), agent, request.getType(), subject);
     }
 
     @Path("{id}/permissions")
     @DELETE
-    public Project removePermission(@Auth Agent subject, @QueryParam("userAuthId") String userId, @QueryParam("projectId") String forProject) {
+    public Project removePermission(@Auth Agent subject, @QueryParam("userAuthId") String userId, @PathParam("id") String forProject) {
 
-        User forUser = agentService.findByIdentityProviderId(userId);
-        if (forUser == null) {
+        Agent forAgent = agentService.findAgentByIdentityProviderId(userId);
+        if (forAgent == null) {
             throw new InvalidInputException("could not find user");
         }
-        return projectService.removePermission(forProject, forUser, subject);
+        return projectService.removePermission(forProject, forAgent, subject);
     }
 
     @Path("{id}/tags")
@@ -106,7 +113,7 @@ public class ProjectResource {
     @Getter
     @AllArgsConstructor
     @NoArgsConstructor
-    static class CreateProject {
+    static class ProjectProperties {
 
         @NotEmpty
         private String name;

@@ -56,6 +56,19 @@ public class ProjectService {
         }
     }
 
+    public Project patchProject(String projectId, String projectName, Agent agent) {
+
+        Permission permission = permissionService.findWritePermission(agent, projectId);
+        Project project = (Project) permission.getResource();
+        project.setName(projectName);
+        try {
+            return projectDAO.persist(project);
+        } catch (Exception e) {
+            throw new CodedException(409, Error.RESOURCE_EXISTS, "A project with this name already exsists");
+        }
+
+    }
+
     void removeProject(String projectId, Agent agent) {
 
         permissionService.findOwnerPermission(agent, projectId);
@@ -146,15 +159,18 @@ public class ProjectService {
         }
     }
 
-    Project addPermission(String projectId, User permissionUser, Permission.Type type, Agent subject) {
+    Permission addPermission(String projectId, Agent permissionUser, Permission.Type type, Agent subject) {
 
         Permission ownerPermission = permissionService.findOwnerPermission(subject, projectId);
 
         try {
             Project project = (Project) ownerPermission.getResource();
-            return projectDAO.addPermission(project, permissionService.createUserPermission(
+            project = projectDAO.addPermission(project, permissionService.createUserPermission(
                     project, permissionUser, type
             ));
+            return project.getPermissions().stream()
+                    .filter(permission -> permission.getAgent().equals(permissionUser))
+                    .findFirst().get();
         } catch (ClassCastException e) {
             throw new InvalidInputException("id was not a project id");
         }

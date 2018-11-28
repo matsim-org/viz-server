@@ -13,6 +13,7 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static junit.framework.TestCase.*;
 import static org.mockito.Mockito.mock;
@@ -245,5 +246,39 @@ public class VisualizationServiceTest {
         assertEquals(1, result.size());
         Visualization resultViz = result.get(0);
         assertEquals(secondViz, resultViz);
+    }
+
+    @Test
+    public void findAllForProject_listOfVisualizations() {
+
+        Project project = TestUtils.persistProjectWithCreator("first-project");
+        project = TestUtils.addFileEntry(project, "some-file.txt");
+        project = addVisualization(project, project.getFiles().iterator().next(), "some-key");
+
+        Project otherProject = new Project();
+        otherProject.setName("second-project");
+        otherProject.setCreator(project.getCreator());
+        otherProject = TestUtils.getProjectDAO().persist(otherProject);
+        otherProject = TestUtils.addFileEntry(otherProject, "some-other-file.txt");
+        otherProject = addVisualization(otherProject, otherProject.getFiles().iterator().next(), "other-key");
+
+        List<Visualization> result = testObject.findAllForProject(project.getId(), project.getCreator());
+
+        assertEquals(project.getVisualizations().size(), result.size());
+        final Set<Visualization> projectVisualizations = project.getVisualizations();
+        result.forEach(viz -> assertTrue(projectVisualizations.stream().anyMatch(projectViz -> projectViz.equals(viz))));
+
+        final Set<Visualization> otherProjectVisualizations = otherProject.getVisualizations();
+        result.forEach(viz -> assertTrue(otherProjectVisualizations.stream().noneMatch(projectViz -> projectViz.equals(viz))));
+    }
+
+    private Project addVisualization(Project project, FileEntry entry, String inputKey) {
+        Visualization visualization = new Visualization();
+        VisualizationInput input = new VisualizationInput();
+        input.setFileEntry(entry);
+        input.setInputKey(inputKey);
+        visualization.addInput(input);
+        project.addVisualization(visualization);
+        return TestUtils.getProjectDAO().persist(project);
     }
 }

@@ -3,6 +3,7 @@ package org.matsim.viz.files.agent;
 import lombok.Getter;
 import org.matsim.viz.error.CodedException;
 import org.matsim.viz.error.Error;
+import org.matsim.viz.files.entities.Agent;
 import org.matsim.viz.files.entities.PublicAgent;
 import org.matsim.viz.files.entities.ServiceAgent;
 import org.matsim.viz.files.entities.User;
@@ -38,7 +39,11 @@ public class AgentService {
         }
     }
 
-    public User findByIdentityProviderId(String id) {
-        return userDAO.findByIdentityProviderId(id);
+    public User findUserByIdentityProviderId(String id) {
+        return userDAO.findUserByIdentityProviderId(id);
+    }
+
+    public Agent findAgentByIdentityProviderId(String id) {
+        return userDAO.findAgentByIdentityProviderId(id);
     }
 }
