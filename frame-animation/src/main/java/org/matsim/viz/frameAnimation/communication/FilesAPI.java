@@ -29,7 +29,7 @@ public class FilesAPI {
     public Visualization[] fetchVisualizations(Instant after) {
 
         Invocation.Builder builder = ServiceCommunication.getClient().target(vizByTypeEndpoint)
-                .queryParam("type", "Animation")
+                .queryParam("type", "frame-animation")
                 .queryParam("after", after.toString())
                 .request();
 

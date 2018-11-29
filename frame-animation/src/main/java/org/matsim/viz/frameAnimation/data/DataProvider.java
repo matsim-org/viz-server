@@ -45,7 +45,7 @@ public class DataProvider {
 
     public ByteArrayOutputStream getSnapshots(String vizId, double fromTimestamp, int numberOfTimesteps, double speedFactor
             , Permission permission) throws IOException {
-        return findWithoutPermission(vizId).getSnapshots(null, fromTimestamp, numberOfTimesteps, speedFactor);
+        return find(vizId, permission).getSnapshots(null, fromTimestamp, numberOfTimesteps, speedFactor);
     }
 
     public FeatureCollection getPlan(String vizId, int idIndex, Permission permission) {
