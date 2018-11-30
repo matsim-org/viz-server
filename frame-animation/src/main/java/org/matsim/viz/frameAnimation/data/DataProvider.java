@@ -5,9 +5,8 @@ import org.matsim.viz.error.ForbiddenException;
 import org.matsim.viz.error.InternalException;
 import org.matsim.viz.error.InvalidInputException;
 import org.matsim.viz.frameAnimation.contracts.ConfigurationResponse;
+import org.matsim.viz.frameAnimation.entities.Agent;
 import org.matsim.viz.frameAnimation.entities.Permission;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -15,8 +14,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class DataProvider {
-
-    private static final Logger logger = LoggerFactory.getLogger(DataProvider.class);
 
     public static DataProvider Instance = new DataProvider();
 
@@ -60,7 +57,7 @@ public class DataProvider {
 
         VisualizationData viz = data.get(vizId);
 
-        if (!viz.getPermissions().contains(permission) && !viz.getPermissions().contains(Permission.getPublicPermission()))
+        if (!hasPermission(viz, permission))
             throw new ForbiddenException("You don't have access to this visualization");
 
         if (!viz.isDone())
@@ -81,7 +78,7 @@ public class DataProvider {
         }
         VisualizationData vizData = data.get(vizId);
 
-        if (!vizData.getPermissions().contains(permission) && !vizData.getPermissions().contains(Permission.getPublicPermission()))
+        if (!hasPermission(vizData, permission))
             throw new ForbiddenException("you don't have access to this visualization");
         if (!vizData.isDone())
             throw new InternalException("visualization is not ready yet");
@@ -89,25 +86,8 @@ public class DataProvider {
         return data.get(vizId).getSimulationData();
     }
 
-    /**
-     * Use method 'find' instead!
-     * returns simulation data without checking for permission. This should be removed as soon as the client is able to
-     * authenticate from background workers.
-     *
-     * @param vizId id of the visualization
-     * @return returns SimulationData which corresponds to supplied vizId
-     */
-    private SimulationData findWithoutPermission(String vizId) {
-
-        logger.warn("Returning Simulation Data without checking for permission. Don't use this feature in production.");
-        if (!data.containsKey(vizId)) {
-            throw new InvalidInputException("Viz id: " + vizId + " is not in data set");
-        }
-        VisualizationData vizData = data.get(vizId);
-
-        if (!vizData.isDone())
-            throw new InternalException("visualization is not ready yet");
-
-        return data.get(vizId).getSimulationData();
+    private boolean hasPermission(VisualizationData data, Permission permission) {
+        return data.getPermissions().stream().anyMatch(p -> p.getAgent().getAuthId().equals(permission.getAgent().getAuthId()))
+                || data.getPermissions().stream().anyMatch(p -> p.getAgent().getAuthId().equals(Agent.getPublicAgent().getAuthId()));
     }
 }

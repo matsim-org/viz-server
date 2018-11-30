@@ -115,8 +115,8 @@ public class DataGeneratorTest {
         project.setId("project-id");
 
         Set<Permission> permissions = new HashSet<>();
-        permissions.add(new Permission("some-auth-id"));
-        permissions.add(new Permission("some-other-id"));
+        permissions.add(Permission.createFromAuthId("some-auth-id"));
+        permissions.add(Permission.createFromAuthId("some-other-id"));
 
         return new Visualization(
                 project, permissions, input, params);
