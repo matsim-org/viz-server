@@ -11,6 +11,7 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.views.ViewBundle;
 import org.eclipse.jetty.server.session.SessionHandler;
+import org.eclipse.jetty.servlets.CrossOriginFilter;
 import org.matsim.viz.auth.authorization.AuthorizationResource;
 import org.matsim.viz.auth.authorization.AuthorizationService;
 import org.matsim.viz.auth.config.AppConfiguration;
@@ -25,12 +26,17 @@ import org.matsim.viz.auth.relyingParty.RelyingPartyDAO;
 import org.matsim.viz.auth.relyingParty.RelyingPartyService;
 import org.matsim.viz.auth.token.*;
 import org.matsim.viz.auth.user.LoginResource;
+import org.matsim.viz.auth.user.LogoutResource;
 import org.matsim.viz.auth.user.UserDAO;
 import org.matsim.viz.auth.user.UserService;
 import org.matsim.viz.database.PersistenceUnit;
 import org.matsim.viz.error.CodedExceptionMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.servlet.DispatcherType;
+import javax.servlet.FilterRegistration;
+import java.util.EnumSet;
 
 public class App extends Application<AppConfiguration> {
 
@@ -61,6 +67,7 @@ public class App extends Application<AppConfiguration> {
         registerBasicAuth(environment.jersey());
         registerSessionHandling(environment.jersey(), environment.servlets());
         registerEndpoints(environment.jersey(), appConfiguration);
+        registerCORSFilter(environment.servlets());
 
         environment.jersey().register(new CodedExceptionMapper());
     }
@@ -121,7 +128,21 @@ public class App extends Application<AppConfiguration> {
         jersey.register(new TokenResource(tokenService));
         jersey.register(new AuthorizationResource(tokenService, authorizationService));
         jersey.register(new LoginResource(userService, tokenService));
+        jersey.register(new LogoutResource());
         jersey.register(new DiscoveryResource(configuration.getHostURI()));
         jersey.register(new TokenSigningKeyResource(keyProvider));
+    }
+
+    @SuppressWarnings("Duplicates")
+    private void registerCORSFilter(ServletEnvironment servlet) {
+
+        final FilterRegistration.Dynamic cors = servlet.addFilter("CORS", CrossOriginFilter.class);
+        cors.setInitParameter(CrossOriginFilter.ALLOWED_ORIGINS_PARAM, "*");
+        cors.setInitParameter(CrossOriginFilter.ALLOWED_METHODS_PARAM, "POST");
+        cors.setInitParameter(CrossOriginFilter.ALLOWED_HEADERS_PARAM, "Authorization, Content-Type");
+        cors.setInitParameter(CrossOriginFilter.ALLOW_CREDENTIALS_PARAM, "true");
+
+        cors.addMappingForUrlPatterns(EnumSet.allOf(DispatcherType.class), true, "/*");
+        cors.setInitParameter(CrossOriginFilter.CHAIN_PREFLIGHT_PARAM, Boolean.FALSE.toString());
     }
 }
