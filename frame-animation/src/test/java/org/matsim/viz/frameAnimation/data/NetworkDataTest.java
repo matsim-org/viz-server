@@ -2,12 +2,12 @@ package org.matsim.viz.frameAnimation.data;
 
 public class NetworkDataTest {
 /*
-    private static Network network;
+    private static MatsimNetwork matsimNetwork;
     private NetworkData testObject;
 
     @BeforeClass
     public static void setUpClass() {
-        network = TestUtils.loadTestNetwork();
+        matsimNetwork = TestUtils.loadTestNetwork();
     }
 
     @Before
@@ -19,7 +19,7 @@ public class NetworkDataTest {
     public void addLink() throws IOException {
 
         //act
-        Collection<? extends Link> values = network.getLinks().values();
+        Collection<? extends Link> values = matsimNetwork.getLinks().values();
         for (Link link : values) {
             testObject.addLink(link);
         }
@@ -51,7 +51,7 @@ public class NetworkDataTest {
     public void getLinks() throws IOException {
 
         //act
-        Collection<? extends Link> values = network.getLinks().values();
+        Collection<? extends Link> values = matsimNetwork.getLinks().values();
         for (Link link : values) {
             testObject.addLink(link);
         }

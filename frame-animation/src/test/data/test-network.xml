@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE network SYSTEM "http://www.matsim.org/files/dtd/network_v1.dtd">
 
-<network name="two-routes test network">
+<network name="two-routes test matsimNetwork">
 
     <nodes>
         <node id="1" x="-2500.0" y="0"/>

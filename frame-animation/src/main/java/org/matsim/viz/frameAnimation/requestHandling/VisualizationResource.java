@@ -32,7 +32,7 @@ public class VisualizationResource {
     }
 
     @GET
-    @Path("/network")
+    @Path("/matsimNetwork")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     public byte[] network(@Auth Permission permission, @PathParam("id") String vizId) {
         return data.getLinks(vizId, permission);

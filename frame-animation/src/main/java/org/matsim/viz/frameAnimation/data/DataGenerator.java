@@ -24,7 +24,7 @@ import java.util.concurrent.ScheduledExecutorService;
 
 class DataGenerator {
 
-    private static final String NETWORK_KEY = "network";
+    private static final String NETWORK_KEY = "matsimNetwork";
     private static final String EVENTS_KEY = "events";
     private static final String PLANS_KEY = "plans";
     private static final String SNAPSHOT_INTERVAL_KEY = "snapshotInterval";

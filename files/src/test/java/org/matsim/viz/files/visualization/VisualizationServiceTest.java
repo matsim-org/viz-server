@@ -49,7 +49,7 @@ public class VisualizationServiceTest {
         project = TestUtils.addFileEntry(project, "some-other-file.txt");
 
         Map<String, String> input = new HashMap<>();
-        input.put("network", project.getFiles().iterator().next().getId());
+        input.put("matsimNetwork", project.getFiles().iterator().next().getId());
         Map<String, String> parameters = new HashMap<>();
         parameters.put("some", "parameter");
 
@@ -86,7 +86,7 @@ public class VisualizationServiceTest {
 
         FileEntry[] entries = project.getFiles().toArray(new FileEntry[0]);
         Map<String, String> input = new HashMap<>();
-        input.put("network", entries[0].getId());
+        input.put("matsimNetwork", entries[0].getId());
         input.put("other", entries[0].getId());
         Map<String, String> parameters = new HashMap<>();
         parameters.put("some", "parameter");
