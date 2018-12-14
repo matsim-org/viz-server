@@ -8,9 +8,13 @@ import org.matsim.api.core.v01.network.Network;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.QSimConfigGroup;
+import org.matsim.core.events.EventsUtils;
+import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.events.algorithms.SnapshotGenerator;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
+import org.matsim.core.scenario.MutableScenario;
+import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.viz.frameAnimation.persistenceModel.MatsimNetwork;
 import org.matsim.viz.frameAnimation.persistenceModel.Visualization;
 
@@ -59,6 +63,27 @@ class VisualizationProcessor {
         Config config = ConfigUtils.createConfig();
         config.qsim().setSnapshotStyle(QSimConfigGroup.SnapshotStyle.queue);
         SnapshotGenerator generator = new SnapshotGenerator(this.originalNetwork, snapshotPeriod, config.qsim());
+        val writer = new DatabaseSnapshotWriter(visualization, this.sessionFactory);
+        generator.addSnapshotWriter(writer);
+        val eventsManager = EventsUtils.createEventsManager();
+        eventsManager.addHandler(generator);
+        val reader = new MatsimEventsReader(eventsManager);
+
+        // this is the part where database action happens
+        try {
+            reader.readFile(eventsFilePath.toString());
+        } catch (Exception e) {
+            throw new RuntimeException("an error occurred while writing snapshots");
+        } finally {
+            // database snapshot writer opens a db session it must be closed
+            generator.finish();
+        }
+    }
+
+    void readPopulation(Visualization visualization) {
+
+        MutableScenario scenario = ScenarioUtils.createMutableScenario(ConfigUtils.createConfig());
+        scenario.setNetwork(this.originalNetwork);
 
     }
 }

@@ -2,6 +2,7 @@ package org.matsim.viz.frameAnimation.inputProcessing;
 
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.matsim.vis.snapshotwriters.AgentSnapshotInfo;
 import org.matsim.vis.snapshotwriters.SnapshotWriter;
@@ -15,16 +16,24 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-@RequiredArgsConstructor
 public class DatabaseSnapshotWriter implements SnapshotWriter {
 
-    private final SessionFactory sessionFactory;
     private final Visualization visualization;
+    private final Session session;
 
     private TempSnapshot currentSnapshot;
 
+    DatabaseSnapshotWriter(Visualization visualization, SessionFactory sessionFactory) {
+        this.visualization = visualization;
+        // open a new session which this instance owns
+        this.session = sessionFactory.openSession();
+        this.session.beginTransaction();
+    }
+
     @Override
     public void beginSnapshot(double timestep) {
+
+
         this.currentSnapshot = new TempSnapshot(timestep);
     }
 
@@ -36,10 +45,7 @@ public class DatabaseSnapshotWriter implements SnapshotWriter {
         snapshot.setTimestep(this.currentSnapshot.timestep);
         snapshot.setData(this.currentSnapshot.encodePositions());
 
-        val session = sessionFactory.getCurrentSession();
-        session.beginTransaction();
         session.save(snapshot);
-        session.getTransaction().commit();
     }
 
     @Override
@@ -53,6 +59,9 @@ public class DatabaseSnapshotWriter implements SnapshotWriter {
     @Override
     public void finish() {
 
+        // commit all the snapshots and throw away the session
+        session.flush();
+        session.close();
     }
 
     private boolean isOnRoute(AgentSnapshotInfo info) {
