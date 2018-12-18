@@ -23,6 +23,9 @@ public class Visualization extends AbstractEntity {
     @OneToMany(mappedBy = "visualization", fetch = FetchType.EAGER, orphanRemoval = true, cascade = CascadeType.ALL)
     private List<Snapshot> snapshots = new ArrayList<>();
 
+    @OneToMany(mappedBy = "visualization", fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL)
+    private List<Plan> plans = new ArrayList<>();
+
     private double timestepSize;
 
     public void addNetwork(MatsimNetwork network) {
@@ -33,5 +36,10 @@ public class Visualization extends AbstractEntity {
     public void addSnapshot(Snapshot snapshot) {
         this.snapshots.add(snapshot);
         snapshot.setVisualization(this);
+    }
+
+    public void addPlan(Plan plan) {
+        this.plans.add(plan);
+        plan.setVisualization(this);
     }
 }

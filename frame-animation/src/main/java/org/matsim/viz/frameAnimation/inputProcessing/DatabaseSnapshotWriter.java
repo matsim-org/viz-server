@@ -33,7 +33,6 @@ public class DatabaseSnapshotWriter implements SnapshotWriter {
     @Override
     public void beginSnapshot(double timestep) {
 
-
         this.currentSnapshot = new TempSnapshot(timestep);
     }
 
@@ -46,6 +45,7 @@ public class DatabaseSnapshotWriter implements SnapshotWriter {
         snapshot.setData(this.currentSnapshot.encodePositions());
 
         session.save(snapshot);
+        session.flush();
     }
 
     @Override
@@ -59,8 +59,8 @@ public class DatabaseSnapshotWriter implements SnapshotWriter {
     @Override
     public void finish() {
 
-        // commit all the snapshots and throw away the session
-        session.flush();
+        // finish the session!
+        session.getTransaction().commit();
         session.close();
     }
 

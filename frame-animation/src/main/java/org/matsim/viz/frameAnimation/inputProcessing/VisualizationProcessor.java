@@ -13,7 +13,7 @@ import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.events.algorithms.SnapshotGenerator;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
-import org.matsim.core.scenario.MutableScenario;
+import org.matsim.core.population.io.PopulationReader;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.viz.frameAnimation.persistenceModel.MatsimNetwork;
 import org.matsim.viz.frameAnimation.persistenceModel.Visualization;
@@ -24,6 +24,7 @@ class VisualizationProcessor {
 
     private Path networkFilePath;
     private Path eventsFilePath;
+    private Path populationFilePath;
 
     private double snapshotPeriod;
     private SessionFactory sessionFactory;
@@ -34,9 +35,10 @@ class VisualizationProcessor {
     private MatsimNetwork generatedNetwork;
 
     @Builder
-    VisualizationProcessor(Path network, Path events, double snapshotPeriod, SessionFactory sessionFactory) {
+    VisualizationProcessor(Path network, Path events, Path population, double snapshotPeriod, SessionFactory sessionFactory) {
         this.networkFilePath = network;
         this.eventsFilePath = events;
+        this.populationFilePath = population;
         this.sessionFactory = sessionFactory;
         this.snapshotPeriod = snapshotPeriod;
     }
@@ -82,8 +84,10 @@ class VisualizationProcessor {
 
     void readPopulation(Visualization visualization) {
 
-        MutableScenario scenario = ScenarioUtils.createMutableScenario(ConfigUtils.createConfig());
+        val scenario = ScenarioUtils.createMutableScenario(ConfigUtils.createConfig());
         scenario.setNetwork(this.originalNetwork);
+        val reader = new PopulationReader(scenario);
+        reader.readFile(populationFilePath.toString());
 
     }
 }
