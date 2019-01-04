@@ -28,8 +28,8 @@ public class Visualization extends AbstractEntity {
 
     private String filesServerId;
     private double timestepSize;
-    private double firstTimestep;
-    private double lastTimestep;
+    private double firstTimestep = Double.MAX_VALUE;
+    private double lastTimestep = Double.MIN_VALUE;
     private Progress progress = Progress.DownloadingInput;
 
     public void addNetwork(MatsimNetwork network) {

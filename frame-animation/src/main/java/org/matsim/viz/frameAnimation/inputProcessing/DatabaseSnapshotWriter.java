@@ -40,6 +40,7 @@ public class DatabaseSnapshotWriter implements SnapshotWriter {
     public void beginSnapshot(double timestep) {
 
         this.currentSnapshot = new TempSnapshot(timestep);
+        setFirstOrLastTimestep(timestep);
     }
 
     @Override
@@ -66,6 +67,9 @@ public class DatabaseSnapshotWriter implements SnapshotWriter {
 
         //TODO persist id -> idIndex map in database
 
+        // persist visualization with first and last timestep set
+        entityManager.merge(visualization);
+
         // finish the session!
         entityManager.getTransaction().commit();
         entityManager.close();
@@ -82,6 +86,14 @@ public class DatabaseSnapshotWriter implements SnapshotWriter {
             index = agentIds.size() - 1;
         }
         return index;
+    }
+
+    private void setFirstOrLastTimestep(double timestep) {
+        if (timestep < visualization.getFirstTimestep())
+            visualization.setFirstTimestep(timestep);
+        if (timestep > visualization.getLastTimestep()) {
+            visualization.setLastTimestep(timestep);
+        }
     }
 
     @RequiredArgsConstructor

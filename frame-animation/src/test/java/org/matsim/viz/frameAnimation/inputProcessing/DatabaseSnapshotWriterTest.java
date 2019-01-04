@@ -1,12 +1,8 @@
 package org.matsim.viz.frameAnimation.inputProcessing;
 
-import io.dropwizard.testing.junit.DAOTestRule;
 import lombok.val;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.matsim.viz.frameAnimation.persistenceModel.MatsimNetwork;
-import org.matsim.viz.frameAnimation.persistenceModel.Plan;
 import org.matsim.viz.frameAnimation.persistenceModel.Snapshot;
 import org.matsim.viz.frameAnimation.persistenceModel.Visualization;
 import org.matsim.viz.frameAnimation.utils.TestUtils;
@@ -17,16 +13,7 @@ import java.nio.ByteOrder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
-public class DatabaseSnapshotWriterTest {
-
-    @Rule
-    public DAOTestRule database = DAOTestRule.newBuilder()
-            .addEntityClass(MatsimNetwork.class)
-            .addEntityClass(Visualization.class)
-            .addEntityClass(Snapshot.class)
-            .addEntityClass(Plan.class)
-            .setShowSql(true)
-            .build();
+public class DatabaseSnapshotWriterTest extends DatabaseTest {
 
     private Visualization visualization;
     private DatabaseSnapshotWriter snapshotWriter;
@@ -91,6 +78,8 @@ public class DatabaseSnapshotWriterTest {
         // we need a new session to force a reload from the database
         try (val session = database.getSessionFactory().openSession()) {
             fetchedVisualization = session.find(Visualization.class, visualization.getId());
+            assertEquals(1, fetchedVisualization.getFirstTimestep(), 0.001);
+            assertEquals(1, fetchedVisualization.getLastTimestep(), 0.001);
             assertEquals(1, fetchedVisualization.getSnapshots().size());
             expectedSnapshot = fetchedVisualization.getSnapshots().get(0);
         }
@@ -120,7 +109,10 @@ public class DatabaseSnapshotWriterTest {
     @Test
     public void writeMultipleSnapshots() {
 
-        snapshotWriter.beginSnapshot(1);
+        final double firstTimestep = 1;
+        final double lastTimestep = 4;
+
+        snapshotWriter.beginSnapshot(firstTimestep);
         TestUtils.createAgentSnapshotInfos(20000).forEach(info -> snapshotWriter.addAgent(info));
         snapshotWriter.endSnapshot();
         snapshotWriter.beginSnapshot(2);
@@ -129,7 +121,7 @@ public class DatabaseSnapshotWriterTest {
         snapshotWriter.beginSnapshot(3);
         TestUtils.createAgentSnapshotInfos(27000).forEach(info -> snapshotWriter.addAgent(info));
         snapshotWriter.endSnapshot();
-        snapshotWriter.beginSnapshot(4);
+        snapshotWriter.beginSnapshot(lastTimestep);
         TestUtils.createAgentSnapshotInfos(68000).forEach(info -> snapshotWriter.addAgent(info));
         snapshotWriter.endSnapshot();
         snapshotWriter.finish();
@@ -138,6 +130,8 @@ public class DatabaseSnapshotWriterTest {
         try (val session = database.getSessionFactory().openSession()) {
             val viz = session.find(Visualization.class, visualization.getId());
             assertEquals(4, viz.getSnapshots().size());
+            assertEquals(firstTimestep, viz.getFirstTimestep(), 0.001);
+            assertEquals(lastTimestep, viz.getLastTimestep(), 0.001);
         }
     }
 }
