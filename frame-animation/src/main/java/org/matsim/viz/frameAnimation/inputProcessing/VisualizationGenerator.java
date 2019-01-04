@@ -46,7 +46,7 @@ public class VisualizationGenerator {
                 val filePath = fetchInputFile(input, vizFolder);
                 inputFiles.put(input.getInputKey(), filePath);
             }
-            VisualizationProcessor processor = new VisualizationProcessor(
+      /*      VisualizationProcessor processor = new VisualizationProcessor(
                     inputFiles.get(NETWORK_KEY),
                     inputFiles.get(EVENTS_KEY),
                     inputFiles.get(PLANS_KEY),
@@ -54,7 +54,7 @@ public class VisualizationGenerator {
                     sessionFactory
             );
             processor.processVisualization();
-
+*/
 
         } catch (Exception e) {
 

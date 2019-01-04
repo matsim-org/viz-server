@@ -30,10 +30,18 @@ public class Visualization extends AbstractEntity {
     private double timestepSize;
     private double firstTimestep = Double.MAX_VALUE;
     private double lastTimestep = Double.MIN_VALUE;
+    private double minEasting;
+    private double maxEasting;
+    private double minNorthing;
+    private double maxNorthing;
     private Progress progress = Progress.DownloadingInput;
 
     public void addNetwork(MatsimNetwork network) {
         this.matsimNetwork = network;
+        minEasting = network.getMinEasting();
+        maxEasting = network.getMaxEasting();
+        minNorthing = network.getMinNorthing();
+        maxNorthing = network.getMaxNorthing();
         network.setVisualization(this);
     }
 

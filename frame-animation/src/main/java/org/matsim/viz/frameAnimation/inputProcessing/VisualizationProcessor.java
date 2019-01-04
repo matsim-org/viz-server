@@ -1,9 +1,7 @@
 package org.matsim.viz.frameAnimation.inputProcessing;
 
 import lombok.Builder;
-import lombok.Getter;
 import lombok.val;
-import org.hibernate.SessionFactory;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.core.config.Config;
@@ -17,6 +15,7 @@ import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.viz.frameAnimation.persistenceModel.MatsimNetwork;
 import org.matsim.viz.frameAnimation.persistenceModel.Visualization;
 
+import javax.persistence.EntityManagerFactory;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -25,29 +24,20 @@ class VisualizationProcessor {
     private final Path networkFilePath;
     private final Path eventsFilePath;
     private final Path populationFilePath;
-
-    private final double snapshotPeriod;
-    private final SessionFactory sessionFactory;
-
     private final Visualization visualization;
-    private Network originalNetwork;
-    private List<Id> idMapping;
 
-    @Getter
-    private MatsimNetwork generatedNetwork;
+    private final EntityManagerFactory emFactory;
+
+    private Network originalNetwork;
+    private List<Id> idMapping; // TODO use idMapping in Population reader
 
     @Builder
-    VisualizationProcessor(Path network, Path events, Path population, double snapshotPeriod, SessionFactory sessionFactory) {
+    VisualizationProcessor(Path network, Path events, Path population, Visualization visualization, EntityManagerFactory emFactory) {
         this.networkFilePath = network;
         this.eventsFilePath = events;
         this.populationFilePath = population;
-        this.sessionFactory = sessionFactory;
-        this.snapshotPeriod = snapshotPeriod;
-
-        //TODO this must move somewhere else
-        this.visualization = new Visualization();
-        visualization.setTimestepSize(snapshotPeriod);
-        sessionFactory.getCurrentSession().save(this.visualization);
+        this.emFactory = emFactory;
+        this.visualization = visualization;
     }
 
     void processVisualization() {
@@ -64,22 +54,22 @@ class VisualizationProcessor {
 
         val networkEntity = new MatsimNetwork(originalNetwork);
         visualization.addNetwork(networkEntity);
-        val session = sessionFactory.getCurrentSession();
-        val transaction = session.beginTransaction();
+        val em = emFactory.createEntityManager();
+
         try {
-            session.save(visualization);
-            transaction.commit();
-            this.generatedNetwork = networkEntity;
-        } catch (Exception e) {
-            throw new RuntimeException("Could not persist network");
+            em.getTransaction().begin();
+            em.merge(visualization);
+            em.getTransaction().commit();
+        } finally {
+            em.close();
         }
     }
 
     private void readEvents(Visualization visualization) {
         Config config = ConfigUtils.createConfig();
         config.qsim().setSnapshotStyle(QSimConfigGroup.SnapshotStyle.queue);
-        SnapshotGenerator generator = new SnapshotGenerator(this.originalNetwork, snapshotPeriod, config.qsim());
-        val writer = new DatabaseSnapshotWriter(visualization, this.sessionFactory);
+        SnapshotGenerator generator = new SnapshotGenerator(this.originalNetwork, visualization.getTimestepSize(), config.qsim());
+        val writer = new DatabaseSnapshotWriter(visualization, this.emFactory);
         generator.addSnapshotWriter(writer);
         val eventsManager = EventsUtils.createEventsManager();
         eventsManager.addHandler(generator);
@@ -99,7 +89,7 @@ class VisualizationProcessor {
 
     private void readPopulation(Visualization visualization) {
 
-        val writer = new DatabasePopulationWriter(populationFilePath, this.originalNetwork, sessionFactory, visualization);
+        val writer = new DatabasePopulationWriter(populationFilePath, this.originalNetwork, emFactory, visualization);
         writer.readPopulationAndWriteToDatabase();
     }
 }
