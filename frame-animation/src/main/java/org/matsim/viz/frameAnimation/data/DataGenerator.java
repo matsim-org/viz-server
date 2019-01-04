@@ -33,7 +33,7 @@ class DataGenerator {
     private static final Path tempFolder = createTempFolder(AppConfiguration.getInstance().getTmpFilePath());
     private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(8);
 
-    FilesAPI filesAPI = FilesAPI.Instance;
+    FilesAPI filesAPI = new FilesAPI(AppConfiguration.getInstance().getFileServer());
     SimulationDataFactory simulationDataFactory = new SimulationDataFactory();
     DataProvider dataProvider = DataProvider.Instance;
     private final Visualization visualization;

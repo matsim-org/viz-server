@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.matsim.viz.error.InternalException;
+import org.matsim.viz.frameAnimation.config.AppConfiguration;
 import org.matsim.viz.frameAnimation.data.DataController;
 import org.matsim.viz.frameAnimation.data.DataProvider;
 import org.matsim.viz.frameAnimation.entities.Subscription;
@@ -57,7 +58,7 @@ public class NotificationHandler {
         logger.info("Attempting to register for notifications");
         try {
             URI callback = selfHostname.resolve("/notifications");
-            Subscription result = FilesAPI.Instance.registerNotfication("visualization_created", callback);
+            Subscription result = new FilesAPI(AppConfiguration.getInstance().getFileServer()).registerNotfication("visualization_created", callback);
             scheduleSubscriptionRefresh(result, selfHostname);
         } catch (Exception e) {
             logger.error("Failed to register for notifications try again in 5 minutes");

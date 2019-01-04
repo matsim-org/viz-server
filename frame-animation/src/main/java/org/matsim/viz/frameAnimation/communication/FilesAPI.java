@@ -2,6 +2,7 @@ package org.matsim.viz.frameAnimation.communication;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.glassfish.jersey.client.oauth2.OAuth2ClientSupport;
 import org.matsim.viz.error.UnauthorizedException;
 import org.matsim.viz.frameAnimation.config.AppConfiguration;
@@ -19,12 +20,12 @@ import java.net.URI;
 import java.time.Instant;
 import java.util.function.Function;
 
+@RequiredArgsConstructor
 public class FilesAPI {
 
     private static final Logger logger = LoggerFactory.getLogger(FilesAPI.class);
-    private static final URI vizByTypeEndpoint =
-            AppConfiguration.getInstance().getFileServer().resolve("/visualizations");
-    public static FilesAPI Instance = new FilesAPI();
+
+    private final URI vizByTypeEndpoint;
 
     public Visualization[] fetchVisualizations(Instant after) {
 

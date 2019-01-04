@@ -17,7 +17,7 @@ public class PopulationDataTest {
 
     @Before
     public void setUp() {
-        MatsimDataReader reader = new MatsimDataReader(TestUtils.NETWORK_FILE, "", TestUtils.POPULATION_FILE);
+        MatsimDataReader reader = new MatsimDataReader(TestUtils.NETWORK_FILE_PATH, "", TestUtils.POPULATION_FILE_PATH);
         Network network = reader.readNetworkFile();
         reader.setRawNetwork(network);
         rawPopulation = reader.readPopulationFile();

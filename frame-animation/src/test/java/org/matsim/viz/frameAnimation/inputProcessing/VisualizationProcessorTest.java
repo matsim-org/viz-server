@@ -25,9 +25,9 @@ public class VisualizationProcessorTest extends DatabaseTest {
         });
 
         this.testObject = VisualizationProcessor.builder()
-                .events(Paths.get(TestUtils.EVENTS_FILE))
-                .network(Paths.get(TestUtils.NETWORK_FILE))
-                .population(Paths.get(TestUtils.POPULATION_FILE))
+                .events(Paths.get(TestUtils.EVENTS_FILE_PATH))
+                .network(Paths.get(TestUtils.NETWORK_FILE_PATH))
+                .population(Paths.get(TestUtils.POPULATION_FILE_PATH))
                 .visualization(visualization)
                 .emFactory(database.getSessionFactory())
                 .build();

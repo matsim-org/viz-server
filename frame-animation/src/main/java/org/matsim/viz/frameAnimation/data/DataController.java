@@ -1,6 +1,7 @@
 package org.matsim.viz.frameAnimation.data;
 
 import org.matsim.viz.frameAnimation.communication.FilesAPI;
+import org.matsim.viz.frameAnimation.config.AppConfiguration;
 import org.matsim.viz.frameAnimation.entities.Visualization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +18,7 @@ public class DataController {
 
     ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(8);
     private Instant lastFetch = Instant.MIN;
-    FilesAPI filesAPI = FilesAPI.Instance;
+    FilesAPI filesAPI = new FilesAPI(AppConfiguration.getInstance().getFileServer());
     DataGeneratorFactory dataGeneratorFactory = new DataGeneratorFactory();
     private boolean isFetchingNewData = false;
 

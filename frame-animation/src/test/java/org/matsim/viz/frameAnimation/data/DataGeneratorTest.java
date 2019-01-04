@@ -104,7 +104,7 @@ public class DataGeneratorTest {
         FileEntry entry = new FileEntry();
         entry.setUserFileName("file.txt");
         entry.setId("entry-id");
-        input.put("matsimNetwork", new VisualizationInput("matsimNetwork", entry));
+        input.put("network", new VisualizationInput("network", entry));
         input.put("events", new VisualizationInput("events", entry));
         input.put("plans", new VisualizationInput("plans", entry));
 

@@ -26,7 +26,9 @@ public class Visualization extends AbstractEntity {
     @OneToMany(mappedBy = "visualization", fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL)
     private List<Plan> plans = new ArrayList<>();
 
+    @Column(unique = true)
     private String filesServerId;
+
     private double timestepSize;
     private double firstTimestep = Double.MAX_VALUE;
     private double lastTimestep = Double.MIN_VALUE;

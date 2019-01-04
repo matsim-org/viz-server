@@ -12,7 +12,7 @@ public class MatsimDataReaderTest {
 
         //arrange
         MatsimDataReader reader =
-                new MatsimDataReader(TestUtils.NETWORK_FILE, TestUtils.EVENTS_FILE, TestUtils.POPULATION_FILE);
+                new MatsimDataReader(TestUtils.NETWORK_FILE_PATH, TestUtils.EVENTS_FILE_PATH, TestUtils.POPULATION_FILE_PATH);
 
         //act
         reader.readAllFiles(2);

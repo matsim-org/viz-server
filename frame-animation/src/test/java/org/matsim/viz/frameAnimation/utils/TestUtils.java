@@ -22,21 +22,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TestUtils {
-    public static final String NETWORK_FILE = "src/test/data/test-network.xml";
-    public static final String EVENTS_FILE = "src/test/data/test-events-100.xml.gz";
-    public static final String POPULATION_FILE = "src/test/data/test-plans-100.xml";
+    public static final String NETWORK_FILE = "test-network.xml";
+    public static final String EVENTS_FILE = "test-events-100.xml.gz";
+    public static final String POPULATION_FILE = "test-plans-100.xml";
+
+    public static final String NETWORK_FILE_PATH = "src/test/data/test-network.xml";
+    public static final String EVENTS_FILE_PATH = "src/test/data/test-events-100.xml.gz";
+    public static final String POPULATION_FILE_PATH = "src/test/data/test-plans-100.xml";
 
     private static SimulationData simulationData;
 
     public static SimulationData getSimulationData() {
         if (simulationData == null)
-            simulationData = new SimulationData(NETWORK_FILE, EVENTS_FILE, POPULATION_FILE, 4);
+            simulationData = new SimulationData(NETWORK_FILE_PATH, EVENTS_FILE_PATH, POPULATION_FILE_PATH, 4);
         return simulationData;
     }
     public static Network loadTestNetwork() {
         Network network = NetworkUtils.createNetwork();
         MatsimNetworkReader reader = new MatsimNetworkReader(network);
-        reader.readFile(NETWORK_FILE);
+        reader.readFile(NETWORK_FILE_PATH);
         return network;
     }
 
@@ -44,7 +48,7 @@ public class TestUtils {
         val scenario = ScenarioUtils.createMutableScenario(ConfigUtils.createConfig());
         scenario.setNetwork(network);
         val reader = new PopulationReader(scenario);
-        reader.readFile(POPULATION_FILE);
+        reader.readFile(POPULATION_FILE_PATH);
         return scenario.getPopulation();
     }
 
