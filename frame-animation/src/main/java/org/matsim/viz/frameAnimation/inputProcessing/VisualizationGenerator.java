@@ -22,7 +22,7 @@ import java.util.Map;
 
 @AllArgsConstructor
 @Log
-public class VisualizationGenerator {
+class VisualizationGenerator {
 
     private static final String NETWORK_KEY = "network";
     private static final String EVENTS_KEY = "events";
@@ -35,9 +35,8 @@ public class VisualizationGenerator {
     private final org.matsim.viz.frameAnimation.entities.Visualization inputVisualization;
     private EntityManagerFactory emFactory;
 
-    public void generate() {
+    void generate() {
 
-        // insert some test, to avoid duplicate processing
         if (!isValidInput(inputVisualization))
             throw new InvalidInputException("visualization from files server doesn't have required values");
 
