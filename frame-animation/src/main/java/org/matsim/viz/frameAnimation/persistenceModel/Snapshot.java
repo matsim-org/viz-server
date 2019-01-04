@@ -5,9 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.matsim.viz.database.AbstractEntity;
 
-import javax.persistence.Entity;
-import javax.persistence.Lob;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 
 @Entity
 @NoArgsConstructor
@@ -15,7 +13,8 @@ import javax.persistence.ManyToOne;
 @Setter
 public class Snapshot extends AbstractEntity {
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "visualization_id")
     private Visualization visualization;
     private double timestep;
     @Lob

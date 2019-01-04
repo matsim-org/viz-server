@@ -4,16 +4,12 @@ import io.dropwizard.testing.junit.DAOTestRule;
 import lombok.val;
 import org.junit.Before;
 import org.junit.Rule;
-import org.junit.Test;
 import org.matsim.viz.frameAnimation.persistenceModel.MatsimNetwork;
 import org.matsim.viz.frameAnimation.persistenceModel.Snapshot;
 import org.matsim.viz.frameAnimation.persistenceModel.Visualization;
 import org.matsim.viz.frameAnimation.utils.TestUtils;
 
 import java.nio.file.Paths;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 public class VisualizationProcessorTest {
 
@@ -42,7 +38,7 @@ public class VisualizationProcessorTest {
         });
     }
 
-    @Test
+   /* @Test
     public void readNetwork() {
         testObject.readNetwork(visualization);
 
@@ -61,6 +57,6 @@ public class VisualizationProcessorTest {
     public void readSnapshots() {
 
         testObject.readEvents(visualization);
-    }
+    }*/
 
 }

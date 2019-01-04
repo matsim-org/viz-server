@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.val;
 import org.hibernate.SessionFactory;
+import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -13,23 +14,24 @@ import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.events.algorithms.SnapshotGenerator;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
-import org.matsim.core.population.io.PopulationReader;
-import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.viz.frameAnimation.persistenceModel.MatsimNetwork;
 import org.matsim.viz.frameAnimation.persistenceModel.Visualization;
 
 import java.nio.file.Path;
+import java.util.List;
 
 class VisualizationProcessor {
 
-    private Path networkFilePath;
-    private Path eventsFilePath;
-    private Path populationFilePath;
+    private final Path networkFilePath;
+    private final Path eventsFilePath;
+    private final Path populationFilePath;
 
-    private double snapshotPeriod;
-    private SessionFactory sessionFactory;
+    private final double snapshotPeriod;
+    private final SessionFactory sessionFactory;
 
+    private final Visualization visualization;
     private Network originalNetwork;
+    private List<Id> idMapping;
 
     @Getter
     private MatsimNetwork generatedNetwork;
@@ -41,9 +43,21 @@ class VisualizationProcessor {
         this.populationFilePath = population;
         this.sessionFactory = sessionFactory;
         this.snapshotPeriod = snapshotPeriod;
+
+        //TODO this must move somewhere else
+        this.visualization = new Visualization();
+        visualization.setTimestepSize(snapshotPeriod);
+        sessionFactory.getCurrentSession().save(this.visualization);
     }
 
-    void readNetwork(Visualization visualization) {
+    void processVisualization() {
+
+        this.readNetwork(visualization);
+        this.readEvents(visualization);
+        this.readPopulation(visualization);
+    }
+
+    private void readNetwork(Visualization visualization) {
 
         originalNetwork = NetworkUtils.createNetwork();
         new MatsimNetworkReader(originalNetwork).readFile(networkFilePath.toString());
@@ -61,7 +75,7 @@ class VisualizationProcessor {
         }
     }
 
-    void readEvents(Visualization visualization) {
+    private void readEvents(Visualization visualization) {
         Config config = ConfigUtils.createConfig();
         config.qsim().setSnapshotStyle(QSimConfigGroup.SnapshotStyle.queue);
         SnapshotGenerator generator = new SnapshotGenerator(this.originalNetwork, snapshotPeriod, config.qsim());
@@ -74,6 +88,7 @@ class VisualizationProcessor {
         // this is the part where database action happens
         try {
             reader.readFile(eventsFilePath.toString());
+            this.idMapping = writer.getAgentIds();
         } catch (Exception e) {
             throw new RuntimeException("an error occurred while writing snapshots");
         } finally {
@@ -82,12 +97,9 @@ class VisualizationProcessor {
         }
     }
 
-    void readPopulation(Visualization visualization) {
+    private void readPopulation(Visualization visualization) {
 
-        val scenario = ScenarioUtils.createMutableScenario(ConfigUtils.createConfig());
-        scenario.setNetwork(this.originalNetwork);
-        val reader = new PopulationReader(scenario);
-        reader.readFile(populationFilePath.toString());
-
+        val writer = new DatabasePopulationWriter(populationFilePath, this.originalNetwork, sessionFactory, visualization);
+        writer.readPopulationAndWriteToDatabase();
     }
 }

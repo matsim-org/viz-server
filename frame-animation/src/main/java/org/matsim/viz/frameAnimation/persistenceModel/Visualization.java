@@ -26,7 +26,11 @@ public class Visualization extends AbstractEntity {
     @OneToMany(mappedBy = "visualization", fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL)
     private List<Plan> plans = new ArrayList<>();
 
+    private String filesServerId;
     private double timestepSize;
+    private double firstTimestep;
+    private double lastTimestep;
+    private Progress progress = Progress.DownloadingInput;
 
     public void addNetwork(MatsimNetwork network) {
         this.matsimNetwork = network;
@@ -42,4 +46,6 @@ public class Visualization extends AbstractEntity {
         this.plans.add(plan);
         plan.setVisualization(this);
     }
+
+    public enum Progress {DownloadingInput, GeneratingData, Done, Failed}
 }

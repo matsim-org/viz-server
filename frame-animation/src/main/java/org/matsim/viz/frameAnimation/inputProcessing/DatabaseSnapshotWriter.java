@@ -1,15 +1,17 @@
 package org.matsim.viz.frameAnimation.inputProcessing;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
+import org.matsim.api.core.v01.Id;
 import org.matsim.vis.snapshotwriters.AgentSnapshotInfo;
 import org.matsim.vis.snapshotwriters.SnapshotWriter;
 import org.matsim.viz.frameAnimation.contracts.SnapshotPosition;
 import org.matsim.viz.frameAnimation.persistenceModel.Snapshot;
 import org.matsim.viz.frameAnimation.persistenceModel.Visualization;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
@@ -19,15 +21,19 @@ import java.util.List;
 public class DatabaseSnapshotWriter implements SnapshotWriter {
 
     private final Visualization visualization;
-    private final Session session;
+    private final EntityManager entityManager;
+    @Getter
+    private final List<Id> agentIds = new ArrayList<>();
 
     private TempSnapshot currentSnapshot;
 
-    DatabaseSnapshotWriter(Visualization visualization, SessionFactory sessionFactory) {
+    DatabaseSnapshotWriter(Visualization visualization, EntityManagerFactory entityManagerFactory) {
+        //this.visualizationId = visualization;
         this.visualization = visualization;
+
         // open a new session which this instance owns
-        this.session = sessionFactory.openSession();
-        this.session.beginTransaction();
+        this.entityManager = entityManagerFactory.createEntityManager();
+        this.entityManager.getTransaction().begin();
     }
 
     @Override
@@ -40,32 +46,42 @@ public class DatabaseSnapshotWriter implements SnapshotWriter {
     public void endSnapshot() {
 
         val snapshot = new Snapshot();
-        visualization.addSnapshot(snapshot);
         snapshot.setTimestep(this.currentSnapshot.timestep);
         snapshot.setData(this.currentSnapshot.encodePositions());
+        snapshot.setVisualization(visualization);
 
-        session.save(snapshot);
-        session.flush();
+        entityManager.persist(snapshot);
+        entityManager.flush();
     }
 
     @Override
     public void addAgent(AgentSnapshotInfo agentSnapshotInfo) {
 
-        if (isOnRoute(agentSnapshotInfo)) {
-            this.currentSnapshot.addAgentInfo(agentSnapshotInfo, 0); //TODO calculate real idIndex
-        }
+        if (isOnRoute(agentSnapshotInfo))
+            this.currentSnapshot.addAgentInfo(agentSnapshotInfo, getIdIndex(agentSnapshotInfo.getId()));
     }
 
     @Override
     public void finish() {
 
+        //TODO persist id -> idIndex map in database
+
         // finish the session!
-        session.getTransaction().commit();
-        session.close();
+        entityManager.getTransaction().commit();
+        entityManager.close();
     }
 
     private boolean isOnRoute(AgentSnapshotInfo info) {
         return info.getAgentState() != AgentSnapshotInfo.AgentState.PERSON_AT_ACTIVITY;
+    }
+
+    private int getIdIndex(Id id) {
+        int index = agentIds.indexOf(id);
+        if (index < 0) {
+            agentIds.add(id);
+            index = agentIds.size() - 1;
+        }
+        return index;
     }
 
     @RequiredArgsConstructor

@@ -20,4 +20,6 @@ public class Plan extends AbstractEntity {
 
     @Lob
     private String geoJson;
+
+    private int idIndex;
 }
