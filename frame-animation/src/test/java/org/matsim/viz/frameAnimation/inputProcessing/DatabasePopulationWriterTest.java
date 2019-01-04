@@ -37,8 +37,10 @@ public class DatabasePopulationWriterTest {
         DatabasePopulationWriter writer = new DatabasePopulationWriter(Paths.get(TestUtils.POPULATION_FILE), network, database.getSessionFactory(), visualization);
         writer.readPopulationAndWriteToDatabase();
 
-        Visualization viz = database.getSessionFactory().getCurrentSession().find(Visualization.class, visualization.getId());
-
-        assertEquals(100, viz.getPlans().size()); // it's a 100 agents in the test file
+        // open a new session to force a reload of the visualization from the db
+        try (val session = database.getSessionFactory().openSession()) {
+            val viz = session.find(Visualization.class, visualization.getId());
+            assertEquals(100, viz.getPlans().size());
+        }
     }
 }

@@ -5,8 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.geojson.*;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
@@ -22,6 +20,8 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.viz.frameAnimation.persistenceModel.Plan;
 import org.matsim.viz.frameAnimation.persistenceModel.Visualization;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +32,7 @@ class DatabasePopulationWriter {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final Path population;
     private final Network network;
-    private final SessionFactory sessionFactory;
+    private final EntityManagerFactory emFactory;
     private final Visualization visualization;
 
     void readPopulationAndWriteToDatabase() {
@@ -46,29 +46,32 @@ class DatabasePopulationWriter {
 
     private void readPopulationAndWriteToDatabase(Population population) {
 
-        try (val session = sessionFactory.openSession()) {
+        val em = emFactory.createEntityManager();
+        try {
             try {
-                session.beginTransaction();
+                em.getTransaction().begin();
 
                 population.getPersons().values().stream()
                         .map(this::planToFeatureCollection)
-                        .forEach(features -> writeToDatabase(features, session));
+                        .forEach(features -> writeToDatabase(features, em));
 
-                session.getTransaction().commit();
+                em.getTransaction().commit();
             } catch (Exception e) {
-                session.getTransaction().rollback();
+                em.getTransaction().rollback();
             }
+        } finally {
+            em.close();
         }
     }
 
-    private void writeToDatabase(FeatureCollection features, Session session) {
+    private void writeToDatabase(FeatureCollection features, EntityManager em) {
 
         try {
             val plan = new Plan();
-            visualization.addPlan(plan);
+            plan.setVisualization(visualization);
             plan.setGeoJson(objectMapper.writeValueAsString(features));
-            session.save(plan);
-            session.flush();
+            em.persist(plan);
+            em.flush();
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Could not write JSON");
         }
