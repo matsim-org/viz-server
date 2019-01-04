@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.population.Person;
 import org.matsim.vis.snapshotwriters.AgentSnapshotInfo;
 import org.matsim.vis.snapshotwriters.SnapshotWriter;
 import org.matsim.viz.frameAnimation.contracts.SnapshotPosition;
@@ -23,7 +24,7 @@ public class DatabaseSnapshotWriter implements SnapshotWriter {
     private final Visualization visualization;
     private final EntityManager entityManager;
     @Getter
-    private final List<Id> agentIds = new ArrayList<>();
+    private final List<Id<Person>> agentIds = new ArrayList<>();
 
     private TempSnapshot currentSnapshot;
 
@@ -79,7 +80,7 @@ public class DatabaseSnapshotWriter implements SnapshotWriter {
         return info.getAgentState() != AgentSnapshotInfo.AgentState.PERSON_AT_ACTIVITY;
     }
 
-    private int getIdIndex(Id id) {
+    private int getIdIndex(Id<Person> id) {
         int index = agentIds.indexOf(id);
         if (index < 0) {
             agentIds.add(id);

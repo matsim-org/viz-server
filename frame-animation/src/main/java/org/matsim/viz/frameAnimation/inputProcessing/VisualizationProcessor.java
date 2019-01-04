@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.val;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Network;
+import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.QSimConfigGroup;
@@ -29,7 +30,7 @@ class VisualizationProcessor {
     private final EntityManagerFactory emFactory;
 
     private Network originalNetwork;
-    private List<Id> idMapping; // TODO use idMapping in Population reader
+    private List<Id<Person>> idMapping;
 
     @Builder
     VisualizationProcessor(Path network, Path events, Path population, Visualization visualization, EntityManagerFactory emFactory) {
@@ -89,7 +90,7 @@ class VisualizationProcessor {
 
     private void readPopulation(Visualization visualization) {
 
-        val writer = new DatabasePopulationWriter(populationFilePath, this.originalNetwork, emFactory, visualization);
+        val writer = new DatabasePopulationWriter(populationFilePath, this.originalNetwork, idMapping, emFactory, visualization);
         writer.readPopulationAndWriteToDatabase();
     }
 }

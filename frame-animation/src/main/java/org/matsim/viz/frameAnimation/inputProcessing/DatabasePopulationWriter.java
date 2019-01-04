@@ -32,6 +32,7 @@ class DatabasePopulationWriter {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final Path population;
     private final Network network;
+    private final List<Id<Person>> idMapping;
     private final EntityManagerFactory emFactory;
     private final Visualization visualization;
 
@@ -51,9 +52,7 @@ class DatabasePopulationWriter {
             try {
                 em.getTransaction().begin();
 
-                population.getPersons().values().stream()
-                        .map(this::planToFeatureCollection)
-                        .forEach(features -> writeToDatabase(features, em));
+                population.getPersons().values().forEach(person -> writePersonToDatabase(person, em));
 
                 em.getTransaction().commit();
             } catch (Exception e) {
@@ -64,20 +63,28 @@ class DatabasePopulationWriter {
         }
     }
 
-    private void writeToDatabase(FeatureCollection features, EntityManager em) {
+    private void writePersonToDatabase(Person person, EntityManager em) {
+
+        val plan = personToPlan(person);
+        em.persist(plan);
+        em.flush();
+    }
+
+    private Plan personToPlan(Person person) {
 
         try {
             val plan = new Plan();
             plan.setVisualization(visualization);
-            plan.setGeoJson(objectMapper.writeValueAsString(features));
-            em.persist(plan);
-            em.flush();
+            val planFeatures = personToFeatureCollection(person);
+            plan.setGeoJson(objectMapper.writeValueAsString(planFeatures));
+            plan.setIdIndex(idMapping.indexOf(person.getId()));
+            return plan;
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Could not write JSON");
         }
     }
 
-    private FeatureCollection planToFeatureCollection(Person person) {
+    private FeatureCollection personToFeatureCollection(Person person) {
 
         val featureCollection = new FeatureCollection();
         person.getSelectedPlan().getPlanElements().forEach(element -> {

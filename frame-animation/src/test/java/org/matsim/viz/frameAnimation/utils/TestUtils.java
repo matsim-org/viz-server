@@ -1,10 +1,15 @@
 package org.matsim.viz.frameAnimation.utils;
 
+import lombok.val;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.api.core.v01.population.Population;
+import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
+import org.matsim.core.population.io.PopulationReader;
+import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.vis.snapshotwriters.AgentSnapshotInfo;
 import org.matsim.vis.snapshotwriters.AgentSnapshotInfoFactory;
 import org.matsim.vis.snapshotwriters.SnapshotLinkWidthCalculator;
@@ -33,6 +38,14 @@ public class TestUtils {
         MatsimNetworkReader reader = new MatsimNetworkReader(network);
         reader.readFile(NETWORK_FILE);
         return network;
+    }
+
+    public static Population loadTestPopulation(Network network) {
+        val scenario = ScenarioUtils.createMutableScenario(ConfigUtils.createConfig());
+        scenario.setNetwork(network);
+        val reader = new PopulationReader(scenario);
+        reader.readFile(POPULATION_FILE);
+        return scenario.getPopulation();
     }
 
     public static List<AgentSnapshotInfo> createAgentSnapshotInfos(int numberOfInfos) {
