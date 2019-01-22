@@ -7,8 +7,11 @@ import io.dropwizard.Application;
 import io.dropwizard.auth.AuthDynamicFeature;
 import io.dropwizard.auth.AuthValueFactoryProvider;
 import io.dropwizard.client.JerseyClientBuilder;
+import io.dropwizard.db.PooledDataSourceFactory;
+import io.dropwizard.hibernate.HibernateBundle;
 import io.dropwizard.jersey.setup.JerseyEnvironment;
 import io.dropwizard.jetty.setup.ServletEnvironment;
+import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
@@ -24,7 +27,8 @@ import org.matsim.viz.frameAnimation.config.AppConfiguration;
 import org.matsim.viz.frameAnimation.data.DataController;
 import org.matsim.viz.frameAnimation.data.DataProvider;
 import org.matsim.viz.frameAnimation.entities.AbstractEntityMixin;
-import org.matsim.viz.frameAnimation.entities.Permission;
+import org.matsim.viz.frameAnimation.persistenceModel.*;
+import org.matsim.viz.frameAnimation.requestHandling.VisualizationResource;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
@@ -39,9 +43,23 @@ import java.util.Optional;
 
 public class App extends Application<AppConfiguration> {
 
+    private final HibernateBundle<AppConfiguration> hibernate = new HibernateBundle<AppConfiguration>(
+            Agent.class, MatsimNetwork.class, Permission.class, Plan.class, Snapshot.class, Visualization.class
+    ) {
+        @Override
+        public PooledDataSourceFactory getDataSourceFactory(AppConfiguration appConfiguration) {
+            return appConfiguration.getDatabase();
+        }
+    };
 
     public static void main(String[] args) throws Exception {
         new App().run(args);
+    }
+
+    @Override
+    public void initialize(Bootstrap<AppConfiguration> bootstrap) {
+
+        bootstrap.addBundle(hibernate);
     }
 
     @Override
@@ -54,8 +72,6 @@ public class App extends Application<AppConfiguration> {
         registerAuthFilter(configuration, ServiceCommunication.getClient(), environment);
         registerCORSFilter(environment.servlets());
         registerEndpoints(environment.jersey(), configuration);
-
-        DataController.Instance.scheduleFetching();
     }
 
     private void createUploadDirectory(AppConfiguration config) throws IOException {
@@ -95,17 +111,20 @@ public class App extends Application<AppConfiguration> {
     private void registerAuthFilter(AppConfiguration configuration, Client client, Environment environment) {
 
         // register oauth filters for request handling
-        final OAuthAuthenticator<Permission> authenticator = new OAuthAuthenticator<>(client, configuration.getIdProvider(),
-                result -> Optional.of(Permission.createFromAuthId(result.getSubjectId())));
+        //final OAuthAuthenticator<Permission> authenticator = new OAuthAuthenticator<>(client, configuration.getIdProvider(),
+        //        result -> Optional.of(Permission.createFromAuthId(result.getSubjectId())));
 
-        OAuthNoAuthFilter filter = new OAuthNoAuthFilter.Builder<Permission>()
-                .setNoAuthPrincipalProvider(() -> Optional.of(Permission.getPublicPermission()))
-                .setAuthenticator(authenticator)
+        final OAuthAuthenticator<Agent> authenticator1 = new OAuthAuthenticator<>(client, configuration.getIdProvider(),
+                result -> Optional.of(new Agent(result.getSubjectId())));
+
+        OAuthNoAuthFilter filter = new OAuthNoAuthFilter.Builder<Agent>()
+                .setNoAuthPrincipalProvider(() -> Optional.of(new Agent(Agent.publicPermissionId)))
+                .setAuthenticator(authenticator1)
                 .setPrefix("Bearer")
                 .buildAuthFilter();
 
         environment.jersey().register(new AuthDynamicFeature(filter));
-        environment.jersey().register(new AuthValueFactoryProvider.Binder<>(Permission.class));
+        environment.jersey().register(new AuthValueFactoryProvider.Binder<>(Agent.class));
     }
 
     @SuppressWarnings("Duplicates")
@@ -123,7 +142,7 @@ public class App extends Application<AppConfiguration> {
 
     private void registerEndpoints(JerseyEnvironment jersey, AppConfiguration configuration) {
 
-        // jersey.register(new VisualizationResource(DataProvider.Instance));
+        jersey.register(new VisualizationResource(hibernate.getSessionFactory()));
         jersey.register(new NotificationHandler(DataController.Instance, DataProvider.Instance, configuration.getOwnHostname()));
     }
 }
