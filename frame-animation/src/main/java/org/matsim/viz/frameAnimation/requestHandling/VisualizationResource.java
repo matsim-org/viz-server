@@ -1,74 +1,132 @@
 package org.matsim.viz.frameAnimation.requestHandling;
 
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import io.dropwizard.auth.Auth;
-import org.geojson.FeatureCollection;
+import io.dropwizard.hibernate.UnitOfWork;
+import lombok.RequiredArgsConstructor;
+import lombok.val;
+import org.matsim.viz.error.ForbiddenException;
 import org.matsim.viz.error.InternalException;
+import org.matsim.viz.error.InvalidInputException;
 import org.matsim.viz.frameAnimation.contracts.ConfigurationResponse;
-import org.matsim.viz.frameAnimation.data.DataProvider;
-import org.matsim.viz.frameAnimation.entities.Permission;
+import org.matsim.viz.frameAnimation.persistenceModel.*;
 
+import javax.persistence.EntityManagerFactory;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+@RequiredArgsConstructor
 @Path("{id}")
 public class VisualizationResource {
 
-    private final DataProvider data;
-
-    public VisualizationResource(DataProvider data) {
-        this.data = data;
-    }
+    private final EntityManagerFactory emFactory;
 
     @GET
     @Path("/configuration")
     @Produces(MediaType.APPLICATION_JSON)
-    public ConfigurationResponse configuration(@Auth Permission permission, @PathParam("id") String vizId) {
+    @UnitOfWork
+    public ConfigurationResponse configuration(@Auth Agent agent, @PathParam("id") String vizId) {
 
-        return data.getConfiguration(vizId, permission);
+        val visualization = findVisualization(agent, vizId);
+
+        if (visualization.getProgress() == Visualization.Progress.Done)
+            return ConfigurationResponse.createFromVisualization(visualization);
+        else
+            return ConfigurationResponse.createForProgressNotDone(visualization.getProgress());
     }
 
     @GET
     @Path("/matsimNetwork")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    public byte[] network(@Auth Permission permission, @PathParam("id") String vizId) {
-        return data.getLinks(vizId, permission);
+    @UnitOfWork
+    public byte[] network(@Auth Agent agent, @PathParam("id") String vizId) {
+
+        if (!hasPermission(agent, vizId))
+            throw new ForbiddenException("user doesn't have permission");
+
+        val networkTable = QMatsimNetwork.matsimNetwork;
+        val result = new JPAQueryFactory(emFactory.createEntityManager()).selectFrom(networkTable)
+                .where(networkTable.visualization.filesServerId.eq(vizId))
+                .fetchFirst();
+        return result.getData();
     }
 
     @GET
     @Path("/snapshots")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    public Response snapshots(@Auth Permission permission,
+    public Response snapshots(@Auth Agent agent,
                               @PathParam("id") String vizId,
                               @QueryParam("fromTimestep") double fromTimestep,
                               @QueryParam("numberOfTimesteps") int numberOfTimesteps,
                               @QueryParam("speedFactor") double speedFactor) {
-        try {
 
-            ByteArrayOutputStream snapshots = data.getSnapshots(vizId, fromTimestep, numberOfTimesteps, speedFactor, permission);
+        val visualization = findVisualization(agent, vizId);
+        val toTimestep = fromTimestep + numberOfTimesteps * visualization.getTimestepSize();
 
-            return Response.ok((StreamingOutput) outputStream -> {
-                snapshots.writeTo(outputStream);
-                outputStream.flush();
+        QSnapshot snapshotTable = QSnapshot.snapshot;
+        val snapshots = new JPAQueryFactory(emFactory.createEntityManager()).selectFrom(snapshotTable)
+                .where(snapshotTable.visualization.filesServerId.eq(vizId)
+                        .and(snapshotTable.timestep.between(fromTimestep, toTimestep))
+                ).fetch();
+
+
+        return Response.ok((StreamingOutput) outputStream -> {
+
+            try {
+                for (val snapshot : snapshots) {
+                    outputStream.write(snapshot.getData());
+                    outputStream.flush();
+                }
+            } catch (IOException e) {
+                throw new InternalException("An error occurred while processing the request");
+            } finally {
                 outputStream.close();
-            }).build();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new InternalException("Could not read snapshots");
-        }
+            }
+        }).build();
     }
 
     @GET
     @Path("/plan")
     @Produces(MediaType.APPLICATION_JSON)
-    public FeatureCollection plan(@Auth Permission permission,
-                                  @PathParam("id") String vizId,
-                                  @QueryParam("index") int index) {
+    public String plan(@Auth Agent agent,
+                       @PathParam("id") String vizId,
+                       @QueryParam("index") int index) {
 
-        return data.getPlan(vizId, index, permission);
+        if (!hasPermission(agent, vizId))
+            throw new ForbiddenException("user doesn't have permission");
+
+        val planTable = QPlan.plan;
+        val plan = new JPAQueryFactory(emFactory.createEntityManager()).selectFrom(planTable)
+                .where(planTable.visualization.filesServerId.eq(vizId).and(planTable.idIndex.eq(index)))
+                .fetchFirst();
+        return plan.getGeoJson();
+    }
+
+    private boolean hasPermission(Agent agent, String vizId) {
+
+        val permissionTable = QPermission.permission;
+        val permission = new JPAQueryFactory(emFactory.createEntityManager()).selectFrom(permissionTable)
+                .where(permissionTable.agent.eq(agent).or(permissionTable.agent.id.eq(Agent.publicPermissionId)).and(permissionTable.visualization.filesServerId.eq(vizId)))
+                .fetchFirst();
+        return permission != null;
+    }
+
+    private Visualization findVisualization(Agent agent, String vizId) {
+
+        if (!hasPermission(agent, vizId))
+            throw new ForbiddenException("user doesn't have permission");
+
+        QVisualization visualizationTable = QVisualization.visualization;
+        val visualization = new JPAQueryFactory(emFactory.createEntityManager()).selectFrom(visualizationTable)
+                .where(visualizationTable.filesServerId.eq(vizId))
+                .fetchOne();
+
+        if (visualization == null)
+            throw new InvalidInputException("Could not find visualization with id: " + vizId);
+
+        return visualization;
     }
 }

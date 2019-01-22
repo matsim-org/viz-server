@@ -8,9 +8,12 @@ import org.matsim.viz.database.AbstractEntity;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
+@Table(indexes = {@Index(columnList = "filesServerId", unique = true)})
 @Getter
 @Setter
 @AllArgsConstructor
@@ -26,7 +29,9 @@ public class Visualization extends AbstractEntity {
     @OneToMany(mappedBy = "visualization", fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL)
     private List<Plan> plans = new ArrayList<>();
 
-    @Column(unique = true)
+    @OneToMany(mappedBy = "visualization", fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL)
+    private Set<Permission> permissions = new HashSet<>();
+
     private String filesServerId;
 
     private double timestepSize;

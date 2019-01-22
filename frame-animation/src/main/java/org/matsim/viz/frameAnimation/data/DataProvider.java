@@ -60,14 +60,15 @@ public class DataProvider {
         if (!hasPermission(viz, permission))
             throw new ForbiddenException("You don't have access to this visualization");
 
-        if (!viz.isDone())
-            return new ConfigurationResponse(viz.getProgress());
+        /*if (!viz.isDone())
+            return new ConfigurationResponse(viz.getProgress());*/
         else
             return new ConfigurationResponse(viz.getSimulationData().getBounds(),
                     viz.getSimulationData().getFirstTimestep(),
                     viz.getSimulationData().getLastTimestep(),
                     viz.getSimulationData().getTimestepSize(),
-                    viz.getProgress()
+                    null
+                    //viz.getProgress()
             );
     }
 

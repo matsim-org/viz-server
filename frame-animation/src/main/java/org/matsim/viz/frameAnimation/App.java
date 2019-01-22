@@ -25,7 +25,6 @@ import org.matsim.viz.frameAnimation.data.DataController;
 import org.matsim.viz.frameAnimation.data.DataProvider;
 import org.matsim.viz.frameAnimation.entities.AbstractEntityMixin;
 import org.matsim.viz.frameAnimation.entities.Permission;
-import org.matsim.viz.frameAnimation.requestHandling.VisualizationResource;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
@@ -124,7 +123,7 @@ public class App extends Application<AppConfiguration> {
 
     private void registerEndpoints(JerseyEnvironment jersey, AppConfiguration configuration) {
 
-        jersey.register(new VisualizationResource(DataProvider.Instance));
+        // jersey.register(new VisualizationResource(DataProvider.Instance));
         jersey.register(new NotificationHandler(DataController.Instance, DataProvider.Instance, configuration.getOwnHostname()));
     }
 }

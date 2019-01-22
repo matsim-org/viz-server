@@ -40,7 +40,7 @@ public class DatabasePopulationWriterTest {
         val population = TestUtils.loadTestPopulation(network);
 
         val idMapping = population.getPersons().values().stream().map(Identifiable::getId).collect(Collectors.toList());
-        DatabasePopulationWriter writer = new DatabasePopulationWriter(Paths.get(TestUtils.POPULATION_FILE), network,
+        DatabasePopulationWriter writer = new DatabasePopulationWriter(Paths.get(TestUtils.POPULATION_FILE_PATH), network,
                 idMapping, database.getSessionFactory(), visualization);
         writer.readPopulationAndWriteToDatabase();
 
