@@ -1,11 +1,8 @@
-package org.matsim.viz.frameAnimation.inputProcessing;
+package org.matsim.viz.frameAnimation.utils;
 
 import io.dropwizard.testing.junit.DAOTestRule;
 import org.junit.Rule;
-import org.matsim.viz.frameAnimation.persistenceModel.MatsimNetwork;
-import org.matsim.viz.frameAnimation.persistenceModel.Plan;
-import org.matsim.viz.frameAnimation.persistenceModel.Snapshot;
-import org.matsim.viz.frameAnimation.persistenceModel.Visualization;
+import org.matsim.viz.frameAnimation.persistenceModel.*;
 
 public class DatabaseTest {
 
@@ -15,6 +12,8 @@ public class DatabaseTest {
             .addEntityClass(Visualization.class)
             .addEntityClass(Snapshot.class)
             .addEntityClass(Plan.class)
+            .addEntityClass(Agent.class)
+            .addEntityClass(Permission.class)
             .setShowSql(true)
             .build();
 }

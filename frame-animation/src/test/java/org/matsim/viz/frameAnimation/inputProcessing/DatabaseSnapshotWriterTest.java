@@ -5,6 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.matsim.viz.frameAnimation.persistenceModel.Snapshot;
 import org.matsim.viz.frameAnimation.persistenceModel.Visualization;
+import org.matsim.viz.frameAnimation.utils.DatabaseTest;
 import org.matsim.viz.frameAnimation.utils.TestUtils;
 
 import java.nio.ByteBuffer;
@@ -27,40 +28,6 @@ public class DatabaseSnapshotWriterTest extends DatabaseTest {
         });
         this.snapshotWriter = new DatabaseSnapshotWriter(visualization, database.getSessionFactory());
     }
-
- /*   @Test
-    public void dbTest() {
-
-        EntityManager em = database.getSessionFactory().openSession();
-        em.getTransaction().begin();
-
-        Visualization viz = new Visualization();
-
-        em.persist(viz);
-
-        em.getTransaction().commit();
-        em.close();
-        String vizId = viz.getId();
-
-        EntityManager otherEm = database.getSessionFactory().openSession();
-        otherEm.getTransaction().begin();
-
-        Visualization fetchedViz = otherEm.getReference(Visualization.class, vizId);
-        Snapshot snapshot = new Snapshot();
-        snapshot.setVisualization(fetchedViz);
-
-        otherEm.persist(snapshot);
-        otherEm.getTransaction().commit();
-
-        EntityManager thirdEm = database.getSessionFactory().openSession();
-
-        Visualization thirdViz = thirdEm.find(Visualization.class, vizId);
-
-        thirdEm.close();
-        otherEm.close();
-        assertNotNull(thirdViz);
-    }
-    */
 
     @Test
     public void writeOneSnapshot() {

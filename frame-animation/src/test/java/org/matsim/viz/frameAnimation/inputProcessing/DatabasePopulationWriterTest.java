@@ -1,14 +1,10 @@
 package org.matsim.viz.frameAnimation.inputProcessing;
 
-import io.dropwizard.testing.junit.DAOTestRule;
 import lombok.val;
-import org.junit.Rule;
 import org.junit.Test;
 import org.matsim.api.core.v01.Identifiable;
-import org.matsim.viz.frameAnimation.persistenceModel.MatsimNetwork;
-import org.matsim.viz.frameAnimation.persistenceModel.Plan;
-import org.matsim.viz.frameAnimation.persistenceModel.Snapshot;
 import org.matsim.viz.frameAnimation.persistenceModel.Visualization;
+import org.matsim.viz.frameAnimation.utils.DatabaseTest;
 import org.matsim.viz.frameAnimation.utils.TestUtils;
 
 import java.nio.file.Paths;
@@ -17,16 +13,7 @@ import java.util.stream.Collectors;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 
-public class DatabasePopulationWriterTest {
-
-    @Rule
-    public DAOTestRule database = DAOTestRule.newBuilder()
-            .addEntityClass(MatsimNetwork.class)
-            .addEntityClass(Visualization.class)
-            .addEntityClass(Snapshot.class)
-            .addEntityClass(Plan.class)
-            .setShowSql(true)
-            .build();
+public class DatabasePopulationWriterTest extends DatabaseTest {
 
     @Test
     public void writeData() {

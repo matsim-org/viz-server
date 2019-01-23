@@ -8,6 +8,7 @@ import org.matsim.viz.error.InvalidInputException;
 import org.matsim.viz.frameAnimation.communication.FilesAPI;
 import org.matsim.viz.frameAnimation.entities.*;
 import org.matsim.viz.frameAnimation.persistenceModel.QVisualization;
+import org.matsim.viz.frameAnimation.utils.DatabaseTest;
 import org.matsim.viz.frameAnimation.utils.TestUtils;
 
 import java.io.IOException;

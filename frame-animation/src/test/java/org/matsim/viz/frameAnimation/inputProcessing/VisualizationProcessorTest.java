@@ -1,9 +1,11 @@
 package org.matsim.viz.frameAnimation.inputProcessing;
 
 import lombok.val;
+import org.hibernate.Session;
 import org.junit.Before;
 import org.junit.Test;
 import org.matsim.viz.frameAnimation.persistenceModel.Visualization;
+import org.matsim.viz.frameAnimation.utils.DatabaseTest;
 import org.matsim.viz.frameAnimation.utils.TestUtils;
 
 import java.nio.file.Paths;
@@ -38,7 +40,7 @@ public class VisualizationProcessorTest extends DatabaseTest {
 
         testObject.processVisualization();
 
-        try (val session = database.getSessionFactory().openSession()) {
+        try (Session session = database.getSessionFactory().openSession()) {
             val processedViz = session.find(Visualization.class, visualization.getId());
 
             assertTrue(processedViz.getPlans().size() > 0);

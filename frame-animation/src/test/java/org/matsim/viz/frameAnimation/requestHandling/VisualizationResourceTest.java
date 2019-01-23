@@ -1,12 +1,11 @@
 package org.matsim.viz.frameAnimation.requestHandling;
 
-import io.dropwizard.testing.junit.DAOTestRule;
 import lombok.val;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.matsim.viz.error.ForbiddenException;
 import org.matsim.viz.frameAnimation.persistenceModel.*;
+import org.matsim.viz.frameAnimation.utils.DatabaseTest;
 import org.matsim.viz.frameAnimation.utils.TestUtils;
 
 import javax.ws.rs.core.Response;
@@ -15,19 +14,10 @@ import static junit.framework.TestCase.fail;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-public class VisualizationResourceTest {
+public class VisualizationResourceTest extends DatabaseTest {
 
     private static final String visualizationServerId = "viz-id";
-    @Rule
-    public DAOTestRule database = DAOTestRule.newBuilder()
-            .addEntityClass(MatsimNetwork.class)
-            .addEntityClass(Visualization.class)
-            .addEntityClass(Snapshot.class)
-            .addEntityClass(Plan.class)
-            .addEntityClass(Permission.class)
-            .addEntityClass(Agent.class)
-            .setShowSql(true)
-            .build();
+
     private Visualization visualization;
     private Agent requester;
     private VisualizationResource resource;
