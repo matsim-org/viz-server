@@ -4,6 +4,7 @@ import lombok.val;
 import org.junit.Test;
 import org.matsim.viz.frameAnimation.communication.FilesAPI;
 import org.matsim.viz.frameAnimation.entities.Visualization;
+import org.matsim.viz.frameAnimation.utils.DatabaseTest;
 import org.mockito.ArgumentCaptor;
 
 import java.time.Instant;
@@ -13,7 +14,7 @@ import static junit.framework.TestCase.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-public class VisualizationFetcherTest {
+public class VisualizationFetcherTest extends DatabaseTest {
 
     @Test
     public void fetchVisualizationData_success() {
@@ -24,7 +25,7 @@ public class VisualizationFetcherTest {
         val generator = mock(VisualizationGenerator.class);
         when(factory.create(any())).thenReturn(generator);
 
-        val testObject = new VisualizationFetcher(filesApi, factory);
+        val testObject = new VisualizationFetcher(filesApi, factory, database.getSessionFactory());
 
         testObject.fetchVisualizationData();
 
@@ -47,7 +48,7 @@ public class VisualizationFetcherTest {
         val generator = mock(VisualizationGenerator.class);
         when(factory.create(any())).thenReturn(generator);
 
-        val testObject = new VisualizationFetcher(filesApi, factory);
+        val testObject = new VisualizationFetcher(filesApi, factory, database.getSessionFactory());
 
         testObject.fetchVisualizationData();
         testObject.fetchVisualizationData();
@@ -67,7 +68,7 @@ public class VisualizationFetcherTest {
         val generator = mock(VisualizationGenerator.class);
         when(factory.create(any())).thenReturn(generator);
 
-        val testObjectSpy = spy(new VisualizationFetcher(filesApi, factory));
+        val testObjectSpy = spy(new VisualizationFetcher(filesApi, factory, database.getSessionFactory()));
         testObjectSpy.fetchVisualizations();
 
         verify(generator, timeout(500).times(1)).generate();
@@ -83,10 +84,10 @@ public class VisualizationFetcherTest {
         val generator = mock(VisualizationGenerator.class);
         when(factory.create(any())).thenReturn(generator);
 
-        val testObjectSpy = spy(new VisualizationFetcher(filesApi, factory));
+        val testObjectSpy = spy(new VisualizationFetcher(filesApi, factory, database.getSessionFactory()));
         testObjectSpy.scheduleFetching();
 
-        verify(generator, timeout(500).times(1)).generate();
-        verify(testObjectSpy, timeout(500).times(1)).fetchVisualizationData();
+        verify(generator, timeout(1000).times(1)).generate();
+        verify(testObjectSpy, timeout(1000).times(1)).fetchVisualizationData();
     }
 }

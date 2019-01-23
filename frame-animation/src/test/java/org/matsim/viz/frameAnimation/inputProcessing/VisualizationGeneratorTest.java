@@ -47,7 +47,7 @@ public class VisualizationGeneratorTest extends DatabaseTest {
         try (val session = database.getSessionFactory().openSession()) {
             val visualizationTable = QVisualization.visualization;
             val generatedViz = new JPAQueryFactory(session).selectFrom(visualizationTable)
-                    .where(visualizationTable.filesServerId.eq(testViz.getId()))
+                    .where(visualizationTable.id.eq(testViz.getId()))
                     .fetchFirst();
 
             assertEquals(org.matsim.viz.frameAnimation.persistenceModel.Visualization.Progress.Failed, generatedViz.getProgress());
@@ -83,7 +83,7 @@ public class VisualizationGeneratorTest extends DatabaseTest {
         try (val session = database.getSessionFactory().openSession()) {
             val vizTable = QVisualization.visualization;
             val generatedViz = new JPAQueryFactory(session).selectFrom(vizTable)
-                    .where(vizTable.filesServerId.eq(testViz.getId()))
+                    .where(vizTable.id.eq(testViz.getId()))
                     .fetchFirst();
 
             assertEquals(org.matsim.viz.frameAnimation.persistenceModel.Visualization.Progress.Done, generatedViz.getProgress());

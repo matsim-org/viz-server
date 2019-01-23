@@ -26,8 +26,6 @@ import org.matsim.viz.frameAnimation.communication.FilesAPI;
 import org.matsim.viz.frameAnimation.communication.NotificationHandler;
 import org.matsim.viz.frameAnimation.communication.ServiceCommunication;
 import org.matsim.viz.frameAnimation.config.AppConfiguration;
-import org.matsim.viz.frameAnimation.data.DataController;
-import org.matsim.viz.frameAnimation.data.DataProvider;
 import org.matsim.viz.frameAnimation.entities.AbstractEntityMixin;
 import org.matsim.viz.frameAnimation.inputProcessing.VisualizationFetcher;
 import org.matsim.viz.frameAnimation.inputProcessing.VisualizationGeneratorFactory;
@@ -48,13 +46,14 @@ import java.util.Optional;
 public class App extends Application<AppConfiguration> {
 
     private final HibernateBundle<AppConfiguration> hibernate = new HibernateBundle<AppConfiguration>(
-            Agent.class, MatsimNetwork.class, Permission.class, Plan.class, Snapshot.class, Visualization.class
+            Agent.class, MatsimNetwork.class, Permission.class, Plan.class, Snapshot.class, Visualization.class, FetchInformation.class
     ) {
         @Override
         public PooledDataSourceFactory getDataSourceFactory(AppConfiguration appConfiguration) {
             return appConfiguration.getDatabase();
         }
     };
+    private VisualizationFetcher visualizationFetcher;
 
     public static void main(String[] args) throws Exception {
         new App().run(args);
@@ -73,14 +72,15 @@ public class App extends Application<AppConfiguration> {
 
         createUploadDirectory(configuration);
         createJerseyClient(configuration, environment);
-        registerAuthFilter(configuration, ServiceCommunication.getClient(), environment);
-        registerCORSFilter(environment.servlets());
-        registerEndpoints(environment.jersey(), configuration);
 
         val filesAPI = new FilesAPI(configuration.getFileServer());
         val factory = new VisualizationGeneratorFactory(filesAPI, hibernate.getSessionFactory(), Paths.get(configuration.getTmpFilePath()));
-        val fetcher = new VisualizationFetcher(filesAPI, factory);
-        fetcher.scheduleFetching();
+        visualizationFetcher = new VisualizationFetcher(filesAPI, factory, hibernate.getSessionFactory());
+        visualizationFetcher.scheduleFetching();
+
+        registerAuthFilter(configuration, ServiceCommunication.getClient(), environment);
+        registerCORSFilter(environment.servlets());
+        registerEndpoints(environment.jersey(), configuration);
     }
 
     private void createUploadDirectory(AppConfiguration config) throws IOException {
@@ -152,6 +152,6 @@ public class App extends Application<AppConfiguration> {
     private void registerEndpoints(JerseyEnvironment jersey, AppConfiguration configuration) {
 
         jersey.register(new VisualizationResource(hibernate.getSessionFactory()));
-        jersey.register(new NotificationHandler(DataController.Instance, DataProvider.Instance, configuration.getOwnHostname()));
+        jersey.register(new NotificationHandler(visualizationFetcher, configuration.getOwnHostname(), hibernate.getSessionFactory()));
     }
 }

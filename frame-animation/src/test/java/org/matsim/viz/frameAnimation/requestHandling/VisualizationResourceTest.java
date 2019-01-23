@@ -28,12 +28,16 @@ public class VisualizationResourceTest extends DatabaseTest {
         requester = new Agent("auth-id");
         visualization = database.inTransaction(() -> {
             val toPersist = new Visualization();
-            toPersist.setFilesServerId(visualizationServerId);
+            toPersist.setId(visualizationServerId);
+            database.getSessionFactory().getCurrentSession().save(toPersist);
             toPersist.setProgress(Visualization.Progress.Done);
             toPersist.setTimestepSize(12);
+            database.getSessionFactory().getCurrentSession().save(requester);
             val permission = new Permission(requester, toPersist);
             toPersist.getPermissions().add(permission);
-            database.getSessionFactory().getCurrentSession().save(toPersist);
+
+            // use persist here which allows writing entities with ids set
+            database.getSessionFactory().getCurrentSession().persist(permission);
             return toPersist;
         });
 
@@ -48,7 +52,7 @@ public class VisualizationResourceTest extends DatabaseTest {
             database.getSessionFactory().getCurrentSession().save(visualization);
         });
 
-        val response = database.inTransaction(() -> resource.configuration(requester, visualization.getFilesServerId()));
+        val response = database.inTransaction(() -> resource.configuration(requester, visualization.getId()));
 
         assertEquals(1, response.getTimestepSize(), .0001);
         assertEquals(visualization.getProgress(), response.getProgress());
@@ -57,7 +61,7 @@ public class VisualizationResourceTest extends DatabaseTest {
     @Test
     public void configuration_progressDone() {
 
-        val response = database.inTransaction(() -> resource.configuration(requester, visualization.getFilesServerId()));
+        val response = database.inTransaction(() -> resource.configuration(requester, visualization.getId()));
 
         assertEquals(visualization.getTimestepSize(), response.getTimestepSize(), .0001);
         assertEquals(visualization.getProgress(), response.getProgress());
@@ -66,7 +70,7 @@ public class VisualizationResourceTest extends DatabaseTest {
     @Test
     public void configuration_progressDonePublicPermission() {
 
-        val response = database.inTransaction(() -> resource.configuration(requester, visualization.getFilesServerId()));
+        val response = database.inTransaction(() -> resource.configuration(requester, visualization.getId()));
 
         assertEquals(visualization.getTimestepSize(), response.getTimestepSize(), .0001);
         assertEquals(visualization.getProgress(), response.getProgress());
@@ -81,7 +85,7 @@ public class VisualizationResourceTest extends DatabaseTest {
             return toPersist;
         });
 
-        database.inTransaction(() -> resource.configuration(otherAgent, visualization.getFilesServerId()));
+        database.inTransaction(() -> resource.configuration(otherAgent, visualization.getId()));
 
         fail("invalid agent should cause forbidden exception");
     }
@@ -98,7 +102,7 @@ public class VisualizationResourceTest extends DatabaseTest {
             return visualization;
         });
 
-        val response = database.inTransaction(() -> resource.network(requester, visualization.getFilesServerId()));
+        val response = database.inTransaction(() -> resource.network(requester, visualization.getId()));
 
         assertNotNull(response);
         assertEquals(visualization.getMatsimNetwork().getData().length, response.length);
@@ -122,7 +126,7 @@ public class VisualizationResourceTest extends DatabaseTest {
             return visualization;
         });
 
-        val response = database.inTransaction(() -> resource.snapshots(requester, visualization.getFilesServerId(), 1, 30, 1));
+        val response = database.inTransaction(() -> resource.snapshots(requester, visualization.getId(), 1, 30, 1));
 
         assertNotNull(response);
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
@@ -147,7 +151,7 @@ public class VisualizationResourceTest extends DatabaseTest {
             return visualization;
         });
 
-        val response = database.inTransaction(() -> resource.plan(requester, visualization.getFilesServerId(), planIndex));
+        val response = database.inTransaction(() -> resource.plan(requester, visualization.getId(), planIndex));
 
         assertEquals(expectedResult, response);
     }

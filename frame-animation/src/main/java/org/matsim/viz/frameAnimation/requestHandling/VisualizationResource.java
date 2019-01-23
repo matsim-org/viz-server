@@ -49,7 +49,7 @@ public class VisualizationResource {
 
         val networkTable = QMatsimNetwork.matsimNetwork;
         val result = new JPAQueryFactory(emFactory.createEntityManager()).selectFrom(networkTable)
-                .where(networkTable.visualization.filesServerId.eq(vizId))
+                .where(networkTable.visualization.id.eq(vizId))
                 .fetchFirst();
         return result.getData();
     }
@@ -69,7 +69,7 @@ public class VisualizationResource {
 
         QSnapshot snapshotTable = QSnapshot.snapshot;
         val snapshots = new JPAQueryFactory(emFactory.createEntityManager()).selectFrom(snapshotTable)
-                .where(snapshotTable.visualization.filesServerId.eq(vizId)
+                .where(snapshotTable.visualization.id.eq(vizId)
                         .and(snapshotTable.timestep.between(fromTimestep, toTimestep))
                 ).fetch();
 
@@ -101,7 +101,7 @@ public class VisualizationResource {
 
         val planTable = QPlan.plan;
         val plan = new JPAQueryFactory(emFactory.createEntityManager()).selectFrom(planTable)
-                .where(planTable.visualization.filesServerId.eq(vizId).and(planTable.idIndex.eq(index)))
+                .where(planTable.visualization.id.eq(vizId).and(planTable.idIndex.eq(index)))
                 .fetchFirst();
         return plan.getGeoJson();
     }
@@ -110,9 +110,11 @@ public class VisualizationResource {
 
         val permissionTable = QPermission.permission;
         val permission = new JPAQueryFactory(emFactory.createEntityManager()).selectFrom(permissionTable)
-                .where(permissionTable.agent.authId.eq(agent.getAuthId()).or(permissionTable.agent.authId.eq(Agent.publicPermissionId)).and(permissionTable.visualization.filesServerId.eq(vizId)))
+                .where(permissionTable.agent.eq(agent)
+                        .or(permissionTable.agent.id.eq(Agent.publicPermissionId))
+                        .and(permissionTable.visualization.id.eq(vizId)))
                 .fetchFirst();
-        return permission != null;
+        return permission == null;
     }
 
     private Visualization findVisualization(Agent agent, String vizId) {
@@ -122,7 +124,7 @@ public class VisualizationResource {
 
         QVisualization visualizationTable = QVisualization.visualization;
         val visualization = new JPAQueryFactory(emFactory.createEntityManager()).selectFrom(visualizationTable)
-                .where(visualizationTable.filesServerId.eq(vizId))
+                .where(visualizationTable.id.eq(vizId))
                 .fetchOne();
 
         if (visualization == null)

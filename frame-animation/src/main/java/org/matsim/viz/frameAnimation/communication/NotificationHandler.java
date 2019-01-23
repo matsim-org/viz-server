@@ -1,16 +1,15 @@
 package org.matsim.viz.frameAnimation.communication;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.matsim.viz.error.InternalException;
 import org.matsim.viz.frameAnimation.config.AppConfiguration;
-import org.matsim.viz.frameAnimation.data.DataController;
-import org.matsim.viz.frameAnimation.data.DataProvider;
 import org.matsim.viz.frameAnimation.entities.Subscription;
+import org.matsim.viz.frameAnimation.inputProcessing.VisualizationFetcher;
+import org.matsim.viz.frameAnimation.persistenceModel.Visualization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.persistence.EntityManagerFactory;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.POST;
@@ -22,18 +21,19 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+@RequiredArgsConstructor
 @Path("/notifications")
 public class NotificationHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(NotificationHandler.class);
 
-    private final DataController dataController;
-    private final DataProvider dataProvider;
+    private final VisualizationFetcher visualizationFetcher;
+    private final EntityManagerFactory emFactory;
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
-    public NotificationHandler(DataController dataController, DataProvider dataProvider, URI selfHostname) {
-        this.dataController = dataController;
-        this.dataProvider = dataProvider;
+    public NotificationHandler(VisualizationFetcher visualizationFetcher, URI selfHostname, EntityManagerFactory emFactory) {
+        this.visualizationFetcher = visualizationFetcher;
+        this.emFactory = emFactory;
         this.registerCallback(selfHostname);
     }
 
@@ -42,15 +42,14 @@ public class NotificationHandler {
 
         switch (notification.getType()) {
             case "visualization_created":
-                this.dataController.fetchVisualizations();
+                this.visualizationFetcher.fetchVisualizations();
                 break;
             case "visualization_deleted":
-                this.dataProvider.remove(notification.getMessage());
+                removeVisualization(notification.getMessage());
                 break;
             default:
                 throw new InternalException("Unknown notification type: " + notification.getType());
         }
-
     }
 
     private void registerCallback(URI selfHostname) {
@@ -63,6 +62,18 @@ public class NotificationHandler {
         } catch (Exception e) {
             logger.error("Failed to register for notifications try again in 5 minutes");
             scheduler.schedule(() -> registerCallback(selfHostname), 5, TimeUnit.MINUTES);
+        }
+    }
+
+    private void removeVisualization(String vizId) {
+
+        val em = emFactory.createEntityManager();
+        try {
+            em.getTransaction().begin();
+            em.remove(em.getReference(Visualization.class, vizId));
+            em.getTransaction().commit();
+        } finally {
+            em.close();
         }
     }
 

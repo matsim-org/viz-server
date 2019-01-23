@@ -14,6 +14,7 @@ public class DatabaseTest {
             .addEntityClass(Plan.class)
             .addEntityClass(Agent.class)
             .addEntityClass(Permission.class)
+            .addEntityClass(FetchInformation.class)
             .setShowSql(true)
             .build();
 }

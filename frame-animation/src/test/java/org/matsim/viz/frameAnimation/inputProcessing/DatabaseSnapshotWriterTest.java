@@ -80,16 +80,16 @@ public class DatabaseSnapshotWriterTest extends DatabaseTest {
         final double lastTimestep = 4;
 
         snapshotWriter.beginSnapshot(firstTimestep);
-        TestUtils.createAgentSnapshotInfos(20000).forEach(info -> snapshotWriter.addAgent(info));
+        TestUtils.createAgentSnapshotInfos(2000).forEach(info -> snapshotWriter.addAgent(info));
         snapshotWriter.endSnapshot();
         snapshotWriter.beginSnapshot(2);
-        TestUtils.createAgentSnapshotInfos(1800).forEach(info -> snapshotWriter.addAgent(info));
+        TestUtils.createAgentSnapshotInfos(180).forEach(info -> snapshotWriter.addAgent(info));
         snapshotWriter.endSnapshot();
         snapshotWriter.beginSnapshot(3);
-        TestUtils.createAgentSnapshotInfos(27000).forEach(info -> snapshotWriter.addAgent(info));
+        TestUtils.createAgentSnapshotInfos(2700).forEach(info -> snapshotWriter.addAgent(info));
         snapshotWriter.endSnapshot();
         snapshotWriter.beginSnapshot(lastTimestep);
-        TestUtils.createAgentSnapshotInfos(68000).forEach(info -> snapshotWriter.addAgent(info));
+        TestUtils.createAgentSnapshotInfos(6800).forEach(info -> snapshotWriter.addAgent(info));
         snapshotWriter.endSnapshot();
         snapshotWriter.finish();
 

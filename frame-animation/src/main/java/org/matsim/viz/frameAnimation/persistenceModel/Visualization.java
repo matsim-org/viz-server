@@ -1,6 +1,9 @@
 package org.matsim.viz.frameAnimation.persistenceModel;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.matsim.viz.database.AbstractEntity;
 
 import javax.persistence.*;
@@ -10,7 +13,6 @@ import java.util.List;
 import java.util.Set;
 
 @Entity
-@Table(indexes = {@Index(columnList = "filesServerId", unique = true)})
 @Getter
 @Setter
 @AllArgsConstructor
@@ -28,8 +30,6 @@ public class Visualization extends AbstractEntity {
 
     @OneToMany(mappedBy = "visualization", fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL)
     private Set<Permission> permissions = new HashSet<>();
-
-    private String filesServerId;
 
     private double timestepSize;
     private double firstTimestep = Double.MAX_VALUE;
@@ -57,11 +57,6 @@ public class Visualization extends AbstractEntity {
     public void addPlan(Plan plan) {
         this.plans.add(plan);
         plan.setVisualization(this);
-    }
-
-    public void addPermissionForAgent(Agent agent) {
-        val permission = new Permission(agent, this);
-        this.permissions.add(permission);
     }
 
     public enum Progress {DownloadingInput, GeneratingData, Done, Failed}

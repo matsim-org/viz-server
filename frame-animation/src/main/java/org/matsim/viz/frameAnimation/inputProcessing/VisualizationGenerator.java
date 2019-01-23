@@ -8,6 +8,7 @@ import org.matsim.viz.error.InvalidInputException;
 import org.matsim.viz.frameAnimation.communication.FilesAPI;
 import org.matsim.viz.frameAnimation.entities.VisualizationInput;
 import org.matsim.viz.frameAnimation.persistenceModel.Agent;
+import org.matsim.viz.frameAnimation.persistenceModel.Permission;
 import org.matsim.viz.frameAnimation.persistenceModel.Visualization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +53,10 @@ class VisualizationGenerator {
             } catch (Exception e) {
                 persistProgress(visualization, Visualization.Progress.Failed, em);
             }
+        } catch (Exception e) {
+            logger.error("failed to create visualization! Beacuse of the following error:");
+            logger.error(e.getMessage());
+            e.printStackTrace();
         } finally {
             em.close();
             removeAllInputFiles(vizFolder);
@@ -59,15 +64,26 @@ class VisualizationGenerator {
     }
 
     private Visualization createVisualization(EntityManager em) {
+
+        em.getTransaction().begin();
+
         val visualization = new Visualization();
+        visualization.setId(inputVisualization.getId());
         visualization.setTimestepSize(Double.parseDouble(inputVisualization.getParameters().get(SNAPSHOT_INTERVAL_KEY).getValue()));
         visualization.setProgress(Visualization.Progress.DownloadingInput);
-        visualization.setFilesServerId(inputVisualization.getId());
-        inputVisualization.getPermissions().forEach(permission -> visualization.addPermissionForAgent(new Agent(permission.getAgent().getAuthId())));
-        em.getTransaction().begin();
-        em.persist(visualization);
+
+        val mergedVisualization = em.merge(visualization);
+
+        inputVisualization.getPermissions().forEach(permission -> {
+
+            val agent = new Agent(permission.getAgent().getAuthId());
+            val mergedAgent = em.merge(agent);
+            val permissionToPersist = new Permission(mergedAgent, mergedVisualization);
+            mergedVisualization.getPermissions().add(permissionToPersist);
+            em.persist(permissionToPersist);
+        });
         em.getTransaction().commit();
-        return visualization;
+        return mergedVisualization;
     }
 
     private Map<String, Path> fetchInputFiles(Path vizFolder) {
