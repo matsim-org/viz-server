@@ -66,8 +66,6 @@ public class DatabaseSnapshotWriter implements SnapshotWriter {
     @Override
     public void finish() {
 
-        //TODO persist id -> idIndex map in database
-
         // persist visualization with first and last timestep set
         entityManager.merge(visualization);
 

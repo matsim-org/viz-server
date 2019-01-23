@@ -13,6 +13,7 @@ import io.dropwizard.jersey.setup.JerseyEnvironment;
 import io.dropwizard.jetty.setup.ServletEnvironment;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import lombok.val;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.glassfish.jersey.client.oauth2.OAuth2ClientSupport;
@@ -21,12 +22,15 @@ import org.matsim.viz.clientAuth.Credentials;
 import org.matsim.viz.clientAuth.OAuthAuthenticator;
 import org.matsim.viz.clientAuth.OAuthNoAuthFilter;
 import org.matsim.viz.database.AbstractEntity;
+import org.matsim.viz.frameAnimation.communication.FilesAPI;
 import org.matsim.viz.frameAnimation.communication.NotificationHandler;
 import org.matsim.viz.frameAnimation.communication.ServiceCommunication;
 import org.matsim.viz.frameAnimation.config.AppConfiguration;
 import org.matsim.viz.frameAnimation.data.DataController;
 import org.matsim.viz.frameAnimation.data.DataProvider;
 import org.matsim.viz.frameAnimation.entities.AbstractEntityMixin;
+import org.matsim.viz.frameAnimation.inputProcessing.VisualizationFetcher;
+import org.matsim.viz.frameAnimation.inputProcessing.VisualizationGeneratorFactory;
 import org.matsim.viz.frameAnimation.persistenceModel.*;
 import org.matsim.viz.frameAnimation.requestHandling.VisualizationResource;
 
@@ -72,6 +76,11 @@ public class App extends Application<AppConfiguration> {
         registerAuthFilter(configuration, ServiceCommunication.getClient(), environment);
         registerCORSFilter(environment.servlets());
         registerEndpoints(environment.jersey(), configuration);
+
+        val filesAPI = new FilesAPI(configuration.getFileServer());
+        val factory = new VisualizationGeneratorFactory(filesAPI, hibernate.getSessionFactory(), Paths.get(configuration.getTmpFilePath()));
+        val fetcher = new VisualizationFetcher(filesAPI, factory);
+        fetcher.scheduleFetching();
     }
 
     private void createUploadDirectory(AppConfiguration config) throws IOException {

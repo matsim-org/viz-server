@@ -11,7 +11,7 @@ import java.nio.file.Path;
  * basically for unit testing VisualizationFetcher
  */
 @RequiredArgsConstructor
-class VisualizationGeneratorFactory {
+public class VisualizationGeneratorFactory {
 
     private final FilesAPI filesAPI;
     private final EntityManagerFactory emFactory;

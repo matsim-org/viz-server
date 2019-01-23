@@ -25,11 +25,11 @@ public class FilesAPI {
 
     private static final Logger logger = LoggerFactory.getLogger(FilesAPI.class);
 
-    private final URI vizByTypeEndpoint;
+    private final URI filesEndpoint;
 
     public Visualization[] fetchVisualizations(Instant after) {
 
-        Invocation.Builder builder = ServiceCommunication.getClient().target(vizByTypeEndpoint)
+        Invocation.Builder builder = ServiceCommunication.getClient().target(filesEndpoint.resolve("/visualizations"))
                 .queryParam("type", "frame-animation")
                 .queryParam("after", after.toString())
                 .request();

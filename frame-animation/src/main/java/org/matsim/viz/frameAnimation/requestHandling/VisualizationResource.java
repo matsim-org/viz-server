@@ -39,12 +39,12 @@ public class VisualizationResource {
     }
 
     @GET
-    @Path("/matsimNetwork")
+    @Path("/network")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     @UnitOfWork
     public byte[] network(@Auth Agent agent, @PathParam("id") String vizId) {
 
-        if (!hasPermission(agent, vizId))
+        if (hasNoPermission(agent, vizId))
             throw new ForbiddenException("user doesn't have permission");
 
         val networkTable = QMatsimNetwork.matsimNetwork;
@@ -57,6 +57,7 @@ public class VisualizationResource {
     @GET
     @Path("/snapshots")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    @UnitOfWork
     public Response snapshots(@Auth Agent agent,
                               @PathParam("id") String vizId,
                               @QueryParam("fromTimestep") double fromTimestep,
@@ -71,7 +72,6 @@ public class VisualizationResource {
                 .where(snapshotTable.visualization.filesServerId.eq(vizId)
                         .and(snapshotTable.timestep.between(fromTimestep, toTimestep))
                 ).fetch();
-
 
         return Response.ok((StreamingOutput) outputStream -> {
 
@@ -91,11 +91,12 @@ public class VisualizationResource {
     @GET
     @Path("/plan")
     @Produces(MediaType.APPLICATION_JSON)
+    @UnitOfWork
     public String plan(@Auth Agent agent,
                        @PathParam("id") String vizId,
                        @QueryParam("index") int index) {
 
-        if (!hasPermission(agent, vizId))
+        if (hasNoPermission(agent, vizId))
             throw new ForbiddenException("user doesn't have permission");
 
         val planTable = QPlan.plan;
@@ -105,18 +106,18 @@ public class VisualizationResource {
         return plan.getGeoJson();
     }
 
-    private boolean hasPermission(Agent agent, String vizId) {
+    private boolean hasNoPermission(Agent agent, String vizId) {
 
         val permissionTable = QPermission.permission;
         val permission = new JPAQueryFactory(emFactory.createEntityManager()).selectFrom(permissionTable)
-                .where(permissionTable.agent.eq(agent).or(permissionTable.agent.id.eq(Agent.publicPermissionId)).and(permissionTable.visualization.filesServerId.eq(vizId)))
+                .where(permissionTable.agent.authId.eq(agent.getAuthId()).or(permissionTable.agent.authId.eq(Agent.publicPermissionId)).and(permissionTable.visualization.filesServerId.eq(vizId)))
                 .fetchFirst();
         return permission != null;
     }
 
     private Visualization findVisualization(Agent agent, String vizId) {
 
-        if (!hasPermission(agent, vizId))
+        if (hasNoPermission(agent, vizId))
             throw new ForbiddenException("user doesn't have permission");
 
         QVisualization visualizationTable = QVisualization.visualization;

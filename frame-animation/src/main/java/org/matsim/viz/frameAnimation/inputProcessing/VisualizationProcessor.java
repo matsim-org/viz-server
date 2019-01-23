@@ -54,12 +54,13 @@ class VisualizationProcessor {
         new MatsimNetworkReader(originalNetwork).readFile(networkFilePath.toString());
 
         val networkEntity = new MatsimNetwork(originalNetwork);
-        visualization.addNetwork(networkEntity);
         val em = emFactory.createEntityManager();
 
         try {
             em.getTransaction().begin();
+            em.persist(networkEntity);
             em.merge(visualization);
+            visualization.addNetwork(networkEntity);
             em.getTransaction().commit();
         } finally {
             em.close();

@@ -7,6 +7,7 @@ import org.apache.commons.io.FileUtils;
 import org.matsim.viz.error.InvalidInputException;
 import org.matsim.viz.frameAnimation.communication.FilesAPI;
 import org.matsim.viz.frameAnimation.entities.VisualizationInput;
+import org.matsim.viz.frameAnimation.persistenceModel.Agent;
 import org.matsim.viz.frameAnimation.persistenceModel.Visualization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,6 +63,7 @@ class VisualizationGenerator {
         visualization.setTimestepSize(Double.parseDouble(inputVisualization.getParameters().get(SNAPSHOT_INTERVAL_KEY).getValue()));
         visualization.setProgress(Visualization.Progress.DownloadingInput);
         visualization.setFilesServerId(inputVisualization.getId());
+        inputVisualization.getPermissions().forEach(permission -> visualization.addPermissionForAgent(new Agent(permission.getAgent().getAuthId())));
         em.getTransaction().begin();
         em.persist(visualization);
         em.getTransaction().commit();

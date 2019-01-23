@@ -1,9 +1,6 @@
 package org.matsim.viz.frameAnimation.persistenceModel;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.matsim.viz.database.AbstractEntity;
 
 import javax.persistence.*;
@@ -60,6 +57,11 @@ public class Visualization extends AbstractEntity {
     public void addPlan(Plan plan) {
         this.plans.add(plan);
         plan.setVisualization(this);
+    }
+
+    public void addPermissionForAgent(Agent agent) {
+        val permission = new Permission(agent, this);
+        this.permissions.add(permission);
     }
 
     public enum Progress {DownloadingInput, GeneratingData, Done, Failed}
