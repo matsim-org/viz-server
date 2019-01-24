@@ -71,7 +71,8 @@ public class VisualizationResource {
         val snapshots = new JPAQueryFactory(emFactory.createEntityManager()).selectFrom(snapshotTable)
                 .where(snapshotTable.visualization.id.eq(vizId)
                         .and(snapshotTable.timestep.between(fromTimestep, toTimestep))
-                ).fetch();
+                ).orderBy(snapshotTable.timestep.asc())
+                .fetch();
 
         return Response.ok((StreamingOutput) outputStream -> {
 

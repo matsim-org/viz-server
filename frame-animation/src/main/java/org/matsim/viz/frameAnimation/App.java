@@ -15,6 +15,7 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import lombok.val;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
+import org.flywaydb.core.Flyway;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.glassfish.jersey.client.oauth2.OAuth2ClientSupport;
 import org.matsim.viz.clientAuth.ClientAuthentication;
@@ -45,11 +46,14 @@ import java.util.Optional;
 
 public class App extends Application<AppConfiguration> {
 
-    private final HibernateBundle<AppConfiguration> hibernate = new HibernateBundle<AppConfiguration>(
+    private HibernateBundle<AppConfiguration> hibernate = new HibernateBundle<AppConfiguration>(
             Agent.class, MatsimNetwork.class, Permission.class, Plan.class, Snapshot.class, Visualization.class, FetchInformation.class
     ) {
         @Override
         public PooledDataSourceFactory getDataSourceFactory(AppConfiguration appConfiguration) {
+
+            // database migration must run before hibernate gets initialized
+            executeDatabaseMigration(appConfiguration);
             return appConfiguration.getDatabase();
         }
     };
@@ -61,7 +65,6 @@ public class App extends Application<AppConfiguration> {
 
     @Override
     public void initialize(Bootstrap<AppConfiguration> bootstrap) {
-
         bootstrap.addBundle(hibernate);
     }
 
@@ -72,12 +75,7 @@ public class App extends Application<AppConfiguration> {
 
         createUploadDirectory(configuration);
         createJerseyClient(configuration, environment);
-
-        val filesAPI = new FilesAPI(configuration.getFileServer());
-        val factory = new VisualizationGeneratorFactory(filesAPI, hibernate.getSessionFactory(), Paths.get(configuration.getTmpFilePath()));
-        visualizationFetcher = new VisualizationFetcher(filesAPI, factory, hibernate.getSessionFactory());
-        visualizationFetcher.scheduleFetching();
-
+        visualizationFetcher = createVisualizationFetcher(configuration);
         registerAuthFilter(configuration, ServiceCommunication.getClient(), environment);
         registerCORSFilter(environment.servlets());
         registerEndpoints(environment.jersey(), configuration);
@@ -87,6 +85,29 @@ public class App extends Application<AppConfiguration> {
 
         Path directory = Paths.get(config.getTmpFilePath());
         Files.createDirectories(directory);
+    }
+
+    private void executeDatabaseMigration(AppConfiguration configuration) {
+
+        if (!configuration.getDatabase().getDriverClass().equals("org.h2.Driver")) {
+            // execute schema migration with flyway before connecting to the database
+            // if H2 in memory database is used, this is not necessary
+            Flyway flyway = Flyway.configure().dataSource(
+                    configuration.getDatabase().getUrl(),
+                    configuration.getDatabase().getUser(),
+                    configuration.getDatabase().getPassword()
+            ).load();
+            flyway.migrate();
+        }
+    }
+
+    private VisualizationFetcher createVisualizationFetcher(AppConfiguration configuration) {
+
+        val filesAPI = new FilesAPI(configuration.getFileServer());
+        val factory = new VisualizationGeneratorFactory(filesAPI, hibernate.getSessionFactory(), Paths.get(configuration.getTmpFilePath()));
+        val fetcher = new VisualizationFetcher(filesAPI, factory, hibernate.getSessionFactory());
+        fetcher.scheduleFetching();
+        return fetcher;
     }
 
     private void createJerseyClient(AppConfiguration config, Environment environment) {
