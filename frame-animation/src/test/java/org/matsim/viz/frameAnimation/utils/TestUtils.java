@@ -14,7 +14,6 @@ import org.matsim.vis.snapshotwriters.AgentSnapshotInfo;
 import org.matsim.vis.snapshotwriters.AgentSnapshotInfoFactory;
 import org.matsim.vis.snapshotwriters.SnapshotLinkWidthCalculator;
 import org.matsim.viz.frameAnimation.config.AppConfiguration;
-import org.matsim.viz.frameAnimation.data.SimulationData;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -30,13 +29,6 @@ public class TestUtils {
     public static final String EVENTS_FILE_PATH = "src/test/data/test-events-100.xml.gz";
     public static final String POPULATION_FILE_PATH = "src/test/data/test-plans-100.xml";
 
-    private static SimulationData simulationData;
-
-    public static SimulationData getSimulationData() {
-        if (simulationData == null)
-            simulationData = new SimulationData(NETWORK_FILE_PATH, EVENTS_FILE_PATH, POPULATION_FILE_PATH, 4);
-        return simulationData;
-    }
     public static Network loadTestNetwork() {
         Network network = NetworkUtils.createNetwork();
         MatsimNetworkReader reader = new MatsimNetworkReader(network);
