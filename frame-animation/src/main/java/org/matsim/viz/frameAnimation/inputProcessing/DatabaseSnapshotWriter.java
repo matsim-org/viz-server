@@ -2,6 +2,7 @@ package org.matsim.viz.frameAnimation.inputProcessing;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.java.Log;
 import lombok.val;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Person;
@@ -19,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+@Log
 public class DatabaseSnapshotWriter implements SnapshotWriter {
 
     private final Visualization visualization;
@@ -72,6 +74,7 @@ public class DatabaseSnapshotWriter implements SnapshotWriter {
         // finish the session!
         entityManager.getTransaction().commit();
         entityManager.close();
+        log.info("Finished writing snapshots.");
     }
 
     private boolean isOnRoute(AgentSnapshotInfo info) {

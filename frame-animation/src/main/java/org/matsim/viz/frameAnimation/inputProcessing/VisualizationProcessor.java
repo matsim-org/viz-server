@@ -1,6 +1,7 @@
 package org.matsim.viz.frameAnimation.inputProcessing;
 
 import lombok.Builder;
+import lombok.extern.java.Log;
 import lombok.val;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Network;
@@ -20,6 +21,7 @@ import javax.persistence.EntityManagerFactory;
 import java.nio.file.Path;
 import java.util.List;
 
+@Log
 class VisualizationProcessor {
 
     private final Path networkFilePath;
@@ -46,6 +48,7 @@ class VisualizationProcessor {
         this.readNetwork(visualization);
         this.readEvents(visualization);
         this.readPopulation(visualization);
+        log.info("Processing visualization finished.");
     }
 
     private void readNetwork(Visualization visualization) {
@@ -64,6 +67,7 @@ class VisualizationProcessor {
             em.getTransaction().commit();
         } finally {
             em.close();
+            log.info("Done writing network.");
         }
     }
 

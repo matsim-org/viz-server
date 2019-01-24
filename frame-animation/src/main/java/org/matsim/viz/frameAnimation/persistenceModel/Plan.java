@@ -6,6 +6,7 @@ import lombok.Setter;
 import org.matsim.viz.database.AbstractEntity;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 
@@ -15,7 +16,7 @@ import javax.persistence.ManyToOne;
 @Entity
 public class Plan extends AbstractEntity {
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Visualization visualization;
 
     @Lob

@@ -10,8 +10,6 @@ import org.matsim.viz.frameAnimation.entities.VisualizationInput;
 import org.matsim.viz.frameAnimation.persistenceModel.Agent;
 import org.matsim.viz.frameAnimation.persistenceModel.Permission;
 import org.matsim.viz.frameAnimation.persistenceModel.Visualization;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -31,7 +29,6 @@ class VisualizationGenerator {
     private static final String PLANS_KEY = "plans";
     private static final String SNAPSHOT_INTERVAL_KEY = "snapshotInterval";
 
-    private static Logger logger = LoggerFactory.getLogger(VisualizationGenerator.class);
     private final FilesAPI filesAPI;
     private final Path tmpFolder;
     private final org.matsim.viz.frameAnimation.entities.Visualization inputVisualization;
@@ -54,8 +51,8 @@ class VisualizationGenerator {
                 persistProgress(visualization, Visualization.Progress.Failed, em);
             }
         } catch (Exception e) {
-            logger.error("failed to create visualization! Beacuse of the following error:");
-            logger.error(e.getMessage());
+            log.severe("failed to create visualization! Beacuse of the following error:");
+            log.severe(e.getMessage());
             e.printStackTrace();
         } finally {
             em.close();
@@ -128,7 +125,7 @@ class VisualizationGenerator {
         try {
             return Files.createDirectories(vizFolder);
         } catch (IOException e) {
-            logger.error("could not create viz folder");
+            log.severe("could not create viz folder");
             throw new RuntimeException("Could not create tmp folder");
         }
     }
@@ -137,7 +134,7 @@ class VisualizationGenerator {
         try {
             FileUtils.deleteDirectory(folder.toFile());
         } catch (IOException e) {
-            logger.error("Could not delete temp viz folder");
+            log.severe("Could not delete temp viz folder");
             throw new RuntimeException("Could not delete temp viz folder");
         }
     }

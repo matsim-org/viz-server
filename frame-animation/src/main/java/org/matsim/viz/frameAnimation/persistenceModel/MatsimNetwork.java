@@ -9,10 +9,7 @@ import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
 import org.matsim.viz.database.AbstractEntity;
 
-import javax.persistence.Entity;
-import javax.persistence.Lob;
-import javax.persistence.OneToOne;
-import javax.persistence.Transient;
+import javax.persistence.*;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -25,7 +22,7 @@ public class MatsimNetwork extends AbstractEntity {
     @Lob
     private byte[] data;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     private Visualization visualization;
 
     @Transient

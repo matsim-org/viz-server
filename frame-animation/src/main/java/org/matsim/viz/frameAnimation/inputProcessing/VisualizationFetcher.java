@@ -2,13 +2,12 @@ package org.matsim.viz.frameAnimation.inputProcessing;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.java.Log;
 import lombok.val;
 import org.matsim.viz.frameAnimation.communication.FilesAPI;
 import org.matsim.viz.frameAnimation.entities.Visualization;
 import org.matsim.viz.frameAnimation.persistenceModel.FetchInformation;
 import org.matsim.viz.frameAnimation.persistenceModel.QFetchInformation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -17,10 +16,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+@Log
 @RequiredArgsConstructor
 public class VisualizationFetcher {
 
-    public static final Logger logger = LoggerFactory.getLogger(VisualizationFetcher.class);
     private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(8);
 
     private final FilesAPI filesAPI;
@@ -37,9 +36,9 @@ public class VisualizationFetcher {
     public void fetchVisualizations() {
 
         if (isFetching) {
-            logger.info("already fetching data. Wait until operation has finished.");
+            log.info("already fetching data. Wait until operation has finished.");
         } else {
-            logger.info("scheduling single fetch.");
+            log.info("scheduling single fetch.");
             scheduler.schedule(this::fetchVisualizationData, 0, TimeUnit.SECONDS);
         }
     }
@@ -61,14 +60,15 @@ public class VisualizationFetcher {
             em.getTransaction().commit();
             isFetching = false;
 
-            logger.info("Received metadata for " + response.length + " visualizations");
+            log.info("Received metadata for " + response.length + " visualizations");
 
             for (Visualization viz : response) {
                 val generator = generatorFactory.create(viz);
                 scheduler.schedule(generator::generate, 0, TimeUnit.SECONDS);
             }
         } catch (Exception e) {
-            logger.error("Error while fetching viz metadata from: ", e);
+            log.warning(e.getMessage());
+            e.printStackTrace();
         } finally {
             em.close();
             isFetching = false;

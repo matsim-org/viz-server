@@ -3,6 +3,7 @@ package org.matsim.viz.frameAnimation.inputProcessing;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.java.Log;
 import lombok.val;
 import org.geojson.*;
 import org.matsim.api.core.v01.Coord;
@@ -26,6 +27,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
+@Log
 @RequiredArgsConstructor
 class DatabasePopulationWriter {
 
@@ -60,6 +62,7 @@ class DatabasePopulationWriter {
             }
         } finally {
             em.close();
+            log.info("Finished writing population.");
         }
     }
 
