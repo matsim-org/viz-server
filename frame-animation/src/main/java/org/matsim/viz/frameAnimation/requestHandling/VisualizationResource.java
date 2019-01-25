@@ -97,7 +97,7 @@ public class VisualizationResource {
                        @PathParam("id") String vizId,
                        @QueryParam("index") int index) {
 
-        if (hasNoPermission(agent, vizId))
+        /*if (hasNoPermission(agent, vizId))
             throw new ForbiddenException("user doesn't have permission");
 
         val planTable = QPlan.plan;
@@ -105,6 +105,8 @@ public class VisualizationResource {
                 .where(planTable.visualization.id.eq(vizId).and(planTable.idIndex.eq(index)))
                 .fetchFirst();
         return plan.getGeoJson();
+        */
+        throw new InternalException("This feature is currently disabled.");
     }
 
     private boolean hasNoPermission(Agent agent, String vizId) {

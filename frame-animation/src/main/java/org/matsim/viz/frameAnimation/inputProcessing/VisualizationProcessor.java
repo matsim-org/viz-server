@@ -47,7 +47,10 @@ class VisualizationProcessor {
 
         this.readNetwork(visualization);
         this.readEvents(visualization);
-        this.readPopulation(visualization);
+
+        // for now, don't write the plans to the database. It needs a lot of time and space and must be solved in a
+        // smarter way than it currently is.
+        // this.readPopulation(visualization);
         log.info("Processing visualization finished.");
     }
 

@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import lombok.val;
+import org.hibernate.Session;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.vis.snapshotwriters.AgentSnapshotInfo;
@@ -12,7 +13,6 @@ import org.matsim.viz.frameAnimation.contracts.SnapshotPosition;
 import org.matsim.viz.frameAnimation.persistenceModel.Snapshot;
 import org.matsim.viz.frameAnimation.persistenceModel.Visualization;
 
-import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -23,19 +23,22 @@ import java.util.List;
 @Log
 public class DatabaseSnapshotWriter implements SnapshotWriter {
 
+    private static final int batchSize = 20;
     private final Visualization visualization;
-    private final EntityManager entityManager;
+    private final Session entityManager;
     @Getter
     private final List<Id<Person>> agentIds = new ArrayList<>();
 
     private TempSnapshot currentSnapshot;
+    private int batchCount = 0;
 
     DatabaseSnapshotWriter(Visualization visualization, EntityManagerFactory entityManagerFactory) {
         //this.visualizationId = visualization;
         this.visualization = visualization;
 
         // open a new session which this instance owns
-        this.entityManager = entityManagerFactory.createEntityManager();
+        this.entityManager = entityManagerFactory.createEntityManager().unwrap(Session.class);
+        this.entityManager.setJdbcBatchSize(batchSize);
         this.entityManager.getTransaction().begin();
     }
 
@@ -55,7 +58,13 @@ public class DatabaseSnapshotWriter implements SnapshotWriter {
         snapshot.setVisualization(visualization);
 
         entityManager.persist(snapshot);
-        entityManager.flush();
+
+        //taken from  http://docs.jboss.org/hibernate/orm/5.2/userguide/html_single/Hibernate_User_Guide.html#batch-session-batch
+        if (++batchCount % batchSize == 0) {
+            log.info("Writing snapshots: Batch Count is: " + batchCount + " Flushing session.");
+            entityManager.flush();
+            entityManager.clear();
+        }
     }
 
     @Override

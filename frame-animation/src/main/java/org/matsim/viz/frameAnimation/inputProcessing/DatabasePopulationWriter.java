@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import lombok.val;
 import org.geojson.*;
+import org.hibernate.Session;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
@@ -21,7 +22,6 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.viz.frameAnimation.persistenceModel.Plan;
 import org.matsim.viz.frameAnimation.persistenceModel.Visualization;
 
-import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -31,12 +31,15 @@ import java.util.List;
 @RequiredArgsConstructor
 class DatabasePopulationWriter {
 
+    private static final int batchSize = 50;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final Path population;
     private final Network network;
     private final List<Id<Person>> idMapping;
     private final EntityManagerFactory emFactory;
     private final Visualization visualization;
+
+    private int batchCount = 0;
 
     void readPopulationAndWriteToDatabase() {
 
@@ -49,28 +52,33 @@ class DatabasePopulationWriter {
 
     private void readPopulationAndWriteToDatabase(Population population) {
 
-        val em = emFactory.createEntityManager();
+        val session = emFactory.createEntityManager().unwrap(Session.class);
         try {
             try {
-                em.getTransaction().begin();
+                session.getTransaction().begin();
 
-                population.getPersons().values().forEach(person -> writePersonToDatabase(person, em));
+                population.getPersons().values().forEach(person -> writePersonToDatabase(person, session));
 
-                em.getTransaction().commit();
+                session.getTransaction().commit();
             } catch (Exception e) {
-                em.getTransaction().rollback();
+                session.getTransaction().rollback();
             }
         } finally {
-            em.close();
+            session.close();
             log.info("Finished writing population.");
         }
     }
 
-    private void writePersonToDatabase(Person person, EntityManager em) {
+    private void writePersonToDatabase(Person person, Session session) {
 
         val plan = personToPlan(person);
-        em.persist(plan);
-        em.flush();
+        session.persist(plan);
+
+        if (++batchCount % batchSize == 0) {
+            log.info("Writing plans: Batch Count is: " + batchCount + " Flushing session.");
+            session.flush();
+            session.clear();
+        }
     }
 
     private Plan personToPlan(Person person) {

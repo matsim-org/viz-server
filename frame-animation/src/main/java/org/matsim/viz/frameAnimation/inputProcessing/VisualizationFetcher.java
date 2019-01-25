@@ -64,7 +64,8 @@ public class VisualizationFetcher {
 
             for (Visualization viz : response) {
                 val generator = generatorFactory.create(viz);
-                scheduler.schedule(generator::generate, 0, TimeUnit.SECONDS);
+                //scheduler.schedule(generator::generate, 0, TimeUnit.SECONDS);
+                generator.generate();
             }
         } catch (Exception e) {
             log.warning(e.getMessage());
