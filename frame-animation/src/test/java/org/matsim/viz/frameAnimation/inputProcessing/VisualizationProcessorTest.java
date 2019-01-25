@@ -43,7 +43,8 @@ public class VisualizationProcessorTest extends DatabaseTest {
         try (Session session = database.getSessionFactory().openSession()) {
             val processedViz = session.find(Visualization.class, visualization.getId());
 
-            assertTrue(processedViz.getPlans().size() > 0);
+            // parsing plans is disabled
+            // assertTrue(processedViz.getPlans().size() > 0);
             assertTrue(processedViz.getMatsimNetwork().getData().length > 0);
             assertTrue(processedViz.getSnapshots().size() > 0);
             assertTrue(processedViz.getFirstTimestep() != 0);

@@ -2,6 +2,7 @@ package org.matsim.viz.frameAnimation.requestHandling;
 
 import lombok.val;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.matsim.viz.error.ForbiddenException;
 import org.matsim.viz.frameAnimation.persistenceModel.*;
@@ -135,7 +136,9 @@ public class VisualizationResourceTest extends DatabaseTest {
         // snapshot is returned...
     }
 
+    // endpoint is currently disabled
     @Test
+    @Ignore
     public void plan() {
 
         final int planIndex = 1;
