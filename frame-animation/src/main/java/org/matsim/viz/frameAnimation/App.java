@@ -7,10 +7,15 @@ import io.dropwizard.Application;
 import io.dropwizard.auth.AuthDynamicFeature;
 import io.dropwizard.auth.AuthValueFactoryProvider;
 import io.dropwizard.client.JerseyClientBuilder;
+import io.dropwizard.db.PooledDataSourceFactory;
+import io.dropwizard.hibernate.HibernateBundle;
 import io.dropwizard.jersey.setup.JerseyEnvironment;
 import io.dropwizard.jetty.setup.ServletEnvironment;
+import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import lombok.val;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
+import org.flywaydb.core.Flyway;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.glassfish.jersey.client.oauth2.OAuth2ClientSupport;
 import org.matsim.viz.clientAuth.ClientAuthentication;
@@ -18,13 +23,14 @@ import org.matsim.viz.clientAuth.Credentials;
 import org.matsim.viz.clientAuth.OAuthAuthenticator;
 import org.matsim.viz.clientAuth.OAuthNoAuthFilter;
 import org.matsim.viz.database.AbstractEntity;
+import org.matsim.viz.frameAnimation.communication.FilesAPI;
 import org.matsim.viz.frameAnimation.communication.NotificationHandler;
 import org.matsim.viz.frameAnimation.communication.ServiceCommunication;
 import org.matsim.viz.frameAnimation.config.AppConfiguration;
-import org.matsim.viz.frameAnimation.data.DataController;
-import org.matsim.viz.frameAnimation.data.DataProvider;
 import org.matsim.viz.frameAnimation.entities.AbstractEntityMixin;
-import org.matsim.viz.frameAnimation.entities.Permission;
+import org.matsim.viz.frameAnimation.inputProcessing.VisualizationFetcher;
+import org.matsim.viz.frameAnimation.inputProcessing.VisualizationGeneratorFactory;
+import org.matsim.viz.frameAnimation.persistenceModel.*;
 import org.matsim.viz.frameAnimation.requestHandling.VisualizationResource;
 
 import javax.servlet.DispatcherType;
@@ -40,9 +46,26 @@ import java.util.Optional;
 
 public class App extends Application<AppConfiguration> {
 
+    private HibernateBundle<AppConfiguration> hibernate = new HibernateBundle<AppConfiguration>(
+            Agent.class, MatsimNetwork.class, Permission.class, Plan.class, Snapshot.class, Visualization.class, FetchInformation.class
+    ) {
+        @Override
+        public PooledDataSourceFactory getDataSourceFactory(AppConfiguration appConfiguration) {
+
+            // database migration must run before hibernate gets initialized
+            executeDatabaseMigration(appConfiguration);
+            return appConfiguration.getDatabase();
+        }
+    };
+    private VisualizationFetcher visualizationFetcher;
 
     public static void main(String[] args) throws Exception {
         new App().run(args);
+    }
+
+    @Override
+    public void initialize(Bootstrap<AppConfiguration> bootstrap) {
+        bootstrap.addBundle(hibernate);
     }
 
     @Override
@@ -52,17 +75,39 @@ public class App extends Application<AppConfiguration> {
 
         createUploadDirectory(configuration);
         createJerseyClient(configuration, environment);
+        visualizationFetcher = createVisualizationFetcher(configuration);
         registerAuthFilter(configuration, ServiceCommunication.getClient(), environment);
         registerCORSFilter(environment.servlets());
         registerEndpoints(environment.jersey(), configuration);
-
-        DataController.Instance.scheduleFetching();
     }
 
     private void createUploadDirectory(AppConfiguration config) throws IOException {
 
         Path directory = Paths.get(config.getTmpFilePath());
         Files.createDirectories(directory);
+    }
+
+    private void executeDatabaseMigration(AppConfiguration configuration) {
+
+        if (!configuration.getDatabase().getDriverClass().equals("org.h2.Driver")) {
+            // execute schema migration with flyway before connecting to the database
+            // if H2 in memory database is used, this is not necessary
+            Flyway flyway = Flyway.configure().dataSource(
+                    configuration.getDatabase().getUrl(),
+                    configuration.getDatabase().getUser(),
+                    configuration.getDatabase().getPassword()
+            ).load();
+            flyway.migrate();
+        }
+    }
+
+    private VisualizationFetcher createVisualizationFetcher(AppConfiguration configuration) {
+
+        val filesAPI = new FilesAPI(configuration.getFileServer());
+        val factory = new VisualizationGeneratorFactory(filesAPI, hibernate.getSessionFactory(), Paths.get(configuration.getTmpFilePath()));
+        val fetcher = new VisualizationFetcher(filesAPI, factory, hibernate.getSessionFactory());
+        fetcher.scheduleFetching();
+        return fetcher;
     }
 
     private void createJerseyClient(AppConfiguration config, Environment environment) {
@@ -96,17 +141,20 @@ public class App extends Application<AppConfiguration> {
     private void registerAuthFilter(AppConfiguration configuration, Client client, Environment environment) {
 
         // register oauth filters for request handling
-        final OAuthAuthenticator<Permission> authenticator = new OAuthAuthenticator<>(client, configuration.getIdProvider(),
-                result -> Optional.of(Permission.createFromAuthId(result.getSubjectId())));
+        //final OAuthAuthenticator<Permission> authenticator = new OAuthAuthenticator<>(client, configuration.getIdProvider(),
+        //        result -> Optional.of(Permission.createFromAuthId(result.getSubjectId())));
 
-        OAuthNoAuthFilter filter = new OAuthNoAuthFilter.Builder<Permission>()
-                .setNoAuthPrincipalProvider(() -> Optional.of(Permission.getPublicPermission()))
-                .setAuthenticator(authenticator)
+        final OAuthAuthenticator<Agent> authenticator1 = new OAuthAuthenticator<>(client, configuration.getIdProvider(),
+                result -> Optional.of(new Agent(result.getSubjectId())));
+
+        OAuthNoAuthFilter filter = new OAuthNoAuthFilter.Builder<Agent>()
+                .setNoAuthPrincipalProvider(() -> Optional.of(new Agent(Agent.publicPermissionId)))
+                .setAuthenticator(authenticator1)
                 .setPrefix("Bearer")
                 .buildAuthFilter();
 
         environment.jersey().register(new AuthDynamicFeature(filter));
-        environment.jersey().register(new AuthValueFactoryProvider.Binder<>(Permission.class));
+        environment.jersey().register(new AuthValueFactoryProvider.Binder<>(Agent.class));
     }
 
     @SuppressWarnings("Duplicates")
@@ -124,7 +172,7 @@ public class App extends Application<AppConfiguration> {
 
     private void registerEndpoints(JerseyEnvironment jersey, AppConfiguration configuration) {
 
-        jersey.register(new VisualizationResource(DataProvider.Instance));
-        jersey.register(new NotificationHandler(DataController.Instance, DataProvider.Instance, configuration.getOwnHostname()));
+        jersey.register(new VisualizationResource(hibernate.getSessionFactory()));
+        jersey.register(new NotificationHandler(visualizationFetcher, configuration.getOwnHostname(), hibernate.getSessionFactory()));
     }
 }

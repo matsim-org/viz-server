@@ -9,7 +9,7 @@ public class SnapshotPosition {
     private double x;
     private double y;
 
-    SnapshotPosition(AgentSnapshotInfo info, int idIndex) {
+    public SnapshotPosition(AgentSnapshotInfo info, int idIndex) {
         this.id = info.getId().toString();
         this.idIndex = idIndex;
         this.x = info.getEasting();
@@ -20,7 +20,7 @@ public class SnapshotPosition {
         return id;
     }
 
-    int getIdIndex() {
+    public int getIdIndex() {
         return idIndex;
     }
 
