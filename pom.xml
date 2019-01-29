@@ -16,6 +16,7 @@
         <module>error-handling</module>
         <module>client-auth</module>
         <module>database</module>
+        <module>files-api</module>
     </modules>
 
     <properties>
