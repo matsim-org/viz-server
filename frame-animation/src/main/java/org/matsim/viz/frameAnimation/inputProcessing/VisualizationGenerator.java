@@ -5,8 +5,8 @@ import lombok.extern.java.Log;
 import lombok.val;
 import org.apache.commons.io.FileUtils;
 import org.matsim.viz.error.InvalidInputException;
-import org.matsim.viz.frameAnimation.communication.FilesAPI;
-import org.matsim.viz.frameAnimation.entities.VisualizationInput;
+import org.matsim.viz.filesApi.FilesApi;
+import org.matsim.viz.filesApi.VisualizationInput;
 import org.matsim.viz.frameAnimation.persistenceModel.Agent;
 import org.matsim.viz.frameAnimation.persistenceModel.Permission;
 import org.matsim.viz.frameAnimation.persistenceModel.Visualization;
@@ -29,9 +29,9 @@ class VisualizationGenerator {
     private static final String PLANS_KEY = "plans";
     private static final String SNAPSHOT_INTERVAL_KEY = "snapshotInterval";
 
-    private final FilesAPI filesAPI;
+    private final FilesApi filesAPI;
     private final Path tmpFolder;
-    private final org.matsim.viz.frameAnimation.entities.Visualization inputVisualization;
+    private final org.matsim.viz.filesApi.Visualization inputVisualization;
     private EntityManagerFactory emFactory;
 
     void generate() {
@@ -109,7 +109,7 @@ class VisualizationGenerator {
     }
 
     private Path fetchInputFile(VisualizationInput input, Path vizFolder) {
-        val fileStream = filesAPI.fetchFile(inputVisualization.getProject().getId(), input.getFileEntry().getId());
+        val fileStream = filesAPI.downloadFile(inputVisualization.getProject().getId(), input.getFileEntry().getId());
         val inputFile = vizFolder.resolve(input.getFileEntry().getUserFileName());
         try {
             Files.copy(fileStream, inputFile, StandardCopyOption.REPLACE_EXISTING);
@@ -145,7 +145,7 @@ class VisualizationGenerator {
         em.getTransaction().commit();
     }
 
-    private boolean isValidInput(org.matsim.viz.frameAnimation.entities.Visualization visualization) {
+    private boolean isValidInput(org.matsim.viz.filesApi.Visualization visualization) {
 
         return visualization.getInputFiles().size() == 3
                 && visualization.getInputFiles().containsKey(NETWORK_KEY)

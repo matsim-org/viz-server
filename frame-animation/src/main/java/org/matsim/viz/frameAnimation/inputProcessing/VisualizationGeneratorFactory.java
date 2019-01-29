@@ -1,8 +1,8 @@
 package org.matsim.viz.frameAnimation.inputProcessing;
 
 import lombok.RequiredArgsConstructor;
-import org.matsim.viz.frameAnimation.communication.FilesAPI;
-import org.matsim.viz.frameAnimation.entities.Visualization;
+import org.matsim.viz.filesApi.FilesApi;
+import org.matsim.viz.filesApi.Visualization;
 
 import javax.persistence.EntityManagerFactory;
 import java.nio.file.Path;
@@ -13,7 +13,7 @@ import java.nio.file.Path;
 @RequiredArgsConstructor
 public class VisualizationGeneratorFactory {
 
-    private final FilesAPI filesAPI;
+    private final FilesApi filesAPI;
     private final EntityManagerFactory emFactory;
     private final Path tmpFolder;
 

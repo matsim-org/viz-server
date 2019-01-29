@@ -4,6 +4,7 @@ import lombok.val;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.matsim.viz.error.InternalException;
+import org.matsim.viz.filesApi.FilesApi;
 import org.matsim.viz.frameAnimation.inputProcessing.VisualizationFetcher;
 import org.matsim.viz.frameAnimation.persistenceModel.Visualization;
 import org.matsim.viz.frameAnimation.utils.DatabaseTest;
@@ -28,7 +29,7 @@ public class NotificationHandlerTest extends DatabaseTest {
         val visualizationFetcher = mock(VisualizationFetcher.class);
         final String id = "some-id";
         NotificationHandler.Notification notification = new NotificationHandler.Notification("visualization_created", id);
-        NotificationHandler handler = new NotificationHandler(visualizationFetcher, URI.create("http://some.uri"), database.getSessionFactory());
+        NotificationHandler handler = new NotificationHandler(mock(FilesApi.class), visualizationFetcher, URI.create("http://some.uri"), database.getSessionFactory());
 
         handler.visualizationCallback(notification);
 
@@ -48,7 +49,7 @@ public class NotificationHandlerTest extends DatabaseTest {
 
         val visualizationFetcher = mock(VisualizationFetcher.class);
         NotificationHandler.Notification notification = new NotificationHandler.Notification("visualization_deleted", visualization.getId());
-        NotificationHandler handler = new NotificationHandler(visualizationFetcher, URI.create("http://some.uri"), database.getSessionFactory());
+        NotificationHandler handler = new NotificationHandler(mock(FilesApi.class), visualizationFetcher, URI.create("http://some.uri"), database.getSessionFactory());
 
         handler.visualizationCallback(notification);
 
@@ -63,7 +64,7 @@ public class NotificationHandlerTest extends DatabaseTest {
     public void notification_unknownType() {
 
         NotificationHandler.Notification notification = new NotificationHandler.Notification("unknown_type", "some-id");
-        NotificationHandler handler = new NotificationHandler(mock(VisualizationFetcher.class), URI.create("http://some.uri"), database.getSessionFactory());
+        NotificationHandler handler = new NotificationHandler(mock(FilesApi.class), mock(VisualizationFetcher.class), URI.create("http://some.uri"), database.getSessionFactory());
 
         handler.visualizationCallback(notification);
     }

@@ -2,8 +2,8 @@ package org.matsim.viz.frameAnimation.communication;
 
 import lombok.*;
 import org.matsim.viz.error.InternalException;
-import org.matsim.viz.frameAnimation.config.AppConfiguration;
-import org.matsim.viz.frameAnimation.entities.Subscription;
+import org.matsim.viz.filesApi.FilesApi;
+import org.matsim.viz.filesApi.Subscription;
 import org.matsim.viz.frameAnimation.inputProcessing.VisualizationFetcher;
 import org.matsim.viz.frameAnimation.persistenceModel.Visualization;
 import org.slf4j.Logger;
@@ -27,14 +27,16 @@ public class NotificationHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(NotificationHandler.class);
 
+    private final FilesApi filesApi;
     private final VisualizationFetcher visualizationFetcher;
     private final EntityManagerFactory emFactory;
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
-    public NotificationHandler(VisualizationFetcher visualizationFetcher, URI selfHostname, EntityManagerFactory emFactory) {
+    public NotificationHandler(FilesApi filesApi, VisualizationFetcher visualizationFetcher, URI selfHostname, EntityManagerFactory emFactory) {
         this.visualizationFetcher = visualizationFetcher;
         this.emFactory = emFactory;
         this.registerCallback(selfHostname);
+        this.filesApi = filesApi;
     }
 
     @POST
@@ -57,7 +59,7 @@ public class NotificationHandler {
         logger.info("Attempting to register for notifications");
         try {
             URI callback = selfHostname.resolve("/notifications");
-            Subscription result = new FilesAPI(AppConfiguration.getInstance().getFileServer()).registerNotfication("visualization_created", callback);
+            Subscription result = filesApi.registerNotification("visualization_created", callback);
             scheduleSubscriptionRefresh(result, selfHostname);
         } catch (Exception e) {
             logger.error("Failed to register for notifications try again in 5 minutes");

@@ -5,8 +5,7 @@ import lombok.val;
 import org.junit.Before;
 import org.junit.Test;
 import org.matsim.viz.error.InvalidInputException;
-import org.matsim.viz.frameAnimation.communication.FilesAPI;
-import org.matsim.viz.frameAnimation.entities.*;
+import org.matsim.viz.filesApi.*;
 import org.matsim.viz.frameAnimation.persistenceModel.QVisualization;
 import org.matsim.viz.frameAnimation.utils.DatabaseTest;
 import org.matsim.viz.frameAnimation.utils.TestUtils;
@@ -37,8 +36,8 @@ public class VisualizationGeneratorTest extends DatabaseTest {
     @Test
     public void generate_downloadFails_stateFailed() {
 
-        val filesAPI = mock(FilesAPI.class);
-        when(filesAPI.fetchFile(any(), any())).thenThrow(new RuntimeException());
+        val filesAPI = mock(FilesApi.class);
+        when(filesAPI.downloadFile(any(), any())).thenThrow(new RuntimeException());
 
         val testObject = new VisualizationGenerator(filesAPI, Paths.get("./"), testViz, database.getSessionFactory());
 
@@ -57,7 +56,7 @@ public class VisualizationGeneratorTest extends DatabaseTest {
     @Test(expected = InvalidInputException.class)
     public void generate_invalidInput_exception() {
 
-        val filesAPI = mock(FilesAPI.class);
+        val filesAPI = mock(FilesApi.class);
         val invalidInput = new Visualization();
         val testObject = new VisualizationGenerator(filesAPI, Paths.get("./"), invalidInput, database.getSessionFactory());
 
@@ -69,10 +68,10 @@ public class VisualizationGeneratorTest extends DatabaseTest {
     @Test
     public void generate_allGood() throws IOException {
 
-        val filesAPI = mock(FilesAPI.class);
-        when(filesAPI.fetchFile(any(), eq("events-id"))).thenReturn(Files.newInputStream(Paths.get(TestUtils.EVENTS_FILE_PATH)));
-        when(filesAPI.fetchFile(any(), eq("network-id"))).thenReturn(Files.newInputStream(Paths.get(TestUtils.NETWORK_FILE_PATH)));
-        when(filesAPI.fetchFile(any(), eq("plans-id"))).thenReturn(Files.newInputStream(Paths.get(TestUtils.POPULATION_FILE_PATH)));
+        val filesAPI = mock(FilesApi.class);
+        when(filesAPI.downloadFile(any(), eq("events-id"))).thenReturn(Files.newInputStream(Paths.get(TestUtils.EVENTS_FILE_PATH)));
+        when(filesAPI.downloadFile(any(), eq("network-id"))).thenReturn(Files.newInputStream(Paths.get(TestUtils.NETWORK_FILE_PATH)));
+        when(filesAPI.downloadFile(any(), eq("plans-id"))).thenReturn(Files.newInputStream(Paths.get(TestUtils.POPULATION_FILE_PATH)));
 
         val testObject = new VisualizationGenerator(
                 filesAPI, Paths.get("./"), testViz, database.getSessionFactory()

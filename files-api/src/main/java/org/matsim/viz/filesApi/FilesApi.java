@@ -3,6 +3,8 @@ package org.matsim.viz.filesApi;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.extern.java.Log;
 import net.jodah.failsafe.Failsafe;
 import net.jodah.failsafe.RetryPolicy;
@@ -14,6 +16,7 @@ import org.matsim.viz.database.AbstractEntity;
 
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.client.Client;
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.core.Feature;
 import javax.ws.rs.core.UriBuilder;
@@ -64,6 +67,15 @@ public class FilesApi {
         return authenticatedRequest(builder, request -> request.get(InputStream.class));
     }
 
+    public Subscription registerNotification(String type, URI callback) {
+
+        URI resouce = UriBuilder.fromUri(endpoint).path("notifications").path("subscribe").build();
+
+        Invocation.Builder builder = client.target(resouce).request();
+        Entity<SubscriptionRequest> entity = Entity.json(new SubscriptionRequest(type, callback));
+        return authenticatedRequest(builder, request -> request.post(entity, Subscription.class));
+    }
+
     private <T> T authenticatedRequest(Invocation.Builder requestBuilder, Function<Invocation.Builder, T> request) {
 
         return Failsafe.with(unauthorizedPolicy).get(() -> {
@@ -78,6 +90,14 @@ public class FilesApi {
                 .handle(NotAuthorizedException.class)
                 .withMaxRetries(1)
                 .onFailedAttempt(e -> authentication.requestAccessToken());
+    }
+
+    @AllArgsConstructor
+    @Getter
+    private static class SubscriptionRequest {
+
+        private String type;
+        private URI callback;
     }
 
     public static class FilesApiBuilder {

@@ -4,8 +4,8 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import lombok.val;
-import org.matsim.viz.frameAnimation.communication.FilesAPI;
-import org.matsim.viz.frameAnimation.entities.Visualization;
+import org.matsim.viz.filesApi.FilesApi;
+import org.matsim.viz.filesApi.Visualization;
 import org.matsim.viz.frameAnimation.persistenceModel.FetchInformation;
 import org.matsim.viz.frameAnimation.persistenceModel.QFetchInformation;
 
@@ -22,7 +22,7 @@ public class VisualizationFetcher {
 
     private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(8);
 
-    private final FilesAPI filesAPI;
+    private final FilesApi filesAPI;
     private final VisualizationGeneratorFactory generatorFactory;
     private final EntityManagerFactory emFactory;
 
@@ -54,7 +54,7 @@ public class VisualizationFetcher {
             val fetchInformation = getFetchInformation(em);
             Instant requestTime = Instant.now();
 
-            Visualization[] response = filesAPI.fetchVisualizations(fetchInformation.getLastFetch());
+            Visualization[] response = filesAPI.fetchVisualizations("frame-animation", fetchInformation.getLastFetch());
 
             fetchInformation.setLastFetch(requestTime);
             em.getTransaction().commit();

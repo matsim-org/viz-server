@@ -2,8 +2,8 @@ package org.matsim.viz.frameAnimation.inputProcessing;
 
 import lombok.val;
 import org.junit.Test;
-import org.matsim.viz.frameAnimation.communication.FilesAPI;
-import org.matsim.viz.frameAnimation.entities.Visualization;
+import org.matsim.viz.filesApi.FilesApi;
+import org.matsim.viz.filesApi.Visualization;
 import org.matsim.viz.frameAnimation.utils.DatabaseTest;
 import org.mockito.ArgumentCaptor;
 
@@ -19,8 +19,8 @@ public class VisualizationFetcherTest extends DatabaseTest {
     @Test
     public void fetchVisualizationData_success() {
 
-        val filesApi = mock(FilesAPI.class);
-        when(filesApi.fetchVisualizations(any())).thenReturn(new Visualization[]{new Visualization()});
+        val filesApi = mock(FilesApi.class);
+        when(filesApi.fetchVisualizations(any(), any())).thenReturn(new Visualization[]{new Visualization()});
         val factory = mock(VisualizationGeneratorFactory.class);
         val generator = mock(VisualizationGenerator.class);
         when(factory.create(any())).thenReturn(generator);
@@ -39,8 +39,8 @@ public class VisualizationFetcherTest extends DatabaseTest {
         viz.setId("id");
         AtomicReference<Instant> lastFetch = new AtomicReference<>(Instant.now());
 
-        val filesApi = mock(FilesAPI.class);
-        when(filesApi.fetchVisualizations(any())).thenAnswer(invocationOnMock -> {
+        val filesApi = mock(FilesApi.class);
+        when(filesApi.fetchVisualizations(any(), any())).thenAnswer(invocationOnMock -> {
             lastFetch.set(invocationOnMock.getArgument(0));
             return new Visualization[]{viz};
         });
@@ -54,16 +54,16 @@ public class VisualizationFetcherTest extends DatabaseTest {
         testObject.fetchVisualizationData();
 
         verify(generator, timeout(500).times(2)).generate();
-        ArgumentCaptor<Instant> argrument = ArgumentCaptor.forClass(Instant.class);
-        verify(filesApi, times(2)).fetchVisualizations(argrument.capture());
-        assertTrue(argrument.getAllValues().get(0).isBefore(argrument.getAllValues().get(1)));
+        ArgumentCaptor<Instant> argument = ArgumentCaptor.forClass(Instant.class);
+        verify(filesApi, times(2)).fetchVisualizations(any(), argument.capture());
+        assertTrue(argument.getAllValues().get(0).isBefore(argument.getAllValues().get(1)));
     }
 
     @Test
     public void fetchVisualization() {
 
-        val filesApi = mock(FilesAPI.class);
-        when(filesApi.fetchVisualizations(any())).thenReturn(new Visualization[]{new Visualization()});
+        val filesApi = mock(FilesApi.class);
+        when(filesApi.fetchVisualizations(any(), any())).thenReturn(new Visualization[]{new Visualization()});
         val factory = mock(VisualizationGeneratorFactory.class);
         val generator = mock(VisualizationGenerator.class);
         when(factory.create(any())).thenReturn(generator);
@@ -78,8 +78,8 @@ public class VisualizationFetcherTest extends DatabaseTest {
     @Test
     public void scheduleFetching() {
 
-        val filesApi = mock(FilesAPI.class);
-        when(filesApi.fetchVisualizations(any())).thenReturn(new Visualization[]{new Visualization()});
+        val filesApi = mock(FilesApi.class);
+        when(filesApi.fetchVisualizations(any(), any())).thenReturn(new Visualization[]{new Visualization()});
         val factory = mock(VisualizationGeneratorFactory.class);
         val generator = mock(VisualizationGenerator.class);
         when(factory.create(any())).thenReturn(generator);
