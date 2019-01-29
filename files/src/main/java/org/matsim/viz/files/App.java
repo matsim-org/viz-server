@@ -83,8 +83,9 @@ public class App extends Application<AppConfiguration> {
         if (!(configuration.getDatabaseFactory() instanceof H2DbConfigurationFactory)) {
             // execute schema migration with flyway before connecting to the database
             // if H2 in memory database is used, this is not necessary
-            Flyway flyway = new Flyway();
-            flyway.setDataSource(dbConfiguration.getJdbcUrl(), dbConfiguration.getUser(), dbConfiguration.getPassword());
+            Flyway flyway = Flyway.configure().dataSource(
+                    dbConfiguration.getJdbcUrl(), dbConfiguration.getUser(), dbConfiguration.getPassword()
+            ).load();
             flyway.migrate();
         }
 
