@@ -35,8 +35,8 @@ public class NotificationHandler {
     public NotificationHandler(FilesApi filesApi, VisualizationFetcher visualizationFetcher, URI selfHostname, EntityManagerFactory emFactory) {
         this.visualizationFetcher = visualizationFetcher;
         this.emFactory = emFactory;
-        this.registerCallback(selfHostname);
         this.filesApi = filesApi;
+        this.registerCallback(selfHostname);
     }
 
     @POST

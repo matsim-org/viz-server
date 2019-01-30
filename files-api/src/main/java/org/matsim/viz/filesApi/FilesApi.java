@@ -78,11 +78,17 @@ public class FilesApi {
 
     private <T> T authenticatedRequest(Invocation.Builder requestBuilder, Function<Invocation.Builder, T> request) {
 
+        requestAccessTokenIfNonePresent();
         return Failsafe.with(unauthorizedPolicy).get(() -> {
                     Invocation.Builder withProperty = requestBuilder.property(OAuth2ClientSupport.OAUTH2_PROPERTY_ACCESS_TOKEN, authentication.getAccessToken());
                     return request.apply(withProperty);
                 }
         );
+    }
+
+    private void requestAccessTokenIfNonePresent() {
+        if (!authentication.hasAccessToken())
+            authentication.requestAccessToken();
     }
 
     private RetryPolicy<Object> createNotAuthorizedPolicy() {

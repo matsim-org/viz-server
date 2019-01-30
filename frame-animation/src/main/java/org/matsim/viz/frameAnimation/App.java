@@ -17,7 +17,6 @@ import org.matsim.viz.clientAuth.OAuthAuthenticator;
 import org.matsim.viz.clientAuth.OAuthNoAuthFilter;
 import org.matsim.viz.filesApi.FilesApi;
 import org.matsim.viz.frameAnimation.communication.NotificationHandler;
-import org.matsim.viz.frameAnimation.communication.ServiceCommunication;
 import org.matsim.viz.frameAnimation.config.AppConfiguration;
 import org.matsim.viz.frameAnimation.inputProcessing.VisualizationFetcher;
 import org.matsim.viz.frameAnimation.inputProcessing.VisualizationGeneratorFactory;
@@ -66,7 +65,7 @@ public class App extends Application<AppConfiguration> {
         final Client client = createJerseyClient(configuration, environment);
         final FilesApi api = createFilesApi(configuration, client);
         final VisualizationFetcher fetcher = createVisualizationFetcher(configuration, api);
-        registerAuthFilter(configuration, ServiceCommunication.getClient(), environment);
+        registerAuthFilter(configuration, client, environment);
         registerCORSFilter(environment.servlets());
         registerEndpoints(environment.jersey(), configuration, fetcher, api);
     }
