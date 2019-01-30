@@ -3,10 +3,11 @@ package org.matsim.viz.filesApi;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.WireMock;
-import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.glassfish.jersey.client.oauth2.OAuth2ClientSupport;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.matsim.viz.clientAuth.ClientAuthentication;
@@ -33,8 +34,11 @@ public class FilesApiTest {
     private static final String clientScope = "client-scope";
     private static final String token = "some-token";
 
+    @ClassRule
+    public static WireMockClassRule wireMockClassRule = new WireMockClassRule();
     @Rule
-    public WireMockRule wireMockRule = new WireMockRule();
+    public WireMockClassRule wireMockRule = wireMockClassRule;
+
     private ClientAuthentication authentication;
     private URI filesEndpoint;
     private Client jerseyClient = ClientBuilder.newClient();
@@ -57,6 +61,14 @@ public class FilesApiTest {
                         .withStatus(401))
         );
 
+      /*  final String invalidToken = "invalid-token";
+        // if invalid token is presented files server will return 401
+        wireMockRule.stubFor(get(WireMock.anyUrl())
+                .withHeader("Authorization", equalTo(invalidToken))
+                .willReturn(aResponse().withStatus(401))
+        );
+*/
+
         // expected visualizations
         String json = mapper.writeValueAsString(new Visualization[]{new Visualization()});
 
@@ -70,7 +82,7 @@ public class FilesApiTest {
 
         // authentication is mocked. On first request there is no access token present
         // on second attempt to request from files server a token is provided
-        when(authentication.getAccessToken()).thenReturn("").thenReturn(token);
+        when(authentication.getAccessToken()).thenReturn("invalid-token").thenReturn(token);
 
         final String vizType = "my-type";
         final Instant createdAfter = Instant.now();
@@ -79,8 +91,10 @@ public class FilesApiTest {
 
         assertEquals(1, result.length);
 
-        // there should be 1 attempt to request a new access token
-        verify(authentication).requestAccessToken();
+        // there should be 2 attempts to request a new access token
+        // once if token is not yet set
+        // once if request was rejected due to invalid token
+        verify(authentication, times(2)).requestAccessToken();
 
         // since the original request to files api is repeated after an access token was requested
         // getAccessToken and the call to /visualizations should be executed twice
@@ -113,6 +127,7 @@ public class FilesApiTest {
 
         // authentication is mocked. Return access token each time it is requested
         when(authentication.getAccessToken()).thenReturn(token);
+        when(authentication.hasAccessToken()).thenReturn(true);
 
         final String vizType = "my-type";
         final Instant createdAfter = Instant.now();

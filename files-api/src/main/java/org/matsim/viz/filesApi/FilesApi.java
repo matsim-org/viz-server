@@ -69,9 +69,9 @@ public class FilesApi {
 
     public Subscription registerNotification(String type, URI callback) {
 
-        URI resouce = UriBuilder.fromUri(endpoint).path("notifications").path("subscribe").build();
+        URI resource = UriBuilder.fromUri(endpoint).path("notifications").path("subscribe").build();
 
-        Invocation.Builder builder = client.target(resouce).request();
+        Invocation.Builder builder = client.target(resource).request();
         Entity<SubscriptionRequest> entity = Entity.json(new SubscriptionRequest(type, callback));
         return authenticatedRequest(builder, request -> request.post(entity, Subscription.class));
     }
