@@ -9,8 +9,46 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <repositories>
+        <repository>
+            <!-- matsim is not on Maven central -->
+            <id>matsim</id>
+            <name>MATSim release repository</name>
+            <url>http://dl.bintray.com/matsim/matsim</url>
+        </repository>
+        <repository>
+            <!-- Geotools is not on Maven central -->
+            <id>geotools</id>
+            <name>Geotools repository</name>
+            <url>http://download.osgeo.org/webdav/geotools</url>
+        </repository>
+        <repository>
+            <!-- For some dependencies of Geotools which are not on Maven central -->
+            <id>maven2-repository.dev.java.net</id>
+            <name>Java.net repository</name>
+            <url>http://download.java.net/maven/2</url>
+        </repository>
+    </repositories>
+
     <artifactId>postprocessing-emissions</artifactId>
     <dependencies>
+        <dependency>
+            <groupId>org.matsim</groupId>
+            <artifactId>files-api</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.matsim.contrib</groupId>
+            <artifactId>emissions</artifactId>
+            <version>0.11.0-SNAPSHOT</version>
+        </dependency>
+        <!-- put jts onto the classpath since the contrib doesn't do it itself... -->
+        <dependency>
+            <groupId>com.vividsolutions</groupId>
+            <artifactId>jts</artifactId>
+            <version>1.13</version>
+        </dependency>
         <dependency>
             <groupId>io.dropwizard</groupId>
             <artifactId>dropwizard-client</artifactId>
@@ -30,10 +68,9 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>org.matsim</groupId>
-            <artifactId>files-api</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <scope>compile</scope>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.6</version>
         </dependency>
     </dependencies>
 

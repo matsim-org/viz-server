@@ -10,12 +10,14 @@ import io.dropwizard.jersey.setup.JerseyEnvironment;
 import io.dropwizard.jetty.setup.ServletEnvironment;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import lombok.val;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
 import org.flywaydb.core.Flyway;
 import org.matsim.viz.clientAuth.OAuthAuthenticator;
 import org.matsim.viz.clientAuth.OAuthNoAuthFilter;
 import org.matsim.viz.filesApi.FilesApi;
 import org.matsim.viz.postprocessing.emissions.persistenceModel.Agent;
+import org.matsim.viz.postprocessing.emissions.persistenceModel.FetchInformation;
 import org.matsim.viz.postprocessing.emissions.persistenceModel.Permission;
 import org.matsim.viz.postprocessing.emissions.persistenceModel.Visualization;
 
@@ -24,13 +26,14 @@ import javax.servlet.FilterRegistration;
 import javax.ws.rs.client.Client;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.EnumSet;
 import java.util.Optional;
 
 public class App extends Application<AppConfiguration> {
 
     private HibernateBundle<AppConfiguration> hibernate = new HibernateBundle<AppConfiguration>(
-            Agent.class, Permission.class, Visualization.class
+            Agent.class, Permission.class, Visualization.class, FetchInformation.class
     ) {
         @Override
         public PooledDataSourceFactory getDataSourceFactory(AppConfiguration appConfiguration) {
@@ -61,7 +64,7 @@ public class App extends Application<AppConfiguration> {
     }
 
     private void createTempDirectory(AppConfiguration configuration) throws IOException {
-        Files.createDirectories(configuration.getTmpFiles());
+        Files.createDirectories(Paths.get(configuration.getTmpFiles()));
     }
 
     private void executeDatabaseMigration(AppConfiguration configuration) {
@@ -99,9 +102,11 @@ public class App extends Application<AppConfiguration> {
     private VisualizationFetcher createVisualizationFetcher(AppConfiguration configuration, FilesApi api) {
 
         VisualizationGeneratorFactory factory = new VisualizationGeneratorFactory(
-                hibernate.getSessionFactory(), api, configuration.getTmpFiles());
+                hibernate.getSessionFactory(), api, Paths.get(configuration.getTmpFiles()));
 
-        return new VisualizationFetcher(hibernate.getSessionFactory(), api, factory);
+        val fetcher = new VisualizationFetcher(hibernate.getSessionFactory(), api, factory);
+        fetcher.fetchVisualizationData();
+        return fetcher;
     }
 
     private void registerAuthFilter(AppConfiguration configuration, Client client, Environment environment) {
@@ -134,7 +139,7 @@ public class App extends Application<AppConfiguration> {
     }
 
     private void registerEndpoints(JerseyEnvironment jersey, AppConfiguration configuration, VisualizationFetcher fetcher, FilesApi api) {
-
+        jersey.register(new VisualizationResource(hibernate.getSessionFactory()));
     }
 
 

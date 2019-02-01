@@ -6,13 +6,11 @@ import io.dropwizard.db.DataSourceFactory;
 import lombok.Getter;
 
 import java.net.URI;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 @Getter
 public class AppConfiguration extends Configuration {
 
-    private Path tmpFiles = Paths.get("./tmpFiles");
+    private String tmpFiles = "./tmpFiles";
     private String relyingPartyId = "id";
     private String relyingPartySecret = "secret";
 

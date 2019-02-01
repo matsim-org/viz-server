@@ -15,13 +15,17 @@ import java.util.Set;
 @Entity
 public class Visualization extends AbstractEntity {
 
-    private Progress progress = Progress.DownloadingInput;
-
     @Lob
     private String data = "";
 
+    private double cellSize;
+    private double smoothingRadius;
+    private double timeBinSize;
+
     @OneToMany(mappedBy = "visualization", fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL)
     private Set<Permission> permissions = new HashSet<>();
+
+    private Progress progress = Progress.DownloadingInput;
 
     public enum Progress {DownloadingInput, GeneratingData, Done, Failed}
 }

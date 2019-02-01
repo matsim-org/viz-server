@@ -15,7 +15,7 @@ import java.time.Instant;
 
 @Log
 @RequiredArgsConstructor
-public class VisualizationFetcher {
+class VisualizationFetcher {
 
     private final SessionFactory sessionFactory;
     private final FilesApi api;
@@ -23,11 +23,11 @@ public class VisualizationFetcher {
 
     private boolean isFetching = false;
 
-    public void fetchVisualizationData() {
+    void fetchVisualizationData() {
 
         isFetching = true;
 
-        try (val session = sessionFactory.getCurrentSession()) {
+        try (val session = sessionFactory.openSession()) {
 
             session.beginTransaction();
 
@@ -44,12 +44,12 @@ public class VisualizationFetcher {
             log.info("start processing metadata");
 
             for (Visualization visualization : response) {
-                val generator = generatorFactory.createGenerator();
+                val generator = generatorFactory.createGenerator(visualization);
+                generator.generate();
             }
-
-
+        } finally {
+            isFetching = false;
         }
-
     }
 
     private FetchInformation getFetchInformation(EntityManager em) {
