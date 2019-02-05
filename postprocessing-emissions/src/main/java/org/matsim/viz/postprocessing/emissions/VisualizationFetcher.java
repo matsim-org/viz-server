@@ -7,7 +7,6 @@ import lombok.val;
 import org.hibernate.SessionFactory;
 import org.matsim.viz.filesApi.FilesApi;
 import org.matsim.viz.filesApi.Visualization;
-import org.matsim.viz.postprocessing.emissions.persistenceModel.FetchInformation;
 import org.matsim.viz.postprocessing.emissions.persistenceModel.QFetchInformation;
 
 import javax.persistence.EntityManager;

@@ -12,8 +12,6 @@ import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.viz.error.InvalidInputException;
 import org.matsim.viz.filesApi.FilesApi;
 import org.matsim.viz.filesApi.VisualizationInput;
-import org.matsim.viz.postprocessing.emissions.persistenceModel.Agent;
-import org.matsim.viz.postprocessing.emissions.persistenceModel.Permission;
 import org.matsim.viz.postprocessing.emissions.persistenceModel.Visualization;
 
 import javax.persistence.EntityManager;
@@ -112,14 +110,14 @@ class VisualizationGenerator {
         visualization.setTimeBinSize(Double.parseDouble(inputVisualization.getParameters().get(TIME_BIN_SIZE_KEY).getValue()));
 
         Visualization mergedVisualization = (Visualization) session.merge(visualization);
-        inputVisualization.getPermissions().forEach(permission -> {
+       /* inputVisualization.getPermissions().forEach(permission -> {
 
             Agent agent = new Agent(permission.getAgent().getAuthId());
             Agent mergedAgent = (Agent) session.merge(agent);
             val permissionToPersist = new Permission(mergedAgent, mergedVisualization);
             mergedVisualization.getPermissions().add(permissionToPersist);
             session.persist(permissionToPersist);
-        });
+        });*/
         session.getTransaction().commit();
         return mergedVisualization;
     }

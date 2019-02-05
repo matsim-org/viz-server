@@ -28,24 +28,35 @@ public class NotificationResource {
             .withMaxAttempts(12);
 
     private final FilesApi filesApi;
+    private final VisualizationFetcher fetcher;
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
-    public NotificationResource(FilesApi filesApi, URI selfHostname) {
+    public NotificationResource(FilesApi filesApi, URI selfHostname, VisualizationFetcher fetcher) {
         this.filesApi = filesApi;
+        this.fetcher = fetcher;
         scheduler.schedule(() -> registerCallback(selfHostname), 0, TimeUnit.SECONDS);
     }
 
     @POST
     public void callback(@Valid Notification notification) {
-        throw new RuntimeException("Not yet implemented");
+
+        switch (notification.getType()) {
+            case "visualization_created":
+                scheduler.schedule(fetcher::fetchVisualizationData, 0, TimeUnit.SECONDS);
+                break;
+            default:
+                throw new RuntimeException("Not implemented");
+        }
     }
 
     private void registerCallback(URI selfHostname) {
-        log.info("Attempting to register notifications");
+        log.info("Attempting to register for notifications");
 
         URI callback = selfHostname.resolve("/notifications");
         Subscription result = Failsafe.with(retryPolicy)
                 .get(() -> filesApi.registerNotification("visualization_created", callback));
+
+        log.info("successfully registered for notifications of type: 'visualization_created'");
         scheduleSubscriptionRefresh(result, selfHostname);
     }
 

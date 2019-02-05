@@ -1,42 +1,24 @@
 package org.matsim.viz.postprocessing.emissions;
 
 import io.dropwizard.Application;
-import io.dropwizard.auth.AuthDynamicFeature;
-import io.dropwizard.auth.AuthValueFactoryProvider;
-import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.db.PooledDataSourceFactory;
 import io.dropwizard.hibernate.HibernateBundle;
-import io.dropwizard.jersey.setup.JerseyEnvironment;
-import io.dropwizard.jetty.setup.ServletEnvironment;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
-import lombok.val;
-import org.eclipse.jetty.servlets.CrossOriginFilter;
+import lombok.extern.java.Log;
 import org.flywaydb.core.Flyway;
-import org.matsim.viz.clientAuth.OAuthAuthenticator;
-import org.matsim.viz.clientAuth.OAuthNoAuthFilter;
-import org.matsim.viz.filesApi.FilesApi;
-import org.matsim.viz.postprocessing.emissions.persistenceModel.Agent;
-import org.matsim.viz.postprocessing.emissions.persistenceModel.FetchInformation;
-import org.matsim.viz.postprocessing.emissions.persistenceModel.Permission;
+import org.matsim.viz.postprocessing.bundle.*;
 import org.matsim.viz.postprocessing.emissions.persistenceModel.Visualization;
 
-import javax.servlet.DispatcherType;
-import javax.servlet.FilterRegistration;
-import javax.ws.rs.client.Client;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.EnumSet;
-import java.util.Optional;
+@Log
+public class App extends Application<PostprocessingConfiguration> {
 
-public class App extends Application<AppConfiguration> {
-
-    private HibernateBundle<AppConfiguration> hibernate = new HibernateBundle<AppConfiguration>(
+    private HibernateBundle<PostprocessingConfiguration> hibernate = new HibernateBundle<PostprocessingConfiguration>(
             Agent.class, Permission.class, Visualization.class, FetchInformation.class
     ) {
         @Override
-        public PooledDataSourceFactory getDataSourceFactory(AppConfiguration appConfiguration) {
+        public PooledDataSourceFactory getDataSourceFactory(PostprocessingConfiguration appConfiguration) {
+
             executeDatabaseMigration(appConfiguration);
             return appConfiguration.getDatabase();
         }
@@ -47,27 +29,33 @@ public class App extends Application<AppConfiguration> {
     }
 
     @Override
-    public void initialize(Bootstrap<AppConfiguration> bootstrap) {
+    public void initialize(Bootstrap<PostprocessingConfiguration> bootstrap) {
+
         bootstrap.addBundle(hibernate);
+        bootstrap.addBundle(new PostprocessingBundle<>((a, b, c) -> log.info("called generator"), hibernate, "emissions"));
     }
 
     @Override
-    public void run(AppConfiguration configuration, Environment environment) throws IOException {
+    public void run(PostprocessingConfiguration configuration, Environment environment) {
 
-        createTempDirectory(configuration);
+
+        environment.jersey().register(new VisualizationResource(hibernate.getSessionFactory()));
+
+      /*  createTempDirectory(configuration);
         final Client client = createJerseyClient(configuration, environment);
         final FilesApi filesApi = createfilesApi(configuration, client);
         final VisualizationFetcher fetcher = createVisualizationFetcher(configuration, filesApi);
         registerAuthFilter(configuration, client, environment);
         registerCORSFilter(environment.servlets());
         registerEndpoints(environment.jersey(), configuration, fetcher, filesApi);
+        */
     }
 
-    private void createTempDirectory(AppConfiguration configuration) throws IOException {
-        Files.createDirectories(Paths.get(configuration.getTmpFiles()));
-    }
-
-    private void executeDatabaseMigration(AppConfiguration configuration) {
+    /*  private void createTempDirectory(AppConfiguration configuration) throws IOException {
+          Files.createDirectories(Paths.get(configuration.getTmpFiles()));
+      }
+  */
+    private void executeDatabaseMigration(PostprocessingConfiguration configuration) {
 
         if (!configuration.getDatabase().getDriverClass().equals("org.h2.Driver")) {
             // execute schema migration with flyway before connecting to the database
@@ -80,7 +68,7 @@ public class App extends Application<AppConfiguration> {
             flyway.migrate();
         }
     }
-
+/*
     private Client createJerseyClient(AppConfiguration configuration, Environment environment) {
         return new JerseyClientBuilder(environment)
                 .using(configuration.getJerseyClient())
@@ -140,7 +128,7 @@ public class App extends Application<AppConfiguration> {
 
     private void registerEndpoints(JerseyEnvironment jersey, AppConfiguration configuration, VisualizationFetcher fetcher, FilesApi api) {
         jersey.register(new VisualizationResource(hibernate.getSessionFactory()));
-    }
+    }*/
 
 
 }

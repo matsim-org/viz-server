@@ -1,14 +1,14 @@
 package org.matsim.viz.postprocessing.emissions;
 
-import io.dropwizard.Configuration;
 import io.dropwizard.client.JerseyClientConfiguration;
 import io.dropwizard.db.DataSourceFactory;
 import lombok.Getter;
+import org.matsim.viz.postprocessing.bundle.PostprocessingConfiguration;
 
 import java.net.URI;
 
 @Getter
-public class AppConfiguration extends Configuration {
+public class AppConfiguration extends PostprocessingConfiguration {
 
     private String tmpFiles = "./tmpFiles";
     private String relyingPartyId = "id";

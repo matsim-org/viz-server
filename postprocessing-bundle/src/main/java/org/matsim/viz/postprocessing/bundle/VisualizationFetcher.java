@@ -75,8 +75,11 @@ public class VisualizationFetcher {
             PersistentVisualization visualization = createVisualization(inputVisualization, session);
 
             try {
+                persistProgress(visualization, PersistentVisualization.Progress.DownloadingInput, session);
                 Map<String, InputFile> inputFiles = fetchInputFiles(inputVisualization, folder);
+                persistProgress(visualization, PersistentVisualization.Progress.GeneratingData, session);
                 generator.generate(visualization, inputFiles, inputVisualization.getParameters());
+                persistProgress(visualization, PersistentVisualization.Progress.Done, session);
             } catch (Exception e) {
                 log.severe("something went wrong. Setting processing status to failed");
                 persistProgress(visualization, PersistentVisualization.Progress.Failed, session);
@@ -92,7 +95,7 @@ public class VisualizationFetcher {
 
         session.beginTransaction();
 
-        PersistentVisualization visualization = new PersistentVisualization();
+        PersistentVisualization visualization = generator.createVisualization();
         visualization.setId(inputVisualization.getId());
         visualization.setProgress(PersistentVisualization.Progress.DownloadingInput);
 

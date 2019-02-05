@@ -6,7 +6,6 @@ import io.dropwizard.hibernate.UnitOfWork;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.matsim.viz.error.InvalidInputException;
-import org.matsim.viz.postprocessing.emissions.persistenceModel.Agent;
 import org.matsim.viz.postprocessing.emissions.persistenceModel.QPermission;
 import org.matsim.viz.postprocessing.emissions.persistenceModel.QVisualization;
 import org.matsim.viz.postprocessing.emissions.persistenceModel.Visualization;

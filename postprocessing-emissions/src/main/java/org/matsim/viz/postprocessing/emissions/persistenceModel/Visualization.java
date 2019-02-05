@@ -3,17 +3,16 @@ package org.matsim.viz.postprocessing.emissions.persistenceModel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.matsim.viz.database.AbstractEntity;
+import org.matsim.viz.postprocessing.bundle.PersistentVisualization;
 
-import javax.persistence.*;
-import java.util.HashSet;
-import java.util.Set;
+import javax.persistence.Entity;
+import javax.persistence.Lob;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @Entity
-public class Visualization extends AbstractEntity {
+public class Visualization extends PersistentVisualization {
 
     @Lob
     private String data = "";
@@ -21,11 +20,4 @@ public class Visualization extends AbstractEntity {
     private double cellSize;
     private double smoothingRadius;
     private double timeBinSize;
-
-    @OneToMany(mappedBy = "visualization", fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL)
-    private Set<Permission> permissions = new HashSet<>();
-
-    private Progress progress = Progress.DownloadingInput;
-
-    public enum Progress {DownloadingInput, GeneratingData, Done, Failed}
 }
