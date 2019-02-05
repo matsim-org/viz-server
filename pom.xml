@@ -18,6 +18,7 @@
         <module>database</module>
         <module>files-api</module>
         <module>postprocessing-emissions</module>
+        <module>postprocessing-bundle</module>
     </modules>
 
     <properties>

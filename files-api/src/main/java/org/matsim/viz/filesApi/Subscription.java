@@ -1,20 +1,23 @@
 package org.matsim.viz.filesApi;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.net.URI;
 import java.time.Instant;
 
 @Getter
+@AllArgsConstructor
 public class Subscription {
 
-    private NotificationType type;
-    private URI callback;
-    private Instant expiresAt;
+    private final NotificationType type;
+    private final URI callback;
+    private final Instant expiresAt;
 
     @Getter
+    @AllArgsConstructor
     public static class NotificationType {
 
-        private String name;
+        private final String name;
     }
 }
