@@ -1,4 +1,4 @@
-package org.matsim.viz.postprocessing.emissions.persistenceModel;
+package org.matsim.viz.postprocessing.emissions;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

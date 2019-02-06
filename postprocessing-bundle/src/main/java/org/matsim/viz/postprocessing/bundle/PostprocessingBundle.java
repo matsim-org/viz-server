@@ -25,13 +25,15 @@ import java.nio.file.Paths;
 import java.util.EnumSet;
 import java.util.Optional;
 
+import static java.util.Objects.requireNonNull;
+
 @Log
 @RequiredArgsConstructor
 public class PostprocessingBundle<T extends PostprocessingConfiguration> implements ConfiguredBundle<T> {
 
-    private final VisualizationGenerator generator;
     private final HibernateBundle hibernate;
-    private final String applicationName;
+    private final VisualizationGenerator generator;
+    private final String visualizationType;
 
     @Override
     public void run(T configuration, Environment environment) throws Exception {
@@ -39,7 +41,8 @@ public class PostprocessingBundle<T extends PostprocessingConfiguration> impleme
         final Path tmpFiles = createTmpDirectory(configuration);
         final Client client = createJerseyClient(configuration, environment);
         final FilesApi api = createFilesApi(configuration, client);
-        final VisualizationFetcher fetcher = new VisualizationFetcher(hibernate.getSessionFactory(), api, tmpFiles, generator);
+        final VisualizationFetcher fetcher =
+                new VisualizationFetcher(new LazySessionFactory(hibernate), api, tmpFiles, requireNonNull(generator), visualizationType);
         registerAuthFilter(configuration, environment, client);
         registerCORSFilter(environment.servlets());
 
@@ -65,7 +68,7 @@ public class PostprocessingBundle<T extends PostprocessingConfiguration> impleme
         return new JerseyClientBuilder(environment)
                 .using(configuration.getJerseyClient())
                 .using(FilesApi.getObjectMapper())
-                .build(applicationName);
+                .build("postprocessing_" + visualizationType);
     }
 
     private FilesApi createFilesApi(T configuration, Client client) {

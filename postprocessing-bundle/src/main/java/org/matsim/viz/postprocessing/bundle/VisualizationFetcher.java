@@ -6,7 +6,6 @@ import lombok.extern.java.Log;
 import lombok.val;
 import org.apache.commons.io.FileUtils;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.matsim.viz.filesApi.FilesApi;
 import org.matsim.viz.filesApi.Visualization;
 import org.matsim.viz.filesApi.VisualizationInput;
@@ -20,21 +19,21 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 @SuppressWarnings("ALL")
 @Log
 @RequiredArgsConstructor
 public class VisualizationFetcher {
 
-    private final SessionFactory sessionFactory;
+    private final LazySessionFactory lazySessionFactory;
     private final FilesApi api;
     private final Path tmpFiles;
     private final VisualizationGenerator generator;
-    private ExecutorService scheduler = Executors.newScheduledThreadPool(8); //TODO make pool size configurable
+    private final String vizType;
 
     void fetchVisualizationData() {
+
+        val sessionFactory = lazySessionFactory.getSessionFactory();
 
         try (val session = sessionFactory.openSession()) {
 
@@ -43,7 +42,7 @@ public class VisualizationFetcher {
             val fetchInformation = getFetchInformation(session);
             val requestTime = Instant.now();
 
-            Visualization[] response = api.fetchVisualizations("emissions", fetchInformation.getLastFetch().toInstant());
+            Visualization[] response = api.fetchVisualizations(vizType, fetchInformation.getLastFetch().toInstant());
 
             fetchInformation.setLastFetch(Timestamp.from(requestTime));
             session.getTransaction().commit();
@@ -70,6 +69,8 @@ public class VisualizationFetcher {
     private void generateVisualization(Visualization inputVisualization) {
 
         Path folder = createTmpFolderIfNecessary(inputVisualization.getId());
+        val sessionFactory = lazySessionFactory.getSessionFactory();
+
         try (Session session = sessionFactory.openSession()) {
 
             PersistentVisualization visualization = createVisualization(inputVisualization, session);
@@ -78,7 +79,9 @@ public class VisualizationFetcher {
                 persistProgress(visualization, PersistentVisualization.Progress.DownloadingInput, session);
                 Map<String, InputFile> inputFiles = fetchInputFiles(inputVisualization, folder);
                 persistProgress(visualization, PersistentVisualization.Progress.GeneratingData, session);
-                generator.generate(visualization, inputFiles, inputVisualization.getParameters());
+                generator.generate(
+                        new VisualizationGenerator.Input(visualization, inputFiles, inputVisualization.getParameters(), session)
+                );
                 persistProgress(visualization, PersistentVisualization.Progress.Done, session);
             } catch (Exception e) {
                 log.severe("something went wrong. Setting processing status to failed");

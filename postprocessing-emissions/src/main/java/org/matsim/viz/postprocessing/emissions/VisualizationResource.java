@@ -5,13 +5,12 @@ import io.dropwizard.auth.Auth;
 import io.dropwizard.hibernate.UnitOfWork;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import org.matsim.viz.error.ForbiddenException;
 import org.matsim.viz.error.InvalidInputException;
-import org.matsim.viz.postprocessing.emissions.persistenceModel.QPermission;
-import org.matsim.viz.postprocessing.emissions.persistenceModel.QVisualization;
-import org.matsim.viz.postprocessing.emissions.persistenceModel.Visualization;
+import org.matsim.viz.postprocessing.bundle.Agent;
+import org.matsim.viz.postprocessing.bundle.QPermission;
 
 import javax.persistence.EntityManagerFactory;
-import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -43,6 +42,7 @@ public class VisualizationResource {
         if (visualization == null)
             throw new InvalidInputException("Could not find visualization with id: " + vizId);
         return visualization;
+
     }
 
     private boolean hasNoPermission(Agent agent, String vizId) {
@@ -50,7 +50,7 @@ public class VisualizationResource {
         val permissionTable = QPermission.permission;
         val permission = new JPAQueryFactory(emFactory.createEntityManager()).selectFrom(permissionTable)
                 .where(permissionTable.agent.eq(agent)
-                        .or(permissionTable.agent.id.endsWith(Agent.publicPermissionId))
+                        .or(permissionTable.agent.id.endsWith(org.matsim.viz.filesApi.Agent.publicPermissionId))
                         .and(permissionTable.visualization.id.eq(vizId)))
                 .fetchFirst();
         return permission == null;

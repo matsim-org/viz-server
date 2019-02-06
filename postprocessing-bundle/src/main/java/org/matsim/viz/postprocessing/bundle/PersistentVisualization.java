@@ -14,7 +14,7 @@ import java.util.Set;
 @NoArgsConstructor
 @Entity
 @MappedSuperclass
-public class PersistentVisualization extends AbstractEntity {
+public abstract class PersistentVisualization extends AbstractEntity {
 
     @OneToMany(mappedBy = "visualization", fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL)
     private Set<Permission> permissions = new HashSet<>();
