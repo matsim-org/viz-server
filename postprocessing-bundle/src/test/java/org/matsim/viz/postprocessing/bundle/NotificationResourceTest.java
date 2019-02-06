@@ -26,7 +26,7 @@ public class NotificationResourceTest {
         FilesApi api = mock(FilesApi.class);
         when(api.registerNotification(anyString(), any())).thenReturn(expectedResult);
 
-        NotificationResource resource = new NotificationResource(api, URI.create("http://some.uri"));
+        NotificationResource resource = new NotificationResource(api, URI.create("http://some.uri"), mock(VisualizationFetcher.class));
 
         assertNotNull(resource);
         verify(api, timeout(100).times(1)).registerNotification(any(), any());
@@ -40,7 +40,7 @@ public class NotificationResourceTest {
         FilesApi api = mock(FilesApi.class);
         when(api.registerNotification(anyString(), any())).thenThrow(new WebApplicationException()).thenReturn(expectedResult);
 
-        NotificationResource resource = new NotificationResource(api, URI.create("http://some.uri"));
+        NotificationResource resource = new NotificationResource(api, URI.create("http://some.uri"), mock(VisualizationFetcher.class));
 
         assertNotNull(resource);
         verify(api, timeout(1300).times(2)).registerNotification(any(), any());

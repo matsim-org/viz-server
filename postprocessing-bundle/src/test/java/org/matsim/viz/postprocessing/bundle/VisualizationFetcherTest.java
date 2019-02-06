@@ -8,6 +8,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.matsim.viz.filesApi.*;
 
+import javax.persistence.Entity;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -27,26 +28,32 @@ public class VisualizationFetcherTest {
     @Rule
     public DAOTestRule database = DAOTestRule.newBuilder()
             .addEntityClass(PersistentVisualization.class)
+            .addEntityClass(TestableVisualization.class)
             .addEntityClass(Agent.class)
             .addEntityClass(Permission.class)
             .addEntityClass(FetchInformation.class)
             .setShowSql(true)
             .build();
     private FilesApi filesApi;
+    private LazySessionFactory sessionFactoryFactory;
 
     @Before
     public void setUp() {
         filesApi = mock(FilesApi.class);
+        sessionFactoryFactory = mock(LazySessionFactory.class);
+        when(sessionFactoryFactory.getSessionFactory()).thenReturn(database.getSessionFactory());
     }
 
 
     @Test
     public void fetchVisualizationData_receivedZeroViz() {
 
-        VisualizationGenerator generator = (visualization, inputFiles, parameters) -> fail("generate should not be called if no viz is fetched");
+        VisualizationGenerator<TestableVisualization> generator = mock(VisualizationGenerator.class);
+        when(generator.createVisualization()).thenReturn(new TestableVisualization());
+        doThrow(new RuntimeException("should not be called")).when(generator).generate(any());
         when(filesApi.fetchVisualizations(anyString(), any())).thenReturn(new Visualization[0]);
         Instant beforeCall = Instant.now();
-        VisualizationFetcher fetcher = new VisualizationFetcher(database.getSessionFactory(), filesApi, tmpFiles, generator);
+        VisualizationFetcher fetcher = new VisualizationFetcher(sessionFactoryFactory, filesApi, tmpFiles, generator, "viz-type");
 
         fetcher.fetchVisualizationData();
 
@@ -61,10 +68,11 @@ public class VisualizationFetcherTest {
     public void fetchVisualizationData_receivedOneViz() {
 
         final Visualization fetchedViz = createVisualization("some-id");
-        VisualizationGenerator generator = mock(VisualizationGenerator.class);
+        VisualizationGenerator<TestableVisualization> generator = mock(VisualizationGenerator.class);
+        when(generator.createVisualization()).thenReturn(new TestableVisualization());
         when(filesApi.fetchVisualizations(anyString(), any())).thenReturn(new Visualization[]{fetchedViz});
         Instant beforeCall = Instant.now();
-        VisualizationFetcher fetcher = new VisualizationFetcher(database.getSessionFactory(), filesApi, tmpFiles, generator);
+        VisualizationFetcher fetcher = new VisualizationFetcher(sessionFactoryFactory, filesApi, tmpFiles, generator, "viz-type");
 
         fetcher.fetchVisualizationData();
 
@@ -85,7 +93,7 @@ public class VisualizationFetcherTest {
             assertEquals(PersistentVisualization.Progress.Done, persistentVisualization.getProgress());
 
             // assert that 'generate' is called once with proper parameters
-            verify(generator, times(1)).generate(any(), any(), any());
+            verify(generator, times(1)).generate(any());
 
             // assert that all input files are removed and folder is deleted
             Path vizFolder = tmpFiles.resolve(fetchedViz.getId());
@@ -98,10 +106,11 @@ public class VisualizationFetcherTest {
 
         final Visualization fetchedViz = createVisualization("some-id");
         final Visualization otherFetchedViz = createVisualization("some-other-id");
-        VisualizationGenerator generator = mock(VisualizationGenerator.class);
+        VisualizationGenerator<TestableVisualization> generator = mock(VisualizationGenerator.class);
+        when(generator.createVisualization()).thenReturn(new TestableVisualization());
         when(filesApi.fetchVisualizations(anyString(), any())).thenReturn(new Visualization[]{fetchedViz, otherFetchedViz});
         Instant beforeCall = Instant.now();
-        VisualizationFetcher fetcher = new VisualizationFetcher(database.getSessionFactory(), filesApi, tmpFiles, generator);
+        VisualizationFetcher fetcher = new VisualizationFetcher(sessionFactoryFactory, filesApi, tmpFiles, generator, "viz-type");
 
         fetcher.fetchVisualizationData();
 
@@ -125,7 +134,7 @@ public class VisualizationFetcherTest {
             otherPersistentVisualization.getPermissions().forEach(permission -> assertNotNull(permission.getAgent()));
 
             // assert that 'generate' is called once with proper parameters
-            verify(generator, times(2)).generate(any(), any(), any());
+            verify(generator, times(2)).generate(any());
 
             // assert that all input files are removed and folder is deleted
             Path vizFolder = tmpFiles.resolve(fetchedViz.getId());
@@ -139,11 +148,11 @@ public class VisualizationFetcherTest {
     public void fetchVisualizationData_ReceivedOneViz_errorDuringProcess() {
 
         final Visualization fetchedViz = createVisualization("some-id");
-        VisualizationGenerator generator = (viz, input, params) -> {
-            throw new RuntimeException("Error");
-        };
+        VisualizationGenerator generator = mock(VisualizationGenerator.class);
+        when(generator.createVisualization()).thenReturn(new TestableVisualization());
+        doThrow(new RuntimeException("should not be called")).when(generator).generate(any());
         when(filesApi.fetchVisualizations(anyString(), any())).thenReturn(new Visualization[]{fetchedViz});
-        VisualizationFetcher fetcher = new VisualizationFetcher(database.getSessionFactory(), filesApi, tmpFiles, generator);
+        VisualizationFetcher fetcher = new VisualizationFetcher(sessionFactoryFactory, filesApi, tmpFiles, generator, "viz-type");
 
         fetcher.fetchVisualizationData();
 
@@ -166,12 +175,12 @@ public class VisualizationFetcherTest {
         FileEntry fileEntry = new FileEntry("some-filename.txt", "application/json", 0, fetchedViz.getProject());
         fileEntry.setId("file-entry-id");
         fetchedViz.getInputFiles().put("first", new VisualizationInput("first", fileEntry));
-        VisualizationGenerator generator = (viz, input, params) -> {
-            throw new RuntimeException("Error");
-        };
+        VisualizationGenerator generator = mock(VisualizationGenerator.class);
+        when(generator.createVisualization()).thenReturn(new TestableVisualization());
+        doThrow(new RuntimeException("should not be called")).when(generator).generate(any());
         when(filesApi.fetchVisualizations(anyString(), any())).thenReturn(new Visualization[]{fetchedViz});
         when(filesApi.downloadFile(anyString(), anyString())).thenThrow(new RuntimeException("some error while fetching files"));
-        VisualizationFetcher fetcher = new VisualizationFetcher(database.getSessionFactory(), filesApi, tmpFiles, generator);
+        VisualizationFetcher fetcher = new VisualizationFetcher(sessionFactoryFactory, filesApi, tmpFiles, generator, "viz-type");
 
         fetcher.fetchVisualizationData();
 
@@ -201,5 +210,10 @@ public class VisualizationFetcherTest {
         Visualization result = new Visualization(project, permissions, new HashMap<>(), new HashMap<>());
         result.setId(vizId);
         return result;
+    }
+
+    @Entity
+    private static class TestableVisualization extends PersistentVisualization {
+
     }
 }
