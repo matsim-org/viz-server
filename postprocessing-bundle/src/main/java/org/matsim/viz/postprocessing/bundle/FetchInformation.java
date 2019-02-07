@@ -17,5 +17,5 @@ import java.time.Instant;
 @NoArgsConstructor
 public class FetchInformation extends AbstractEntity {
 
-    Timestamp lastFetch = Timestamp.from(Instant.now());
+    Timestamp lastFetch = Timestamp.from(Instant.EPOCH);
 }

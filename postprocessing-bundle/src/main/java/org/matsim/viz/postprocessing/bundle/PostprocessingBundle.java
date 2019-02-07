@@ -11,6 +11,7 @@ import io.dropwizard.setup.Environment;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
+import org.eclipse.jetty.util.component.LifeCycle;
 import org.matsim.viz.clientAuth.OAuthAuthenticator;
 import org.matsim.viz.clientAuth.OAuthNoAuthFilter;
 import org.matsim.viz.filesApi.FilesApi;
@@ -24,6 +25,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.EnumSet;
 import java.util.Optional;
+import java.util.concurrent.Executors;
 
 import static java.util.Objects.requireNonNull;
 
@@ -47,6 +49,33 @@ public class PostprocessingBundle<T extends PostprocessingConfiguration> impleme
         registerCORSFilter(environment.servlets());
 
         log.info("register notification resource");
+
+        // trigger a visualization fetch, when component has started up. Most callbacks are not interesting for us.
+        environment.lifecycle().addLifeCycleListener(new LifeCycle.Listener() {
+            @Override
+            public void lifeCycleStarting(LifeCycle lifeCycle) {
+            }
+
+            @Override
+            public void lifeCycleStarted(LifeCycle lifeCycle) {
+                Executors.newSingleThreadExecutor().submit(fetcher::fetchVisualizationData);
+            }
+
+            @Override
+            public void lifeCycleFailure(LifeCycle lifeCycle, Throwable throwable) {
+
+            }
+
+            @Override
+            public void lifeCycleStopping(LifeCycle lifeCycle) {
+
+            }
+
+            @Override
+            public void lifeCycleStopped(LifeCycle lifeCycle) {
+
+            }
+        });
         environment.jersey().register(new NotificationResource(api, configuration.getOwnHostname(), fetcher));
     }
 

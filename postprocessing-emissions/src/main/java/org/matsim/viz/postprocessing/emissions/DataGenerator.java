@@ -35,7 +35,7 @@ public class DataGenerator implements VisualizationGenerator<Visualization> {
         session.getTransaction().commit();
 
         val network = NetworkUtils.createNetwork();
-        new MatsimNetworkReader(network).readFile(input.getInputFiles().get(NETWORK_KEY).toString());
+        new MatsimNetworkReader(network).readFile(input.getInputFiles().get(NETWORK_KEY).getPath().toString());
 
         val analyzer = new EmissionGridAnalyzer.Builder()
                 .withTimeBinSize(input.getVisualization().getTimeBinSize())
@@ -46,7 +46,7 @@ public class DataGenerator implements VisualizationGenerator<Visualization> {
                 .build();
 
         log.info("Start processing emissions. This may take some while.");
-        val json = analyzer.processToJsonString(input.getInputFiles().get(EVENTS_KEY).toString());
+        val json = analyzer.processToJsonString(input.getInputFiles().get(EVENTS_KEY).getPath().toString());
 
         log.info("Finished processing emissions. Write result to database");
 

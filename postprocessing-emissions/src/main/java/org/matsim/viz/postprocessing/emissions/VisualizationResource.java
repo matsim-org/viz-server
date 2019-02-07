@@ -4,6 +4,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import io.dropwizard.auth.Auth;
 import io.dropwizard.hibernate.UnitOfWork;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.java.Log;
 import lombok.val;
 import org.matsim.viz.error.ForbiddenException;
 import org.matsim.viz.error.InvalidInputException;
@@ -14,7 +15,10 @@ import javax.persistence.EntityManagerFactory;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 
+@Log
 @RequiredArgsConstructor
 @Path("{id}")
 public class VisualizationResource {
@@ -23,8 +27,10 @@ public class VisualizationResource {
 
     @GET
     @Path("/data")
+    @Produces(MediaType.APPLICATION_JSON)
     @UnitOfWork
     public String data(@Auth Agent agent, @PathParam("id") String vizId) {
+
         return findVisualization(agent, vizId).getData();
     }
 
@@ -42,7 +48,6 @@ public class VisualizationResource {
         if (visualization == null)
             throw new InvalidInputException("Could not find visualization with id: " + vizId);
         return visualization;
-
     }
 
     private boolean hasNoPermission(Agent agent, String vizId) {
