@@ -29,6 +29,11 @@
             <name>Java.net repository</name>
             <url>http://download.java.net/maven/2</url>
         </repository>
+        <repository>
+            <!-- For MATSim snapshots: -->
+            <id>ojo-snapshots</id>
+            <url>http://oss.jfrog.org/libs-snapshot</url>
+        </repository>
     </repositories>
 
     <artifactId>postprocessing-emissions</artifactId>
