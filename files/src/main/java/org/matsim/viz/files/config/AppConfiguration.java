@@ -3,6 +3,7 @@ package org.matsim.viz.files.config;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Configuration;
 import io.dropwizard.client.JerseyClientConfiguration;
+import io.dropwizard.db.DataSourceFactory;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,8 +20,8 @@ public class AppConfiguration extends Configuration {
     private String relyingPartyId = "relyingPartyId";
     private String relyingPartySecret = "secret";
     private JerseyClientConfiguration jerseyClient = new JerseyClientConfiguration();
-    @JsonProperty("database")
-    private DbConfigurationFactory databaseFactory = new H2DbConfigurationFactory();
+
+    private DataSourceFactory database = new DataSourceFactory();
     @JsonProperty("repository")
     private RepositoryFactory repositoryFactory = new LocalRepositoryFactory();
 }
