@@ -40,13 +40,19 @@ CREATE TABLE Tag(
   type VARCHAR(255) NOT NULL,
   project_id VARCHAR(255) NOT NULL,
   PRIMARY KEY (id)
-);
+)
+
+CHARACTER SET utf8,
+COLLATE utf8_general_ci;;
 
 create table FileEntry_Tag (
    FileEntry_id varchar(255) not null,
     tags_id varchar(255) not null,
     primary key (FileEntry_id, tags_id)
-);
+)
+
+CHARACTER SET utf8,
+COLLATE utf8_general_ci;;
 
 --
 -- Create FileEntry_Tag table required by the ManyToMany relation
