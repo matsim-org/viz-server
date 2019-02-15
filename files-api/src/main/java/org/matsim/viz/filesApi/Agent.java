@@ -10,7 +10,7 @@ import org.matsim.viz.database.AbstractEntity;
 @Getter
 public class Agent extends AbstractEntity {
 
-    private static final String publicPermissionId = "allUsers";
+    public static final String publicPermissionId = "allUsers";
     private static final Agent publicAgent = new Agent(publicPermissionId);
 
     private String authId;

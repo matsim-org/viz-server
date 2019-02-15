@@ -64,6 +64,7 @@ public class FilesApi {
         URI resource = UriBuilder.fromUri(endpoint).path("projects").path(projectId).path("files")
                 .path(fileId).build();
         Invocation.Builder builder = client.target(resource).request();
+        log.info("downloading file from: " + resource.toString());
         return authenticatedRequest(builder, request -> request.get(InputStream.class));
     }
 
