@@ -12,6 +12,7 @@ import io.dropwizard.jersey.setup.JerseyEnvironment;
 import io.dropwizard.jetty.setup.ServletEnvironment;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import lombok.extern.java.Log;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
 import org.flywaydb.core.Flyway;
 import org.matsim.viz.clientAuth.OAuthAuthenticator;
@@ -23,9 +24,7 @@ import org.matsim.viz.files.agent.AgentService;
 import org.matsim.viz.files.agent.UserDAO;
 import org.matsim.viz.files.config.AppConfiguration;
 import org.matsim.viz.files.entities.*;
-import org.matsim.viz.files.notifications.NotificationDAO;
-import org.matsim.viz.files.notifications.NotificationResource;
-import org.matsim.viz.files.notifications.Notifier;
+import org.matsim.viz.files.notifications.*;
 import org.matsim.viz.files.permission.PermissionDAO;
 import org.matsim.viz.files.permission.PermissionService;
 import org.matsim.viz.files.permission.SubjectFactory;
@@ -42,17 +41,19 @@ import javax.servlet.FilterRegistration;
 import javax.ws.rs.client.Client;
 import java.util.EnumSet;
 
+@Log
 public class App extends Application<AppConfiguration> {
 
     private HibernateBundle<AppConfiguration> hibernate = new HibernateBundle<AppConfiguration>(
             Agent.class, FileEntry.class, PendingFileTransfer.class, Permission.class, Project.class, PublicAgent.class,
             Resource.class, ServiceAgent.class, Tag.class, User.class, Visualization.class, VisualizationInput.class,
-            VisualizationParameter.class
+            VisualizationParameter.class, NotificationType.class, Subscription.class
     ) {
         @Override
         public PooledDataSourceFactory getDataSourceFactory(AppConfiguration appConfiguration) {
 
-            executeDatabaseMigration(appConfiguration);
+            log.warning("Database Migration is disabled until moving to another db");
+            // executeDatabaseMigration(appConfiguration);
             return appConfiguration.getDatabase();
         }
     };
@@ -71,6 +72,7 @@ public class App extends Application<AppConfiguration> {
         bootstrap.getObjectMapper().addMixIn(AbstractEntity.class, AbstractEntityMixin.class);
 
         bootstrap.addBundle(new MultiPartBundle());
+        bootstrap.addBundle(hibernate);
     }
 
     @Override
