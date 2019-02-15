@@ -15,7 +15,7 @@ import java.time.Instant;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-class Subscription extends AbstractEntity {
+public class Subscription extends AbstractEntity {
 
     @ManyToOne(optional = false)
     private NotificationType type;
