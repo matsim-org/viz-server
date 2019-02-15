@@ -1,13 +1,19 @@
 CREATE TABLE `Agent` (
   `id` varchar(255) NOT NULL,
   PRIMARY KEY (`id`)
-);
+)
+
+CHARACTER SET utf8,
+COLLATE utf8_general_ci;
 
 CREATE TABLE `FetchInformation` (
   `id` varchar(255) NOT NULL,
   `lastFetch` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-);
+)
+
+CHARACTER SET utf8,
+COLLATE utf8_general_ci;
 
 CREATE TABLE `Permission` (
   `id` varchar(255) NOT NULL,
@@ -16,7 +22,10 @@ CREATE TABLE `Permission` (
   PRIMARY KEY (`id`),
   KEY `FK605vcay96wytp55rjhwkwx8jt` (`agent_id`),
   CONSTRAINT `FK605vcay96wytp55rjhwkwx8jt` FOREIGN KEY (`agent_id`) REFERENCES `Agent` (`id`)
-);
+)
+
+CHARACTER SET utf8,
+COLLATE utf8_general_ci;
 
 CREATE TABLE `Visualization` (
   `id` varchar(255) NOT NULL,
@@ -26,4 +35,7 @@ CREATE TABLE `Visualization` (
   `smoothingRadius` double NOT NULL,
   `timeBinSize` double NOT NULL,
   PRIMARY KEY (`id`)
-);
+)
+
+CHARACTER SET utf8,
+COLLATE utf8_general_ci;
