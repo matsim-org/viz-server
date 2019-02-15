@@ -11,7 +11,6 @@ import io.dropwizard.jetty.setup.ServletEnvironment;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
-import org.flywaydb.core.Flyway;
 import org.matsim.viz.clientAuth.OAuthAuthenticator;
 import org.matsim.viz.clientAuth.OAuthNoAuthFilter;
 import org.matsim.viz.database.AbstractEntity;
@@ -21,7 +20,6 @@ import org.matsim.viz.error.CodedExceptionMapper;
 import org.matsim.viz.files.agent.AgentService;
 import org.matsim.viz.files.agent.UserDAO;
 import org.matsim.viz.files.config.AppConfiguration;
-import org.matsim.viz.files.config.H2DbConfigurationFactory;
 import org.matsim.viz.files.entities.Agent;
 import org.matsim.viz.files.notifications.NotificationDAO;
 import org.matsim.viz.files.notifications.NotificationResource;
@@ -80,7 +78,9 @@ public class App extends Application<AppConfiguration> {
 
         DbConfiguration dbConfiguration = configuration.getDatabaseFactory().createConfiguration();
 
-        if (!(configuration.getDatabaseFactory() instanceof H2DbConfigurationFactory)) {
+        logger.warn("Database migration is disabled!");
+
+      /*  if (!(configuration.getDatabaseFactory() instanceof H2DbConfigurationFactory)) {
             // execute schema migration with flyway before connecting to the database
             // if H2 in memory database is used, this is not necessary
             Flyway flyway = Flyway.configure().dataSource(
@@ -88,7 +88,7 @@ public class App extends Application<AppConfiguration> {
             ).load();
             flyway.migrate();
         }
-
+*/
         // create the actual connection to the database
         return new PersistenceUnit("org.matsim.viz.files", dbConfiguration);
     }
