@@ -20,8 +20,6 @@ public class AppConfiguration extends Configuration {
     private String relyingPartyId = "relyingPartyId";
     private String relyingPartySecret = "secret";
     private JerseyClientConfiguration jerseyClient = new JerseyClientConfiguration();
-    /*@JsonProperty("database")
-    private DbConfigurationFactory databaseFactory = new H2DbConfigurationFactory();*/
 
     private DataSourceFactory database = new DataSourceFactory();
     @JsonProperty("repository")
