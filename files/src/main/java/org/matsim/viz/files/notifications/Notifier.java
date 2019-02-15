@@ -5,6 +5,7 @@ import org.matsim.viz.error.InvalidInputException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.persistence.PersistenceException;
 import javax.persistence.RollbackException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
@@ -38,7 +39,7 @@ public class Notifier {
         return possibleTypes.stream().map(type -> {
             try {
                 return this.dao.persistType(type);
-            } catch (RollbackException e) {
+            } catch (PersistenceException e) {
                 return this.dao.findType(type.getName());
             }
         }).collect(Collectors.toList());
