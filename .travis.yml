@@ -3,7 +3,7 @@ sudo: required
 dist: trusty
 addons:
   ssh_known_hosts:
-    - viz.vsp.tu-berlin.de
+    - cnode00.vsp.tu-berlin.de
 
 script: mvn clean install -Dmaven.test.skip=true
 
