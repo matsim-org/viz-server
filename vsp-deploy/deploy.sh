@@ -16,4 +16,4 @@ scp -r auth/target/auth-1.0-SNAPSHOT.jar vizdeploy@cnode00.vsp.tu-berlin.de:/srv
 scp -r files/target/files-1.0-SNAPSHOT.jar vizdeploy@cnode00.vsp.tu-berlin.de:/srv/www/viz-files-$DOMAIN/app/
 # build new docker image 
 ssh vizdeploy@cnode00.vsp.tu-berlin.de "sudo -u dockerbuilder /home/vizdeploy/bin/build_viz-auth-$DOMAIN.sh"
-ssh vizdeploy@cnode00.vsp.tu-berlin.de "sudo -u dockerbuilder /home/vizdeploy/bin/build_viz-auth-$DOMAIN.sh"
+ssh vizdeploy@cnode00.vsp.tu-berlin.de "sudo -u dockerbuilder /home/vizdeploy/bin/build_viz-files-$DOMAIN.sh"
