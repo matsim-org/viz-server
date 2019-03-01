@@ -10,6 +10,12 @@ after_success:
 deploy:
   - on:
       branch: develop
+    provider: script
+    script: ./vsp-deploy/deploy.sh play
+    skip_cleanup: true
+
+  - on:
+      branch: develop
     skip_cleanup: true
     provider: elasticbeanstalk
     access_key_id: $BEANSTALK_KEY_ID
