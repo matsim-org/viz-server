@@ -16,7 +16,7 @@ deploy:
   - on:
       branch: develop
     provider: script
-    script: ./vsp-deploy/deploy.sh play
+    script: bash ./vsp-deploy/deploy.sh play
     skip_cleanup: true
 
 #  - on:
