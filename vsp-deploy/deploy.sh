@@ -13,4 +13,4 @@ ssh vizdeploy@cnode00.vsp.tu-berlin.de "rm -r /srv/www/$DOMAIN/app/*"
 # upload fresh built files
 scp -r dist/* vizdeploy@cnode00.vsp.tu-berlin.de:/srv/www/$DOMAIN/app/
 # build new docker image 
-ssh vizdeploy@cnode00.vsp.tu-berlin.de "sudo -u dockerbuilder /home/vizdeploy/bin/build_viz-auth-play.sh"
+ssh vizdeploy@cnode00.vsp.tu-berlin.de "sudo -u dockerbuilder /home/vizdeploy/bin/build_$DOMAIN.sh"
