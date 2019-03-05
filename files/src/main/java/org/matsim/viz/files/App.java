@@ -52,8 +52,8 @@ public class App extends Application<AppConfiguration> {
         @Override
         public PooledDataSourceFactory getDataSourceFactory(AppConfiguration appConfiguration) {
 
-            log.warning("Database Migration is disabled until moving to another db");
-            // executeDatabaseMigration(appConfiguration);
+			//log.warning("Database Migration is disabled until moving to another db");
+			executeDatabaseMigration(appConfiguration);
             return appConfiguration.getDatabase();
         }
     };
