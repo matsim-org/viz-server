@@ -2,6 +2,7 @@ package org.matsim.viz.frameAnimation.config;
 
 import io.dropwizard.Configuration;
 import io.dropwizard.client.JerseyClientConfiguration;
+import io.dropwizard.db.DataSourceFactory;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -26,4 +27,5 @@ public class AppConfiguration extends Configuration {
 
 
     private JerseyClientConfiguration jerseyClient = new JerseyClientConfiguration();
+    private DataSourceFactory database = new DataSourceFactory();
 }

@@ -1,36 +1,31 @@
 package org.matsim.viz.frameAnimation;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.dropwizard.Application;
 import io.dropwizard.auth.AuthDynamicFeature;
 import io.dropwizard.auth.AuthValueFactoryProvider;
 import io.dropwizard.client.JerseyClientBuilder;
+import io.dropwizard.db.PooledDataSourceFactory;
+import io.dropwizard.hibernate.HibernateBundle;
 import io.dropwizard.jersey.setup.JerseyEnvironment;
 import io.dropwizard.jetty.setup.ServletEnvironment;
+import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import lombok.val;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
-import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
-import org.glassfish.jersey.client.oauth2.OAuth2ClientSupport;
-import org.matsim.viz.clientAuth.ClientAuthentication;
-import org.matsim.viz.clientAuth.Credentials;
+import org.flywaydb.core.Flyway;
 import org.matsim.viz.clientAuth.OAuthAuthenticator;
 import org.matsim.viz.clientAuth.OAuthNoAuthFilter;
-import org.matsim.viz.database.AbstractEntity;
+import org.matsim.viz.filesApi.FilesApi;
 import org.matsim.viz.frameAnimation.communication.NotificationHandler;
-import org.matsim.viz.frameAnimation.communication.ServiceCommunication;
 import org.matsim.viz.frameAnimation.config.AppConfiguration;
-import org.matsim.viz.frameAnimation.data.DataController;
-import org.matsim.viz.frameAnimation.data.DataProvider;
-import org.matsim.viz.frameAnimation.entities.AbstractEntityMixin;
-import org.matsim.viz.frameAnimation.entities.Permission;
+import org.matsim.viz.frameAnimation.inputProcessing.VisualizationFetcher;
+import org.matsim.viz.frameAnimation.inputProcessing.VisualizationGeneratorFactory;
+import org.matsim.viz.frameAnimation.persistenceModel.*;
 import org.matsim.viz.frameAnimation.requestHandling.VisualizationResource;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
 import javax.ws.rs.client.Client;
-import javax.ws.rs.core.Feature;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -40,9 +35,25 @@ import java.util.Optional;
 
 public class App extends Application<AppConfiguration> {
 
+    private HibernateBundle<AppConfiguration> hibernate = new HibernateBundle<AppConfiguration>(
+            Agent.class, MatsimNetwork.class, Permission.class, Plan.class, Snapshot.class, Visualization.class, FetchInformation.class
+    ) {
+        @Override
+        public PooledDataSourceFactory getDataSourceFactory(AppConfiguration appConfiguration) {
+
+            // database migration must run before hibernate gets initialized
+            executeDatabaseMigration(appConfiguration);
+            return appConfiguration.getDatabase();
+        }
+    };
 
     public static void main(String[] args) throws Exception {
         new App().run(args);
+    }
+
+    @Override
+    public void initialize(Bootstrap<AppConfiguration> bootstrap) {
+        bootstrap.addBundle(hibernate);
     }
 
     @Override
@@ -51,12 +62,12 @@ public class App extends Application<AppConfiguration> {
         AppConfiguration.setInstance(configuration);
 
         createUploadDirectory(configuration);
-        createJerseyClient(configuration, environment);
-        registerAuthFilter(configuration, ServiceCommunication.getClient(), environment);
+        final Client client = createJerseyClient(configuration, environment);
+        final FilesApi api = createFilesApi(configuration, client);
+        final VisualizationFetcher fetcher = createVisualizationFetcher(configuration, api);
+        registerAuthFilter(configuration, client, environment);
         registerCORSFilter(environment.servlets());
-        registerEndpoints(environment.jersey(), configuration);
-
-        DataController.Instance.scheduleFetching();
+        registerEndpoints(environment.jersey(), configuration, fetcher, api);
     }
 
     private void createUploadDirectory(AppConfiguration config) throws IOException {
@@ -65,48 +76,59 @@ public class App extends Application<AppConfiguration> {
         Files.createDirectories(directory);
     }
 
-    private void createJerseyClient(AppConfiguration config, Environment environment) {
+    private void executeDatabaseMigration(AppConfiguration configuration) {
 
-        // register a new objectMapper for jersey client because we are using jsonIdentityInfo for serializing out
-        // object graph and the default object mapper by dropwizard does not support this.
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-        mapper.addMixIn(AbstractEntity.class, AbstractEntityMixin.class);
-        mapper.registerModule(new JavaTimeModule());
+        if (!configuration.getDatabase().getDriverClass().equals("org.h2.Driver")) {
+            // execute schema migration with flyway before connecting to the database
+            // if H2 in memory database is used, this is not necessary
+            Flyway flyway = Flyway.configure().dataSource(
+                    configuration.getDatabase().getUrl(),
+                    configuration.getDatabase().getUser(),
+                    configuration.getDatabase().getPassword()
+            ).load();
+            flyway.migrate();
+        }
+    }
 
-        final Client client = new JerseyClientBuilder(environment)
+    private Client createJerseyClient(AppConfiguration config, Environment environment) {
+
+        return new JerseyClientBuilder(environment)
                 .using(config.getJerseyClient())
-                .using(mapper)
+                .using(FilesApi.getObjectMapper())
                 .build("frame-animation");
+    }
 
-        // register basic auth support for retrieving access tokens
-        HttpAuthenticationFeature basicAuth = HttpAuthenticationFeature.basicBuilder().nonPreemptive().build();
-        client.register(basicAuth);
+    private FilesApi createFilesApi(AppConfiguration configuration, Client client) {
+        return new FilesApi.FilesApiBuilder()
+                .withClient(client)
+                .withFilesEndpoint(configuration.getFileServer())
+                .withRelyingPartyId(configuration.getRelyingPartyId())
+                .withRelyingPartySecret(configuration.getRelyingPartySecret())
+                .withTokenEndpoint(configuration.getTokenEndpoint())
+                .build();
+    }
 
-        ClientAuthentication authentication = new ClientAuthentication(client, config.getTokenEndpoint(),
-                "service-client", new Credentials(config.getRelyingPartyId(), config.getRelyingPartySecret()));
-        authentication.requestAccessToken();
-        ServiceCommunication.initialize(client, authentication);
+    private VisualizationFetcher createVisualizationFetcher(AppConfiguration configuration, FilesApi api) {
 
-        // register oauth support for retrieving data from file server
-        Feature oauthFeature = OAuth2ClientSupport.feature(null);
-        client.register(oauthFeature);
+        val factory = new VisualizationGeneratorFactory(api, hibernate.getSessionFactory(), Paths.get(configuration.getTmpFilePath()));
+        val fetcher = new VisualizationFetcher(api, factory, hibernate.getSessionFactory());
+        fetcher.scheduleFetching();
+        return fetcher;
     }
 
     private void registerAuthFilter(AppConfiguration configuration, Client client, Environment environment) {
 
-        // register oauth filters for request handling
-        final OAuthAuthenticator<Permission> authenticator = new OAuthAuthenticator<>(client, configuration.getIdProvider(),
-                result -> Optional.of(Permission.createFromAuthId(result.getSubjectId())));
+        final OAuthAuthenticator<Agent> authenticator1 = new OAuthAuthenticator<>(client, configuration.getIdProvider(),
+                result -> Optional.of(new Agent(result.getSubjectId())));
 
-        OAuthNoAuthFilter filter = new OAuthNoAuthFilter.Builder<Permission>()
-                .setNoAuthPrincipalProvider(() -> Optional.of(Permission.getPublicPermission()))
-                .setAuthenticator(authenticator)
+        OAuthNoAuthFilter filter = new OAuthNoAuthFilter.Builder<Agent>()
+                .setNoAuthPrincipalProvider(() -> Optional.of(new Agent(Agent.publicPermissionId)))
+                .setAuthenticator(authenticator1)
                 .setPrefix("Bearer")
                 .buildAuthFilter();
 
         environment.jersey().register(new AuthDynamicFeature(filter));
-        environment.jersey().register(new AuthValueFactoryProvider.Binder<>(Permission.class));
+        environment.jersey().register(new AuthValueFactoryProvider.Binder<>(Agent.class));
     }
 
     @SuppressWarnings("Duplicates")
@@ -122,9 +144,9 @@ public class App extends Application<AppConfiguration> {
         cors.setInitParameter(CrossOriginFilter.CHAIN_PREFLIGHT_PARAM, Boolean.FALSE.toString());
     }
 
-    private void registerEndpoints(JerseyEnvironment jersey, AppConfiguration configuration) {
+    private void registerEndpoints(JerseyEnvironment jersey, AppConfiguration configuration, VisualizationFetcher fetcher, FilesApi api) {
 
-        jersey.register(new VisualizationResource(DataProvider.Instance));
-        jersey.register(new NotificationHandler(DataController.Instance, DataProvider.Instance, configuration.getOwnHostname()));
+        jersey.register(new VisualizationResource(hibernate.getSessionFactory()));
+        jersey.register(new NotificationHandler(api, fetcher, configuration.getOwnHostname(), hibernate.getSessionFactory()));
     }
 }

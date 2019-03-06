@@ -13,7 +13,6 @@ CREATE TABLE Agent (
   PRIMARY KEY (id)
 )
 
-AVG_ROW_LENGTH = 8192,
 CHARACTER SET utf8,
 COLLATE utf8_general_ci;
 
@@ -159,7 +158,6 @@ CREATE TABLE VisualizationType (
   PRIMARY KEY (id)
 )
 
-AVG_ROW_LENGTH = 4096,
 CHARACTER SET utf8,
 COLLATE utf8_general_ci;
 
@@ -177,7 +175,6 @@ CREATE TABLE VisualizationType_requiredParamKeys (
   requiredParamKeys VARCHAR(255) DEFAULT NULL
 )
 
-AVG_ROW_LENGTH = 16384,
 CHARACTER SET utf8,
 COLLATE utf8_general_ci;
 
@@ -196,7 +193,6 @@ CREATE TABLE VisualizationType_requiredFileKeys (
   requiredFileKeys VARCHAR(255) DEFAULT NULL
 )
 
-AVG_ROW_LENGTH = 1820,
 CHARACTER SET utf8,
 COLLATE utf8_general_ci;
 

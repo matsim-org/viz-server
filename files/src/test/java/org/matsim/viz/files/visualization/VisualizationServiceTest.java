@@ -1,8 +1,9 @@
 package org.matsim.viz.files.visualization;
 
-import org.junit.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.matsim.viz.error.CodedException;
-import org.matsim.viz.error.Error;
 import org.matsim.viz.error.ForbiddenException;
 import org.matsim.viz.files.entities.*;
 import org.matsim.viz.files.notifications.Notifier;
@@ -12,6 +13,7 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static junit.framework.TestCase.*;
 import static org.mockito.Mockito.mock;
@@ -22,17 +24,6 @@ public class VisualizationServiceTest {
     private static String typeKey = "test-key";
     private static VisualizationDAO visualizationDAO = new VisualizationDAO(TestUtils.getPersistenceUnit());
     private VisualizationService testObject;
-
-    @BeforeClass
-    public static void setUpFixture() {
-        VisualizationType type = new VisualizationType(typeKey, false, null, null, null);
-        visualizationDAO.persistType(type);
-    }
-
-    @AfterClass
-    public static void tearDownFixture() {
-        visualizationDAO.removeType(typeKey);
-    }
 
     @Before
     public void setUp() {
@@ -49,35 +40,13 @@ public class VisualizationServiceTest {
         TestUtils.removeAllEntities();
     }
 
-    @Test
-    public void createVisualizationFromRequest_invalidType_exception() {
-
-        Project project = TestUtils.persistProjectWithCreator("some-project");
-
-        Map<String, String> input = new HashMap<>();
-        Map<String, String> parameters = new HashMap<>();
-        parameters.put("some", "parameter");
-
-        CreateVisualizationRequest request = new CreateVisualizationRequest(
-                project.getId(),
-                "invalid-type",
-                input,
-                parameters);
-
-        try {
-            testObject.createVisualizationFromRequest(request, project.getCreator());
-            fail("invalid viz type should cause exception");
-        } catch (CodedException e) {
-            assertEquals(Error.INVALID_REQUEST, e.getInternalErrorCode());
-        }
-    }
 
     @Test
     public void createVisualizationFromRequest_visualization() throws CodedException {
 
         Project project = TestUtils.persistProjectWithCreator("some-project");
-        project = TestUtils.addFileEntry(project);
-        project = TestUtils.addFileEntry(project);
+        project = TestUtils.addFileEntry(project, "some-file.txt");
+        project = TestUtils.addFileEntry(project, "some-other-file.txt");
 
         Map<String, String> input = new HashMap<>();
         input.put("network", project.getFiles().iterator().next().getId());
@@ -95,7 +64,7 @@ public class VisualizationServiceTest {
         assertNotNull(viz.getId());
         assertEquals(1, viz.getInputFiles().size());
         assertEquals(1, viz.getParameters().size());
-        assertEquals(request.getTypeKey(), viz.getType().getTypeName());
+        assertEquals(request.getTypeKey(), viz.getType());
         Project finalProject = project;
         assertTrue(viz.getPermissions().stream().anyMatch(p -> p.getAgent().equals(finalProject.getCreator())));
 
@@ -112,8 +81,8 @@ public class VisualizationServiceTest {
     public void createVisualizationFromRequest_sameInputTwice_correctPermissions() {
 
         Project project = TestUtils.persistProjectWithCreator("some-project");
-        project = TestUtils.addFileEntry(project);
-        project = TestUtils.addFileEntry(project);
+        project = TestUtils.addFileEntry(project, "some-file.txt");
+        project = TestUtils.addFileEntry(project, "some-other-file.abc");
 
         FileEntry[] entries = project.getFiles().toArray(new FileEntry[0]);
         Map<String, String> input = new HashMap<>();
@@ -133,7 +102,7 @@ public class VisualizationServiceTest {
         assertNotNull(viz.getId());
         assertEquals(2, viz.getInputFiles().size());
         assertEquals(1, viz.getParameters().size());
-        assertEquals(request.getTypeKey(), viz.getType().getTypeName());
+        assertEquals(request.getTypeKey(), viz.getType());
 
         Project finalProject = project;
         assertTrue(viz.getPermissions().stream().anyMatch(p -> p.getAgent().equals(finalProject.getCreator())));
@@ -156,7 +125,7 @@ public class VisualizationServiceTest {
         Project project = TestUtils.persistProjectWithCreator("bla");
 
         Visualization viz = new Visualization();
-        viz.setType(visualizationDAO.findType(typeKey));
+        viz.setType(typeKey);
         project.addVisualization(viz);
         project = TestUtils.getProjectDAO().persist(project);
         viz = project.getVisualizations().iterator().next();
@@ -176,14 +145,15 @@ public class VisualizationServiceTest {
         Project project = TestUtils.persistProjectWithCreator("bla");
 
         Visualization viz = new Visualization();
-        viz.setType(visualizationDAO.findType(typeKey));
+        viz.setType(typeKey);
         project.addVisualization(viz);
         project = TestUtils.getProjectDAO().persist(project);
         viz = project.getVisualizations().iterator().next();
 
         Visualization result = testObject.find(viz.getId(), project.getCreator());
 
-        assertEquals(viz.getType().getTypeName(), result.getType().getTypeName());
+        assertEquals(viz.getType(), result.getType());
+        assertEquals(viz, result);
     }
 
     @Test(expected = ForbiddenException.class)
@@ -191,7 +161,7 @@ public class VisualizationServiceTest {
         Project project = TestUtils.persistProjectWithCreator("bla");
 
         Visualization viz = new Visualization();
-        viz.setType(visualizationDAO.findType(typeKey));
+        viz.setType(typeKey);
         project.addVisualization(viz);
         project = TestUtils.getProjectDAO().persist(project);
         viz = project.getVisualizations().iterator().next();
@@ -215,10 +185,13 @@ public class VisualizationServiceTest {
     @Test
     public void findByType_noSuchType_emtpyList() {
 
-        User user = TestUtils.persistUser("id");
-        String type = "some-type";
+        Project project = TestUtils.persistProjectWithCreator("bla");
+        Visualization viz = new Visualization();
+        viz.setType(typeKey);
+        project.addVisualization(viz);
+        TestUtils.getProjectDAO().persist(project);
 
-        List<Visualization> result = testObject.findByType(type, Instant.EPOCH, user);
+        List<Visualization> result = testObject.findByType("no-such-type", Instant.EPOCH, project.getCreator());
 
         assertEquals(0, result.size());
     }
@@ -226,13 +199,15 @@ public class VisualizationServiceTest {
     @Test
     public void findByType_agentDoesNotHavePermissionForViz_emtpyList() {
 
-        VisualizationType type = new VisualizationType();
-        type.setTypeName("key");
-        testObject.persistType(type);
+        Project project = TestUtils.persistProjectWithCreator("bla");
+        Visualization viz = new Visualization();
+        viz.setType(typeKey);
+        project.addVisualization(viz);
+        TestUtils.getProjectDAO().persist(project);
 
         User user = TestUtils.persistUser("id");
 
-        List<Visualization> result = testObject.findByType(type.getTypeName(), Instant.EPOCH, user);
+        List<Visualization> result = testObject.findByType(typeKey, Instant.EPOCH, user);
 
         assertEquals(0, result.size());
     }
@@ -258,7 +233,7 @@ public class VisualizationServiceTest {
         Project project = TestUtils.persistProjectWithCreator("first project");
 
         CreateVisualizationRequest create = new CreateVisualizationRequest(project.getId(), typeKey, new HashMap<>(), new HashMap<>());
-        Visualization viz = testObject.createVisualizationFromRequest(create, project.getCreator());
+        testObject.createVisualizationFromRequest(create, project.getCreator());
 
         Instant afterFirst = Instant.now();
         Thread.sleep(100);
@@ -271,5 +246,39 @@ public class VisualizationServiceTest {
         assertEquals(1, result.size());
         Visualization resultViz = result.get(0);
         assertEquals(secondViz, resultViz);
+    }
+
+    @Test
+    public void findAllForProject_listOfVisualizations() {
+
+        Project project = TestUtils.persistProjectWithCreator("first-project");
+        project = TestUtils.addFileEntry(project, "some-file.txt");
+        project = addVisualization(project, project.getFiles().iterator().next(), "some-key");
+
+        Project otherProject = new Project();
+        otherProject.setName("second-project");
+        otherProject.setCreator(project.getCreator());
+        otherProject = TestUtils.getProjectDAO().persist(otherProject);
+        otherProject = TestUtils.addFileEntry(otherProject, "some-other-file.txt");
+        otherProject = addVisualization(otherProject, otherProject.getFiles().iterator().next(), "other-key");
+
+        List<Visualization> result = testObject.findAllForProject(project.getId(), project.getCreator());
+
+        assertEquals(project.getVisualizations().size(), result.size());
+        final Set<Visualization> projectVisualizations = project.getVisualizations();
+        result.forEach(viz -> assertTrue(projectVisualizations.stream().anyMatch(projectViz -> projectViz.equals(viz))));
+
+        final Set<Visualization> otherProjectVisualizations = otherProject.getVisualizations();
+        result.forEach(viz -> assertTrue(otherProjectVisualizations.stream().noneMatch(projectViz -> projectViz.equals(viz))));
+    }
+
+    private Project addVisualization(Project project, FileEntry entry, String inputKey) {
+        Visualization visualization = new Visualization();
+        VisualizationInput input = new VisualizationInput();
+        input.setFileEntry(entry);
+        input.setInputKey(inputKey);
+        visualization.addInput(input);
+        project.addVisualization(visualization);
+        return TestUtils.getProjectDAO().persist(project);
     }
 }

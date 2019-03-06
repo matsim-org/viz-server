@@ -12,4 +12,5 @@ public class FileUpload {
     private String fileName;
     private String contentType;
     private InputStream file;
+    private String[] tagIds;
 }

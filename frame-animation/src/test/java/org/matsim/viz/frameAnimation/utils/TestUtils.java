@@ -1,15 +1,19 @@
 package org.matsim.viz.frameAnimation.utils;
 
+import lombok.val;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.api.core.v01.population.Population;
+import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
+import org.matsim.core.population.io.PopulationReader;
+import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.vis.snapshotwriters.AgentSnapshotInfo;
 import org.matsim.vis.snapshotwriters.AgentSnapshotInfoFactory;
 import org.matsim.vis.snapshotwriters.SnapshotLinkWidthCalculator;
 import org.matsim.viz.frameAnimation.config.AppConfiguration;
-import org.matsim.viz.frameAnimation.data.SimulationData;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -17,22 +21,27 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TestUtils {
-    public static final String NETWORK_FILE = "src/test/data/test-network.xml";
-    public static final String EVENTS_FILE = "src/test/data/test-events-100.xml.gz";
-    public static final String POPULATION_FILE = "src/test/data/test-plans-100.xml";
+    public static final String NETWORK_FILE = "test-network.xml";
+    public static final String EVENTS_FILE = "test-events-100.xml.gz";
+    public static final String POPULATION_FILE = "test-plans-100.xml";
 
-    private static SimulationData simulationData;
+    public static final String NETWORK_FILE_PATH = "src/test/data/test-network.xml";
+    public static final String EVENTS_FILE_PATH = "src/test/data/test-events-100.xml.gz";
+    public static final String POPULATION_FILE_PATH = "src/test/data/test-plans-100.xml";
 
-    public static SimulationData getSimulationData() {
-        if (simulationData == null)
-            simulationData = new SimulationData(NETWORK_FILE, EVENTS_FILE, POPULATION_FILE, 4);
-        return simulationData;
-    }
     public static Network loadTestNetwork() {
         Network network = NetworkUtils.createNetwork();
         MatsimNetworkReader reader = new MatsimNetworkReader(network);
-        reader.readFile(NETWORK_FILE);
+        reader.readFile(NETWORK_FILE_PATH);
         return network;
+    }
+
+    public static Population loadTestPopulation(Network network) {
+        val scenario = ScenarioUtils.createMutableScenario(ConfigUtils.createConfig());
+        scenario.setNetwork(network);
+        val reader = new PopulationReader(scenario);
+        reader.readFile(POPULATION_FILE_PATH);
+        return scenario.getPopulation();
     }
 
     public static List<AgentSnapshotInfo> createAgentSnapshotInfos(int numberOfInfos) {

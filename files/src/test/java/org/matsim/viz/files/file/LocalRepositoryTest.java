@@ -2,6 +2,7 @@ package org.matsim.viz.files.file;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.*;
 import org.matsim.viz.files.entities.FileEntry;
 import org.matsim.viz.files.util.TestUtils;
@@ -63,8 +64,9 @@ public class LocalRepositoryTest {
 
         final String filename = "file.name";
         final String contentType = "content-type";
+        final String tagsString = "first-tag.second-tag";
         InputStream inputStream = mock(InputStream.class);
-        FileUpload upload = new FileUpload(filename, contentType, inputStream);
+        FileUpload upload = new FileUpload(filename, contentType, inputStream, tagsString.split("\\."));
 
         FileEntry entry = testObject.addFile(upload);
 
@@ -75,6 +77,8 @@ public class LocalRepositoryTest {
         assertEquals(FilenameUtils.getExtension(filename), FilenameUtils.getExtension(entry.getPersistedFileName()));
         assertEquals(contentType, entry.getContentType());
         assertEquals(0, entry.getSizeInBytes());
+        assertEquals(2, entry.getTags().size());
+        assertTrue(StringUtils.isNotBlank(entry.getTagSummary()));
     }
 
     @Test
@@ -82,8 +86,8 @@ public class LocalRepositoryTest {
 
         InputStream inputStream = mock(InputStream.class);
         List<FileUpload> uploads = new ArrayList<>();
-        uploads.add(new FileUpload("name", "type", inputStream));
-        uploads.add(new FileUpload("other", "type", inputStream));
+        uploads.add(new FileUpload("name", "type", inputStream, new String[]{"some-tag"}));
+        uploads.add(new FileUpload("other", "type", inputStream, new String[]{"some-tag"}));
 
         List<FileEntry> entries = testObject.addFiles(uploads);
 

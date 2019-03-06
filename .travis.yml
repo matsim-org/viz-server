@@ -1,48 +1,26 @@
 language: java
 sudo: required
 dist: trusty
+addons:
+  ssh_known_hosts:
+    - cnode00.vsp.tu-berlin.de
 
-after_success:
-  - bash ./aws-deploy/create-aws-bundle.sh auth 1.0-SNAPSHOT
-  - bash ./aws-deploy/create-aws-bundle.sh files 1.0-SNAPSHOT
-  - bash ./aws-deploy/create-aws-bundle.sh frame-animation 1.0-SNAPSHOT
+script: mvn clean install
 
 deploy:
   - on:
       branch: develop
+    provider: script
+    script: bash ./vsp-deploy/deploy.sh -play
     skip_cleanup: true
-    provider: elasticbeanstalk
-    access_key_id: $BEANSTALK_KEY_ID
-    secret_access_key:
-      secure: $BEANSTALK_KEY
-    region: eu-central-1
-    env: auth
-    app: matsim-viz-server
-    zip_file: ./auth/target/aws-bundle.zip
-    bucket_name: elasticbeanstalk-eu-central-1-760858299633
-
   - on:
-      branch: develop
+      branch: master
+    provider: script
+    script: bash ./vsp-deploy/deploy.sh -dev
     skip_cleanup: true
-    provider: elasticbeanstalk
-    access_key_id: $BEANSTALK_KEY_ID
-    secret_access_key:
-      secure: $BEANSTALK_KEY
-    region: eu-central-1
-    env: files
-    app: matsim-viz-server
-    zip_file: ./files/target/aws-bundle.zip
-    bucket_name: elasticbeanstalk-eu-central-1-760858299633
-
   - on:
-      branch: develop
-    skip_cleanup: true
-    provider: elasticbeanstalk
-    access_key_id: $BEANSTALK_KEY_ID
-    secret_access_key:
-      secure: $BEANSTALK_KEY
-    region: eu-central-1
-    env: frame-animation
-    app: matsim-viz-server
-    zip_file: ./frame-animation/target/aws-bundle.zip
-    bucket_name: elasticbeanstalk-eu-central-1-760858299633
+      branch: stable
+    provider: script
+    # this is the default domain and doesn't require a domain param
+    script: bash ./vsp-deploy/deploy.sh
+    skip_cleanup: false

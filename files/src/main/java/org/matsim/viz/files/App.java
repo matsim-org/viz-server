@@ -5,28 +5,26 @@ import io.dropwizard.Application;
 import io.dropwizard.auth.AuthDynamicFeature;
 import io.dropwizard.auth.AuthValueFactoryProvider;
 import io.dropwizard.client.JerseyClientBuilder;
+import io.dropwizard.db.PooledDataSourceFactory;
 import io.dropwizard.forms.MultiPartBundle;
+import io.dropwizard.hibernate.HibernateBundle;
 import io.dropwizard.jersey.setup.JerseyEnvironment;
 import io.dropwizard.jetty.setup.ServletEnvironment;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import lombok.extern.java.Log;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
 import org.flywaydb.core.Flyway;
 import org.matsim.viz.clientAuth.OAuthAuthenticator;
 import org.matsim.viz.clientAuth.OAuthNoAuthFilter;
 import org.matsim.viz.database.AbstractEntity;
-import org.matsim.viz.database.DbConfiguration;
 import org.matsim.viz.database.PersistenceUnit;
 import org.matsim.viz.error.CodedExceptionMapper;
 import org.matsim.viz.files.agent.AgentService;
 import org.matsim.viz.files.agent.UserDAO;
 import org.matsim.viz.files.config.AppConfiguration;
-import org.matsim.viz.files.config.H2DbConfigurationFactory;
-import org.matsim.viz.files.entities.Agent;
-import org.matsim.viz.files.entities.VisualizationType;
-import org.matsim.viz.files.notifications.NotificationDAO;
-import org.matsim.viz.files.notifications.NotificationResource;
-import org.matsim.viz.files.notifications.Notifier;
+import org.matsim.viz.files.entities.*;
+import org.matsim.viz.files.notifications.*;
 import org.matsim.viz.files.permission.PermissionDAO;
 import org.matsim.viz.files.permission.PermissionService;
 import org.matsim.viz.files.permission.SubjectFactory;
@@ -37,18 +35,28 @@ import org.matsim.viz.files.serialization.AbstractEntityMixin;
 import org.matsim.viz.files.visualization.VisualizationDAO;
 import org.matsim.viz.files.visualization.VisualizationResource;
 import org.matsim.viz.files.visualization.VisualizationService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import javax.persistence.RollbackException;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
 import javax.ws.rs.client.Client;
 import java.util.EnumSet;
 
+@Log
 public class App extends Application<AppConfiguration> {
 
-    private Logger logger = LoggerFactory.getLogger(App.class);
+    private HibernateBundle<AppConfiguration> hibernate = new HibernateBundle<AppConfiguration>(
+            Agent.class, FileEntry.class, PendingFileTransfer.class, Permission.class, Project.class, PublicAgent.class,
+            Resource.class, ServiceAgent.class, Tag.class, User.class, Visualization.class, VisualizationInput.class,
+            VisualizationParameter.class, NotificationType.class, Subscription.class
+    ) {
+        @Override
+        public PooledDataSourceFactory getDataSourceFactory(AppConfiguration appConfiguration) {
+
+			//log.warning("Database Migration is disabled until moving to another db");
+			executeDatabaseMigration(appConfiguration);
+            return appConfiguration.getDatabase();
+        }
+    };
 
     private AgentService agentService;
 
@@ -64,6 +72,7 @@ public class App extends Application<AppConfiguration> {
         bootstrap.getObjectMapper().addMixIn(AbstractEntity.class, AbstractEntityMixin.class);
 
         bootstrap.addBundle(new MultiPartBundle());
+        bootstrap.addBundle(hibernate);
     }
 
     @Override
@@ -71,27 +80,25 @@ public class App extends Application<AppConfiguration> {
 
         AppConfiguration.setInstance(configuration);
 
-        PersistenceUnit persistenceUnit = establishDatabaseConnection(configuration);
+        PersistenceUnit persistenceUnit = new PersistenceUnit(hibernate.getSessionFactory());
         registerEndpoints(environment, configuration, persistenceUnit);
         registerOAuth(configuration, environment);
         registerExceptionMappers(environment.jersey());
         registerCORSFilter(environment.servlets());
     }
 
-    private PersistenceUnit establishDatabaseConnection(AppConfiguration configuration) {
+    private void executeDatabaseMigration(AppConfiguration configuration) {
 
-        DbConfiguration dbConfiguration = configuration.getDatabaseFactory().createConfiguration();
-
-        if (!(configuration.getDatabaseFactory() instanceof H2DbConfigurationFactory)) {
+        if (!configuration.getDatabase().getDriverClass().equals("org.h2.Driver")) {
             // execute schema migration with flyway before connecting to the database
             // if H2 in memory database is used, this is not necessary
-            Flyway flyway = new Flyway();
-            flyway.setDataSource(dbConfiguration.getJdbcUrl(), dbConfiguration.getUser(), dbConfiguration.getPassword());
+            Flyway flyway = Flyway.configure().dataSource(
+                    configuration.getDatabase().getUrl(),
+                    configuration.getDatabase().getUser(),
+                    configuration.getDatabase().getPassword()
+            ).load();
             flyway.migrate();
         }
-
-        // create the actual connection to the database
-        return new PersistenceUnit("org.matsim.viz.files", dbConfiguration);
     }
 
     private void registerOAuth(AppConfiguration config, Environment environment) {
@@ -124,7 +131,7 @@ public class App extends Application<AppConfiguration> {
 
         final FilterRegistration.Dynamic cors = servlet.addFilter("CORS", CrossOriginFilter.class);
         cors.setInitParameter(CrossOriginFilter.ALLOWED_ORIGINS_PARAM, "*");
-        cors.setInitParameter(CrossOriginFilter.ALLOWED_METHODS_PARAM, "GET, POST, PUT, OPTIONS, DELETE");
+        cors.setInitParameter(CrossOriginFilter.ALLOWED_METHODS_PARAM, "GET, POST, PUT, OPTIONS, DELETE, PATCH");
         cors.setInitParameter(CrossOriginFilter.ALLOWED_HEADERS_PARAM, "Authorization, Content-Type");
         cors.setInitParameter(CrossOriginFilter.ALLOW_CREDENTIALS_PARAM, "true");
 
@@ -149,18 +156,5 @@ public class App extends Application<AppConfiguration> {
         environment.jersey().register(new ProjectResource(projectService, visualizationService, agentService));
         environment.jersey().register(new VisualizationResource(visualizationService));
         environment.jersey().register(new NotificationResource(notifier));
-
-        this.loadVizTypes(visualizationService, configuration);
-    }
-
-    private void loadVizTypes(VisualizationService visualizationService, AppConfiguration config) {
-        for (VisualizationType type : config.getVizTypes()) {
-            logger.info("persisting viz type: " + type.getTypeName());
-            try {
-                visualizationService.persistType(type);
-            } catch (RollbackException e) {
-                logger.info("viz type: " + type.getTypeName() + " already exists");
-            }
-        }
     }
 }

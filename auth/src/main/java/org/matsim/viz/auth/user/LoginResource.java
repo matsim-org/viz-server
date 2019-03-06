@@ -43,7 +43,7 @@ public class LoginResource {
         //creates cookie which is always sent to any auth server route, never expires, is secure, is http only.
         NewCookie cookie = new NewCookie(
                 "login", idToken.getTokenValue(), "/", "", "no-comment",
-                -1, false, true
+                -1, true, true
         );
 
         return Response.seeOther(URI.create("/authorize/from-login")).cookie(cookie).build();

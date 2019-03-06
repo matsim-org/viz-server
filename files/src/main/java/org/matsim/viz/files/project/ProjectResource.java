@@ -8,10 +8,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 import org.matsim.viz.error.InvalidInputException;
 import org.matsim.viz.error.UnauthorizedException;
 import org.matsim.viz.files.agent.AgentService;
-import org.matsim.viz.files.entities.Agent;
-import org.matsim.viz.files.entities.Permission;
-import org.matsim.viz.files.entities.Project;
-import org.matsim.viz.files.entities.User;
+import org.matsim.viz.files.entities.*;
 import org.matsim.viz.files.file.FileResource;
 import org.matsim.viz.files.visualization.ProjectVisualizationResource;
 import org.matsim.viz.files.visualization.VisualizationService;
@@ -35,7 +32,7 @@ public class ProjectResource {
     @POST
     public Project createProject(
             @Auth Agent subject,
-            @NotNull @Valid CreateProject request) {
+            @NotNull @Valid ProjectProperties request) {
 
         if (!(subject instanceof User))
             throw new UnauthorizedException("Only real people can create Projects");
@@ -48,6 +45,13 @@ public class ProjectResource {
     public Response removeProject(@Auth Agent subject, @NotNull @PathParam("id") String id) {
 
         projectService.removeProject(id, subject);
+        return Response.status(Response.Status.NO_CONTENT).build();
+    }
+
+    @PATCH
+    @Path("/{id}")
+    public Response patchProject(@Auth Agent subject, @PathParam("id") String id, @Valid ProjectProperties props) {
+        projectService.patchProject(id, props.getName(), subject);
         return Response.status(Response.Status.NO_CONTENT).build();
     }
 
@@ -69,35 +73,47 @@ public class ProjectResource {
 
     @Path("{id}/visualizations")
     public ProjectVisualizationResource visualizations(@PathParam("id") String projectId) {
-        return new ProjectVisualizationResource(visualizationService);
+        return new ProjectVisualizationResource(visualizationService, projectId);
     }
 
     @Path("{id}/permissions")
     @POST
-    public Project addPermission(@Auth Agent subject, @Valid AddPermissionRequest request) {
+    public Permission addPermission(@Auth Agent subject, @Valid AddPermissionRequest request) {
 
-        User user = agentService.findByIdentityProviderId(request.getUserAuthId());
-        if (user == null)
+        Agent agent = agentService.findAgentByIdentityProviderId(request.getUserAuthId());
+        if (agent == null)
             throw new InvalidInputException("could not find user");
 
-        return projectService.addPermission(request.getResourceId(), user, request.getType(), subject);
+        return projectService.addPermission(request.getResourceId(), agent, request.getType(), subject);
     }
 
     @Path("{id}/permissions")
     @DELETE
-    public Project removePermission(@Auth Agent subject, @QueryParam("userAuthId") String userId, @QueryParam("projectId") String forProject) {
+    public Project removePermission(@Auth Agent subject, @QueryParam("userAuthId") String userId, @PathParam("id") String forProject) {
 
-        User forUser = agentService.findByIdentityProviderId(userId);
-        if (forUser == null) {
+        Agent forAgent = agentService.findAgentByIdentityProviderId(userId);
+        if (forAgent == null) {
             throw new InvalidInputException("could not find user");
         }
-        return projectService.removePermission(forProject, forUser, subject);
+        return projectService.removePermission(forProject, forAgent, subject);
+    }
+
+    @Path("{id}/tags")
+    @POST
+    public Tag addTag(@Auth Agent subject, @PathParam("id") String projectId, @Valid AddTagRequest request) {
+        return projectService.addTag(projectId, request.name, request.type, subject);
+    }
+
+    @Path("{id}/tags/{tagId}")
+    @DELETE
+    public Project removeTag(@Auth Agent subject, @PathParam("id") String projectId, @PathParam("tagId") @NotEmpty String tagId) {
+        return projectService.removeTag(projectId, tagId, subject);
     }
 
     @Getter
     @AllArgsConstructor
     @NoArgsConstructor
-    static class CreateProject {
+    static class ProjectProperties {
 
         @NotEmpty
         private String name;
@@ -114,5 +130,17 @@ public class ProjectResource {
         private String userAuthId;
         @NotNull
         private Permission.Type type;
+    }
+
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Getter
+    private static class AddTagRequest {
+
+        @NotEmpty
+        private String name;
+
+        @NotEmpty
+        private String type;
     }
 }

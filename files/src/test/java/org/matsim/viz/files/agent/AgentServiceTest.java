@@ -54,7 +54,7 @@ public class AgentServiceTest {
 
         User user = TestUtils.persistUser("some-id");
 
-        User result = testObject.findByIdentityProviderId(user.getAuthId());
+        User result = testObject.findUserByIdentityProviderId(user.getAuthId());
 
         assertEquals(user, result);
     }

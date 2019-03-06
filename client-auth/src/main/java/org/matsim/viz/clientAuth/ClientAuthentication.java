@@ -39,4 +39,8 @@ public class ClientAuthentication {
             logger.error("Could not retrieve access token.", e);
         }
     }
+
+    public boolean hasAccessToken() {
+        return accessToken != null && !accessToken.isEmpty();
+    }
 }

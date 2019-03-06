@@ -54,6 +54,7 @@ public class ProjectDAO extends DAO {
                 .leftJoin(project.files, fileEntry).fetchJoin()
                 .leftJoin(project.visualizations, visualization).fetchJoin()
                 .leftJoin(project.permissions).fetchJoin()
+                .leftJoin(project.tags).fetchJoin()
                 .fetchOne());
     }
 
@@ -82,6 +83,7 @@ public class ProjectDAO extends DAO {
         QProject project = QProject.project;
         QFileEntry fileEntry = QFileEntry.fileEntry;
         QVisualization visualization = QVisualization.visualization;
+        QTag tag = QTag.tag;
         QPermission permission = QPermission.permission;
 
         return database.executeQuery(query -> query.selectFrom(project)
@@ -90,6 +92,7 @@ public class ProjectDAO extends DAO {
                 .leftJoin(fileEntry.permissions, permission).fetchJoin()
                 .leftJoin(project.visualizations, visualization).fetchJoin()
                 .leftJoin(visualization.permissions, permission).fetchJoin()
+                .leftJoin(project.tags, tag).fetchJoin()
                 .leftJoin(project.permissions).fetchJoin()
                 .fetchOne());
     }

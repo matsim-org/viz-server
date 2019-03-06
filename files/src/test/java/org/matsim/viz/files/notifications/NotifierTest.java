@@ -53,6 +53,27 @@ public class NotifierTest {
     }
 
     @Test
+    public void createNotificationTypes_sameTypeTwice_resultsInSameTypeEntity() {
+
+        List<NotificationType> types = new ArrayList<>();
+        types.add(new NotificationType("some"));
+        types.add(new NotificationType("type"));
+
+        List<NotificationType> persisted = testObject.createNotificationTypes(types);
+        List<NotificationType> secondAttempt = testObject.createNotificationTypes(types);
+
+        assertEquals(persisted.size(), secondAttempt.size());
+
+        // each type name may exist only once
+        // though the createType method yields an already created type entity instead of an exception
+        // if a duplicate name is supplied
+        persisted.forEach(type -> {
+            @SuppressWarnings("OptionalGetWithoutIsPresent") NotificationType secondType = secondAttempt.stream().filter(t -> t.getName().equals(type.getName())).findFirst().get();
+            assertEquals(type, secondType);
+        });
+    }
+
+    @Test
     public void createSubscription_alreadySubscribed_newExpiryDate() throws InterruptedException {
 
         final String type = "first";

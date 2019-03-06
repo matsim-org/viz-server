@@ -38,35 +38,20 @@ public class VisualizationService {
         this.notifier = notifier;
         this.createNotificationTypes();
     }
-    public VisualizationType persistType(VisualizationType type) {
-        return visualizationDAO.persistType(type);
-    }
-
-    List<VisualizationType> findAllTypes() {
-        return visualizationDAO.findAllTypes();
-    }
 
     private static void validate(Visualization viz) throws CodedException {
         if (viz == null) throw new InvalidInputException("could not find visualization");
-    }
-
-    private VisualizationType findOrThrow(String visualizationType) throws CodedException {
-        VisualizationType type = visualizationDAO.findType(visualizationType);
-        if (type == null)
-            throw new InvalidInputException("Could not find visualization type: " + visualizationType);
-        return type;
     }
 
     Visualization createVisualizationFromRequest(CreateVisualizationRequest request, Agent user) {
 
         permissionService.findWritePermission(user, request.getProjectId());
 
-        VisualizationType type = findOrThrow(request.getTypeKey());
         Project project = projectService.findWithFullChildGraph(request.getProjectId(), user);
 
         Visualization viz = new Visualization();
         project.addVisualization(viz);
-        viz.setType(type);
+        viz.setType(request.getTypeKey());
         viz.addPermission(permissionService.createServicePermission(viz));
         addInputFilesAndPersistPermissions(viz, project, request);
         addParameters(viz, request);
@@ -102,6 +87,10 @@ public class VisualizationService {
         Visualization viz = visualizationDAO.find(vizId);
         validate(viz);
         return viz;
+    }
+
+    List<Visualization> findAllForProject(String projectId, Agent agent) {
+        return visualizationDAO.findAllForProject(projectId, agent);
     }
 
     private void addInputFilesAndPersistPermissions(Visualization viz, Project project, CreateVisualizationRequest request) {

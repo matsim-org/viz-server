@@ -63,7 +63,7 @@ public class S3RepositoryTest {
         final InputStream inputStream = mock(InputStream.class);
         final AmazonS3Client s3 = mock(AmazonS3Client.class);
         S3Repository repo = createRepo(s3);
-        FileUpload upload = new FileUpload(filename, contentType, inputStream);
+        FileUpload upload = new FileUpload(filename, contentType, inputStream, new String[]{});
 
         FileEntry fileEntry = repo.addFile(upload);
         project.addFileEntry(fileEntry);
@@ -93,7 +93,7 @@ public class S3RepositoryTest {
         final AmazonS3Client s3 = mock(AmazonS3Client.class);
         when(s3.putObject(anyString(), anyString(), any(File.class))).thenThrow(new AmazonServiceException("error"));
         S3Repository repo = createRepo(s3);
-        FileUpload upload = new FileUpload(filename, contentType, inputStream);
+        FileUpload upload = new FileUpload(filename, contentType, inputStream, new String[0]);
 
         FileEntry fileEntry = repo.addFile(upload);
         project.addFileEntry(fileEntry);
@@ -125,8 +125,8 @@ public class S3RepositoryTest {
         final AmazonS3Client s3 = mock(AmazonS3Client.class);
         S3Repository repo = createRepo(s3);
         List<FileUpload> uploads = new ArrayList<>(2);
-        uploads.add(new FileUpload(filename, contentType, inputStream));
-        uploads.add(new FileUpload(secondFilename, contentType, inputStream));
+        uploads.add(new FileUpload(filename, contentType, inputStream, new String[0]));
+        uploads.add(new FileUpload(secondFilename, contentType, inputStream, new String[0]));
 
         List<FileEntry> fileEntries = repo.addFiles(uploads);
         project.addFileEntries(fileEntries);
