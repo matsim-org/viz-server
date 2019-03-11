@@ -60,7 +60,8 @@ public class VisualizationFetcherTest {
         // assert that last fetch time is updated correctly
         try (val session = database.getSessionFactory().openSession()) {
             val fetchInfo = new JPAQueryFactory(session).selectFrom(QFetchInformation.fetchInformation).fetchFirst();
-            assertTrue(beforeCall.isBefore(fetchInfo.lastFetch.toInstant()));
+            // the following comes down to lastfetch was after or at the same time as the beforeCall timestamp
+            assertTrue(beforeCall.minusMillis(1).isBefore(fetchInfo.lastFetch.toInstant()));
         }
     }
 
@@ -80,7 +81,8 @@ public class VisualizationFetcherTest {
 
             // assert that last fetch time is updated correctly
             val fetchInfo = new JPAQueryFactory(session).selectFrom(QFetchInformation.fetchInformation).fetchFirst();
-            assertTrue(beforeCall.isBefore(fetchInfo.lastFetch.toInstant()));
+            // the following comes down to lastfetch was after or at the same time as the beforeCall timestamp
+            assertTrue(beforeCall.minusMillis(1).isBefore(fetchInfo.lastFetch.toInstant()));
 
             // assert that viz is persisted
             PersistentVisualization persistentVisualization = session.find(PersistentVisualization.class, fetchedViz.getId());
@@ -104,12 +106,12 @@ public class VisualizationFetcherTest {
     @Test
     public void fetchVisualizationData_receivedTwoViz() {
 
+        Instant beforeCall = Instant.now();
         final Visualization fetchedViz = createVisualization("some-id");
         final Visualization otherFetchedViz = createVisualization("some-other-id");
         VisualizationGenerator<TestableVisualization> generator = mock(VisualizationGenerator.class);
         when(generator.createVisualization()).thenReturn(new TestableVisualization());
         when(filesApi.fetchVisualizations(anyString(), any())).thenReturn(new Visualization[]{fetchedViz, otherFetchedViz});
-        Instant beforeCall = Instant.now();
         VisualizationFetcher fetcher = new VisualizationFetcher(sessionFactoryFactory, filesApi, tmpFiles, generator, "viz-type");
 
         fetcher.fetchVisualizationData();
@@ -118,7 +120,10 @@ public class VisualizationFetcherTest {
 
             // assert that last fetch time is updated correctly
             val fetchInfo = new JPAQueryFactory(session).selectFrom(QFetchInformation.fetchInformation).fetchFirst();
-            assertTrue(beforeCall.isBefore(fetchInfo.lastFetch.toInstant()));
+            System.out.println(beforeCall);
+            System.out.println(fetchInfo.lastFetch);
+            // the following comes down to lastfetch was after or at the same time as the beforeCall timestamp
+            assertTrue(beforeCall.minusMillis(1).isBefore(fetchInfo.lastFetch.toInstant()));
 
             // assert that vizes are persisted
             PersistentVisualization persistentVisualization = session.find(PersistentVisualization.class, fetchedViz.getId());
