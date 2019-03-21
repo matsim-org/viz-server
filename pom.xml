@@ -19,6 +19,7 @@
         <module>files-api</module>
         <module>postprocessing-emissions</module>
         <module>postprocessing-bundle</module>
+        <module>postprocessing-event-animation</module>
     </modules>
 
     <properties>

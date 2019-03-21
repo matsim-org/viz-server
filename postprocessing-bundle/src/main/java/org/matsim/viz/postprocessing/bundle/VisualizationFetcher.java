@@ -80,7 +80,7 @@ public class VisualizationFetcher {
                 Map<String, InputFile> inputFiles = fetchInputFiles(inputVisualization, folder);
                 persistProgress(visualization, PersistentVisualization.Progress.GeneratingData, session);
                 generator.generate(
-                        new VisualizationGenerator.Input(visualization, inputFiles, inputVisualization.getParameters(), session)
+						new VisualizationGenerator.Input(visualization, inputFiles, inputVisualization.getParameters(), sessionFactory)
                 );
                 persistProgress(visualization, PersistentVisualization.Progress.Done, session);
             } catch (Exception e) {

@@ -26,7 +26,7 @@ public class DataGenerator implements VisualizationGenerator<Visualization> {
     @Override
     public void generate(Input<Visualization> input) {
 
-        val session = input.getSession();
+		val session = input.getSessionFactory().getCurrentSession();
         val mergedViz = (Visualization) session.merge(input.getVisualization());
         session.beginTransaction();
         mergedViz.setCellSize(Double.parseDouble(input.getParams().get(CELL_SIZE_KEY).getValue()));
