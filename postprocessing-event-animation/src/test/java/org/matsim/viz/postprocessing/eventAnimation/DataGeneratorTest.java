@@ -14,7 +14,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class DataGeneratorTest {
 
@@ -34,6 +35,8 @@ public class DataGeneratorTest {
 		val generator = new DataGenerator();
 		val viz = generator.createVisualization();
 
+		database.getSessionFactory().getCurrentSession().persist(viz);
+
 		val inputFiles = new HashMap<String, InputFile>();
 		inputFiles.put("network", new InputFile("network", getResourcePath("test-network.xml")));
 		inputFiles.put("events", new InputFile("events", getResourcePath("test-events-100.xml.gz")));
@@ -41,8 +44,22 @@ public class DataGeneratorTest {
 
 		generator.generate(input);
 
-		assertFalse(true);
+		try (val session = database.getSessionFactory().openSession()) {
+			val resultViz = session.find(Visualization.class, viz.getId());
+			val matsimNetwork = resultViz.getMatsimNetwork();
+			val linkTrips = resultViz.getLinkTrips();
 
+			assertEquals(viz.getId(), resultViz.getId());
+			assertEquals(25200, resultViz.getFirstTimestep(), 0.0001);
+			assertEquals(25441, resultViz.getLastTimestep(), 0.0001);
+			assertEquals(-2500, resultViz.getMinEasting(), 0.0001);
+			assertEquals(1000, resultViz.getMaxEasting(), 0.0001);
+			assertEquals(-1000, resultViz.getMinNorthing(), 0.0001);
+			assertEquals(400, resultViz.getMaxNorthing(), 0.0001);
+
+			assertTrue(matsimNetwork.getData().length > 0);
+			assertTrue(linkTrips.size() > 0);
+		}
 	}
 
 	private Path getResourcePath(String filename) {

@@ -31,32 +31,32 @@ public class DataGenerator implements VisualizationGenerator<Visualization> {
 
 		try (val session = input.getSessionFactory().openSession()) {
 
-			generateNetwork(networkPath, input.getVisualization(), session);
-			generateLinkTrips(eventsPath, input.getVisualization(), session);
+			val vizWithNetwork = generateNetwork(networkPath, input.getVisualization(), session);
+			generateLinkTrips(eventsPath, vizWithNetwork, session);
 		}
 	}
 
-	private void generateNetwork(Path networkPath, Visualization visualization, Session session) {
+	private Visualization generateNetwork(Path networkPath, Visualization visualization, Session session) {
 
 		originalNetwork = NetworkUtils.createNetwork();
 		new MatsimNetworkReader(originalNetwork).readFile(networkPath.toString());
 		val matsimNetwork = new MatsimNetwork(originalNetwork);
 
-		session.beginTransaction();
+		session.getTransaction().begin();
 		session.persist(matsimNetwork);
-		session.merge(visualization);
-		matsimNetwork.setVisualization(visualization);
-		visualization.setMatsimNetwork(matsimNetwork);
+		val merged = (Visualization) session.merge(visualization);
+		merged.addMatsimNetwork(matsimNetwork);
 		session.getTransaction().commit();
+		return merged;
 	}
 
 	private void generateLinkTrips(Path eventsPath, Visualization visualization, Session session) {
 
-		val handler = new EventsHandler(originalNetwork, session);
-		val eventsManager = EventsUtils.createEventsManager();
-		eventsManager.addHandler(handler);
-		val reader = new MatsimEventsReader(eventsManager);
-
-		reader.readFile(eventsPath.toString());
+		try (val handler = new EventsHandler(visualization, originalNetwork, session)) {
+			val eventsManager = EventsUtils.createEventsManager();
+			eventsManager.addHandler(handler);
+			val reader = new MatsimEventsReader(eventsManager);
+			reader.readFile(eventsPath.toString());
+		}
 	}
 }
