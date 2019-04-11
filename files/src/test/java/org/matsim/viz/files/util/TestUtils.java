@@ -6,6 +6,7 @@ import org.matsim.viz.files.agent.UserDAO;
 import org.matsim.viz.files.config.AppConfiguration;
 import org.matsim.viz.files.entities.FileEntry;
 import org.matsim.viz.files.entities.Project;
+import org.matsim.viz.files.entities.Tag;
 import org.matsim.viz.files.entities.User;
 import org.matsim.viz.files.notifications.NotificationDAO;
 import org.matsim.viz.files.notifications.Notifier;
@@ -101,6 +102,12 @@ public class TestUtils {
         entry.setPersistedFileName(filename);
         project.getFiles().add(entry);
         entry.setProject(project);
+        return projectDAO.persist(project);
+    }
+
+    public static Project addTag(Project project, String tagName, String tagType) {
+        Tag tag = new Tag(tagName, tagType, project);
+        project.addTag(tag);
         return projectDAO.persist(project);
     }
 

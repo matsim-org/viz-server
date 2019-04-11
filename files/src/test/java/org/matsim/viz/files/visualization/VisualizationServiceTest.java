@@ -18,7 +18,6 @@ import java.util.Set;
 import static junit.framework.TestCase.*;
 import static org.mockito.Mockito.mock;
 
-@SuppressWarnings("ConstantConditions")
 public class VisualizationServiceTest {
 
     private static String typeKey = "test-key";
@@ -47,6 +46,8 @@ public class VisualizationServiceTest {
         Project project = TestUtils.persistProjectWithCreator("some-project");
         project = TestUtils.addFileEntry(project, "some-file.txt");
         project = TestUtils.addFileEntry(project, "some-other-file.txt");
+        project = TestUtils.addTag(project, "tag-name", "tag-type");
+        Tag tag = project.getTags().iterator().next();
 
         Map<String, String> input = new HashMap<>();
         input.put("network", project.getFiles().iterator().next().getId());
@@ -57,7 +58,8 @@ public class VisualizationServiceTest {
                 project.getId(),
                 typeKey,
                 input,
-                parameters);
+                parameters,
+                new String[]{tag.getId()});
 
         Visualization viz = testObject.createVisualizationFromRequest(request, project.getCreator());
 
@@ -65,6 +67,8 @@ public class VisualizationServiceTest {
         assertEquals(1, viz.getInputFiles().size());
         assertEquals(1, viz.getParameters().size());
         assertEquals(request.getTypeKey(), viz.getType());
+        assertEquals(1, viz.getTags().size());
+        assertTrue(viz.getTags().contains(tag));
         Project finalProject = project;
         assertTrue(viz.getPermissions().stream().anyMatch(p -> p.getAgent().equals(finalProject.getCreator())));
 
@@ -95,7 +99,8 @@ public class VisualizationServiceTest {
                 project.getId(),
                 typeKey,
                 input,
-                parameters);
+                parameters,
+                new String[0]);
 
         Visualization viz = testObject.createVisualizationFromRequest(request, project.getCreator());
 
@@ -217,7 +222,8 @@ public class VisualizationServiceTest {
 
         Project project = TestUtils.persistProjectWithCreator("project");
 
-        CreateVisualizationRequest create = new CreateVisualizationRequest(project.getId(), typeKey, new HashMap<>(), new HashMap<>());
+        CreateVisualizationRequest create = new CreateVisualizationRequest(project.getId(), typeKey, new HashMap<>(),
+                new HashMap<>(), new String[0]);
         Visualization viz = testObject.createVisualizationFromRequest(create, project.getCreator());
 
         List<Visualization> result = testObject.findByType(typeKey, Instant.EPOCH, project.getCreator());
@@ -232,13 +238,15 @@ public class VisualizationServiceTest {
 
         Project project = TestUtils.persistProjectWithCreator("first project");
 
-        CreateVisualizationRequest create = new CreateVisualizationRequest(project.getId(), typeKey, new HashMap<>(), new HashMap<>());
+        CreateVisualizationRequest create = new CreateVisualizationRequest(project.getId(), typeKey, new HashMap<>(),
+                new HashMap<>(), new String[0]);
         testObject.createVisualizationFromRequest(create, project.getCreator());
 
         Instant afterFirst = Instant.now();
         Thread.sleep(100);
 
-        CreateVisualizationRequest secondCreate = new CreateVisualizationRequest(project.getId(), typeKey, new HashMap<>(), new HashMap<>());
+        CreateVisualizationRequest secondCreate = new CreateVisualizationRequest(project.getId(), typeKey, new HashMap<>(),
+                new HashMap<>(), new String[0]);
         Visualization secondViz = testObject.createVisualizationFromRequest(secondCreate, project.getCreator());
 
         List<Visualization> result = testObject.findByType(typeKey, afterFirst, project.getCreator());

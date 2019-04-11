@@ -21,4 +21,6 @@ class CreateVisualizationRequest {
     private Map<String, String> inputFiles;
     @NotNull
     private Map<String, String> inputParameters;
+
+	private String[] tagIds = new String[0];
 }
