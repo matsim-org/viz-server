@@ -256,22 +256,25 @@ public class ProjectServiceTest {
             FileEntry result = new FileEntry();
             result.setPersistedFileName(upload.getFileName());
             result.setUserFileName(upload.getFileName());
+            result.addTags(upload.getTagIds());
             return result;
         }).when(repository).addFile(any(FileUpload.class));
         testObject = new ProjectService(new ProjectDAO(TestUtils.getPersistenceUnit()),
                 TestUtils.getPermissionService(), repository, mock(Notifier.class));
         Project project = TestUtils.persistProjectWithCreator("test");
         final String tagName = "some-tag-name";
+        val tag = testObject.addTag(project.getId(), tagName, "some-type", project.getCreator());
 
         final String secondName = "second.txt";
-        val upload1 = new FileUpload("first.txt", "plain/text", mock(InputStream.class), new String[]{tagName});
-        val upload2 = new FileUpload(secondName, "plain/text", mock(InputStream.class), new String[]{tagName});
+        val upload1 = new FileUpload("first.txt", "plain/text", mock(InputStream.class), new String[]{tag.getId()});
+        val upload2 = new FileUpload(secondName, "plain/text", mock(InputStream.class), new String[]{tag.getId()});
 
         testObject.addFileToProject(upload1, project.getId(), project.getCreator());
         FileEntry result = testObject.addFileToProject(upload2, project.getId(), project.getCreator());
 
         assertEquals(secondName, result.getUserFileName());
         assertNotNull(result.getId());
+        assertTrue(result.getTags().contains(tag));
     }
 
     @Test(expected = InternalException.class)
