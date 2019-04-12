@@ -65,7 +65,7 @@ public class VisualizationServiceTest {
                 input,
                 parameters,
                 new String[]{tag.getId()},
-                properties,
+                null,
                 thumbnail
         );
 
@@ -113,8 +113,7 @@ public class VisualizationServiceTest {
                 input,
                 parameters,
                 new String[0],
-                "some-properties",
-                "base64encoded-thumbnail");
+                null, "base64encoded-thumbnail");
 
         Visualization viz = testObject.createVisualizationFromRequest(request, project.getCreator());
 
@@ -239,7 +238,7 @@ public class VisualizationServiceTest {
         CreateVisualizationRequest create = new CreateVisualizationRequest(project.getId(), typeKey, "some-title",
                 new HashMap<>(),
                 new HashMap<>(), new String[0],
-                "some-properties",
+                null,
                 "base64encoded-thumbnail");
         Visualization viz = testObject.createVisualizationFromRequest(create, project.getCreator());
 
@@ -258,7 +257,7 @@ public class VisualizationServiceTest {
         CreateVisualizationRequest create = new CreateVisualizationRequest(project.getId(), typeKey, "some-title",
                 new HashMap<>(),
                 new HashMap<>(), new String[0],
-                "some-properties",
+                null,
                 "base64encoded-thumbnail");
         testObject.createVisualizationFromRequest(create, project.getCreator());
 
@@ -268,7 +267,7 @@ public class VisualizationServiceTest {
         CreateVisualizationRequest secondCreate = new CreateVisualizationRequest(project.getId(), typeKey, "some-title",
                 new HashMap<>(),
                 new HashMap<>(), new String[0],
-                "some-properties",
+                null,
                 "base64encoded-thumbnail");
         Visualization secondViz = testObject.createVisualizationFromRequest(secondCreate, project.getCreator());
 

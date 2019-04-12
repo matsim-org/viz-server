@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;
+import java.util.HashMap;
 import java.util.Map;
 
 @Getter
@@ -25,6 +26,6 @@ class CreateVisualizationRequest {
     private Map<String, String> inputParameters;
 
 	private String[] tagIds = new String[0];
-	private String properties = "";
+	private Map<String, String> properties = new HashMap<>();
 	private String thumbnail = "";
 }
