@@ -38,7 +38,8 @@ public class NotificationResourceTest {
         final Subscription expectedResult = new Subscription(new Subscription.NotificationType("some-type"),
                 URI.create("http://some.uri"), Instant.now().plus(Duration.ofDays(1)));
         FilesApi api = mock(FilesApi.class);
-        when(api.registerNotification(anyString(), any())).thenThrow(new WebApplicationException()).thenReturn(expectedResult);
+        WebApplicationException exception = mock(WebApplicationException.class);
+        when(api.registerNotification(anyString(), any())).thenThrow(exception).thenReturn(expectedResult);
 
         NotificationResource resource = new NotificationResource(api, URI.create("http://some.uri"), mock(VisualizationFetcher.class));
 
