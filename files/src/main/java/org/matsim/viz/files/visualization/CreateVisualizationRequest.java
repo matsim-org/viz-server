@@ -17,10 +17,14 @@ class CreateVisualizationRequest {
     private String projectId;
     @NotEmpty
     private String typeKey;
+	@NotEmpty
+	private String title;
     @NotEmpty
     private Map<String, String> inputFiles;
     @NotNull
     private Map<String, String> inputParameters;
 
 	private String[] tagIds = new String[0];
+	private String properties = "";
+	private String thumbnail = "";
 }

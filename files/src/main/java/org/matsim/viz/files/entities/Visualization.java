@@ -15,6 +15,14 @@ public class Visualization extends Taggable {
 
     private String type;
 
+    private String title;
+
+    @Lob
+    private String thumbnail;
+
+    @Lob
+    private String properties;
+
     @ManyToOne(optional = false)
     private Project project;
 
