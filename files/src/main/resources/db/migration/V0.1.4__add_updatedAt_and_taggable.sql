@@ -67,12 +67,10 @@ SET tagSummary = '';
 --
 -- Copy all values from FileEntry_Tag
 --
-UPDATE Taggable_Tag, FileEntry_Tag
-SET Taggable_Tag.Taggable_id = FileEntry_Tag.FileEntry_id;
-UPDATE Taggable_Tag, FileEntry_Tag
-SET Taggable_Tag.tags_id=FileEntry_Tag.tags_id;
+INSERT INTO Taggable_Tag (Taggable_id, tags_id)
+SELECT FileEntry_id, tags_id FROM FileEntry_Tag;
 
 --
--- Drop old FileEntry table
+-- Drop old FileEntry_Tag table
 --
 DROP TABLE IF EXISTS FileEntry_Tag;
