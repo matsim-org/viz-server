@@ -22,6 +22,7 @@ public class Visualization extends Taggable {
 
     // This will create a separate table which is linked automatically
     @ElementCollection
+    @Column(name = "value", length = 10000)
     private Map<String, String> properties = new HashMap<>();
 
     @ManyToOne(optional = false)
