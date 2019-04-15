@@ -24,8 +24,10 @@ class CreateVisualizationRequest {
     private Map<String, String> inputFiles;
     @NotNull
     private Map<String, String> inputParameters;
-
+	@NotNull
 	private String[] tagIds = new String[0];
+	@NotNull
 	private Map<String, String> properties = new HashMap<>();
+	@NotEmpty
 	private String thumbnail = "";
 }

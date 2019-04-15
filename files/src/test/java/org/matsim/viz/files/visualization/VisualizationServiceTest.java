@@ -55,7 +55,8 @@ public class VisualizationServiceTest {
         Map<String, String> parameters = new HashMap<>();
         parameters.put("some", "parameter");
         val title = "some-title";
-        val properties = "some-props";
+		Map<String, String> properties = new HashMap<>();
+		properties.put("some-key", "some-value");
         val thumbnail = "base64encoded-thumbnail";
 
         CreateVisualizationRequest request = new CreateVisualizationRequest(
@@ -65,7 +66,7 @@ public class VisualizationServiceTest {
                 input,
                 parameters,
                 new String[]{tag.getId()},
-                null,
+				properties,
                 thumbnail
         );
 
@@ -78,7 +79,7 @@ public class VisualizationServiceTest {
         assertEquals(1, viz.getTags().size());
         assertTrue(viz.getTags().contains(tag));
         assertEquals(title, viz.getTitle());
-        assertEquals(properties, viz.getProperties());
+		assertEquals(properties.get("some-key"), viz.getProperties().get("some-key"));
         assertEquals(thumbnail, viz.getThumbnail());
         Project finalProject = project;
         assertTrue(viz.getPermissions().stream().anyMatch(p -> p.getAgent().equals(finalProject.getCreator())));
@@ -113,7 +114,7 @@ public class VisualizationServiceTest {
                 input,
                 parameters,
                 new String[0],
-                null, "base64encoded-thumbnail");
+				new HashMap<>(), "base64encoded-thumbnail");
 
         Visualization viz = testObject.createVisualizationFromRequest(request, project.getCreator());
 

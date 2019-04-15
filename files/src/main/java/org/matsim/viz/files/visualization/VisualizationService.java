@@ -54,7 +54,7 @@ public class VisualizationService {
         viz.setType(request.getTypeKey());
         viz.setTitle(request.getTitle());
 		viz.addTags(request.getTagIds());
-		//viz.setProperties(request.getProperties());
+        viz.setProperties(request.getProperties());
         viz.setThumbnail(request.getThumbnail());
         viz.addPermission(permissionService.createServicePermission(viz));
         addInputFilesAndPersistPermissions(viz, project, request);

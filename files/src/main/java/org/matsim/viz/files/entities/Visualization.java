@@ -20,8 +20,9 @@ public class Visualization extends Taggable {
     @Lob
     private String thumbnail;
 
-    @Lob
-    private String properties;
+    // This will create a separate table which is linked automatically
+    @ElementCollection
+    private Map<String, String> properties = new HashMap<>();
 
     @ManyToOne(optional = false)
     private Project project;
