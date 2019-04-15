@@ -49,6 +49,7 @@ public class VisualizationDAO extends DAO {
                 .leftJoin(visualization.inputFiles).fetchJoin()
                 .leftJoin(visualization.parameters).fetchJoin()
                 .leftJoin(visualization.permissions).fetchJoin()
+				.leftJoin(visualization.tags).fetchJoin()
                 .distinct()
                 .fetch()
         );
@@ -58,12 +59,20 @@ public class VisualizationDAO extends DAO {
         database.remove(viz);
     }
 
-    public List<Visualization> findAllForProject(String projectId, Agent agent) {
+	List<Visualization> findAllForProject(String projectId, Agent agent) {
 
         QVisualization visualization = QVisualization.visualization;
+
+		// this query fetches a possibly large dataset and it relations if we should ever encounter performance issues
+		// the result set could be limited.
         return database.executeQuery(query -> query.selectFrom(visualization)
                 .where(visualization.project.id.eq(projectId)
                         .and(visualization.permissions.any().agent.eq(agent)))
+				.leftJoin(visualization.inputFiles).fetchJoin()
+				.leftJoin(visualization.parameters).fetchJoin()
+				.leftJoin(visualization.permissions).fetchJoin()
+				.leftJoin(visualization.tags).fetchJoin()
+                .leftJoin(visualization.properties).fetchJoin()
                 .distinct()
                 .fetch()
         );

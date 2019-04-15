@@ -3,6 +3,7 @@ package org.matsim.viz.files.entities;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.matsim.viz.database.AbstractEntity;
 
 import javax.persistence.*;
@@ -22,6 +23,9 @@ public abstract class Resource extends AbstractEntity {
 
     @CreationTimestamp
     private Instant createdAt;
+
+	@UpdateTimestamp
+	private Instant updatedAt;
 
     public boolean addPermission(Permission permission) {
 

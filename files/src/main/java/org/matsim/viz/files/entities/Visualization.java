@@ -11,9 +11,19 @@ import java.util.Map;
 @Setter
 @Entity
 @Table(indexes = {@Index(columnList = "type")})
-public class Visualization extends Resource {
+public class Visualization extends Taggable {
 
     private String type;
+
+    private String title;
+
+    @Lob
+    private String thumbnail;
+
+    // This will create a separate table which is linked automatically
+    @ElementCollection
+    @Column(name = "value", length = 10000)
+    private Map<String, String> properties = new HashMap<>();
 
     @ManyToOne(optional = false)
     private Project project;
