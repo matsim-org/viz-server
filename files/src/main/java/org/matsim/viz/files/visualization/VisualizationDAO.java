@@ -72,6 +72,7 @@ public class VisualizationDAO extends DAO {
 				.leftJoin(visualization.parameters).fetchJoin()
 				.leftJoin(visualization.permissions).fetchJoin()
 				.leftJoin(visualization.tags).fetchJoin()
+                .leftJoin(visualization.properties).fetchJoin()
                 .distinct()
                 .fetch()
         );
