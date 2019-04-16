@@ -72,7 +72,8 @@ public class ProjectDAO extends DAO {
         QPermission permission = QPermission.permission;
 
         return database.executeQuery(query -> query.selectFrom(project)
-                .innerJoin(project.permissions, permission).on(permission.agent.eq(agent))
+				.where(project.permissions.any().agent.eq(agent))
+				.innerJoin(project.permissions, permission).fetchJoin()
                 .distinct()
                 .fetch()
         );
