@@ -23,4 +23,4 @@ deploy:
     provider: script
     # this is the default domain and doesn't require a domain param
     script: bash ./vsp-deploy/deploy.sh
-    skip_cleanup: false
+    skip_cleanup: true
