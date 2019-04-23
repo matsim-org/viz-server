@@ -10,7 +10,7 @@ import org.matsim.viz.postprocessing.bundle.*;
 public class App extends Application<PostprocessingConfiguration> {
 
 	private HibernateBundle<PostprocessingConfiguration> hibernate = new HibernateBundle<PostprocessingConfiguration>(
-			Agent.class, Permission.class, FetchInformation.class
+			Agent.class, Permission.class, FetchInformation.class, Visualization.class, LinkTrip.class, MatsimNetwork.class
 	) {
 		@Override
 		public PooledDataSourceFactory getDataSourceFactory(PostprocessingConfiguration postprocessingConfiguration) {
@@ -27,11 +27,11 @@ public class App extends Application<PostprocessingConfiguration> {
 	public void initialize(Bootstrap<PostprocessingConfiguration> bootstrap) {
 
 		bootstrap.addBundle(hibernate);
-		bootstrap.addBundle(new PostprocessingBundle<>(hibernate, null, "event-animation"));
+		bootstrap.addBundle(new PostprocessingBundle<>(hibernate, new DataGenerator(), "events-animation"));
 	}
 
 	@Override
 	public void run(PostprocessingConfiguration postprocessingConfiguration, Environment environment) throws Exception {
-
+		environment.jersey().register(new VisualizationResource(hibernate.getSessionFactory()));
 	}
 }

@@ -15,8 +15,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 public class VisualizationResourceTest {
 
@@ -51,7 +50,7 @@ public class VisualizationResourceTest {
     @Test
     public void configuration() {
 
-        val resource = new VisualizationResource(database.getSessionFactory().openSession());
+        val resource = new VisualizationResource(database.getSessionFactory());
         val publicAgent = new Agent("allUsers");
 
         database.inTransaction(() -> {
@@ -69,22 +68,22 @@ public class VisualizationResourceTest {
     @Test
     public void network() {
 
-        val resource = new VisualizationResource(database.getSessionFactory().getCurrentSession());
+        val resource = new VisualizationResource(database.getSessionFactory());
         val publicAgent = new Agent("allUsers");
 
         database.inTransaction(() -> {
-
-
             val result = resource.network(publicAgent, vizId);
-            assertNotNull(result);
 
+            // not so smart but maybe sufficient?
+            assertNotNull(result);
+            assertTrue(result.length > 0);
         });
     }
 
     @Test
     public void linkTrips() {
 
-        val resource = new VisualizationResource(database.getSessionFactory().getCurrentSession());
+        val resource = new VisualizationResource(database.getSessionFactory());
         val publicAgent = new Agent("allUsers");
 
         val result = resource.linkTrips(publicAgent, vizId, 25200, 25441);
@@ -95,7 +94,7 @@ public class VisualizationResourceTest {
     @Test
     public void linkTrips_withTimeWindow() {
 
-        val resource = new VisualizationResource(database.getSessionFactory().getCurrentSession());
+        val resource = new VisualizationResource(database.getSessionFactory());
         val publicAgent = new Agent("allUsers");
 
         val result = resource.linkTrips(publicAgent, vizId, 25210, 25290);

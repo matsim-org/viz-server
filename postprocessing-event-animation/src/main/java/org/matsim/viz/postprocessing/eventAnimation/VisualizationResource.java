@@ -6,13 +6,10 @@ import io.dropwizard.hibernate.UnitOfWork;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import lombok.val;
-import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.matsim.viz.postprocessing.bundle.Agent;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.util.List;
 
@@ -21,7 +18,7 @@ import java.util.List;
 @Path("{id}")
 public class VisualizationResource {
 
-	private final Session session;
+	private final SessionFactory sessionFactory;
 
 	@GET
 	@Path("/configuration")
@@ -29,7 +26,7 @@ public class VisualizationResource {
 	@UnitOfWork
 	public ConfigurationResponse configuration(@Auth Agent agent, @PathParam("id") String vizId) {
 
-		val visualization = session.find(Visualization.class, vizId);
+		val visualization = sessionFactory.getCurrentSession().find(Visualization.class, vizId);
 		return ConfigurationResponse.createFromVisualization(visualization);
 	}
 
@@ -40,7 +37,7 @@ public class VisualizationResource {
 	public byte[] network(@Auth Agent agent, @PathParam("id") String vizId) {
 
 		val qMatsimNetwork = QMatsimNetwork.matsimNetwork;
-		val network = new JPAQueryFactory(session).selectFrom(qMatsimNetwork)
+		val network = new JPAQueryFactory(sessionFactory.getCurrentSession()).selectFrom(qMatsimNetwork)
 				.where(qMatsimNetwork.visualization.id.eq(vizId))
 				.fetchOne();
 
@@ -51,11 +48,12 @@ public class VisualizationResource {
 	@Path("linkTrips")
 	@Produces(MediaType.APPLICATION_JSON)
 	@UnitOfWork
-	public List<LinkTrip> linkTrips(@Auth Agent agent, @PathParam("id") String vizId, double fromTime, double toTime) {
+	public List<LinkTrip> linkTrips(@Auth Agent agent, @PathParam("id") String vizId,
+									@QueryParam("from") double fromTime, @QueryParam("to") double toTime) {
 
 		val qLinkTrip = QLinkTrip.linkTrip;
 
-		return new JPAQueryFactory(session).selectFrom(qLinkTrip)
+		return new JPAQueryFactory(sessionFactory.getCurrentSession()).selectFrom(qLinkTrip)
 				.where(qLinkTrip.visualization.id.eq(vizId)
 						.and(qLinkTrip.enterTime.between(fromTime, toTime)).or(qLinkTrip.leaveTime.between(fromTime, toTime)))
 				.fetch();
