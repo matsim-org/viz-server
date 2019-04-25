@@ -47,7 +47,7 @@
         <dependency>
             <groupId>org.matsim.contrib</groupId>
             <artifactId>emissions</artifactId>
-            <version>0.11.0-SNAPSHOT</version>
+            <version>12.0-SNAPSHOT</version>
         </dependency>
         <!-- put jts onto the classpath since the contrib doesn't do it itself... -->
         <dependency>
@@ -82,6 +82,12 @@
             <groupId>org.matsim</groupId>
             <artifactId>postprocessing-bundle</artifactId>
             <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.matsim</groupId>
+            <artifactId>matsim</artifactId>
+            <version>12.0-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 

@@ -12,11 +12,11 @@ import org.matsim.viz.postprocessing.bundle.VisualizationGenerator;
 @RequiredArgsConstructor
 public class DataGenerator implements VisualizationGenerator<Visualization> {
 
-    private static final String NETWORK_KEY = "network";
-    private static final String EVENTS_KEY = "events";
-    private static final String CELL_SIZE_KEY = "cell-size";
-    private static final String SMOOTHING_RADIUS_KEY = "smoothing-radius";
-    private static final String TIME_BIN_SIZE_KEY = "time-bin-size";
+    private static final String NETWORK_KEY = "Network";
+    private static final String EVENTS_KEY = "Events";
+    private static final String CELL_SIZE_KEY = "Cell size";
+    private static final String SMOOTHING_RADIUS_KEY = "Smoothing radius";
+    private static final String TIME_BIN_SIZE_KEY = "Time bin size";
 
     @Override
     public Visualization createVisualization() {
@@ -45,7 +45,7 @@ public class DataGenerator implements VisualizationGenerator<Visualization> {
                 .withNetwork(network)
                 .build();
 
-        log.info("Start processing emissions. This may take some while.");
+        log.info("Start processing emissions. This may take a while.");
         val json = analyzer.processToJsonString(input.getInputFiles().get(EVENTS_KEY).getPath().toString());
 
         log.info("Finished processing emissions. Write result to database");
