@@ -11,16 +11,10 @@ deploy:
   - on:
       branch: develop
     provider: script
-    script: bash ./vsp-deploy/deploy.sh -play
+    script: bash ./vsp-deploy/deploy.sh -dev
     skip_cleanup: true
   - on:
       branch: master
     provider: script
-    script: bash ./vsp-deploy/deploy.sh -dev
-    skip_cleanup: true
-  - on:
-      branch: stable
-    provider: script
-    # this is the default domain and doesn't require a domain param
     script: bash ./vsp-deploy/deploy.sh
     skip_cleanup: true
