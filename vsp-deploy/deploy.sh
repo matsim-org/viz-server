@@ -12,15 +12,19 @@ ssh-add <(echo "$VSP_SSHKEY_VIZDEPLOY_CNODE00_BASE64"| base64 --decode)
 ssh vizdeploy@cnode00.vsp.tu-berlin.de "rm -r /srv/www/viz-auth$DOMAIN/app/*"
 ssh vizdeploy@cnode00.vsp.tu-berlin.de "rm -r /srv/www/viz-files$DOMAIN/app/*"
 ssh vizdeploy@cnode00.vsp.tu-berlin.de "rm -r /srv/www/viz-frani$DOMAIN/app/*"
+ssh vizdeploy@cnode00.vsp.tu-berlin.de "rm -r /srv/www/viz-pprocemis$DOMAIN/app/*"
 # upload fresh built files
 scp -r auth/target/auth-1.0-SNAPSHOT.jar vizdeploy@cnode00.vsp.tu-berlin.de:/srv/www/viz-auth$DOMAIN/app/
 scp -r files/target/files-1.0-SNAPSHOT.jar vizdeploy@cnode00.vsp.tu-berlin.de:/srv/www/viz-files$DOMAIN/app/
 scp -r frame-animation/target/frame-animation-1.0-SNAPSHOT.jar vizdeploy@cnode00.vsp.tu-berlin.de:/srv/www/viz-frani$DOMAIN/app/
+scp -r postprocessing-emissions/target/postprocessing-emissions-1.0-SNAPSHOT.jar vizdeploy@cnode00.vsp.tu-berlin.de:/srv/www/viz-pprocemis$DOMAIN/app/
 # set correct permissions
 ssh vizdeploy@cnode00.vsp.tu-berlin.de "chmod 0664 /srv/www/viz-auth$DOMAIN/app/auth-1.0-SNAPSHOT.jar"
 ssh vizdeploy@cnode00.vsp.tu-berlin.de "chmod 0664 /srv/www/viz-files$DOMAIN/app/files-1.0-SNAPSHOT.jar"
 ssh vizdeploy@cnode00.vsp.tu-berlin.de "chmod 0664 /srv/www/viz-frani$DOMAIN/app/frame-animation-1.0-SNAPSHOT.jar"
+ssh vizdeploy@cnode00.vsp.tu-berlin.de "chmod 0664 /srv/www/viz-pprocemis$DOMAIN/app/postprocessing-emissions-1.0-SNAPSHOT.jar"
 # build new docker image 
 ssh vizdeploy@cnode00.vsp.tu-berlin.de "sudo -u dockerbuilder /home/vizdeploy/bin/build_viz-auth$DOMAIN.sh"
 ssh vizdeploy@cnode00.vsp.tu-berlin.de "sudo -u dockerbuilder /home/vizdeploy/bin/build_viz-files$DOMAIN.sh"
 ssh vizdeploy@cnode00.vsp.tu-berlin.de "sudo -u dockerbuilder /home/vizdeploy/bin/build_viz-frani$DOMAIN.sh"
+ssh vizdeploy@cnode00.vsp.tu-berlin.de "sudo -u dockerbuilder /home/vizdeploy/bin/build_viz-pprocemis$DOMAIN.sh"

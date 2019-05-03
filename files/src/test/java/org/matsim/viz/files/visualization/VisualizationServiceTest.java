@@ -1,5 +1,6 @@
 package org.matsim.viz.files.visualization;
 
+import lombok.val;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,7 +19,6 @@ import java.util.Set;
 import static junit.framework.TestCase.*;
 import static org.mockito.Mockito.mock;
 
-@SuppressWarnings("ConstantConditions")
 public class VisualizationServiceTest {
 
     private static String typeKey = "test-key";
@@ -47,17 +47,28 @@ public class VisualizationServiceTest {
         Project project = TestUtils.persistProjectWithCreator("some-project");
         project = TestUtils.addFileEntry(project, "some-file.txt");
         project = TestUtils.addFileEntry(project, "some-other-file.txt");
+        project = TestUtils.addTag(project, "tag-name", "tag-type");
+        Tag tag = project.getTags().iterator().next();
 
         Map<String, String> input = new HashMap<>();
         input.put("network", project.getFiles().iterator().next().getId());
         Map<String, String> parameters = new HashMap<>();
         parameters.put("some", "parameter");
+        val title = "some-title";
+		Map<String, String> properties = new HashMap<>();
+		properties.put("some-key", "some-value");
+        val thumbnail = "base64encoded-thumbnail";
 
         CreateVisualizationRequest request = new CreateVisualizationRequest(
                 project.getId(),
                 typeKey,
+                title,
                 input,
-                parameters);
+                parameters,
+                new String[]{tag.getId()},
+				properties,
+                thumbnail
+        );
 
         Visualization viz = testObject.createVisualizationFromRequest(request, project.getCreator());
 
@@ -65,6 +76,11 @@ public class VisualizationServiceTest {
         assertEquals(1, viz.getInputFiles().size());
         assertEquals(1, viz.getParameters().size());
         assertEquals(request.getTypeKey(), viz.getType());
+        assertEquals(1, viz.getTags().size());
+        assertTrue(viz.getTags().contains(tag));
+        assertEquals(title, viz.getTitle());
+		assertEquals(properties.get("some-key"), viz.getProperties().get("some-key"));
+        assertEquals(thumbnail, viz.getThumbnail());
         Project finalProject = project;
         assertTrue(viz.getPermissions().stream().anyMatch(p -> p.getAgent().equals(finalProject.getCreator())));
 
@@ -94,8 +110,11 @@ public class VisualizationServiceTest {
         CreateVisualizationRequest request = new CreateVisualizationRequest(
                 project.getId(),
                 typeKey,
+                "some-title",
                 input,
-                parameters);
+                parameters,
+                new String[0],
+				new HashMap<>(), "base64encoded-thumbnail");
 
         Visualization viz = testObject.createVisualizationFromRequest(request, project.getCreator());
 
@@ -217,7 +236,11 @@ public class VisualizationServiceTest {
 
         Project project = TestUtils.persistProjectWithCreator("project");
 
-        CreateVisualizationRequest create = new CreateVisualizationRequest(project.getId(), typeKey, new HashMap<>(), new HashMap<>());
+        CreateVisualizationRequest create = new CreateVisualizationRequest(project.getId(), typeKey, "some-title",
+                new HashMap<>(),
+                new HashMap<>(), new String[0],
+                null,
+                "base64encoded-thumbnail");
         Visualization viz = testObject.createVisualizationFromRequest(create, project.getCreator());
 
         List<Visualization> result = testObject.findByType(typeKey, Instant.EPOCH, project.getCreator());
@@ -232,13 +255,21 @@ public class VisualizationServiceTest {
 
         Project project = TestUtils.persistProjectWithCreator("first project");
 
-        CreateVisualizationRequest create = new CreateVisualizationRequest(project.getId(), typeKey, new HashMap<>(), new HashMap<>());
+        CreateVisualizationRequest create = new CreateVisualizationRequest(project.getId(), typeKey, "some-title",
+                new HashMap<>(),
+                new HashMap<>(), new String[0],
+                null,
+                "base64encoded-thumbnail");
         testObject.createVisualizationFromRequest(create, project.getCreator());
 
         Instant afterFirst = Instant.now();
         Thread.sleep(100);
 
-        CreateVisualizationRequest secondCreate = new CreateVisualizationRequest(project.getId(), typeKey, new HashMap<>(), new HashMap<>());
+        CreateVisualizationRequest secondCreate = new CreateVisualizationRequest(project.getId(), typeKey, "some-title",
+                new HashMap<>(),
+                new HashMap<>(), new String[0],
+                null,
+                "base64encoded-thumbnail");
         Visualization secondViz = testObject.createVisualizationFromRequest(secondCreate, project.getCreator());
 
         List<Visualization> result = testObject.findByType(typeKey, afterFirst, project.getCreator());
