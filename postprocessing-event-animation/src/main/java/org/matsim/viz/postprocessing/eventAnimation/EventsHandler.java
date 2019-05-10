@@ -32,11 +32,11 @@ public class EventsHandler implements AutoCloseable, LinkEnterEventHandler, Link
 
 	EventsHandler(Visualization visualization, Network network, Session session) {
 
-		this.visualization = visualization;
 		this.network = network;
 		this.session = session;
 		this.session.setJdbcBatchSize(batchSize);
 		this.session.beginTransaction();
+		this.visualization = (Visualization) this.session.merge(visualization);
 	}
 
 	@Override

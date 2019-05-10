@@ -45,6 +45,8 @@ public class VisualizationResourceTest {
         val input = new VisualizationGenerator.Input<Visualization>(viz, inputFiles, new HashMap<>(), database.getSessionFactory());
 
         generator.generate(input);
+        // clear the session cache to make sure the following tests load the entities from the actual datbase
+        database.getSessionFactory().getCurrentSession().clear();
     }
 
     @Test
