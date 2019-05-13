@@ -1,7 +1,7 @@
 package org.matsim.viz.postprocessing.eventAnimation;
 
 import lombok.val;
-import org.hibernate.Session;
+import org.hibernate.StatelessSession;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
@@ -29,28 +29,28 @@ public class DataGenerator implements VisualizationGenerator<Visualization> {
 		val networkPath = input.getInputFiles().get(NETWORK_KEY).getPath();
 		val eventsPath = input.getInputFiles().get(EVENTS_KEY).getPath();
 
-		try (val session = input.getSessionFactory().openSession()) {
+		try (val session = input.getSessionFactory().openStatelessSession()) {
 
 			val vizWithNetwork = generateNetwork(networkPath, input.getVisualization(), session);
 			generateLinkTrips(eventsPath, vizWithNetwork, session);
 		}
 	}
 
-	private Visualization generateNetwork(Path networkPath, Visualization visualization, Session session) {
+	private Visualization generateNetwork(Path networkPath, Visualization visualization, StatelessSession session) {
 
 		originalNetwork = NetworkUtils.createNetwork();
 		new MatsimNetworkReader(originalNetwork).readFile(networkPath.toString());
 		val matsimNetwork = new MatsimNetwork(originalNetwork);
 
 		session.getTransaction().begin();
-		session.persist(matsimNetwork);
-		val merged = (Visualization) session.merge(visualization);
-		merged.addMatsimNetwork(matsimNetwork);
+		session.insert(matsimNetwork);
+		visualization.addMatsimNetwork(matsimNetwork);
+		session.update(visualization);
 		session.getTransaction().commit();
-		return merged;
+		return visualization;
 	}
 
-	private void generateLinkTrips(Path eventsPath, Visualization visualization, Session session) {
+	private void generateLinkTrips(Path eventsPath, Visualization visualization, StatelessSession session) {
 
 		try (val handler = new EventsHandler(visualization, originalNetwork, session)) {
 			val eventsManager = EventsUtils.createEventsManager();

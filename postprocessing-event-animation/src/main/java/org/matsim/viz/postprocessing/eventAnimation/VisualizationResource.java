@@ -26,6 +26,7 @@ public class VisualizationResource {
 	@UnitOfWork
 	public ConfigurationResponse configuration(@Auth Agent agent, @PathParam("id") String vizId) {
 
+		sessionFactory.getCurrentSession().clear();
 		val visualization = sessionFactory.getCurrentSession().find(Visualization.class, vizId);
 		return ConfigurationResponse.createFromVisualization(visualization);
 	}

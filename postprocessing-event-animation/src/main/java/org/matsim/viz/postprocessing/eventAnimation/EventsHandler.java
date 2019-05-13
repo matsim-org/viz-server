@@ -3,7 +3,7 @@ package org.matsim.viz.postprocessing.eventAnimation;
 import lombok.Getter;
 import lombok.extern.java.Log;
 import lombok.val;
-import org.hibernate.Session;
+import org.hibernate.StatelessSession;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.LinkEnterEvent;
 import org.matsim.api.core.v01.events.LinkLeaveEvent;
@@ -23,20 +23,20 @@ public class EventsHandler implements AutoCloseable, LinkEnterEventHandler, Link
 
 	private static final int batchSize = 50;
 	private final Network network;
-	private final Session session;
+	private final StatelessSession session;
 	private final Visualization visualization;
 
 	@Getter
 	private Map<String, LinkTrip> linkTrips = new ConcurrentHashMap<>();
 	private int batchCount = 0;
 
-	EventsHandler(Visualization visualization, Network network, Session session) {
+	EventsHandler(Visualization visualization, Network network, StatelessSession session) {
 
 		this.network = network;
 		this.session = session;
 		this.session.setJdbcBatchSize(batchSize);
 		this.session.beginTransaction();
-		this.visualization = (Visualization) this.session.merge(visualization);
+		this.visualization = visualization;
 	}
 
 	@Override
@@ -59,13 +59,21 @@ public class EventsHandler implements AutoCloseable, LinkEnterEventHandler, Link
 		if (linkTrips.containsKey(tripKey)) {
 			val linkTrip = linkTrips.remove(tripKey);
 			linkTrip.setLeaveTime(event.getTime());
-			session.persist(linkTrip);
+			session.insert(linkTrip);
 
-			if (++batchCount % batchSize == 0) {
-				log.info("Batch count is: " + batchCount + ". Flushing to database.");
+			if (++batchCount % 1000 == 0) {
+				log.info(batchCount + " link trips were written to the db");
+			}
+
+			/*if (++batchCount % batchSize == 0) {
+
 				session.flush();
 				session.clear();
+				if (batchCount % 1000 == 0) {
+					log.info(batchCount + " link trips were written into database.");
+				}
 			}
+*/
 		} else {
 			log.warning("There was no LinkTrip saved for: " + tripKey);
 		}
@@ -73,8 +81,8 @@ public class EventsHandler implements AutoCloseable, LinkEnterEventHandler, Link
 
 	@Override
 	public void close() {
-
-		session.merge(visualization);
+		log.info("updating visualization");
+		session.update(visualization);
 		session.getTransaction().commit();
 	}
 
