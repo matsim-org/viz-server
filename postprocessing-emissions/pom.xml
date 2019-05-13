@@ -48,6 +48,13 @@
             <groupId>org.matsim.contrib</groupId>
             <artifactId>emissions</artifactId>
             <version>0.11.0-SNAPSHOT</version>
+            <!-- exclude log4j dependency because hibernate doesn't work with logback otherwise -->
+            <exclusions>
+                <exclusion>
+                    <groupId>log4j</groupId>
+                    <artifactId>log4j</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <!-- put jts onto the classpath since the contrib doesn't do it itself... -->
         <dependency>
