@@ -44,13 +44,13 @@ public class MatsimNetwork extends AbstractEntity {
 	@OneToOne(fetch = FetchType.LAZY)
 	private Visualization visualization;
 
-	public MatsimNetwork(Network network) {
+	MatsimNetwork(Network network) {
 
 		val size = network.getLinks().size();
 		val valueSize = Float.BYTES;
-		val numberOfValuesPerLink = 5; //id, x1, y1, x2, y2
+		val numberOfValuesPerLink = 4; //x1, y1, x2, y2
 		val buffer = ByteBuffer.allocate(valueSize * numberOfValuesPerLink * size);
-		buffer.order(ByteOrder.LITTLE_ENDIAN);
+		buffer.order(ByteOrder.BIG_ENDIAN);
 		network.getLinks().values().forEach(link -> {
 			this.putLink(buffer, link);
 			this.adjustBoundingRectangle(link);
@@ -61,7 +61,6 @@ public class MatsimNetwork extends AbstractEntity {
 	private void putLink(ByteBuffer buffer, Link link) {
 
 		linkIdMapping.put(link.getId(), (float) currentLinkId++);
-		buffer.putFloat(currentLinkId);
 		buffer.putFloat((float) link.getFromNode().getCoord().getX());
 		buffer.putFloat((float) link.getFromNode().getCoord().getY());
 		buffer.putFloat((float) link.getToNode().getCoord().getX());

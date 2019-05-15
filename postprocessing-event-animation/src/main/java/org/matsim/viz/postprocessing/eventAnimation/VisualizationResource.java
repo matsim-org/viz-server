@@ -12,6 +12,7 @@ import org.matsim.viz.postprocessing.bundle.Agent;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Log
 @RequiredArgsConstructor
@@ -26,7 +27,7 @@ public class VisualizationResource {
 	@UnitOfWork
 	public ConfigurationResponse configuration(@Auth Agent agent, @PathParam("id") String vizId) {
 
-		sessionFactory.getCurrentSession().clear();
+		log.info("configuration was called by: " + agent.getId() + " for viz: " + vizId);
 		val visualization = sessionFactory.getCurrentSession().find(Visualization.class, vizId);
 		return ConfigurationResponse.createFromVisualization(visualization);
 	}
@@ -37,11 +38,15 @@ public class VisualizationResource {
 	@UnitOfWork
 	public byte[] network(@Auth Agent agent, @PathParam("id") String vizId) {
 
+		log.info("network was called by: " + agent.getId() + " for viz: " + vizId);
 		val qMatsimNetwork = QMatsimNetwork.matsimNetwork;
+		log.info("after qmatsim network");
 		val network = new JPAQueryFactory(sessionFactory.getCurrentSession()).selectFrom(qMatsimNetwork)
 				.where(qMatsimNetwork.visualization.id.eq(vizId))
 				.fetchOne();
 
+		log.info("fetched network.");
+		assert network != null;
 		return network.getData();
 	}
 
@@ -49,22 +54,16 @@ public class VisualizationResource {
 	@Path("linkTrips")
 	@Produces(MediaType.APPLICATION_JSON)
 	@UnitOfWork
-	public List<LinkTrip> linkTrips(@Auth Agent agent, @PathParam("id") String vizId,
-									@QueryParam("from") double fromTime, @QueryParam("to") double toTime) {
+	public List<LinkTripResponse> linkTrips(@Auth Agent agent, @PathParam("id") String vizId,
+											@QueryParam("from") double fromTime, @QueryParam("to") double toTime) {
 
 		val qLinkTrip = QLinkTrip.linkTrip;
 
 		return new JPAQueryFactory(sessionFactory.getCurrentSession()).selectFrom(qLinkTrip)
 				.where(qLinkTrip.visualization.id.eq(vizId)
 						.and(qLinkTrip.enterTime.between(fromTime, toTime)).or(qLinkTrip.leaveTime.between(fromTime, toTime)))
-				.fetch();
-	}
-
-	private ConfigurationResponse createResponse(Visualization visualization) {
-		return new ConfigurationResponse(
-				visualization.getFirstTimestep(), visualization.getLastTimestep(),
-				visualization.getMinEasting(), visualization.getMaxEasting(),
-				visualization.getMinNorthing(), visualization.getMaxNorthing()
-		);
+				.fetch()
+				.stream().map(LinkTripResponse::fromLinkTrip)
+				.collect(Collectors.toList());
 	}
 }

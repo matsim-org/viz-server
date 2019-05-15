@@ -21,7 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Log
 public class EventsHandler implements AutoCloseable, LinkEnterEventHandler, LinkLeaveEventHandler, VehicleEntersTrafficEventHandler {
 
-	private static final int batchSize = 50;
+	private static final int batchSize = 1000;
 	private final Network network;
 	private final StatelessSession session;
 	private final Visualization visualization;
@@ -64,16 +64,6 @@ public class EventsHandler implements AutoCloseable, LinkEnterEventHandler, Link
 			if (++batchCount % 1000 == 0) {
 				log.info(batchCount + " link trips were written to the db");
 			}
-
-			/*if (++batchCount % batchSize == 0) {
-
-				session.flush();
-				session.clear();
-				if (batchCount % 1000 == 0) {
-					log.info(batchCount + " link trips were written into database.");
-				}
-			}
-*/
 		} else {
 			log.warning("There was no LinkTrip saved for: " + tripKey);
 		}
