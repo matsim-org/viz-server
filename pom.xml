@@ -19,6 +19,7 @@
         <module>files-api</module>
         <module>postprocessing-emissions</module>
         <module>postprocessing-bundle</module>
+        <module>postprocessing-od</module>
     </modules>
 
     <properties>
