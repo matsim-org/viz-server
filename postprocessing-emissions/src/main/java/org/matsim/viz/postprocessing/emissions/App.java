@@ -13,7 +13,7 @@ import org.matsim.viz.postprocessing.bundle.*;
 public class App extends Application<PostprocessingConfiguration> {
 
     private HibernateBundle<PostprocessingConfiguration> hibernate = new HibernateBundle<PostprocessingConfiguration>(
-            Agent.class, Permission.class, Visualization.class, FetchInformation.class
+            Agent.class, Permission.class, Bin.class, Visualization.class, FetchInformation.class
     ) {
         @Override
         public PooledDataSourceFactory getDataSourceFactory(PostprocessingConfiguration appConfiguration) {
