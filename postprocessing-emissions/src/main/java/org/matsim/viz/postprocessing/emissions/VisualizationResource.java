@@ -3,21 +3,20 @@ package org.matsim.viz.postprocessing.emissions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import io.dropwizard.auth.Auth;
 import io.dropwizard.hibernate.UnitOfWork;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import lombok.extern.java.Log;
-import lombok.val;
 import org.matsim.viz.error.ForbiddenException;
 import org.matsim.viz.error.InvalidInputException;
 import org.matsim.viz.postprocessing.bundle.Agent;
 import org.matsim.viz.postprocessing.bundle.QPermission;
 
 import javax.persistence.EntityManagerFactory;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 
+import static java.lang.Integer.parseInt;
+
+@Data
 @Log
 @RequiredArgsConstructor
 @Path("{id}")
@@ -29,9 +28,37 @@ public class VisualizationResource {
     @Path("/data")
     @Produces(MediaType.APPLICATION_JSON)
     @UnitOfWork
-    public String data(@Auth Agent agent, @PathParam("id") String vizId) {
+    public String data(@Auth Agent agent,
+                       @PathParam("id") String vizId,
+                       @QueryParam("startTime") String startTime) {
 
-        return findVisualization(agent, vizId).getData();
+        val bins = findVisualization(agent, vizId).getBins();
+
+        if (startTime == null) return bins.iterator().next().getData();
+
+        int startTimeValue = parseInt(startTime);
+        for (Bin bin : bins) {
+            if (bin.getStartTime() == startTimeValue) return bin.getData();
+        }
+
+        throw new InvalidInputException("Could not find startTime of " + startTime);
+    }
+
+    @GET
+    @Path("/bins")
+    @Produces(MediaType.APPLICATION_JSON)
+    @UnitOfWork
+    public String bins(@Auth Agent agent,
+                       @PathParam("id") String vizId) {
+
+        val bins = findVisualization(agent, vizId).getBins();
+
+        String json = "{\"bins\": [";
+        for (Bin bin : bins) json = json + bin.getStartTime() + ',';
+        json = json.substring(0, json.length() -1 ) + "]}";
+
+        log.info(json);
+        return json;
     }
 
     private Visualization findVisualization(Agent agent, String vizId) {
