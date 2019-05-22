@@ -14,7 +14,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 
-import static java.lang.Integer.parseInt;
+import static java.lang.Double.parseDouble;
 
 @Data
 @Log
@@ -32,16 +32,14 @@ public class VisualizationResource {
                        @PathParam("id") String vizId,
                        @QueryParam("startTime") String startTime) {
 
-        val bins = findVisualization(agent, vizId).getBins();
+        QBin binTable = QBin.bin;
+        val bin = new JPAQueryFactory(emFactory.createEntityManager()).selectFrom(binTable)
+                .where(binTable.startTime.eq(parseDouble(startTime)))
+                .fetchFirst();
 
-        if (startTime == null) return bins.iterator().next().getData();
+        if (bin == null) throw new InvalidInputException("Could not find startTime " + startTime);
 
-        int startTimeValue = parseInt(startTime);
-        for (Bin bin : bins) {
-            if (bin.getStartTime() == startTimeValue) return bin.getData();
-        }
-
-        throw new InvalidInputException("Could not find startTime of " + startTime);
+        return bin.getData();
     }
 
     @GET
@@ -52,6 +50,8 @@ public class VisualizationResource {
                        @PathParam("id") String vizId) {
 
         val bins = findVisualization(agent, vizId).getBins();
+
+        // todo just make the array of doubles and return that.
 
         String json = "{\"bins\": [";
         for (Bin bin : bins) json = json + bin.getStartTime() + ',';
