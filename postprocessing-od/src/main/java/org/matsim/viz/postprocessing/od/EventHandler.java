@@ -49,6 +49,8 @@ public class EventHandler implements PersonStuckEventHandler, LinkLeaveEventHand
 	@Override
 	public void handleEvent(ActivityStartEvent event) {
 
+		if (isInteraction(event.getActType()) || ptDrivers.contains(event.getPersonId())) return;
+
 		Trip currentTrip = getLastTrip(event.getPersonId());
 		currentTrip.setArrivalLink(event.getLinkId());
 		currentTrip.setArrivalTime(event.getTime());
