@@ -14,6 +14,8 @@ import javax.persistence.EntityManagerFactory;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 
+import java.util.List;
+
 import static java.lang.Double.parseDouble;
 
 @Data
@@ -34,7 +36,8 @@ public class VisualizationResource {
 
         QBin binTable = QBin.bin;
         val bin = new JPAQueryFactory(emFactory.createEntityManager()).selectFrom(binTable)
-                .where(binTable.startTime.eq(parseDouble(startTime)))
+                .where(binTable.visualization.id.eq(vizId)
+                        .and(binTable.startTime.eq(parseDouble(startTime))))
                 .fetchFirst();
 
         if (bin == null) throw new InvalidInputException("Could not find startTime " + startTime);
@@ -46,19 +49,18 @@ public class VisualizationResource {
     @Path("/bins")
     @Produces(MediaType.APPLICATION_JSON)
     @UnitOfWork
-    public String bins(@Auth Agent agent,
-                       @PathParam("id") String vizId) {
+    public List<Double> bins(@Auth Agent agent,
+                             @PathParam("id") String vizId) {
 
-        val bins = findVisualization(agent, vizId).getBins();
+        QBin binTable = QBin.bin;
+        val startTimes = new JPAQueryFactory(emFactory.createEntityManager()).selectFrom(binTable)
+                .where(binTable.visualization.id.eq(vizId))
+                .select(binTable.startTime)
+                .fetch();
 
-        // todo just make the array of doubles and return that.
-
-        String json = "{\"bins\": [";
-        for (Bin bin : bins) json = json + bin.getStartTime() + ',';
-        json = json.substring(0, json.length() -1 ) + "]}";
-
-        log.info(json);
-        return json;
+        if (startTimes == null)
+            throw new InvalidInputException("No time bins found");
+        return startTimes;
     }
 
     private Visualization findVisualization(Agent agent, String vizId) {
