@@ -48,6 +48,12 @@
             <groupId>org.matsim.contrib</groupId>
             <artifactId>emissions</artifactId>
             <version>12.0-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.hibernate.validator</groupId>
+                    <artifactId>hibernate-validator</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <!-- put jts onto the classpath since the contrib doesn't do it itself... -->
         <dependency>
