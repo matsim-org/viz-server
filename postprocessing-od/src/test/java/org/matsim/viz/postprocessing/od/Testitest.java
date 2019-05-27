@@ -2,6 +2,7 @@ package org.matsim.viz.postprocessing.od;
 
 import com.bedatadriven.jackson.datatype.jts.JtsModule;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.geotools.referencing.CRS;
 import org.junit.Test;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
@@ -21,6 +22,9 @@ import org.matsim.core.network.NetworkUtils;
 import org.matsim.facilities.ActivityFacilities;
 import org.matsim.facilities.ActivityFacility;
 import org.matsim.facilities.FacilitiesUtils;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.opengis.referencing.operation.TransformException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -50,6 +54,24 @@ public class Testitest {
 		FeatureCollection featureCollection = mapper.readValue(geoJson.toFile(), FeatureCollection.class);
 
 
+	}
+
+	@Test
+	public void readGeoJsonAndTransformCoordinates() throws IOException, FactoryException, TransformException {
+
+		Path geoJson = Paths.get("G:\\Users\\Janek\\tubcloud\\geojson test.geojson");
+		Path output = Paths.get("G:\\Users\\Janek\\Desktop\\transformed.geojson");
+
+
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.registerModule(new JtsModule());
+		FeatureCollection featureCollection = mapper.readValue(geoJson.toFile(), FeatureCollection.class);
+
+		CoordinateReferenceSystem wgs84 = CRS.decode("urn:ogc:def:crs:EPSG:3857");
+
+		FeatureCollection trans = featureCollection.transformCollection(wgs84);
+
+		mapper.writeValue(output.toFile(), trans);
 	}
 
 	@Test
