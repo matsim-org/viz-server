@@ -14,6 +14,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static java.lang.Double.parseDouble;
@@ -27,12 +28,16 @@ public class VisualizationResource {
     private final EntityManagerFactory emFactory;
 
     @GET
-    @Path("/data")
+    @Path("/bin")
     @Produces(MediaType.APPLICATION_JSON)
     @UnitOfWork
-    public String data(@Auth Agent agent,
+    public String bin(@Auth Agent agent,
                        @PathParam("id") String vizId,
                        @QueryParam("startTime") String startTime) {
+
+        if (hasNoPermission(agent, vizId)) {
+            throw new ForbiddenException("user doesn't have permission");
+        }
 
         QBin binTable = QBin.bin;
         val bin = new JPAQueryFactory(emFactory.createEntityManager()).selectFrom(binTable)
@@ -46,11 +51,15 @@ public class VisualizationResource {
     }
 
     @GET
-    @Path("/bins")
+    @Path("/startTimes")
     @Produces(MediaType.APPLICATION_JSON)
     @UnitOfWork
-    public List<Double> bins(@Auth Agent agent,
+    public List<Double> startTimes(@Auth Agent agent,
                              @PathParam("id") String vizId) {
+
+        if (hasNoPermission(agent, vizId)) {
+            throw new ForbiddenException("user doesn't have permission");
+        }
 
         QBin binTable = QBin.bin;
         val startTimes = new JPAQueryFactory(emFactory.createEntityManager()).selectFrom(binTable)
@@ -60,23 +69,13 @@ public class VisualizationResource {
 
         if (startTimes == null)
             throw new InvalidInputException("No time bins found");
-        return startTimes;
-    }
 
-    private Visualization findVisualization(Agent agent, String vizId) {
+        ArrayList<Double> result = new ArrayList<>();
+        for (Double startTime : startTimes) result.add(startTime.doubleValue());
 
-        if (hasNoPermission(agent, vizId)) {
-            throw new ForbiddenException("user doesn't have permission");
-        }
+        log.info("time bins: " + result.toString());
 
-        val visualizationTable = QVisualization.visualization;
-        val visualization = new JPAQueryFactory(emFactory.createEntityManager()).selectFrom(visualizationTable)
-                .where(visualizationTable.id.eq(vizId))
-                .fetchOne();
-
-        if (visualization == null)
-            throw new InvalidInputException("Could not find visualization with id: " + vizId);
-        return visualization;
+        return result;
     }
 
     private boolean hasNoPermission(Agent agent, String vizId) {

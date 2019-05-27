@@ -53,17 +53,14 @@ public class DataGenerator implements VisualizationGenerator<Visualization> {
         // all of the bins need to be successful, or the transaction should fail.
         session.beginTransaction();
 
-        Tuple<Double, String> result = analyzer.processNextTimeBin();
-
-        while (result != null) {
+        while (analyzer.hasNextTimeBin()) {
+            Tuple<Double, String> result = analyzer.processNextTimeBin();
             log.info("-- JSON size: " + result.getSecond().length());
 
-            Bin b = new Bin();
-            b.setStartTime(result.getFirst());
-            b.setData(result.getSecond());
-            mergedViz.addBin(b);
-
-            result = analyzer.processNextTimeBin();
+            Bin bin = new Bin();
+            bin.setStartTime(result.getFirst());
+            bin.setData(result.getSecond());
+            mergedViz.addBin(bin);
         }
 
         session.getTransaction().commit();

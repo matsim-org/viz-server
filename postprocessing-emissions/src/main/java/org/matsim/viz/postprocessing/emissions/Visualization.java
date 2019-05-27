@@ -16,7 +16,7 @@ import java.util.Set;
 public class Visualization extends PersistentVisualization {
 
     @OneToMany(mappedBy = "visualization", fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL)
-    Set<Bin> bins = new HashSet();
+    private Set<Bin> bins = new HashSet();
 
     private double cellSize;
     private double smoothingRadius;
@@ -24,10 +24,10 @@ public class Visualization extends PersistentVisualization {
 
     /**
      * Add a time bin to the visualization, and link that viz to the bin itself
-     * @param b
+     * @param bin
      */
-    void addBin(Bin b) {
-        b.setVisualization(this);
-        bins.add(b);
+    void addBin(Bin bin) {
+        bin.setVisualization(this);
+        bins.add(bin);
     }
 }
