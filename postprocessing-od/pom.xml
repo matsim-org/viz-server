@@ -10,6 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>postprocessing-od</artifactId>
+    <packaging>jar</packaging>
 
     <repositories>
         <repository>
@@ -52,8 +53,52 @@
             <groupId>com.graphhopper.external</groupId>
             <artifactId>jackson-datatype-jts</artifactId>
             <version>0.12-2.5-1</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.locationtech.jts</groupId>
+                    <artifactId>jts-core</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <!-- put jts onto the classpath since the contrib doesn't do it itself... -->
+        <dependency>
+            <groupId>com.vividsolutions</groupId>
+            <artifactId>jts</artifactId>
+            <version>1.13</version>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.mysema.maven</groupId>
+                <artifactId>apt-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>2.3</version>
+                <executions>
+                    <execution>
+                        <configuration>
+                            <transformers>
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>org.matsim.viz.postprocessing.od.ODAnalysis</mainClass>
+                                </transformer>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
 
 </project>
