@@ -11,14 +11,13 @@ import org.matsim.vehicles.Vehicle;
 
 import java.util.*;
 
-public class EventHandler implements PersonStuckEventHandler, LinkLeaveEventHandler, VehicleEntersTrafficEventHandler, TeleportationArrivalEventHandler, TransitDriverStartsEventHandler, ActivityEndEventHandler, ActivityStartEventHandler, PersonDepartureEventHandler, PersonArrivalEventHandler {
+public class TripEventHandler implements PersonStuckEventHandler, LinkLeaveEventHandler, VehicleEntersTrafficEventHandler, TeleportationArrivalEventHandler, TransitDriverStartsEventHandler, ActivityEndEventHandler, ActivityStartEventHandler, PersonDepartureEventHandler, PersonArrivalEventHandler {
 
 	private Set<Id<Person>> ptDrivers = new HashSet<>();
 	@Getter
 	private Map<Id<Person>, List<Trip>> tripToPerson = new HashMap<>();
 	private Map<Id<Vehicle>, Id<Person>> vehicleToPerson = new HashMap<>();
 	private Map<Id<Person>, Leg> openLegs = new HashMap<>();
-
 
 	@Override
 	public void handleEvent(TransitDriverStartsEvent event) {

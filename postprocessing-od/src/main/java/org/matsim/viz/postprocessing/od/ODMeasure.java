@@ -8,5 +8,14 @@ import lombok.Getter;
 class ODMeasure {
 
     private String mode;
-    private String key;
+	private int fromIndex;
+	private int toIndex;
+
+	boolean hasValidToAndFromZone() {
+		return (fromIndex >= 0 && toIndex >= 0);
+	}
+
+	String getFromToKey() {
+		return fromIndex + "_" + toIndex;
+	}
 }

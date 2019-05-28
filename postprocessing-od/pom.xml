@@ -90,7 +90,6 @@
                                         implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>org.matsim.viz.postprocessing.od.ODAnalysis</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>

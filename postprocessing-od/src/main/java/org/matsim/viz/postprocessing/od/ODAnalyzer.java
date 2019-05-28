@@ -13,8 +13,8 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 @AllArgsConstructor
@@ -24,33 +24,29 @@ class ODAnalyzer {
     private final Network network;
     private final FeatureCollection odZones;
 
-    Map<String, Map<String, Integer>> run() {
+    Map<String, ODRelation> run() {
 
         EventsManager manager = EventsUtils.createEventsManager();
-        EventHandler handler = new EventHandler();
+        TripEventHandler handler = new TripEventHandler();
         manager.addHandler(handler);
         new MatsimEventsReader(manager).readFile(eventFile.toString());
 
-        Map<String, Map<String, Integer>> numberOfTripsByOdAndMode = new HashMap<>();
-
         System.out.println("starting computation");
         Instant start = Instant.now();
-        Map<String, Map<String, Integer>> test = handler.getTripToPerson().values().parallelStream()
+        Map<String, ODRelation> result = handler.getTripToPerson().values().parallelStream()
                 .flatMap(Collection::parallelStream)
                 .map(trip -> {
                     Coord from = network.getLinks().get(trip.getDepartureLink()).getCoord();
                     Coord to = network.getLinks().get(trip.getArrivalLink()).getCoord();
-                    return new ODMeasure(trip.getMainMode(), createODKey(from, to));
-                }).collect(Collectors.groupingBy(ODMeasure::getKey,
-                        Collectors.groupingBy(ODMeasure::getMode, Collectors.summingInt(measure -> 1))));
+                    return new ODMeasure(trip.getMainMode(), getZoneIndex(from), getZoneIndex(to));
+                })
+                .filter(ODMeasure::hasValidToAndFromZone)
+                .collect(Collectors.groupingBy(ODMeasure::getFromToKey,
+                        Collector.of(ODRelation::new, ODRelation::accept, ODRelation::combine)));
 
         Duration duration = Duration.between(start, Instant.now());
         System.out.println("finished computation. It took: " + duration.toString());
-        return numberOfTripsByOdAndMode;
-    }
-
-    private String createODKey(Coord from, Coord to) {
-        return getZoneIndex(from) + "_" + getZoneIndex(to);
+        return result;
     }
 
     private int getZoneIndex(Coord coord) {

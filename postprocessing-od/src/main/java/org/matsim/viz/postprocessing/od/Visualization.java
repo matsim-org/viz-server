@@ -6,6 +6,9 @@ import lombok.Setter;
 import org.matsim.viz.postprocessing.bundle.PersistentVisualization;
 
 import javax.persistence.Entity;
+import javax.persistence.OneToMany;
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -13,5 +16,11 @@ import javax.persistence.Entity;
 @Entity
 public class Visualization extends PersistentVisualization {
 
+	@OneToMany(mappedBy = "visualization", orphanRemoval = true)
+	private Set<ODRelation> odRelations = new HashSet<>();
 
+	void addRelation(ODRelation relation) {
+		this.odRelations.add(relation);
+		relation.setVisualization(this);
+	}
 }

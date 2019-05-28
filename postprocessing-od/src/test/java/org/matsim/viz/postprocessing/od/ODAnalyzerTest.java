@@ -3,6 +3,7 @@ package org.matsim.viz.postprocessing.od;
 import com.bedatadriven.jackson.datatype.jts.JtsModule;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.core.network.NetworkUtils;
@@ -15,11 +16,12 @@ import java.nio.file.Paths;
 public class ODAnalyzerTest {
 
     @Test
+    @Ignore
     public void testRun() throws IOException {
 
-        Path networkPath = Paths.get("G:\\Users\\Janek\\tubcloud\\output_network.xml.gz");
-        Path eventsPath = Paths.get("G:\\Users\\Janek\\tubcloud\\output_events.xml.gz");
-        Path geoJson = Paths.get("G:\\Users\\Janek\\tubcloud\\geojson test.geojson");
+        Path networkPath = Paths.get("C:\\Users\\Janek\\tubcloud\\output_network.xml.gz");
+        Path eventsPath = Paths.get("C:\\Users\\Janek\\tubcloud\\output_events.xml.gz");
+        Path geoJson = Paths.get("C:\\Users\\Janek\\tubcloud\\geojson test.geojson");
 
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JtsModule());

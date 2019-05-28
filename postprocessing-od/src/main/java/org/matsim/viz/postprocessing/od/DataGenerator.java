@@ -2,6 +2,7 @@ package org.matsim.viz.postprocessing.od;
 
 import com.bedatadriven.jackson.datatype.jts.JtsModule;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.Setter;
 import org.geotools.referencing.CRS;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.core.network.NetworkUtils;
@@ -13,6 +14,8 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.TransformException;
 
 import java.io.IOException;
+import java.nio.file.Path;
+import java.util.Map;
 
 public class DataGenerator implements VisualizationGenerator<Visualization> {
 
@@ -21,16 +24,18 @@ public class DataGenerator implements VisualizationGenerator<Visualization> {
 	private static final String EVENTS_Key = "Events";
 
 	private static ObjectMapper objectMapper = new ObjectMapper().registerModule(new JtsModule());
-	private static CoordinateReferenceSystem wgs84;
 
-	public DataGenerator() {
-		if (wgs84 == null) {
+	private CoordinateReferenceSystem wgs84;
+
+	@Setter
+	private Path geoJsonFolder;
+
+	DataGenerator() {
 			try {
-				CRS.decode("urn:ogc:def:crs:EPSG:3857");
+				wgs84 = CRS.decode("urn:ogc:def:crs:EPSG:3857");
 			} catch (FactoryException e) {
 				throw new RuntimeException(e);
 			}
-		}
 	}
 
 	@Override
@@ -41,29 +46,39 @@ public class DataGenerator implements VisualizationGenerator<Visualization> {
 	@Override
 	public void generate(Input<Visualization> input) {
 
+		if (geoJsonFolder == null)
+			throw new RuntimeException("Geo json folder was not set. Can't store transformed od-cells.");
+
 		if (!isValidInput(input)) {
 			throw new RuntimeException("Input was not valid");
 		}
-
 
 		try {
 			// get the cells
 			InputFile zonesfile = input.getInputFiles().get(ZONES_KEY);
 			FeatureCollection zonesCollection = objectMapper.readValue(zonesfile.getPath().toFile(), FeatureCollection.class);
-			FeatureCollection transformedCollection = zonesCollection.transformCollection(wgs84);
 
 			// get the network
 			Network network = NetworkUtils.createNetwork();
 			new MatsimNetworkReader(network).readFile(input.getInputFiles().get(NETWORK_KEY).getPath().toString());
 
-			// set up event handler
+			// set up analysis
+			ODAnalyzer analyzer = new ODAnalyzer(input.getInputFiles().get(EVENTS_Key).getPath(), network, zonesCollection);
+			Map<String, ODRelation> relations = analyzer.run();
 
+			// store into db
+			input.getSession().beginTransaction();
+			Visualization mergedViz = (Visualization) input.getSession().merge(input.getVisualization());
+			for (ODRelation relation : relations.values()) {
+				mergedViz.addRelation(relation);
+			}
+			input.getSession().getTransaction().commit();
 
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (FactoryException e) {
-			e.printStackTrace();
-		} catch (TransformException e) {
+			// store a transformed geojson file
+			FeatureCollection transformedCollection = zonesCollection.transformCollection(wgs84);
+			objectMapper.writeValue(geoJsonFolder.resolve(mergedViz.getId() + ".geojson").toFile(), transformedCollection);
+
+		} catch (IOException | FactoryException | TransformException e) {
 			e.printStackTrace();
 		}
 	}

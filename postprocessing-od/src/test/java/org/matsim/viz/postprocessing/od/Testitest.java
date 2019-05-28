@@ -3,6 +3,7 @@ package org.matsim.viz.postprocessing.od;
 import com.bedatadriven.jackson.datatype.jts.JtsModule;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.geotools.referencing.CRS;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
@@ -44,6 +45,7 @@ public class Testitest {
 	private static ActivityFacilities facilities = FacilitiesUtils.createActivityFacilities();
 
 	@Test
+	@Ignore
 	public void readGeoJson() throws IOException {
 
 		Path geoJson = Paths.get("C:\\Users\\Janek\\Desktop\\geojson test.geojson");
@@ -57,6 +59,7 @@ public class Testitest {
 	}
 
 	@Test
+	@Ignore
 	public void readGeoJsonAndTransformCoordinates() throws IOException, FactoryException, TransformException {
 
 		Path geoJson = Paths.get("G:\\Users\\Janek\\tubcloud\\geojson test.geojson");
@@ -75,12 +78,13 @@ public class Testitest {
 	}
 
 	@Test
+	@Ignore
 	public void runEventHandlerStuff() {
 
 		Path events = Paths.get("C:\\Users\\Janek\\Downloads\\berlin-v5.3-10pct.output_events.xml.gz");
 
 		EventsManager manager = EventsUtils.createEventsManager();
-		EventHandler handler = new EventHandler();
+		TripEventHandler handler = new TripEventHandler();
 		manager.addHandler(handler);
 
 		new MatsimEventsReader(manager).readFile(events.toString());
@@ -112,6 +116,7 @@ public class Testitest {
 	}
 
 	@Test
+	@Ignore
 	public void teleportedWalk() {
 
 		Id<Person> person = Id.createPersonId("person");
@@ -120,7 +125,7 @@ public class Testitest {
 		Id<Link> homeLink = Id.createLinkId(1);
 		Id<Link> workLink = Id.createLinkId(2);
 
-		EventHandler handler = new EventHandler();
+		TripEventHandler handler = new TripEventHandler();
 
 		// mock a home -> work -> home plan with teleported walk
 		handler.handleEvent(new ActivityEndEvent(0, person, homeLink, homeFacility, "home"));
