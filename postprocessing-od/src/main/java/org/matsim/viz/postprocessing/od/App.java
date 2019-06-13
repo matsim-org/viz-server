@@ -34,7 +34,7 @@ public class App extends Application<AppConfiguration> {
 
 		dataGenerator = new DataGenerator();
 		bootstrap.addBundle(hibernate);
-		bootstrap.addBundle(new PostprocessingBundle<>(hibernate, dataGenerator, "od"));
+		bootstrap.addBundle(new PostprocessingBundle<>(hibernate, dataGenerator, "aggregate-od"));
 	}
 
 	@Override

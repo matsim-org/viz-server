@@ -14,6 +14,7 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.TransformException;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 
@@ -76,10 +77,11 @@ public class DataGenerator implements VisualizationGenerator<Visualization> {
 
 			// store a transformed geojson file
 			FeatureCollection transformedCollection = zonesCollection.transformCollection(wgs84);
+			Files.createDirectories(geoJsonFolder);
 			objectMapper.writeValue(geoJsonFolder.resolve(mergedViz.getId() + ".geojson").toFile(), transformedCollection);
 
 		} catch (IOException | FactoryException | TransformException e) {
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -88,6 +90,5 @@ public class DataGenerator implements VisualizationGenerator<Visualization> {
 		return input.getInputFiles().containsKey(ZONES_KEY) &&
 				input.getInputFiles().containsKey(EVENTS_Key) &&
 				input.getInputFiles().containsKey(NETWORK_KEY);
-
 	}
 }

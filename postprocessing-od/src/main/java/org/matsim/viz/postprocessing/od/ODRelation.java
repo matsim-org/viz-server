@@ -22,6 +22,7 @@ package org.matsim.viz.postprocessing.od;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.matsim.viz.database.AbstractEntity;
 
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
@@ -37,10 +38,10 @@ import java.util.Map;
 @NoArgsConstructor
 @Setter
 @Entity
-class ODRelation {
+class ODRelation extends AbstractEntity {
 
-	private int from = -1;
-	private int to = -1;
+	private int fromIndex = -1;
+	private int toIndex = -1;
 
 	@ElementCollection(fetch = FetchType.EAGER)
 	private Map<String, Integer> tripsByMode = new HashMap<>();
@@ -51,8 +52,8 @@ class ODRelation {
 	void accept(ODMeasure measure) {
 
 		if (isFirstAccept()) {
-			from = measure.getFromIndex();
-			to = measure.getToIndex();
+			fromIndex = measure.getFromIndex();
+			toIndex = measure.getToIndex();
 		} else if (isNotSameFromAndTo(measure))
 			throw new RuntimeException("Only collect measures with same origin - destination");
 
@@ -61,8 +62,8 @@ class ODRelation {
 
 	ODRelation combine(ODRelation relation) {
 		if (isFirstAccept()) {
-			from = relation.getFrom();
-			to = relation.getTo();
+			fromIndex = relation.getFromIndex();
+			toIndex = relation.getToIndex();
 		} else if (isNotSameFromAndTo(relation))
 			throw new RuntimeException("Only collect measures with same origin - destination");
 
@@ -73,15 +74,15 @@ class ODRelation {
 	}
 
 	private boolean isFirstAccept() {
-		return (from == -1 && to == -1);
+		return (fromIndex == -1 && toIndex == -1);
 	}
 
 	private boolean isNotSameFromAndTo(ODMeasure measure) {
-		return from != measure.getFromIndex() || to != measure.getToIndex();
+		return fromIndex != measure.getFromIndex() || toIndex != measure.getToIndex();
 	}
 
 	private boolean isNotSameFromAndTo(ODRelation relation) {
-		return from != relation.getFrom() || to != relation.getTo();
+		return fromIndex != relation.getFromIndex() || toIndex != relation.getToIndex();
 	}
 }
 

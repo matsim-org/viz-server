@@ -2,6 +2,8 @@ package org.matsim.viz.postprocessing.od;
 
 import io.dropwizard.auth.Auth;
 import io.dropwizard.hibernate.UnitOfWork;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.SessionFactory;
@@ -16,7 +18,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.nio.file.Files;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Path("{id}")
 @Produces(MediaType.APPLICATION_JSON)
@@ -48,12 +52,23 @@ public class VisualizationResource {
 	@GET
 	@Path("relations")
 	@UnitOfWork
-	public Set<ODRelation> relations(@Auth Agent agent, @PathParam("id") String vizId) {
+	public Set<ODRelationResponse> relations(@Auth Agent agent, @PathParam("id") String vizId) {
 
 		Visualization visualization = sessionFactory.getCurrentSession().find(Visualization.class, vizId);
 		if (visualization == null)
 			throw new InvalidInputException("Could not find visualization with id: " + vizId);
-		return visualization.getOdRelations();
+		return visualization.getOdRelations().stream()
+				.map(relation -> new ODRelationResponse(relation.getFromIndex(), relation.getToIndex(), relation.getTripsByMode()))
+				.collect(Collectors.toSet());
+	}
+
+	@AllArgsConstructor
+	@Getter
+	private static class ODRelationResponse {
+
+		private int fromIndex;
+		private int toIndex;
+		private Map<String, Integer> tripsByMode;
 	}
 
 }
