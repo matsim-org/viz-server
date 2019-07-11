@@ -9,7 +9,12 @@ import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.viz.postprocessing.bundle.VisualizationGenerator;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class DataGenerator implements VisualizationGenerator<Visualization> {
 
@@ -26,13 +31,14 @@ public class DataGenerator implements VisualizationGenerator<Visualization> {
 	@Override
 	public void generate(Input<Visualization> input) {
 
-		val networkPath = input.getInputFiles().get(NETWORK_KEY).getPath();
-		val eventsPath = input.getInputFiles().get(EVENTS_KEY).getPath();
+		Path networkPath = input.getInputFiles().get(NETWORK_KEY).getPath();
+		Path eventsPath = input.getInputFiles().get(EVENTS_KEY).getPath();
 
-		try (val session = input.getSessionFactory().openStatelessSession()) {
+		try (StatelessSession session = input.getSessionFactory().openStatelessSession()) {
 
-			val vizWithNetwork = generateNetwork(networkPath, input.getVisualization(), session);
-			generateLinkTrips(eventsPath, vizWithNetwork, session);
+			Visualization vizWithNetwork = generateNetwork(networkPath, input.getVisualization(), session);
+			//generateLinkTrips(eventsPath, vizWithNetwork, session);
+			generateProtoTrips(eventsPath);
 		}
 	}
 
@@ -44,9 +50,9 @@ public class DataGenerator implements VisualizationGenerator<Visualization> {
 
 		session.getTransaction().begin();
 		session.insert(matsimNetwork);
-		visualization.addMatsimNetwork(matsimNetwork);
-		session.update(visualization);
-		session.getTransaction().commit();
+		//visualization.addMatsimNetwork(matsimNetwork);
+		//session.update(visualization);
+		//session.getTransaction().commit();
 		return visualization;
 	}
 
@@ -57,6 +63,27 @@ public class DataGenerator implements VisualizationGenerator<Visualization> {
 			eventsManager.addHandler(handler);
 			val reader = new MatsimEventsReader(eventsManager);
 			reader.readFile(eventsPath.toString());
+		}
+	}
+
+	private void generateProtoTrips(Path eventsPath) {
+
+		ProtoEventHandler handler = new ProtoEventHandler(originalNetwork);
+		val eventsManager = EventsUtils.createEventsManager();
+		eventsManager.addHandler(handler);
+		new MatsimEventsReader(eventsManager).readFile(eventsPath.toString());
+		ByteArrayOutputStream stream = new ByteArrayOutputStream();
+
+		Path testOutput = Paths.get("G:\\Users\\Janek\\prototest.file");
+
+		try (OutputStream outputStream = Files.newOutputStream(testOutput)) {
+			for (LinkTripProto.LinkTrip linkTrip : handler.getResult()) {
+				byte[] bytes = linkTrip.toByteArray();
+				stream.write(bytes);
+				linkTrip.writeDelimitedTo(outputStream);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 }

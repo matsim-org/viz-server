@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package eventAnimation;
+
+option java_package = "org.matsim.viz.postprocessing.eventAnimation";
+option java_outer_classname = "LinkTripProto";
+
+message LinkTrip {
+    float enterTime = 1;
+    float leaveTime = 2;
+    float fromX = 3;
+    float fromY = 4;
+    float toX = 5;
+    float toY = 6;
+}
