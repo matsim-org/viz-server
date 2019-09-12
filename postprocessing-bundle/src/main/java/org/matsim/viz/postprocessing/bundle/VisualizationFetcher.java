@@ -84,6 +84,7 @@ public class VisualizationFetcher {
                 );
                 persistProgress(visualization, PersistentVisualization.Progress.Done, session);
             } catch (Exception e) {
+                e.printStackTrace();
                 log.severe(e.getMessage());
                 log.severe(e.getStackTrace().toString());
                 log.severe("### Something went wrong. Setting processing status to failed");
