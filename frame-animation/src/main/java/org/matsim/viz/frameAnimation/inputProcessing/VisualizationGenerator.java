@@ -151,7 +151,6 @@ class VisualizationGenerator {
                 && visualization.getInputFiles().containsKey(NETWORK_KEY)
                 && visualization.getInputFiles().containsKey(EVENTS_KEY)
                 && visualization.getInputFiles().containsKey(PLANS_KEY)
-                && visualization.getParameters().size() == 1
                 && visualization.getParameters().containsKey(SNAPSHOT_INTERVAL_KEY)
                 && !visualization.getPermissions().isEmpty();
     }
