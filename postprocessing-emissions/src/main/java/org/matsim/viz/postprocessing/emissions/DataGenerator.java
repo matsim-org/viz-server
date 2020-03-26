@@ -6,6 +6,7 @@ import lombok.val;
 import org.matsim.contrib.emissions.analysis.EmissionGridAnalyzer;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
+import org.matsim.core.utils.collections.Tuple;
 import org.matsim.viz.postprocessing.bundle.VisualizationGenerator;
 
 @Log
@@ -46,12 +47,24 @@ public class DataGenerator implements VisualizationGenerator<Visualization> {
                 .build();
 
         log.info("Start processing emissions. This may take a while.");
-        val json = analyzer.processToJsonString(input.getInputFiles().get(EVENTS_KEY).getPath().toString());
 
-        log.info("Finished processing emissions. Write result to database");
+        analyzer.processTimeBinsWithEmissions(input.getInputFiles().get(EVENTS_KEY).getPath().toString());
 
+        // all of the bins need to be successful, or the transaction should fail.
         session.beginTransaction();
-        mergedViz.setData(json);
+
+        while (analyzer.hasNextTimeBin()) {
+            Tuple<Double, String> result = analyzer.processNextTimeBin();
+            log.info("-- JSON size: " + result.getSecond().length());
+
+            Bin bin = new Bin();
+            bin.setStartTime(result.getFirst());
+            bin.setData(result.getSecond());
+            mergedViz.addBin(bin);
+        }
+
         session.getTransaction().commit();
+
+        log.info("Finished committing database transactions");
     }
 }
